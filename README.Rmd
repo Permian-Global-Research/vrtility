@@ -66,13 +66,13 @@ library(tictoc)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (130.75 -11.45)"),
-  extend_x = 0.1, extend_y = 0.125
+  extend_x = 0.17, extend_y = 0.125
 )
 
 s2_vrt <- sentinel2_stac_vrt(
   bbox = bbox,
   start_date = "2023-01-01",
-  end_date = "2023-04-30",
+  end_date = "2023-05-30",
   assets = c(
     # "B01",
     "B02", "B03", "B04"
@@ -95,7 +95,7 @@ toc()
 
 terra::plotRGB(
   terra::rast(s2_composite), 3, 2, 1,
-  stretch = "lin", zlim = c(700, 2200), zcol = TRUE,
+  stretch = "lin", zlim = c(500, 2200), zcol = TRUE,
   mar = c(2, 2, 2, 2),
   axes = TRUE
 )

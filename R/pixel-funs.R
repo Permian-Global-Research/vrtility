@@ -14,28 +14,26 @@ def median_jit(in_ar):
     for y in prange(in_ar.shape[1]):
         for x in prange(in_ar.shape[2]):
             values = in_ar[:, y, x]  # Get all values for this pixel
-            valid_vals = values[~np.isnan(values)]  # Filter out NaNs
-
-            if len(valid_vals) == 0:
-                result[y, x] = np.nan
-            else:
-                valid_vals.sort()
-                mid = len(valid_vals) // 2
-                if len(valid_vals) % 2 == 0:
-                    result[y, x] = (valid_vals[mid-1] + valid_vals[mid]) / 2
-                else:
-                    result[y, x] = valid_vals[mid]
+            result[y, x] = np.nanmedian(values)  # Much simpler!
 
     return result
 
 def median(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
           raster_ysize, buf_radius, gt, **kwargs):
     try:
-        # Stack arrays into 3D array (sources, y, x)
-        stacked = np.stack([arr for arr in in_ar])
+        stacked = np.stack(in_ar)
         out_ar[:] = median_jit(stacked)
     except Exception as e:
-        print(f'Error in median function: {{str(e)}}')
+        print('Error in median function: %s' % str(e))
         raise
+")
+}
+
+
+numpy_median <- function() {
+  glue::glue("
+import numpy as np
+def median(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
+    out_ar[:] = np.nanmedian(in_ar, axis=0)
 ")
 }

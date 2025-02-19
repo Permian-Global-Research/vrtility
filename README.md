@@ -59,13 +59,13 @@ library(tictoc)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (130.75 -11.45)"),
-  extend_x = 0.1, extend_y = 0.125
+  extend_x = 0.17, extend_y = 0.125
 )
 
 s2_vrt <- sentinel2_stac_vrt(
   bbox = bbox,
   start_date = "2023-01-01",
-  end_date = "2023-04-30",
+  end_date = "2023-05-30",
   assets = c(
     # "B01",
     "B02", "B03", "B04"
@@ -85,18 +85,19 @@ print(s2_vrt)
 #> [3] <VRTRasterBand dataType="UInt16" band="1" Description="B02">\n  <NoDataVa ...
 #> [4] <VRTRasterBand dataType="UInt16" band="2" Description="B03">\n  <NoDataVa ...
 #> [5] <VRTRasterBand dataType="UInt16" band="3" Description="B04">\n  <NoDataVa ...
+#> [6] <OverviewList resampling="nearest">2 4 8 16</OverviewList>
 #> 
 #> $bbox
-#> [1] 130.650 -11.575 130.850 -11.325
+#> [1] 130.580 -11.575 130.920 -11.325
 #> 
 #> $start_date
 #> [1] "2023-01-01"
 #> 
 #> $end_date
-#> [1] "2023-04-30"
+#> [1] "2023-05-30"
 #> 
 #> $n_items
-#> [1] 4
+#> [1] 9
 #> 
 #> $assets
 #> [1] "B02" "B03" "B04"
@@ -118,14 +119,14 @@ s2_composite <- vrt_composite(
 
 ``` r
 toc()
-#> 19.927 sec elapsed
+#> 41.807 sec elapsed
 ```
 
 ``` r
 
 terra::plotRGB(
   terra::rast(s2_composite), 3, 2, 1,
-  stretch = "lin", zlim = c(700, 2200), zcol = TRUE,
+  stretch = "lin", zlim = c(500, 2200), zcol = TRUE,
   mar = c(2, 2, 2, 2),
   axes = TRUE
 )
