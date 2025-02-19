@@ -10,10 +10,28 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 <!-- badges: end -->
 
 The goal of vrtility is to make the best use of GDAL’s VRT capabilities
-for efficient processing of large raster datasets. This package is
-currently experimental and under active development.
+for efficient processing of large raster datasets. This package’s
+primary focus is on the use of GDAL VRT pixel functions using
+[numba](https://numba.pydata.org/). for very efficient raster
+processing. At present the only function provided is a simple median.
+There is definitely scope to expand this functionality! Comments and
+contributions are most welcome!
 
 ## Features
+
+- No intermediate downloads - the use of nested VRTs enables the
+  download and processing of only the required data in a single gdalwarp
+  call.
+
+- use of numba in python pixel function(s)
+
+## TO DO:
+
+- [ ] Add efficient masking.
+- [ ] Add more pixel functions (geometric median in particular).
+- [ ] clean things up a lot!
+- [ ] time series functions…
+- [ ] configure GPU processing with numba?
 
 …
 
@@ -25,12 +43,15 @@ You can install the development version of vrtility from
 ``` r
 # install.packages("devtools")
 devtools::install_github("Permian-Global-Research/vrtility")
+# next set up the required Python environment
 vrtility::build_vrtility_python()
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Here is a simple example where we: define a bounding box, search a STAC
+catalog for Sentinel-2 data, create a VRT, and then create a composite
+image using a median pixel function.
 
 ``` r
 library(vrtility)
@@ -97,7 +118,7 @@ s2_composite <- vrt_composite(
 
 ``` r
 toc()
-#> 18.566 sec elapsed
+#> 19.927 sec elapsed
 ```
 
 ``` r
