@@ -75,15 +75,13 @@ sentinel2_stac_vrt <- function(
     sign_planetary_computer()
 
 
-
-
-  rstac::assets_url(stac_its, append_gdalvsi = TRUE)
-
-
   # browser()
   asset_vrts <- purrr::map(assets, function(x) {
     its_asset <- rstac::assets_select(stac_its, asset_names = x)
-    urls <- rstac::assets_url(its_asset, append_gdalvsi = TRUE)
+
+    urls <- suppressWarnings(
+      rstac::assets_url(its_asset, append_gdalvsi = TRUE)
+    )
     #
     urls
   }) |>
@@ -95,10 +93,9 @@ sentinel2_stac_vrt <- function(
 
         gdalraster::buildVRT(tf, unlist(x),
           cl_arg = c(
-            "-tr", "10", "10",
-            "-tap",
-            "-r", "bilinear",
-            "-vrtnodata", "NaN",
+            # "-tr", "10", "10",
+            # "-tap",
+            # "-r", "bilinear",
             "-separate"
           ),
           quiet = TRUE
@@ -114,9 +111,9 @@ sentinel2_stac_vrt <- function(
   gdalraster::buildVRT(
     vrt_filename = master_vrt,
     input_rasters = unlist(asset_vrts),
-    cl_arg = c(
-      "-vrtnodata", "NaN"
-    ),
+    # cl_arg = c(
+    #   "-vrtnodata", "NaN"
+    # ),
     quiet = TRUE
   )
 
