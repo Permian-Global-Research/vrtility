@@ -1,0 +1,10 @@
+.Rproj.user
+
+# dev space
+scratch.R
+
+# files to ignore
+*.tif
+*.vrt
+
+/.quarto/
