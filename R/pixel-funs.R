@@ -39,3 +39,12 @@ def median(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         raise
 ")
 }
+
+
+numpy_median <- function() {
+  glue::glue("
+import numpy as np
+def median(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
+    out_ar[:] = np.nanmedian(in_ar, axis=0)
+")
+}
