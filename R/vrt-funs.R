@@ -119,7 +119,9 @@ sentinel2_stac_vrt <- function(
     vrt = mvrt,
     bbox = bbox,
     start_date = start_date,
-    end_date = end_date
+    end_date = end_date,
+    n_items = rstac::items_length(stac_its),
+    assets = assets
   )
 
   class(rvrt) <- "stac_vrt"

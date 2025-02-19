@@ -64,6 +64,8 @@ s2_vrt <- sentinel2_stac_vrt(
   )
 )
 
+print(s2_vrt)
+
 tic()
 s2_composite <- vrt_composite(
   s2_vrt,

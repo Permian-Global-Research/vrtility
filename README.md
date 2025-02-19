@@ -55,6 +55,37 @@ s2_vrt <- sentinel2_stac_vrt(
   )
 )
 
+print(s2_vrt)
+#> $vrt
+#> {xml_document}
+#> <VRTDataset rasterXSize="20976" rasterYSize="10980">
+#> [1] <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["WGS 84 / UTM zone 52S",GEOGCS ...
+#> [2] <GeoTransform>  6.0000000000000000e+05,  1.0000000000000000e+01,  0.00000 ...
+#> [3] <VRTRasterBand dataType="UInt16" band="1" Description="B02">\n  <NoDataVa ...
+#> [4] <VRTRasterBand dataType="UInt16" band="2" Description="B03">\n  <NoDataVa ...
+#> [5] <VRTRasterBand dataType="UInt16" band="3" Description="B04">\n  <NoDataVa ...
+#> 
+#> $bbox
+#> [1] 130.650 -11.575 130.850 -11.325
+#> 
+#> $start_date
+#> [1] "2023-01-01"
+#> 
+#> $end_date
+#> [1] "2023-04-30"
+#> 
+#> $n_items
+#> [1] 4
+#> 
+#> $assets
+#> [1] "B02" "B03" "B04"
+#> 
+#> attr(,"class")
+#> [1] "stac_vrt"
+```
+
+``` r
+
 tic()
 s2_composite <- vrt_composite(
   s2_vrt,
@@ -66,7 +97,7 @@ s2_composite <- vrt_composite(
 
 ``` r
 toc()
-#> 19.493 sec elapsed
+#> 18.566 sec elapsed
 ```
 
 ``` r
