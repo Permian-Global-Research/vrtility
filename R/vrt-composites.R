@@ -35,19 +35,26 @@ vrt_composite <- function(
       "-r", "bilinear",
       "-co", "COMPRESS=DEFLATE",
       "-co", "PREDICTOR=2",
-      "-co", "NUM_THREADS=ALL_CPUS"
+      "-co", "NUM_THREADS=1",
+      "-multi", "-srcnodata", "0"
     ),
     config_options = c(
       GDAL_VRT_ENABLE_PYTHON = "YES",
       VSI_CACHE = "TRUE",
-      GDAL_CACHEMAX = "30%",
-      VSI_CACHE_SIZE = "10000000",
+      GDAL_CACHEMAX = "50%", # Increased from 30%
+      VSI_CACHE_SIZE = "536870912", # Increased to 512MB
       GDAL_HTTP_MULTIPLEX = "YES",
-      GDAL_INGESTED_BYTES_AT_OPEN = "32000",
-      GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
+      GDAL_INGESTED_BYTES_AT_OPEN = "262144000", # Increased to 250MB
+      GDAL_DISABLE_READDIR_ON_OPEN = "YES", # Changed from EMPTY_DIR
       GDAL_HTTP_VERSION = "2",
       GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-      GDAL_NUM_THREADS = "ALL_CPUS"
+      GDAL_HTTP_RETRY_COUNT = "5", # Added retry count
+      GDAL_HTTP_MAX_RETRY = "5", # Added max retries
+      VSI_CACHE_READ_CHUNK_SIZE = "1048576", # Added 1MB chunk size
+      GDAL_NUM_THREADS = "ALL_CPUS", # Using all CPUs
+      GDAL_HTTP_CONNECTTIMEOUT = "30", # Added connection timeout
+      GDAL_HTTP_TIMEOUT = "30", # Added request timeout
+      CPL_VSIL_CURL_ALLOWED_EXTENSIONS = "TIF,tif,vrt" # Limit to needed extensions
     ),
     quiet = FALSE) {
   # First, ensure we have the correct paths
@@ -118,7 +125,7 @@ call_vrt_composite <- function(
       "-r", "near",
       "-co", "COMPRESS=DEFLATE",
       "-co", "PREDICTOR=2",
-      "-co", "NUM_THREADS=10"
+      "-co", "NUM_THREADS=ALL_CPUS"
     ),
     config_options = c(
       GDAL_VRT_ENABLE_PYTHON = "YES",

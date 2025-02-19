@@ -1,0 +1,140 @@
+#' Generate a Sentinel 2 VRT from a STAC query
+#' @param bbox A numeric vector of the bounding box (length 4) in lat/long
+#' @param start_date A character string of the start date
+#' @param end_date A character string of the end date
+#' @param assets A character vector of the asset names to include
+#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
+#' @param stac_source A character string of the STAC source
+#' @param collection A character string of the collection to query
+#' @return A stac_vrt object
+#' @export
+sentinel2_stac_vrt <- function(
+    bbox,
+    start_date,
+    end_date,
+    assets = c(
+      "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
+      "B09", "B11", "B12"
+    ),
+    mask_band = "SCL",
+    max_cloud_cover = 10,
+    stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+    collection = "sentinel-2-l2a") {
+  stac_its <- stac_query(
+    bbox = bbox,
+    stac_source = stac_source,
+    start_date = start_date,
+    end_date = end_date,
+    collection = collection
+  ) |>
+    rstac::items_filter(
+      filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+    ) |>
+    sign_planetary_computer()
+
+  # browser()
+  asset_lists <- purrr::map(c(assets, mask_band), function(x) {
+    its_asset <- rstac::assets_select(stac_its, asset_names = x)
+
+    urls <- suppressWarnings(
+      rstac::assets_url(its_asset, append_gdalvsi = TRUE)
+    )
+
+    return(urls)
+  }) |>
+    purrr::set_names(c(assets, mask_band))
+
+
+  # mask_srcs <- asset_lists[[mask_band]]
+  # asset_lists[mask_band] <- NULL
+
+  asset_vrts <- asset_lists |>
+    purrr::transpose() |>
+    purrr::map(
+      function(x) {
+        tf <- fs::file_temp(ext = "vrt")
+
+        # get index of x that is named mask_band
+        mask_idx <- which(names(x) == mask_band)
+        # mask_src <- x[[mask_idx]]
+        # x[[mask_idx]] <- NULL
+
+        gdalraster::buildVRT(tf, unlist(x),
+          cl_arg = c(
+            "-separate"
+          ),
+          quiet = TRUE
+        )
+
+        ivrt <- xml2::read_xml(tf)
+
+        # set the mask band as MasBand
+        bands <- xml2::xml_find_all(ivrt, "//VRTRasterBand")
+        # Get the mask band node
+        mask_band_node <- bands[[mask_idx]]
+        # Remove it from current position
+        xml2::xml_remove(mask_band_node)
+        # Create MaskBand element and add the node to it
+        mask_band_xml <- xml2::xml_add_child(ivrt, "MaskBand")
+        xml2::xml_add_child(mask_band_xml, mask_band_node)
+
+        # Set the mask band to mask,1
+        src_bands <- xml2::xml_find_all(ivrt, "//SourceBand")
+        xml2::xml_set_text(
+          src_bands[[mask_idx]],
+          "mask,1"
+        )
+
+
+        # Add pixel function to convert to 0-1
+        # mask_band_node <- xml2::xml_find_first(ivrt, "//MaskBand")
+        # xml2::xml_set_attr(mask_band_node, "subClass", "VRTDerivedRasterBand")
+        # xml2::xml_set_attr(mask_band_node, "Description", mask_band)
+        # xml2::xml_add_child(mask_band_node, "PixelFunctionType", "mask")
+        # xml2::xml_add_child(mask_band_node, "PixelFunctionLanguage", "Python")
+        # xml2::xml_add_child(
+        #   mask_band_node, "PixelFunctionCode",
+        #   sentinel_mask()
+        # )
+
+        xml2::write_xml(ivrt, tf)
+        return(tf)
+      }
+    )
+
+  # browser()
+
+  master_vrt <- fs::file_temp(ext = "vrt")
+
+  gdalraster::buildVRT(
+    vrt_filename = master_vrt,
+    input_rasters = unlist(asset_vrts),
+    # cl_arg = c(
+    #   "-vrtnodata", "NaN"
+    # ),
+    quiet = TRUE
+  )
+
+  mvrt <- xml2::read_xml(master_vrt)
+  mvrt_bands <- xml2::xml_find_all(mvrt, "//VRTRasterBand")
+  purrr::walk2(
+    mvrt_bands,
+    c(assets, mask_band),
+    function(x, y) {
+      xml2::xml_set_attr(x, "Description", y)
+    }
+  )
+
+  rvrt <- list(
+    vrt = mvrt,
+    bbox = bbox,
+    start_date = start_date,
+    end_date = end_date,
+    n_items = rstac::items_length(stac_its),
+    assets = assets
+  )
+
+  class(rvrt) <- "stac_vrt"
+
+  return(rvrt)
+}
