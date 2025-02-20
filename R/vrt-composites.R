@@ -19,7 +19,7 @@
 #' main testing point for now!
 vrt_composite <- function(
     src_files, outfile, bbox,
-    fun = "median",
+    fun = numba_median,
     t_srs = to_generic_projected(bbox),
     res = 10,
     vrt_options = NULL,
@@ -81,6 +81,7 @@ vrt_composite <- function(
       call_vrt_composite(
         src_files = src_files,
         outfile = outfile,
+        fun = fun,
         t_srs = t_srs,
         warp_options = warp_options
       )
@@ -111,7 +112,7 @@ vrt_composite <- function(
 call_vrt_composite <- function(
     src_files,
     outfile,
-    fun = c("median"),
+    fun = numba_median,
     t_srs = "",
     vrt_options = NULL,
     warp_options = c(
@@ -142,7 +143,7 @@ call_vrt_composite <- function(
   # TODO: this wont warn about stac_vrt so add at some point.
   v_assert_type(src_files, "src_files", "character")
   v_assert_type(outfile, "outfile", "character")
-  fun <- rlang::arg_match(fun)
+  v_assert_type(fun, "fun", "function")
   v_assert_type(t_srs, "t_srs", "character")
   v_assert_type(vrt_options, "vrt_options", "character")
   v_assert_type(warp_options, "warp_options", "character")
@@ -153,11 +154,8 @@ call_vrt_composite <- function(
     ~ gdalraster::set_config_option(.y, .x)
   )
 
-  fun <- switch(fun,
-    median = numba_median()
-  )
 
-  pix_fun_vrt <- vrt_pixfun(src_files, vrt_options, fun)
+  pix_fun_vrt <- vrt_pixfun(src_files, vrt_options, fun())
 
   gdalraster::warp(
     pix_fun_vrt,
