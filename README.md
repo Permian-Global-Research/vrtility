@@ -40,15 +40,27 @@ contributions are most welcome!
 You can install the development version of vrtility from
 [GitHub](https://github.com/) with:
 
-You may first need to install python and python venv like so:
-`apt-get install python3-venv python3-pip python3-dev`
-
 ``` r
-# install.packages("devtools")
-devtools::install_github("Permian-Global-Research/vrtility")
+# install.packages("pak")
+pak::pkg_install("Permian-Global-Research/vrtility")
 # next set up the required Python environment
 vrtility::build_vrtility_python()
 ```
+
+### Possible extra steps.
+
+For now, {vrtility} requires the use of a virtual python environment -
+this is a lighter and safer way to manage python envs than with conda or
+the system python, respectively. It may be necessary to install the
+virtualenv package for python3.
+
+This can be done on Debian/Ubuntu with:
+
+    sudo apt-get install python3-venv
+
+or if on MacOS or Windows, you can install it with pip:
+
+    python3 -m pip install virtualenv
 
 ## Example
 
@@ -122,7 +134,7 @@ s2_composite <- vrt_composite(
 
 ``` r
 toc()
-#> 54.543 sec elapsed
+#> 46.764 sec elapsed
 ```
 
 ``` r
