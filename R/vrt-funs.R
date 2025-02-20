@@ -93,9 +93,6 @@ sentinel2_stac_vrt <- function(
 
         gdalraster::buildVRT(tf, unlist(x),
           cl_arg = c(
-            # "-tr", "10", "10",
-            # "-tap",
-            # "-r", "bilinear",
             "-separate"
           ),
           quiet = TRUE
@@ -104,16 +101,14 @@ sentinel2_stac_vrt <- function(
       }
     )
 
-  # browser()
-
   master_vrt <- fs::file_temp(ext = "vrt")
-
+  # browser()
   gdalraster::buildVRT(
     vrt_filename = master_vrt,
     input_rasters = unlist(asset_vrts),
-    # cl_arg = c(
-    #   "-vrtnodata", "NaN"
-    # ),
+    cl_arg = c(
+      "-vrtnodata", "0"
+    ),
     quiet = TRUE
   )
 

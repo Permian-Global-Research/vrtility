@@ -14,6 +14,8 @@ def median_jit(in_ar):
     for y in prange(in_ar.shape[1]):
         for x in prange(in_ar.shape[2]):
             values = in_ar[:, y, x]  # Get all values for this pixel
+            # Convert zeros to nan
+            values = np.where(values == 0, np.nan, values)
             result[y, x] = np.nanmedian(values)  # Much simpler!
 
     return result
