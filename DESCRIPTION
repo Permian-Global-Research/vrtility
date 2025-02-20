@@ -1,12 +1,12 @@
 Package: vrtility
 Title: Expermimental package for efficient raster processing with GDAL VRTs
-Version: 0.0.1.1
+Version: 0.0.1.2
 Authors@R: 
     person("Hugh", "Graham", , "hugh.graham@permianglobal.com", role = c("aut", "cre"),
           comment = c(ORCID = "0000-0001-9451-5010"))
 Description: Experimental package for efficient raster processing with GDAL VRTs.
 License: Apache License (>= 2)
-SystemRequirements: Python (>= 3.6), python3-venv
+SystemRequirements: Python (>= 3.6), venv
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
