@@ -8,7 +8,7 @@ vrt_composite(
   src_files,
   outfile,
   bbox,
-  fun = "median",
+  fun = numba_median,
   t_srs = to_generic_projected(bbox),
   res = 10,
   vrt_options = NULL,

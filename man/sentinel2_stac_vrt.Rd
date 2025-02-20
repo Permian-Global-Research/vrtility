@@ -10,6 +10,7 @@ sentinel2_stac_vrt(
   end_date,
   assets = c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11",
     "B12", "SCL"),
+  max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "sentinel-2-l2a"
 )
@@ -22,6 +23,8 @@ sentinel2_stac_vrt(
 \item{end_date}{A character string of the end date}
 
 \item{assets}{A character vector of the asset names to include}
+
+\item{max_cloud_cover}{A numeric value of the maximum cloud cover percentage}
 
 \item{stac_source}{A character string of the STAC source}
 

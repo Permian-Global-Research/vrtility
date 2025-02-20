@@ -1,7 +1,6 @@
-#' python pixel function for the median
-#' @return character
-#' @keywords internal
-#' @noRd
+#' python pixel function for the median using numba
+#' @return character of the python function
+#' @export
 numba_median <- function() {
   glue::glue("\n
 import numpy as np
@@ -31,7 +30,9 @@ def median(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 ")
 }
 
-
+#' python pixel function for the median using numpy
+#' @return character of the python function
+#' @export
 numpy_median <- function() {
   glue::glue("
 import numpy as np
