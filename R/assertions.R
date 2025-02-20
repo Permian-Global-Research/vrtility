@@ -1,5 +1,5 @@
 v_assert_type <- function(
-    x, name, type = c("character", "numeric", "logical"),
+    x, name, type = c("character", "numeric", "logical", "function"),
     nullok = TRUE) {
   type <- rlang::arg_match(type)
   if (nullok && is.null(x)) {
