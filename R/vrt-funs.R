@@ -68,11 +68,15 @@ sentinel2_stac_vrt <- function(
     start_date = start_date,
     end_date = end_date,
     collection = collection
-  ) |>
-    rstac::items_filter(
-      filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
-    ) |>
-    sign_planetary_computer()
+  )
+
+  if (!is.null(max_cloud_cover)) {
+    stac_its <- stac_its |>
+      rstac::items_filter(
+        filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+      )
+  }
+  stac_its <- sign_planetary_computer(stac_its)
 
 
   # browser()
