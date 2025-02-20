@@ -136,7 +136,7 @@ call_vrt_composite <- function(
     ),
     quiet = FALSE) {
   if (inherits(src_files, "stac_vrt")) {
-    vrt_xml <- src_files$vrt
+    vrt_xml <- xml2::read_xml(src_files$vrt)
     src_files <- fs::file_temp(ext = "vrt")
     xml2::write_xml(vrt_xml, src_files)
   }

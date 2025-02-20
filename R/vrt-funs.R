@@ -127,7 +127,7 @@ sentinel2_stac_vrt <- function(
   )
 
   rvrt <- list(
-    vrt = mvrt,
+    vrt = as.character(mvrt),
     bbox = bbox,
     start_date = start_date,
     end_date = end_date,
@@ -138,4 +138,52 @@ sentinel2_stac_vrt <- function(
   class(rvrt) <- "stac_vrt"
 
   return(rvrt)
+}
+
+#' Print a stac_vrt object
+#' @param x A stac_vrt object
+#' @param xml A logical indicating whether to print the XML
+#' @param ... Additional arguments not used
+#' @export
+print.stac_vrt <- function(x, xml = FALSE, ...) {
+  cli::cli_inform(c(">" = cli::style_bold(cli::col_green("STAC VRT"))))
+  if (xml) {
+    xml_printer(x$vrt)
+  } else {
+    cli::cli_inform(
+      c(
+        paste(cli::style_bold(
+          cli::col_yellow("VRT XML: "),
+          "[hidden]"
+        )),
+        " " = cli::style_italic("run {cli::code_highlight('print(x, xml = TRUE)')} to view")
+      )
+    )
+  }
+  cli::cli_inform(
+    c(
+      paste(
+        cli::style_bold(cli::col_blue("Bounding Box:")),
+        paste(x$bbox, collapse = " ")
+      ),
+      paste(cli::style_bold(cli::col_blue("Start Date:")), x$start_date),
+      paste(cli::style_bold(cli::col_blue("End Date:")), x$end_date),
+      paste(cli::style_bold(cli::col_blue("Number of Items:")), x$n_items),
+      paste(
+        cli::style_bold(cli::col_blue("Assets:")),
+        paste(x$assets, collapse = ", ")
+      )
+    )
+  )
+  invisible(x)
+}
+
+xml_printer <- function(x) {
+  cli::style_bold("XML process graph: \n\n") |>
+    cli::col_yellow() |>
+    cat()
+  paste0(x, "\n") |>
+    cli::style_italic() |>
+    cli::col_green() |>
+    cat()
 }
