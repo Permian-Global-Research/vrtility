@@ -47,6 +47,9 @@ and processing of only the required data in a single gdalwarp call.
 
 You can install the development version of vrtility from [GitHub](https://github.com/) with:
 
+You may first need to install python and python venv like so:
+`apt-get install python3-venv python3-pip python3-dev` 
+
 ``` r
 # install.packages("devtools")
 devtools::install_github("Permian-Global-Research/vrtility")
