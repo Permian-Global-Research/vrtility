@@ -3,7 +3,9 @@
 #' #' @keywords internal
 #' #' @noRd
 vrtility_usr_agent <- function() {
-  httr::user_agent("vrtility (https://permian-global-research.github.io/rsi/)")
+  httr::user_agent(
+    "vrtility (https://github.com/Permian-Global-Research/vrtility)"
+  )
 }
 
 

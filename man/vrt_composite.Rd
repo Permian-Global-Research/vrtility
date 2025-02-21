@@ -8,10 +8,8 @@ vrt_composite(
   src_files,
   outfile,
   bbox,
-  fun = numba_median,
   t_srs = to_generic_projected(bbox),
   res = 10,
-  vrt_options = NULL,
   warp_options = c("-overwrite", "-te", gdalraster::bbox_transform(bbox,
     gdalraster::srs_to_wkt("EPSG:4326"), to_generic_projected(bbox)), "-tr", res, res,
     "-tap", "-r", "bilinear", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2", "-co",
@@ -32,14 +30,9 @@ rasters}
 
 \item{bbox}{A numeric vector of the bounding box (length 4) in lat/long}
 
-\item{fun}{A character string of the pixel function to apply (only median is
-supported for now...)}
-
 \item{t_srs}{A character string of the target SRS}
 
 \item{res}{A numeric of the target resolution in units of t_srs}
-
-\item{vrt_options}{A list of options to pass to the VRT}
 
 \item{warp_options}{A character vector of options to pass to the warp}
 
@@ -47,6 +40,11 @@ supported for now...)}
 environment}
 
 \item{quiet}{A logical indicating whether to suppress output}
+
+\item{fun}{A character string of the pixel function to apply (only median is
+supported for now...)}
+
+\item{vrt_options}{A list of options to pass to the VRT}
 }
 \value{
 A character string of the path to the output raster

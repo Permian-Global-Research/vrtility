@@ -15,6 +15,11 @@
 
 
 .onLoad <- function(libname, pkgname) {
+  python_init_checks()
+  cache_init_checks()
+}
+
+python_init_checks <- function() {
   vrtility_python <- Sys.getenv("VRTILITY_PYTHON", unset = NA)
 
   if (!is.na(vrtility_python)) {
@@ -34,4 +39,14 @@
       )
     }
   }
+}
+
+cache_init_checks <- function() {
+  op <- options()
+  op_vrtility <- list(
+    vrt.cache = tempdir()
+  )
+
+  toset <- !(names(op_vrtility) %in% names(op))
+  if (any(toset)) options(op_vrtility[toset])
 }

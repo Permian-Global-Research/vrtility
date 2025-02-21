@@ -19,10 +19,8 @@
 #' main testing point for now!
 vrt_composite <- function(
     src_files, outfile, bbox,
-    fun = numba_median,
     t_srs = to_generic_projected(bbox),
     res = 10,
-    vrt_options = NULL,
     warp_options = c(
       "-overwrite",
       "-te", gdalraster::bbox_transform(
@@ -50,12 +48,17 @@ vrt_composite <- function(
       GDAL_NUM_THREADS = "ALL_CPUS"
     ),
     quiet = FALSE) {
+  if (inherits(src_files, "stac_vrt")) {
+    src_files <- save_vrt(src_files)
+  }
   # First, ensure we have the correct paths
   py_bin <- Sys.getenv("VRTILITY_PY_EXECUTABLE", unset = NA)
+
   if (is.na(py_bin)) {
     cli::cli_abort(
       c("Cannot locate the {cli::style_bold('VRTILITY_PYTHON')} environment",
-        "i" = "You may need to run {cli::code_highlight('`build_vrtility_python()`')} to install it"
+        "i" = "You may need to run
+        {cli::code_highlight('`build_vrtility_python()`')} to install it"
       )
     )
   }
@@ -81,9 +84,9 @@ vrt_composite <- function(
       call_vrt_composite(
         src_files = src_files,
         outfile = outfile,
-        fun = fun,
         t_srs = t_srs,
-        warp_options = warp_options
+        warp_options = warp_options,
+        config_options = config_options,
       )
     }
   )
@@ -112,7 +115,7 @@ vrt_composite <- function(
 call_vrt_composite <- function(
     src_files,
     outfile,
-    fun = numba_median,
+    fun = vrtility::numba_median,
     t_srs = "",
     vrt_options = NULL,
     warp_options = c(
@@ -135,11 +138,6 @@ call_vrt_composite <- function(
       # , CPL_DEBUG = "ON"
     ),
     quiet = FALSE) {
-  if (inherits(src_files, "stac_vrt")) {
-    vrt_xml <- xml2::read_xml(src_files$vrt)
-    src_files <- fs::file_temp(ext = "vrt")
-    xml2::write_xml(vrt_xml, src_files)
-  }
   # TODO: this wont warn about stac_vrt so add at some point.
   v_assert_type(src_files, "src_files", "character")
   v_assert_type(outfile, "outfile", "character")
@@ -154,11 +152,8 @@ call_vrt_composite <- function(
     ~ gdalraster::set_config_option(.y, .x)
   )
 
-
-  pix_fun_vrt <- vrt_pixfun(src_files, vrt_options, fun())
-
   gdalraster::warp(
-    pix_fun_vrt,
+    src_files,
     outfile,
     t_srs = t_srs,
     cl_arg = warp_options,
