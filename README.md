@@ -77,6 +77,7 @@ bbox <- gdalraster::bbox_from_wkt(
   extend_x = 0.17, extend_y = 0.125
 )
 
+tic()
 s2_vrt <- sentinel2_stac_vrt(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -87,45 +88,40 @@ s2_vrt <- sentinel2_stac_vrt(
     # "B05", "B06", "B07",
     # "B08", "B8A", "B09",
     # "B11", "B12"
-    # , "SCL"
   )
 )
-
 print(s2_vrt)
-#> $vrt
-#> {xml_document}
-#> <VRTDataset rasterXSize="20976" rasterYSize="10980">
-#> [1] <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["WGS 84 / UTM zone 52S",GEOGCS ...
-#> [2] <GeoTransform>  6.0000000000000000e+05,  1.0000000000000000e+01,  0.00000 ...
-#> [3] <VRTRasterBand dataType="UInt16" band="1" Description="B02">\n  <NoDataVa ...
-#> [4] <VRTRasterBand dataType="UInt16" band="2" Description="B03">\n  <NoDataVa ...
-#> [5] <VRTRasterBand dataType="UInt16" band="3" Description="B04">\n  <NoDataVa ...
-#> [6] <OverviewList resampling="nearest">2 4 8 16</OverviewList>
-#> 
-#> $bbox
-#> [1] 130.580 -11.575 130.920 -11.325
-#> 
-#> $start_date
-#> [1] "2023-01-01"
-#> 
-#> $end_date
-#> [1] "2023-05-30"
-#> 
-#> $n_items
-#> [1] 9
-#> 
-#> $assets
-#> [1] "B02" "B03" "B04"
-#> 
-#> attr(,"class")
-#> [1] "stac_vrt"
+#> → STAC VRT
+#> VRT XML: [hidden]
+#>   run print(x, xml = TRUE) to view
+#> Bounding Box: 130.58 -11.575 130.92 -11.325
+#> Start Date: 2023-01-01
+#> End Date: 2023-05-30
+#> Number of Items: 9
+#> Assets: B02, B03, B04
 ```
 
 ``` r
 
-tic()
+s2_vrt_pf <- vrt_add_pixfun(s2_vrt) # add a median pixel function to vrt
+
+print(s2_vrt_pf)
+#> → STAC VRT
+#> VRT XML: [hidden]
+#>   run print(x, xml = TRUE) to view
+#> Pixel Function: [hidden]
+#>   run print(x, pixfun = TRUE) to view
+#> Bounding Box: 130.58 -11.575 130.92 -11.325
+#> Start Date: 2023-01-01
+#> End Date: 2023-05-30
+#> Number of Items: 9
+#> Assets: B02, B03, B04
+```
+
+``` r
+
 s2_composite <- vrt_composite(
-  s2_vrt,
+  s2_vrt_pf,
   outfile = fs::file_temp(ext = ".tif"),
   bbox = bbox
 )
@@ -134,7 +130,7 @@ s2_composite <- vrt_composite(
 
 ``` r
 toc()
-#> 46.764 sec elapsed
+#> 57.579 sec elapsed
 ```
 
 ``` r

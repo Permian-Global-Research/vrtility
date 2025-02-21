@@ -87,6 +87,7 @@ bbox <- gdalraster::bbox_from_wkt(
   extend_x = 0.17, extend_y = 0.125
 )
 
+tic()
 s2_vrt <- sentinel2_stac_vrt(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -97,15 +98,16 @@ s2_vrt <- sentinel2_stac_vrt(
     # "B05", "B06", "B07",
     # "B08", "B8A", "B09",
     # "B11", "B12"
-    # , "SCL"
   )
 )
-
 print(s2_vrt)
 
-tic()
+s2_vrt_pf <- vrt_add_pixfun(s2_vrt) # add a median pixel function to vrt
+
+print(s2_vrt_pf)
+
 s2_composite <- vrt_composite(
-  s2_vrt,
+  s2_vrt_pf,
   outfile = fs::file_temp(ext = ".tif"),
   bbox = bbox
 )
