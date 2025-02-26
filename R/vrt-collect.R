@@ -16,7 +16,6 @@ vrt_collect.default <- function(x) {
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(x) {
-  x <- rstac::assets_select(x, asset_names = c("B02", "B03", "B04"))
   assets <- rstac::items_assets(x)
 
   vrt_items <- purrr::map(assets, function(a) {
