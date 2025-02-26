@@ -185,7 +185,7 @@ print.vrt_collection <- function(
   ...
 ) {
   if (blocks) {
-    purrr::walk(x, print)
+    print(x[[1]])
     return(invisible(x))
   }
   cli::cli_inform(c(
