@@ -23,7 +23,7 @@ vrt_warp(
   outfile,
   t_srs,
   te,
-  res,
+  res = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
