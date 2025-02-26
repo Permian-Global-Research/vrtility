@@ -11,7 +11,7 @@ vrt_warp(
   outfile,
   t_srs,
   te,
-  res = 10,
+  tr,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE,
@@ -23,7 +23,7 @@ vrt_warp(
   outfile,
   t_srs,
   te,
-  res = x$res,
+  tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
@@ -34,7 +34,7 @@ vrt_warp(
   outfile,
   t_srs,
   te,
-  res,
+  tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
@@ -44,8 +44,6 @@ vrt_warp(
 \item{outfile}{A character string of the output file path}
 
 \item{t_srs}{A character string of the target SRS}
-
-\item{res}{A numeric of the target resolution in units of t_srs}
 
 \item{warp_options}{A character vector of options to pass to the warp}
 
@@ -61,6 +59,8 @@ rasters}
 
 \item{fun}{A character string of the pixel function to apply (only median is
 supported for now...)}
+
+\item{res}{A numeric of the target resolution in units of t_srs}
 
 \item{vrt_options}{A list of options to pass to the VRT}
 }
