@@ -64,6 +64,23 @@ call_vrt_warp <- function(
   return(outfile)
 }
 
+
+combine_warp_opts <- function(warp_opts, te, res) {
+  opts_check(warp_opts, "-te")
+  opts_check(warp_opts, "-tr")
+
+  warp_opts <- c(
+    warp_opts,
+    "-te",
+    paste(te, collapse = " "),
+    "-tr",
+    paste(res, collapse = " ")
+  )
+
+  return(warp_opts)
+}
+
+
 #' Generate a composite raster from (virtual) raster sources.
 #' @param src_files A stac_vrt object or a character vector of file paths to the
 #' rasters
@@ -89,7 +106,7 @@ vrt_warp <- function(
   outfile,
   t_srs,
   te,
-  res = 10,
+  tr,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE,
@@ -118,7 +135,7 @@ vrt_warp.vrt_block <- function(
   outfile,
   t_srs,
   te,
-  res = x$res,
+  tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
@@ -127,8 +144,10 @@ vrt_warp.vrt_block <- function(
   file_src <- xml2::read_xml(x$vrt)
   xml2::write_xml(file_src, tmp_vrt)
 
-  call_vrt_warp(
-    src_files = tmp_vrt,
+  warp_options <- combine_warp_opts(warp_options, te, tr)
+
+  vrt_warp_method(
+    x = tmp_vrt,
     outfile = outfile,
     t_srs = t_srs,
     warp_options = warp_options,
@@ -144,20 +163,34 @@ vrt_warp.vrt_collection <- function(
   outfile,
   t_srs,
   te,
-  res,
+  tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
 ) {
-  src_files <- purrr::map_chr(
-    x$assets,
-    ~ x$assets[[.x]]$uri
+  browser()
+
+  b <- x[[1]]
+  class(x) <- "list"
+
+  class(b)
+  b
+
+  purrr::map(
+    x,
+    function(.x) {
+      purrr::map_chr(
+        .x,
+        ~ .x$date_time
+      )
+    }
   )
 
-  call_vrt_warp(
-    src_files = src_files,
+  vrt_warp(
+    x,
     outfile = outfile,
     t_srs = t_srs,
+    te = te,
     warp_options = warp_options,
     config_options = config_options,
     quiet = quiet
