@@ -12,7 +12,8 @@ sentinel2_stac_collect(
     "B12", "SCL"),
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "sentinel-2-l2a"
+  collection = "sentinel-2-l2a",
+  mpc_sign = TRUE
 )
 }
 \arguments{

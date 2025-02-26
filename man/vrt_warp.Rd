@@ -6,17 +6,7 @@
 \alias{vrt_warp.vrt_collection}
 \title{Generate a composite raster from (virtual) raster sources.}
 \usage{
-vrt_warp(
-  x,
-  outfile,
-  t_srs,
-  te,
-  tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE,
-  ...
-)
+vrt_warp(x, outfile, t_srs, te, ...)
 
 \method{vrt_warp}{vrt_block}(
   x,
@@ -45,6 +35,11 @@ vrt_warp(
 
 \item{t_srs}{A character string of the target SRS}
 
+\item{te}{A numeric vector of the target extent in the form
+c(xmin, ymin, xmax, ymax) and must be the same SRS as in \code{t_srs}.}
+
+\item{tr}{A numeric vector of the target resolution in the form c(xres, yres)}
+
 \item{warp_options}{A character vector of options to pass to the warp}
 
 \item{config_options}{A character vector of options to set in the GDAL
@@ -54,15 +49,6 @@ environment}
 
 \item{src_files}{A stac_vrt object or a character vector of file paths to the
 rasters}
-
-\item{bbox}{A numeric vector of the bounding box (length 4) in lat/long}
-
-\item{fun}{A character string of the pixel function to apply (only median is
-supported for now...)}
-
-\item{res}{A numeric of the target resolution in units of t_srs}
-
-\item{vrt_options}{A list of options to pass to the VRT}
 }
 \value{
 A character string of the path to the output raster
@@ -71,7 +57,7 @@ A character string of the path to the output raster
 Generate a composite raster from (virtual) raster sources.
 }
 \details{
-This is the main package function at present. It is quite targetted
-towards Sentinel 2 data and will likely change - but this will server as the
-main testing point for now!
+This is the primary function to call processing of raster data. The
+behaviour of the warper is dependent on the form of the input vrt datasets
+and the associated options.
 }
