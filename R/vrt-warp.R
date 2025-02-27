@@ -77,7 +77,7 @@ vrt_warp.vrt_collection <- function(
   quiet = FALSE
 ) {
   v_assert_length(tr, "tr", 2)
-  purrr::imap(
+  purrr::imap_chr(
     x[[1]],
     function(.x, .y) {
       uid <- if (nchar(.x$date_time) > 0) .x$date_time else .y
