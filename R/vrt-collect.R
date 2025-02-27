@@ -68,83 +68,11 @@ vrt_collect.doc_items <- function(x) {
             as_file = TRUE
           )
 
-        # read and verify modified VRT
-        gdr <- new(gdalraster::GDALRaster, tf)
-        assets <- purrr::map_chr(
-          seq_along(x),
-          function(.x) gdr$getDescription(.x)
-        )
-        no_data_val <- purrr::map_dbl(
-          seq_along(x),
-          function(.x) gdr$getNoDataValue(.x)
-        )
-        dttm <- gdr$getMetadataItem(0, "datetime", "")
-
-        build_vrt_block(
-          xml2::read_xml(tf),
-          srs = gdr$getProjection(),
-          bbox = gdr$bbox(),
-          res = gdr$res(),
-          date_time = dttm,
-          assets = assets,
-          no_data_val = no_data_val
-        )
-      }
-    )
-
-  bbox <- purrr::map(vrt_items, function(.x) .x$bbox) |>
-    purrr::reduce(
-      function(.x, .y) {
-        c(
-          min(.x[1], .y[1]),
-          min(.x[2], .y[2]),
-          max(.x[3], .y[3]),
-          max(.x[4], .y[4])
-        )
-      }
-    )
-
-  sd <- purrr::map_chr(
-    vrt_items,
-    function(.x) .x$date_time
-  ) |>
-    lubridate::as_datetime()
-
-  uniq_assets <- purrr::map(
-    vrt_items,
-    function(.x) .x$assets
-  ) |>
-    unlist() |>
-    unique()
-
-  uniq_crs <- purrr::map(
-    vrt_items,
-    function(.x) .x$srs
-  ) |>
-    unlist() |>
-    unique()
-
-  min_res <- purrr::map(
-    vrt_items,
-    function(.x) .x$res
-  ) |>
-    purrr::reduce(
-      function(.x, .y) {
-        c(
-          min(.x[1], .y[1]),
-          min(.x[2], .y[2])
-        )
+        build_vrt_block(tf)
       }
     )
 
   build_vrt_collection(
-    vrt_items,
-    srs = uniq_crs,
-    bbox = bbox,
-    res = min_res,
-    start_date = min(sd),
-    end_date = max(sd),
-    n_its = length(vrt_items),
-    assets = uniq_assets
+    vrt_items
   )
 }

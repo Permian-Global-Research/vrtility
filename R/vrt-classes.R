@@ -10,28 +10,37 @@
 #' @noRd
 build_vrt_stack <- function(
   x,
-  srs,
-  bbox,
-  start_date,
-  end_date,
-  n_its,
-  assets,
   maskfun = NULL,
   pixfun = NULL,
   ...
 ) {
+  # read and verify modified VRT
+  gdr <- new(gdalraster::GDALRaster, x)
+  ras_count <- gdr$getRasterCount()
+  assets <- purrr::map_chr(
+    seq_along(ras_count),
+    function(.x) gdr$getDescription(.x)
+  )
+  no_data_val <- purrr::map_dbl(
+    seq_along(ras_count),
+    function(.x) gdr$getNoDataValue(.x)
+  )
+  dttm <- gdr$getMetadataItem(0, "datetime", "")
+
   rvrt <- list(
-    vrt = as.character(x),
-    srs = srs,
-    bbox = bbox,
-    start_date = start_date,
-    end_date = end_date,
-    n_items = n_its,
+    vrt = as.character(xml2::read_xml(x)),
+    srs = gdr$getProjection(),
+    bbox = gdr$bbox(),
+    res = gdr$res(),
+    start_date = min(sd),
+    end_date = max(sd),
     assets = assets,
-    pixfun = pixfun
+    no_data_val = no_data_val,
+    pixfun = pixfun,
+    maskfun = maskfun
   )
 
-  class(rvrt) <- c("vrt_stack", "vrt_block", "list")
+  class(rvrt) <- c("vrt_stack", "vrt_collection", "vrt_block", "list")
 
   return(rvrt)
 }
@@ -43,7 +52,7 @@ build_vrt_stack <- function(
 #' @export
 #' @rdname vrt_block
 print.vrt_stack <- function(x, xml = FALSE, pixfun = FALSE, ...) {
-  cli::cli_inform(c(">" = cli::style_bold(cli::col_green("STAC VRT"))))
+  cli::cli_inform(c(">" = cli::style_bold(cli::col_green("VRT STACK"))))
   if (xml) {
     xml_printer(x$vrt)
   } else {
@@ -84,22 +93,29 @@ print.vrt_stack <- function(x, xml = FALSE, pixfun = FALSE, ...) {
 #' @noRd
 build_vrt_block <- function(
   x,
-  srs,
-  bbox,
-  res,
-  date_time,
-  assets,
-  no_data_val,
   maskfun = NULL,
   pixfun = NULL,
   ...
 ) {
+  # read and verify modified VRT
+  gdr <- new(gdalraster::GDALRaster, x)
+  ras_count <- gdr$getRasterCount()
+  assets <- purrr::map_chr(
+    seq_len(ras_count),
+    function(.x) gdr$getDescription(.x)
+  )
+  no_data_val <- purrr::map_dbl(
+    seq_len(ras_count),
+    function(.x) gdr$getNoDataValue(.x)
+  )
+  dttm <- gdr$getMetadataItem(0, "datetime", "")
+
   rvrt <- list(
-    vrt = as.character(x),
-    srs = srs,
-    bbox = bbox,
-    res = res,
-    date_time = date_time,
+    vrt = as.character(xml2::read_xml(x)),
+    srs = gdr$getProjection(),
+    bbox = gdr$bbox(),
+    res = gdr$res(),
+    date_time = dttm,
     assets = assets,
     no_data_val = no_data_val,
     pixfun = pixfun,
@@ -146,27 +162,66 @@ print.vrt_block <- function(x, xml = FALSE, pixfun = FALSE, ...) {
 #' @export
 build_vrt_collection <- function(
   x,
-  srs,
-  bbox,
-  res,
-  start_date,
-  end_date,
-  n_its,
-  assets,
-  maskfun = NULL,
   pixfun = NULL,
+  maskfun = NULL,
   ...
 ) {
+  bbox <- purrr::map(x, function(.x) .x$bbox) |>
+    purrr::reduce(
+      function(.x, .y) {
+        c(
+          min(.x[1], .y[1]),
+          min(.x[2], .y[2]),
+          max(.x[3], .y[3]),
+          max(.x[4], .y[4])
+        )
+      }
+    )
+
+  sd <- purrr::map_chr(
+    x,
+    function(.x) .x$date_time
+  ) |>
+    lubridate::as_datetime()
+
+  uniq_assets <- purrr::map(
+    x,
+    function(.x) .x$assets
+  ) |>
+    unlist() |>
+    unique()
+
+  uniq_crs <- purrr::map(
+    x,
+    function(.x) .x$srs
+  ) |>
+    unlist() |>
+    unique()
+
+  min_res <- purrr::map(
+    x,
+    function(.x) .x$res
+  ) |>
+    purrr::reduce(
+      function(.x, .y) {
+        c(
+          min(.x[1], .y[1]),
+          min(.x[2], .y[2])
+        )
+      }
+    )
+
   rvrt <- list(
     vrt = x,
-    srs = srs,
+    srs = uniq_crs,
     bbox = bbox,
-    res = res,
-    start_date = start_date,
-    end_date = end_date,
-    n_items = n_its,
-    assets = assets,
-    pixfun = pixfun
+    res = min_res,
+    start_date = min(sd),
+    end_date = max(sd),
+    n_items = length(x),
+    assets = uniq_assets,
+    pixfun = pixfun,
+    maskfun = maskfun
   )
 
   class(rvrt) <- c("vrt_collection", "vrt_block", "list")
