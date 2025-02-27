@@ -36,8 +36,6 @@ vrt_set_mask.vrt_block <- function(x, mask_band) {
   }
 
   mask_band_node <- bands[[mask_idx]]
-  # Remove the mask band from its current position
-  # xml2::xml_remove(mask_band_node)
 
   # Set pixel function attributes
   xml2::xml_set_attr(mask_band_node, "subClass", "VRTDerivedRasterBand")
@@ -48,7 +46,7 @@ vrt_set_mask.vrt_block <- function(x, mask_band) {
   pixel_func <- glue::glue(
     "
 import numpy as np
-#breakpoint()
+breakpoint()
 def sentinel2_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                   raster_ysize, buf_radius, gt, **kwargs):
     # Valid SCL values:
@@ -59,7 +57,7 @@ def sentinel2_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
     # 11 = Snow
     valid_values = [4, 5, 6, 7, 11]
     
-    #breakpoint()
+    breakpoint()
     # Set mask to 1 (valid) for valid pixels, 0 (invalid) for others
     mask = np.isin(in_ar[0], valid_values)
     out_ar[:] = mask.astype(np.uint8)
@@ -71,12 +69,37 @@ def sentinel2_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
   pixel_func_code <- xml2::xml_add_child(mask_band_node, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
 
-  # Create MaskBand element and add the VRTRasterBand to it
-  # mask_band_xml <- xml2::xml_add_child(vx, "MaskBand")
-  # xml2::xml_add_child(mask_band_xml, mask_band_node)
+  # browser()
+  # cat(as.character(vx))
 
-  # Write back to file
+  # Remove the mask band from its current position
+  # Create MaskBand element and add the VRTRasterBand to it
+
+  ndv <- xml2::xml_find_all(mask_band_node, "NoDataValue")
+  xml2::xml_remove(ndv)
+  masksrc <- xml2::xml_find_all(
+    mask_band_node,
+    "//SimpleSource | //ComplexSource"
+  )
+  xml2::xml_set_name(masksrc, "SimpleSource")
+  ndc <- xml2::xml_find_all(masksrc, "NODATA")
+  xml2::xml_remove(ndc)
+  xml2::xml_remove(mask_band_node)
+
+  main_bands <- xml2::xml_find_all(
+    vx,
+    "//SimpleSource | //ComplexSource"
+  )
+  purrr::walk(main_bands, function(x) {
+    nodatachild <- xml2::xml_find_all(x, "NODATA")
+    xml2::xml_remove(nodatachild)
+    use_mask <- xml2::xml_add_child(x, "UseMaskBand")
+    xml2::xml_text(use_mask) <- "true"
+  })
+  mask_band_xml <- xml2::xml_add_child(vx, "MaskBand")
+  xml2::xml_add_child(mask_band_xml, mask_band_node)
+
+  # Write back to block
   x$vrt <- as.character(vx)
-  #TODO: also need to add mask pixel function.
   return(x)
 }
