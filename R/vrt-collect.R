@@ -1,5 +1,5 @@
 #' Construct the base VRT object for composing VRT pipelines.
-#' @rdname vrt_collect
+#' @rdname vrt_classes
 #' @export
 vrt_collect <- function(x) {
   UseMethod("vrt_collect")
@@ -13,7 +13,7 @@ vrt_collect.default <- function(x) {
   )
 }
 
-#' @rdname vrt_collect
+#' @rdname vrt_classes
 #' @export
 vrt_collect.doc_items <- function(x) {
   assets <- rstac::items_assets(x)

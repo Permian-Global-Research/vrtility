@@ -104,9 +104,12 @@ sign_planetary_computer <- function(
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
 #' @param stac_source A character string of the STAC source
 #' @param collection A character string of the collection to query
+#' @param mpc_sign A logical indicating whether to sign the items using the
+#' Planetary Computer API's signing method (only required if using the
+#' Planetary Computer STAC API).
 #' @return A stac_vrt object
 #' @export
-sentinel2_stac_collect <- function(
+sentinel2_stac_query <- function(
   bbox,
   start_date,
   end_date,
