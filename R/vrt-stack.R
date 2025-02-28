@@ -2,7 +2,7 @@
 #' @param x A vrt_collection object
 #' @param ... Additional arguments passed to methods
 #' @export
-#' @rdname vrt_stack
+#' @rdname vrt_classes
 vrt_stack <- function(x, ...) {
   UseMethod("vrt_stack")
 }
@@ -17,7 +17,8 @@ vrt_stack.default <- function(x, ...) {
 }
 
 #' @export
-#' @rdname vrt_stack
+#' @param quiet Logical. If TRUE, suppress GDAL progress bar
+#' @rdname vrt_classes
 vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
   vrt_paths <- purrr::map_chr(
     x[[1]],
@@ -38,19 +39,17 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
     quiet = quiet
   )
 
-  #TODO: sort this description/ date stuff.
-  # browser()
-
-  # tf <- set_vrt_descriptions(
-  #   x = main_vrt,
-  #   x$assets,
-  #   as_file = TRUE
-  # ) |>
-  #   set_vrt_metadata(
-  #     keys = "datetime",
-  #     values = dttm,
-  #     as_file = TRUE
-  #   )
+  main_vrt <- set_vrt_descriptions(
+    main_vrt,
+    x$assets,
+    as_file = TRUE
+  ) #|>
+  main_vrt <- set_vrt_metadata(
+    main_vrt,
+    keys = paste0("datetime_", seq_along(x$date_time)),
+    values = x$date_time,
+    as_file = TRUE
+  )
 
   build_vrt_stack(main_vrt, pix_fun = x$pixfun, maskfun = x$maskfun)
 }

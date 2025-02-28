@@ -1,6 +1,5 @@
 #' Generate a composite raster from (virtual) raster sources.
-#' @param src_files A stac_vrt object or a character vector of file paths to the
-#' rasters
+#' @param x A vrt_block, vrt_stack, or vrt_collection object
 #' @param outfile A character string of the output file path
 #' @param t_srs A character string of the target SRS
 #' @param te A numeric vector of the target extent in the form
@@ -21,7 +20,10 @@ vrt_warp <- function(
   outfile,
   t_srs,
   te,
-  ...
+  tr = x$res,
+  warp_options = getOption("vrt.gdal.warp.options"),
+  config_options = getOption("vrt.gdal.config.options"),
+  quiet = FALSE
 ) {
   v_assert_type(outfile, "outfile", "character")
   v_assert_length(te, "te", 4)
