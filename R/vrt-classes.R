@@ -18,29 +18,33 @@ build_vrt_stack <- function(
   gdr <- new(gdalraster::GDALRaster, x)
   ras_count <- gdr$getRasterCount()
   assets <- purrr::map_chr(
-    seq_along(ras_count),
+    seq_len(ras_count),
     function(.x) gdr$getDescription(.x)
   )
   no_data_val <- purrr::map_dbl(
-    seq_along(ras_count),
+    seq_len(ras_count),
     function(.x) gdr$getNoDataValue(.x)
   )
-  dttm <- gdr$getMetadataItem(0, "datetime", "")
+  nits <- length(setdiff(gdr$getFileList(), gdr$getFilename()))
+  dttm <- purrr::map_chr(
+    seq_len(nits),
+    ~ gdr$getMetadataItem(0, paste0("datetime_", .x), "")
+  )
 
   rvrt <- list(
     vrt = as.character(xml2::read_xml(x)),
     srs = gdr$getProjection(),
     bbox = gdr$bbox(),
     res = gdr$res(),
-    start_date = min(sd),
-    end_date = max(sd),
+    date_time = dttm,
+    n_items = nits,
     assets = assets,
     no_data_val = no_data_val,
     pixfun = pixfun,
     maskfun = maskfun
   )
 
-  class(rvrt) <- c("vrt_stack", "vrt_collection", "vrt_block", "list")
+  class(rvrt) <- c("vrt_stack", "vrt_block", "list")
 
   return(rvrt)
 }
@@ -48,10 +52,18 @@ build_vrt_stack <- function(
 #' Print a vrt_block object
 #' @param x A vrt_block object
 #' @param xml A logical indicating whether to print the XML
+#' @param pixfun A logical indicating whether to print the pixel function
+#' @param maskfun A logical indicating whether to print the mask function
 #' @param ... Additional arguments not used
 #' @export
-#' @rdname vrt_block
-print.vrt_stack <- function(x, xml = FALSE, pixfun = FALSE, ...) {
+#' @rdname vrt_classes
+print.vrt_stack <- function(
+  x,
+  xml = FALSE,
+  pixfun = FALSE,
+  maskfun = FALSE,
+  ...
+) {
   cli::cli_inform(c(">" = cli::style_bold(cli::col_green("VRT STACK"))))
   if (xml) {
     xml_printer(x$vrt)
@@ -66,11 +78,19 @@ print.vrt_stack <- function(x, xml = FALSE, pixfun = FALSE, ...) {
     }
   }
 
+  if (!is.null(x$maskfun)) {
+    if (maskfun) {
+      pixel_fun_printer(x$maskfun, type = "mf")
+    } else {
+      pix_fun_print_msg(type = "mf")
+    }
+  }
+
   cli::cli_inform(
     c(
       bbox_printer(x$bbox),
-      dttm_printer(x, "start"),
-      dttm_printer(x, "end"),
+      dttm_printer(x$date_time, "start"),
+      dttm_printer(x$date_time, "end"),
       n_items_printer(x$n_items),
       assets_printer(x$assets)
     )
@@ -159,7 +179,6 @@ print.vrt_block <- function(x, xml = FALSE, pixfun = FALSE, ...) {
 
 #' @keywords internal
 #' @noRd
-#' @export
 build_vrt_collection <- function(
   x,
   pixfun = NULL,
@@ -181,8 +200,7 @@ build_vrt_collection <- function(
   sd <- purrr::map_chr(
     x,
     function(.x) .x$date_time
-  ) |>
-    lubridate::as_datetime()
+  )
 
   uniq_assets <- purrr::map(
     x,
@@ -216,8 +234,7 @@ build_vrt_collection <- function(
     srs = uniq_crs,
     bbox = bbox,
     res = min_res,
-    start_date = min(sd),
-    end_date = max(sd),
+    date_time = sd,
     n_items = length(x),
     assets = uniq_assets,
     pixfun = pixfun,
@@ -231,11 +248,15 @@ build_vrt_collection <- function(
 
 
 #' @export
-#' @rdname vrt_block
+#' @param blocks A logical indicating whether to print the blocks instead of
+#' the collection summary.
+#' @param ... Additional arguments not used
+#' @rdname vrt_classes
 print.vrt_collection <- function(
   x,
   xml = FALSE,
   pixfun = FALSE,
+  maskfun = FALSE,
   blocks = FALSE,
   ...
 ) {
@@ -255,13 +276,21 @@ print.vrt_collection <- function(
     }
   }
 
+  if (!is.null(x$maskfun)) {
+    if (maskfun) {
+      pixel_fun_printer(x$maskfun, type = "mf")
+    } else {
+      pix_fun_print_msg(type = "mf")
+    }
+  }
+
   cli::cli_inform(
     c(
       crs_printer(x$srs),
       bbox_printer(x$bbox),
       res_printer(x$res),
-      dttm_printer(x$start_date, "start"),
-      dttm_printer(x$end_date, "end"),
+      dttm_printer(x$date_time, "start"),
+      dttm_printer(x$date_time, "end"),
       n_items_printer(x$n_items),
       assets_printer(x$assets)
     )
@@ -271,16 +300,16 @@ print.vrt_collection <- function(
 
 
 #' Save a vrt_block object to disk
-#' @param x A vrt_block object
+#' @param x A vrt_stack object.
 #' @export
-#' @rdname vrt_block
-save_vrt <- function(x, file) {
+#' @rdname vrt_classes
+save_vrt <- function(x, outfile) {
   UseMethod("save_vrt")
 }
 
 #' @keywords internal
 #' @noRd
-save_vrt.default <- function(x, file) {
+save_vrt.default <- function(x, ...) {
   cli::cli_abort(
     "The save_vrt method is not implemented for class {class(x)}",
     class = "vrtility_type_error"
@@ -288,7 +317,8 @@ save_vrt.default <- function(x, file) {
 }
 
 #' @export
-#' @rdname vrt_block
+#' @param outfile A character string of the output file
+#' @rdname vrt_classes
 save_vrt.vrt_stack <- function(
   x,
   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
