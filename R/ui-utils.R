@@ -62,25 +62,37 @@ vrt_print_msg <- function() {
   )
 }
 
-pixel_fun_printer <- function(x) {
+pixel_fun_printer <- function(x, type = c("pf", "mf")) {
+  type <- rlang::arg_match(type, c("pf", "mf"))
+  type <- switch(type, pf = "Pixel Function", mf = "Mask Function")
+  # browser()
   cli::cli_inform(
-    paste(cli::style_bold(cli::col_blue("Pixel Function:"))),
+    paste(cli::style_bold(cli::col_blue("{type}:"))),
   )
 
   cli::code_highlight(
     cli::cli_code(format(x), language = "python")
   )
+  cat("\n")
 }
 
-pix_fun_print_msg <- function() {
+pix_fun_print_msg <- function(type = c("pf", "mf")) {
+  type <- rlang::arg_match(type, c("pf", "mf"))
+  tname <- switch(type, pf = "Pixel Function", mf = "Mask Function")
+  arg_name <- switch(
+    type,
+    pf = "run {cli::code_highlight('print(x, pixfun = TRUE)')} to view",
+    mf = "run {cli::code_highlight('print(x, maskfun = TRUE)')} to view"
+  )
+
   cli::cli_inform(
     c(
       paste(cli::style_bold(
-        cli::col_yellow("Pixel Function: "),
+        cli::col_yellow("{tname}: "),
         "[hidden]"
       )),
       " " = cli::style_italic(
-        "run {cli::code_highlight('print(x, pixfun = TRUE)')} to view"
+        arg_name
       )
     )
   )
@@ -103,17 +115,18 @@ dttm_printer <- function(x, type = c("dttm", "start", "end")) {
     end = "End Date"
   )
 
+  if (!inherits(x, "POSIXct")) {
+    x <- lubridate::as_datetime(x)
+  }
+
+  x <- switch(type, dttm = x, start = min(x), end = max(x))
+
   paste(
     cli::style_bold(cli::col_blue(
       glue::glue(dt_lab),
       ":"
     )),
-
-    if (inherits(x, "POSIXct")) {
-      x
-    } else {
-      lubridate::as_datetime(x)
-    }
+    strftime(x, tz = lubridate::tz(x), usetz = TRUE)
   )
 }
 
