@@ -31,7 +31,6 @@ contributions are most welcome!
 - [ ] Add more pixel functions (geometric median in particular).
 - [ ] clean things up a lot!
 - [ ] time series functions…
-- [ ] configure GPU processing with numba?
 
 …
 
@@ -73,73 +72,58 @@ library(vrtility)
 library(tictoc)
 
 bbox <- gdalraster::bbox_from_wkt(
-  wkt = wk::wkt("POINT (130.75 -11.45)"),
-  extend_x = 0.17, extend_y = 0.125
+  wkt = wk::wkt("POINT (144.3 -7.6)"),
+  extend_x = 0.17,
+  extend_y = 0.125
 )
 
-tic()
-s2_vrt <- sentinel2_stac_vrt(
+trs <- to_generic_projected(bbox)
+
+te <- gdalraster::bbox_transform(
+  bbox,
+  gdalraster::srs_to_wkt("EPSG:4326"),
+  trs
+)
+
+s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
-  end_date = "2023-05-30",
+  end_date = "2023-12-31",
+  max_cloud_cover = 30,
   assets = c(
-    # "B01",
-    "B02", "B03", "B04"
-    # "B05", "B06", "B07",
-    # "B08", "B8A", "B09",
-    # "B11", "B12"
+    "B02",
+    "B03",
+    "B04",
+    "SCL"
   )
 )
-print(s2_vrt)
-#> → STAC VRT
-#> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
-#> Bounding Box: 130.58 -11.575 130.92 -11.325
-#> Start Date: 2023-01-01
-#> End Date: 2023-05-30
-#> Number of Items: 9
-#> Assets: B02, B03, B04
-```
-
-``` r
-
-s2_vrt_pf <- vrt_add_pixfun(s2_vrt) # add a median pixel function to vrt
-
-print(s2_vrt_pf)
-#> → STAC VRT
-#> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
-#> Pixel Function: [hidden]
-#>   run print(x, pixfun = TRUE) to view
-#> Bounding Box: 130.58 -11.575 130.92 -11.325
-#> Start Date: 2023-01-01
-#> End Date: 2023-05-30
-#> Number of Items: 9
-#> Assets: B02, B03, B04
-```
-
-``` r
-
-s2_composite <- vrt_composite(
-  s2_vrt_pf,
-  outfile = fs::file_temp(ext = ".tif"),
-  bbox = bbox
-)
+tic()
+median_composite <- vrt_collect(s2_stac) |>
+  vrt_set_maskfun(
+    "SCL",
+    valid_bits = c(4, 5, 6, 7, 11)
+  ) |>
+  vrt_stack() |>
+  vrt_set_pixelfun() |>
+  vrt_warp(
+    outfile = fs::file_temp(ext = "tif"),
+    t_srs = trs,
+    te = te
+  )
 #> 0...10...20...30...40...50...60...70...80...90...100 - done.
 ```
 
 ``` r
 toc()
-#> 57.579 sec elapsed
+#> 45.749 sec elapsed
 ```
 
 ``` r
 
-terra::plotRGB(
-  terra::rast(s2_composite), 3, 2, 1,
-  stretch = "lin", zlim = c(500, 2200), zcol = TRUE,
-  mar = c(2, 2, 2, 2),
-  axes = TRUE
+plot_raster_src(
+  median_composite,
+  c(3, 2, 1),
+  minmax_pct_cut = c(1, 88)
 )
 ```
 

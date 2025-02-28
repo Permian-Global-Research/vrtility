@@ -8,3 +8,5 @@ scratch.R
 *.vrt
 
 /.quarto/
+/air.toml
+/.vscode/

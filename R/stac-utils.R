@@ -20,20 +20,20 @@ vrtility_usr_agent <- function() {
 #' @return A list of items
 #' @export
 stac_query <- function(
-    bbox,
-    stac_source,
-    collection,
-    start_date,
-    end_date,
-    limit = 999,
-    ...) {
+  bbox,
+  stac_source,
+  collection,
+  start_date,
+  end_date,
+  limit = 999,
+  ...
+) {
   validate_bbox(bbox)
   v_assert_type(stac_source, "stac_source", "character")
   v_assert_type(collection, "collection", "character")
   v_assert_type(start_date, "start_date", "character")
   v_assert_type(end_date, "end_date", "character")
   v_assert_type(limit, "limit", "numeric")
-
 
   if (!is.null(start_date)) {
     datetime <- paste0(start_date, "/", end_date)
@@ -74,8 +74,9 @@ stac_query <- function(
 #' @export
 #' @details copied from the `rsi` package
 sign_planetary_computer <- function(
-    items,
-    subscription_key = Sys.getenv("rsi_pc_key")) {
+  items,
+  subscription_key = Sys.getenv("rsi_pc_key")
+) {
   # check for the variable used by sits if the rsi one isn't set
   if (subscription_key == "") subscription_key <- Sys.getenv("MPC_TOKEN")
   if (subscription_key == "") {
@@ -92,4 +93,66 @@ sign_planetary_computer <- function(
       )
     )
   }
+}
+
+
+#' Generate a Sentinel 2 stac collection doc_imes object
+#' @param bbox A numeric vector of the bounding box (length 4) in lat/long
+#' @param start_date A character string of the start date
+#' @param end_date A character string of the end date
+#' @param assets A character vector of the asset names to include
+#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
+#' @param stac_source A character string of the STAC source
+#' @param collection A character string of the collection to query
+#' @param mpc_sign A logical indicating whether to sign the items using the
+#' Planetary Computer API's signing method (only required if using the
+#' Planetary Computer STAC API).
+#' @return A stac_vrt object
+#' @export
+sentinel2_stac_query <- function(
+  bbox,
+  start_date,
+  end_date,
+  assets = c(
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B8A",
+    "B09",
+    "B11",
+    "B12",
+    "SCL"
+  ),
+  max_cloud_cover = 10,
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "sentinel-2-l2a",
+  mpc_sign = TRUE
+) {
+  stac_its <- stac_query(
+    bbox = bbox,
+    stac_source = stac_source,
+    start_date = start_date,
+    end_date = end_date,
+    collection = collection
+  )
+
+  if (!is.null(max_cloud_cover)) {
+    stac_its <- stac_its |>
+      rstac::items_filter(
+        filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+      )
+  }
+
+  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
+
+  if (mpc_sign) {
+    stac_its <- sign_planetary_computer(stac_its)
+  }
+
+  return(stac_its)
 }

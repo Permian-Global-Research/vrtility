@@ -18,10 +18,10 @@ is_temp_dir <- function(path) {
 #' @rdname vrt_cache_management
 #' @details
 #' The default cache location is `tempdir()`. This function allows you to set
-#' the cache location to a different directory. It is mainly useful if you intend
-#' to work with parallel processing with, for example {mirai} or {future}.
-#' {vrtility} depends on saving many vrt files to disk and passing these files
-#' between processes fails when using a temporary directory.
+#' the cache location to a different directory. It is mainly useful if you
+#' intend to work with parallel processing. `vrtility` depends on saving many
+#' vrt files to disk and passing these files between processes fails when using a
+#' temporary directory.
 vrt_cache_set <- function(dir) {
   v_assert_type(dir, "dir", "character", nullok = FALSE)
   orig_cache <- options("vrt.cache")
@@ -63,7 +63,7 @@ vrt_cache_destroy <- function() {
       c(
         "!" = "Woah There! Your cache is set to {cli::code_highlight('tempdir()')}",
         " " = "Deleting the temporary directory is a bad idea!",
-        " " = "Let's not do that... 😜"
+        " " = "Let's not do that..."
       )
     )
     return(invisible())

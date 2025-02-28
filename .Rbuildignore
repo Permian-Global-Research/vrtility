@@ -3,3 +3,6 @@
 ^README\.Rmd$
 ^scratch.R$
 ^LICENSE\.md$
+^\.vscode$
+^air.toml$
+^example-data$
