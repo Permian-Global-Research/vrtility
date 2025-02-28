@@ -2,13 +2,15 @@
 #' @description A wrapper around `gdalraster::plot_raster` that simplifies the
 #' process of plotting a raster file.
 #' @param x A path to a raster file
-#' @param bands a numeric vector of band numbers to plot
+#' @param bands a numeric vector of band numbers to plot must be of length
+#' 1 or 3.
+#' @param pal a character vector of colors to use when plotting a single band.
 #' @inheritParams gdalraster::plot_raster
-#'
-rasplot <- function(
+#' @export
+plot_raster_src <- function(
   x,
   bands = 1,
-  pal = hcl.colors(10, "viridis"),
+  pal = grDevices::hcl.colors(10, "viridis"),
   xsize = NULL,
   ysize = NULL,
   nbands = length(bands),
@@ -17,7 +19,7 @@ rasplot <- function(
   maxColorValue = 1,
   normalize = TRUE,
   minmax_def = NULL,
-  minmax_pct_cut = if (length(bands) == 3) c(1, 95) else NULL,
+  minmax_pct_cut = if (length(bands) == 3) c(1, 97) else NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
     NULL,
   xlim = NULL,
