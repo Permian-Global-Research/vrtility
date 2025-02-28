@@ -15,16 +15,18 @@ Imports:
     fs,
     gdalraster,
     glue,
+    grDevices,
     httr,
+    lubridate,
     purrr,
     reticulate,
     rlang,
     rstac,
+    scales,
     withr,
     wk,
     xml2
 Suggests: 
-    terra,
     testthat (>= 3.0.0),
     tictoc
 Config/testthat/edition: 3

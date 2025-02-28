@@ -22,10 +22,10 @@ Destroy the VRT cache directory
 }
 \details{
 The default cache location is \code{tempdir()}. This function allows you to set
-the cache location to a different directory. It is mainly useful if you intend
-to work with parallel processing with, for example {mirai} or {future}.
-{vrtility} depends on saving many vrt files to disk and passing these files
-between processes fails when using a temporary directory.
+the cache location to a different directory. It is mainly useful if you
+intend to work with parallel processing. \code{vrtility} depends on saving many
+vrt files to disk and passing these files between processes fails when using a
+temporary directory.
 
 A helper function that will destroy the VRT cache directory. This is useful
 if you want to clear the cache directory and start fresh. If the cache

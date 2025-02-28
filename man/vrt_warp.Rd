@@ -6,7 +6,16 @@
 \alias{vrt_warp.vrt_collection}
 \title{Generate a composite raster from (virtual) raster sources.}
 \usage{
-vrt_warp(x, outfile, t_srs, te, ...)
+vrt_warp(
+  x,
+  outfile,
+  t_srs,
+  te,
+  tr = x$res,
+  warp_options = getOption("vrt.gdal.warp.options"),
+  config_options = getOption("vrt.gdal.config.options"),
+  quiet = FALSE
+)
 
 \method{vrt_warp}{vrt_block}(
   x,
@@ -31,6 +40,8 @@ vrt_warp(x, outfile, t_srs, te, ...)
 )
 }
 \arguments{
+\item{x}{A vrt_block, vrt_stack, or vrt_collection object}
+
 \item{outfile}{A character string of the output file path}
 
 \item{t_srs}{A character string of the target SRS}
@@ -46,9 +57,6 @@ c(xmin, ymin, xmax, ymax) and must be the same SRS as in \code{t_srs}.}
 environment}
 
 \item{quiet}{A logical indicating whether to suppress output}
-
-\item{src_files}{A stac_vrt object or a character vector of file paths to the
-rasters}
 }
 \value{
 A character string of the path to the output raster
