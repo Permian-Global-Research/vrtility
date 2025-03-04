@@ -69,7 +69,7 @@ gdal_init_opts <- function() {
 
   gdal_warp_opts <- c(
     "-r",
-    "bilinear",
+    "near", # experiment with this - may need to be bilinear but we set this in the initial warpedVRTs
     "-co",
     "COMPRESS=DEFLATE",
     "-co",
