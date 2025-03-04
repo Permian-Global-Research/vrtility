@@ -27,9 +27,8 @@ contributions are most welcome!
 
 ## TO DO:
 
-- [ ] Add efficient masking.
-- [ ] Add more pixel functions (geometric median in particular).
-- [ ] clean things up a lot!
+- [ ] Add more efficient masking.
+- [ ] Add additional pixel functions (geometric median in particular).
 - [ ] time series functions…
 
 …
@@ -94,11 +93,15 @@ s2_stac <- sentinel2_stac_query(
     "B02",
     "B03",
     "B04",
+    "B08",
     "SCL"
   )
 )
 tic()
-median_composite <- vrt_collect(s2_stac) |>
+median_composite <- vrt_collect(
+  s2_stac,
+  t_srs = trs, te = te, tr = c(10, 10)
+) |>
   vrt_set_maskfun(
     "SCL",
     valid_bits = c(4, 5, 6, 7, 11)
@@ -106,24 +109,22 @@ median_composite <- vrt_collect(s2_stac) |>
   vrt_stack() |>
   vrt_set_pixelfun() |>
   vrt_warp(
-    outfile = fs::file_temp(ext = "tif"),
-    t_srs = trs,
-    te = te
+    outfile = fs::file_temp(ext = "tif")
   )
 #> 0...10...20...30...40...50...60...70...80...90...100 - done.
 ```
 
 ``` r
 toc()
-#> 45.749 sec elapsed
+#> 126.895 sec elapsed
 ```
 
 ``` r
 
 plot_raster_src(
   median_composite,
-  c(3, 2, 1),
-  minmax_pct_cut = c(1, 88)
+  c(4, 2, 1),
+  minmax_pct_cut = c(2, 75)
 )
 ```
 
