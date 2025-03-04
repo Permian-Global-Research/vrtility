@@ -11,6 +11,10 @@
 vrt_to_warped_vrt <- function(src, t_srs, te, tr, resampling = "bilinear") {
   tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
+  ds <- new(gdalraster::GDALRaster, src)
+  data_type <- ds$getDataTypeName(1)
+  resampling <- if (data_type == "Byte") "near" else resampling
+
   call_vrt_warp(
     src,
     tfw,
