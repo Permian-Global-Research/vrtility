@@ -10,21 +10,26 @@ validate_bbox <- function(bbox) {
 
   bbox_poly <- bbox_to_wkt(bbox)
 
-
   if (!gdalraster::g_is_valid(bbox_poly)) {
-    rlang::abort("Bounding box (bbox) is not valid",
+    rlang::abort(
+      "Bounding box (bbox) is not valid",
       class = "vrtility_bbox_not_valid"
     )
   }
 
   c_bbox <- gdalraster::bbox_from_wkt(bbox_poly)
 
-  if (!rlang::is_true(
-    c_bbox[1] >= -180 && c_bbox[3] <= 180 &&
-      c_bbox[2] >= -90 && c_bbox[4] <= 90
-  )) {
+  if (
+    !rlang::is_true(
+      c_bbox[1] >= -180 &&
+        c_bbox[3] <= 180 &&
+        c_bbox[2] >= -90 &&
+        c_bbox[4] <= 90
+    )
+  ) {
     rlang::abort(
-      c("Bounding box (bbox) is not within valid bounds",
+      c(
+        "Bounding box (bbox) is not within valid bounds",
         "i" = "Are you sure the bounding box is lat/long?"
       ),
       class = "vrtility_bbox_not_within_bounds"
@@ -51,7 +56,6 @@ bbox_to_wkt <- function(bbox) {
 }
 
 
-
 #' Project an sf/sfc object to a generic projected coordinate system
 #' @param x numeric vector of length 4 representing a bounding box (in lat/long)
 #' @param proj a character vector. The projection to use. One of "laea", "aeqd",
@@ -74,12 +78,13 @@ bbox_to_wkt <- function(bbox) {
 #' for pconic: \url{https://proj.org/en/9.4/operations/projections/pconic.html}
 #' for eqdc: \url{https://proj.org/en/9.4/operations/projections/eqdc.html}
 to_generic_projected <- function(
-    x,
-    proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
-    ellps = "WGS84",
-    no_defs = TRUE,
-    opts = "",
-    return_as = c("wkt", "proj4")) {
+  x,
+  proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
+  ellps = "WGS84",
+  no_defs = TRUE,
+  opts = "",
+  return_as = c("wkt", "proj4")
+) {
   # arg assertions
   x <- validate_bbox(x)
   proj <- rlang::arg_match(proj)
@@ -91,7 +96,9 @@ to_generic_projected <- function(
   cent_coor <- gdalraster::g_centroid(bbox_to_wkt(x))
 
   # configure proj args
-  n_or_s <- ifelse(cent_coor[2] == 0, "",
+  n_or_s <- ifelse(
+    cent_coor[2] == 0,
+    "",
     ifelse(cent_coor[2] > 0, "+north", "+south")
   )
 
@@ -103,7 +110,8 @@ to_generic_projected <- function(
   }
 
   # construct proj4 string
-  prj <- trimws(switch(proj,
+  prj <- trimws(switch(
+    proj,
     laea = glue::glue(
       "+proj=laea +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
       "+ellps={ellps} {no_defs}",
@@ -138,8 +146,39 @@ to_generic_projected <- function(
     )
   ))
 
-  switch(return_as,
-    proj4 = prj,
-    wkt = gdalraster::srs_to_wkt(prj)
+  switch(return_as, proj4 = prj, wkt = gdalraster::srs_to_wkt(prj))
+}
+
+
+#' Convert an object to wkt.
+#' @param x The object to convert to wkt.
+#' @return A character string of the object in wkt format.
+#' @export
+#' @rdname vrtility-internal
+#' @keywords internal
+to_wkt <- function(x) {
+  UseMethod("to_wkt")
+}
+
+#' @rdname vrtility-internal
+#' @export
+to_wkt.default <- function(x) {
+  rlang::abort(
+    "to_wkt() not implemented for class {class(x)[1]}",
+    class = "vrtility_to_wkt_not_implemented"
   )
 }
+
+#' @export
+#' @rdname vrtility-internal
+to_wkt.numeric <- function(x) {
+  gdalraster::epsg_to_wkt(x)
+}
+
+#' @export
+#' @noRd
+to_wkt.character <- function(x) {
+  gdalraster::srs_to_wkt(x)
+}
+
+#TODO: we could consider extending to other crs classes in R spatial.
