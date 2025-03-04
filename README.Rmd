@@ -76,7 +76,7 @@ Here is a simple example where we: define a bounding box, search a STAC catalog
 for Sentinel-2 data, create a VRT, and then create a composite image 
 using a median pixel function.
 
-```{r example}
+```{r example, fig.width=10, fig.height=6}
 library(vrtility)
 library(tictoc)
 
@@ -98,12 +98,11 @@ s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
-  max_cloud_cover = 30,
+  max_cloud_cover = 35,
   assets = c(
     "B02",
     "B03",
     "B04",
-    "B08",
     "SCL"
   )
 )
@@ -125,8 +124,7 @@ toc()
 
 plot_raster_src(
   median_composite,
-  c(4, 2, 1),
-  minmax_pct_cut = c(2, 75)
+  c(3, 2, 1)
 )
 ```
 

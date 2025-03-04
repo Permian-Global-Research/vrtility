@@ -88,12 +88,11 @@ s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
-  max_cloud_cover = 30,
+  max_cloud_cover = 35,
   assets = c(
     "B02",
     "B03",
     "B04",
-    "B08",
     "SCL"
   )
 )
@@ -116,15 +115,14 @@ median_composite <- vrt_collect(
 
 ``` r
 toc()
-#> 126.895 sec elapsed
+#> 141.64 sec elapsed
 ```
 
 ``` r
 
 plot_raster_src(
   median_composite,
-  c(4, 2, 1),
-  minmax_pct_cut = c(2, 75)
+  c(3, 2, 1)
 )
 ```
 
