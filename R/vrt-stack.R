@@ -1,5 +1,4 @@
 #' Stack VRT files from a vrt_collection object
-#' @param x A vrt_collection object
 #' @param ... Additional arguments passed to methods
 #' @export
 #' @rdname vrt_classes
@@ -35,7 +34,7 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
   gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
-    cl_arg = c("-allow_projection_difference"),
+    cl_arg = c("-allow_projection_difference"), # TODO: is this still  needed with warped VRT?
     quiet = quiet
   )
 
