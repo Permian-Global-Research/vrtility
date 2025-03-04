@@ -18,8 +18,8 @@
 vrt_warp <- function(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
@@ -42,8 +42,8 @@ vrt_warp.default <- function(x, ...) {
 vrt_warp.vrt_block <- function(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
@@ -71,24 +71,30 @@ vrt_warp.vrt_block <- function(
 vrt_warp.vrt_collection <- function(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
 ) {
   v_assert_length(tr, "tr", 2)
-  purrr::imap_chr(
+
+  uniq_pths <- purrr::imap_chr(
     x[[1]],
     function(.x, .y) {
-      uid <- if (nchar(.x$date_time) > 0) .x$date_time else .y
+      if (nchar(.x$date_time) > 0) .x$date_time else .y
+    }
+  ) |>
+    unique_fp(outfile)
 
-      fp <- unique_fp(outfile, uid)
-
+  purrr::map2_chr(
+    x[[1]],
+    uniq_pths,
+    function(.x, .y) {
       vrt_warp(
         .x,
-        outfile = fp,
+        outfile = .y,
         t_srs = t_srs,
         te = te,
         warp_options = warp_options,
@@ -213,7 +219,8 @@ combine_warp_opts <- function(warp_opts, te, res) {
     "-te",
     te,
     "-tr",
-    res
+    res,
+    if ("-tap" %in% warp_opts) NULL else "-tap"
   )
 
   return(warp_opts)
