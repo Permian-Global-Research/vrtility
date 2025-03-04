@@ -22,16 +22,16 @@ save_vrt(x, outfile)
   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 )
 
-vrt_collect(x)
+vrt_collect(x, t_srs, te, tr, quiet = FALSE)
 
-\method{vrt_collect}{doc_items}(x)
+\method{vrt_collect}{doc_items}(x, t_srs, te, tr, quiet = FALSE)
 
 vrt_stack(x, ...)
 
 \method{vrt_stack}{vrt_collection}(x, quiet = TRUE, ...)
 }
 \arguments{
-\item{x}{A vrt_collection object}
+\item{x}{An object to be used to create a vrt_x object see details.}
 
 \item{xml}{A logical indicating whether to print the XML}
 
@@ -46,6 +46,14 @@ the collection summary.}
 
 \item{outfile}{A character string of the output file}
 
+\item{t_srs}{character target SRS must be a numeric EPSG code, or SRS like
+character such as a proj4 string or WKT.}
+
+\item{te}{numeric vector of the target extent in the form
+c(xmin, ymin, xmax, ymax) using the same SRS as in \code{t_srs}.}
+
+\item{tr}{numeric vector of the target resolution in the form c(xres, yres)}
+
 \item{quiet}{Logical. If TRUE, suppress GDAL progress bar}
 }
 \description{
@@ -56,4 +64,15 @@ Save a vrt_block object to disk
 Construct the base VRT object for composing VRT pipelines.
 
 Stack VRT files from a vrt_collection object
+}
+\details{
+For now the main way to create a vrt_collection object, which forms
+the basis of the vrrt-based pipelines in vrtility is using a doc_items
+object from the \code{rstac} package. For more info on how to create a doc_items
+object see \code{\link[=sentinel2_stac_query]{sentinel2_stac_query()}}. To build a vrt_stack object a vrt_collection
+is required first. The vrt_collection object is essentially a list of warped
+VRT files. When vrt_stack is called on a vrt_collection object, the VRT files
+are stacked into a single VRT file where each band in the VRT contains the
+files of multiple epochs. We can then composite or summarise these layers
+using the pixel functions.
 }

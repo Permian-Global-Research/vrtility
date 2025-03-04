@@ -9,8 +9,8 @@
 vrt_warp(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
@@ -20,8 +20,8 @@ vrt_warp(
 \method{vrt_warp}{vrt_block}(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
@@ -31,8 +31,8 @@ vrt_warp(
 \method{vrt_warp}{vrt_collection}(
   x,
   outfile,
-  t_srs,
-  te,
+  t_srs = x$srs,
+  te = x$bbox,
   tr = x$res,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),

@@ -7,16 +7,13 @@
 plot_raster_src(
   x,
   bands = 1,
-  pal = grDevices::hcl.colors(10, "viridis"),
-  xsize = NULL,
-  ysize = NULL,
+  pal = grDevices::hcl.colors(10, "Viridis"),
   nbands = length(bands),
-  max_pixels = 2.5e+07,
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
   minmax_def = NULL,
-  minmax_pct_cut = if (length(bands) == 3) c(1, 97) else NULL,
+  minmax_pct_cut = if (length(bands) == 3) c(1, 95) else NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else NULL,
   xlim = NULL,
   ylim = NULL,
@@ -24,10 +21,10 @@ plot_raster_src(
   asp = 1,
   axes = TRUE,
   main = "",
-  xlab = "x",
-  ylab = "y",
-  xaxs = "i",
-  yaxs = "i",
+  xlab = "",
+  ylab = "",
+  xaxs = "r",
+  yaxs = "r",
   legend = if (nbands == 1) TRUE else FALSE,
   digits = 2,
   na_col = rgb(0, 0, 0, 0),
@@ -42,24 +39,10 @@ plot_raster_src(
 
 \item{pal}{a character vector of colors to use when plotting a single band.}
 
-\item{xsize}{The number of pixels along the x dimension in \code{data}. If \code{data}
-is a \code{GDALRaster} object, specifies the size at which the raster will be
-read (used for argument \code{out_xsize} in \code{GDALRaster$read()}). By default,
-the entire raster will be read at full resolution.}
-
-\item{ysize}{The number of pixels along the y dimension in \code{data}. If \code{data}
-is a \code{GDALRaster} object, specifies the size at which the raster will be
-read (used for argument \code{out_ysize} in \code{GDALRaster$read()}). By default,
-the entire raster will be read at full resolution.}
-
 \item{nbands}{The number of bands in \code{data}. Must be either 1 (grayscale) or
 3 (RGB). For RGB, \code{data} are interleaved by band. If \code{nbands} is \code{NULL} (the
 default), then \code{nbands = 3} is assumed if the input data contain 3 bands,
 otherwise band 1 is used.}
-
-\item{max_pixels}{The maximum number of pixels that the function will
-attempt to display (per band). An error is raised if \code{(xsize * ysize)}
-exceeds this value. Setting to \code{NULL} turns off this check.}
 
 \item{col_tbl}{A color table as a matrix or data frame with four or five
 columns. Column 1 contains the numeric pixel values. Columns 2:4 contain

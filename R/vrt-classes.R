@@ -50,7 +50,6 @@ build_vrt_stack <- function(
 }
 
 #' Print a vrt_block object
-#' @param x A vrt_block object
 #' @param xml A logical indicating whether to print the XML
 #' @param pixfun A logical indicating whether to print the pixel function
 #' @param maskfun A logical indicating whether to print the mask function
@@ -88,6 +87,7 @@ print.vrt_stack <- function(
 
   cli::cli_inform(
     c(
+      crs_printer(x$srs),
       bbox_printer(x$bbox),
       dttm_printer(x$date_time, "start"),
       dttm_printer(x$date_time, "end"),
@@ -300,7 +300,6 @@ print.vrt_collection <- function(
 
 
 #' Save a vrt_block object to disk
-#' @param x A vrt_stack object.
 #' @export
 #' @rdname vrt_classes
 save_vrt <- function(x, outfile) {

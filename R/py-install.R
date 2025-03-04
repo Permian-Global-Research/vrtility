@@ -9,6 +9,7 @@
 #' environment variable to the name of the virtual environment. reticulate is
 #' not called directly in this package but is used to manage the environment
 #' that will be used by GDAL during pixel functions.
+#' @rdname vrtility_python
 build_vrtility_python <- function(pyenv = NULL) {
   if (is.null(pyenv)) {
     pyenviron <- "vrtility"
@@ -22,8 +23,7 @@ build_vrtility_python <- function(pyenv = NULL) {
     env_exists_choice <- nice_menu(
       "The virtual environment already exists. Do you want to recreate it?",
       choices = c("Yes", "No"),
-      not_interactive =
-        "{cli::code_highlight('build_vrtility_python()')}
+      not_interactive = "{cli::code_highlight('build_vrtility_python()')}
         requires an interactive session."
     )
 
@@ -37,8 +37,7 @@ build_vrtility_python <- function(pyenv = NULL) {
   create_env_choice <- nice_menu(
     "Do you want to create the virtual environment?",
     choices = c("Yes", "No"),
-    not_interactive =
-      "{cli::code_highlight('build_vrtility_python()')}
+    not_interactive = "{cli::code_highlight('build_vrtility_python()')}
       requires an interactive session."
   )
 
@@ -86,5 +85,21 @@ set_py_env_vals <- function(pyenviron) {
   Sys.setenv(VRTILITY_PY_EXECUTABLE = sys$executable)
   Sys.setenv(VRTILITY_PY_VERSION_MAJOR = sys$version_info$major)
   Sys.setenv(VRTILITY_PY_VERSION_MINOR = sys$version_info$minor)
+  invisible()
+}
+
+#' @title Install Python packages in the vrtility environment
+#' @description This function installs Python packages in the vrtility
+#' environment
+#' @param pkgs A character vector of package names
+#' @return Invisible
+#' @export
+#' @rdname vrtility_python
+vrtility_python_pkg_install <- function(pkgs) {
+  reticulate::py_install(
+    pkgs,
+    envname = Sys.getenv("VRTILITY_PYTHON"),
+    method = "virtualenv"
+  )
   invisible()
 }

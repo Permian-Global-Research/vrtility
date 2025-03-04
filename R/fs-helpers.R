@@ -1,14 +1,13 @@
-unique_fp <- function(basepath, uid) {
+unique_fp <- function(uid, basepath) {
   dir <- fs::path_dir(basepath)
   basefile <- fs::path_ext_remove(fs::path_file(basepath))
 
-  if (nchar(uid) > 0) {
-    uid <- gsub(
-      ":",
-      "-",
-      gsub(" ", "_", strftime(lubridate::as_datetime(uid)))
-    )
-  }
+  uid <- gsub(
+    ":",
+    "-",
+    gsub(" ", "_", strftime(lubridate::as_datetime(uid)))
+  ) |>
+    make.unique(sep = "_")
 
   fs::path(
     dir,
