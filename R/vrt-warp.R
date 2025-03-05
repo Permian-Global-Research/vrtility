@@ -210,18 +210,24 @@ call_vrt_warp <- function(
   return(outfile)
 }
 
-combine_warp_opts <- function(warp_opts, te, res) {
+combine_warp_opts <- function(warp_opts, te, res = NULL) {
   opts_check(warp_opts, "-te")
   opts_check(warp_opts, "-tr")
 
   warp_opts <- c(
     warp_opts,
     "-te",
-    te,
-    "-tr",
-    res,
-    if ("-tap" %in% warp_opts) NULL else "-tap"
+    te
   )
+
+  if (!is.null(res)) {
+    warp_opts <- c(
+      warp_opts,
+      "-tr",
+      res,
+      if ("-tap" %in% warp_opts) NULL else "-tap"
+    )
+  }
 
   return(warp_opts)
 }
