@@ -76,7 +76,7 @@ bbox <- gdalraster::bbox_from_wkt(
   extend_y = 0.125
 )
 
-trs <- to_generic_projected(bbox)
+trs <- to_projected(bbox)
 
 te <- gdalraster::bbox_transform(
   bbox,
@@ -99,10 +99,9 @@ s2_stac <- sentinel2_stac_query(
 tic()
 median_composite <- vrt_collect(
   s2_stac,
-  t_srs = trs, te = te, tr = c(10, 10)
+  t_srs = trs, te = te, tr = c(10, 10), mask_band = "SCL"
 ) |>
-  vrt_set_maskfun(
-    "SCL",
+  vrt_set_maskfun(,
     valid_bits = c(4, 5, 6, 7, 11)
   ) |>
   vrt_stack() |>
@@ -115,7 +114,7 @@ median_composite <- vrt_collect(
 
 ``` r
 toc()
-#> 152.448 sec elapsed
+#> 138.229 sec elapsed
 ```
 
 ``` r
