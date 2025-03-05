@@ -56,7 +56,7 @@ bbox_to_wkt <- function(bbox) {
 }
 
 
-#' Project an sf/sfc object to a generic projected coordinate system
+#' Project an bounding box to a generic projected coordinate system
 #' @param x numeric vector of length 4 representing a bounding box (in lat/long)
 #' @param proj a character vector. The projection to use. One of "laea", "aeqd",
 #' "utm", "pconic", or "eqdc".
@@ -77,7 +77,7 @@ bbox_to_wkt <- function(bbox) {
 #' for aeqd: \url{https://proj.org/en/9.4/operations/projections/aeqd.html}
 #' for pconic: \url{https://proj.org/en/9.4/operations/projections/pconic.html}
 #' for eqdc: \url{https://proj.org/en/9.4/operations/projections/eqdc.html}
-to_generic_projected <- function(
+to_projected <- function(
   x,
   proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
   ellps = "WGS84",
@@ -176,7 +176,7 @@ to_wkt.numeric <- function(x) {
 }
 
 #' @export
-#' @noRd
+#' @rdname vrtility-internal
 to_wkt.character <- function(x) {
   gdalraster::srs_to_wkt(x)
 }
