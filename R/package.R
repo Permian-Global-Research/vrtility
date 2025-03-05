@@ -83,7 +83,7 @@ gdal_init_opts <- function() {
   gdal_warp_opts <- c(
     # Resampling
     "-r",
-    "cubic", # CHANGED: Often better quality/performance balance than 'near'
+    "near",
 
     # Compression options
     "-co",
