@@ -18,6 +18,10 @@
 #' files of multiple epochs. We can then composite or summarise these layers
 #' using the pixel functions.
 vrt_collect <- function(x, t_srs, te, tr, quiet = FALSE) {
+  v_assert_type(t_srs, "t_srs", "character")
+  v_assert_type(te, "te", "numeric")
+  v_assert_length(te, "te", 4)
+  v_assert_type(tr, "tr", "numeric")
   UseMethod("vrt_collect")
 }
 
@@ -33,6 +37,11 @@ vrt_collect.default <- function(x, ...) {
 #' @rdname vrt_classes
 #' @export
 vrt_collect.doc_items <- function(x, t_srs, te, tr, quiet = FALSE) {
+  if (length(tr) == 1) {
+    tr <- c(tr, tr)
+  }
+  v_assert_length(tr, "tr", 2)
+
   assets <- rstac::items_assets(x)
   t_srs <- to_wkt(t_srs)
 
