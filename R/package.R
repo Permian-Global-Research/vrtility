@@ -61,29 +61,23 @@ gdal_init_opts <- function() {
 
     # Optimize VSI caching for COGs
     VSI_CACHE_SIZE = "25000000", # Increase cache size
-    VSI_CACHED_CHUNK_SIZE = "262144", # Larger chunk size (256KB)
-    CPL_VSIL_CURL_CACHE_SIZE = "25000000", # Explicit curl cache
+    CPL_VSIL_CURL_CHUNK_SIZE = "262144",
+    CPL_VSIL_CURL_CACHE_SIZE = "33554432",
 
     # Optimize HTTP connections
     GDAL_HTTP_MAX_RETRY = "5",
     GDAL_HTTP_RETRY_DELAY = "3",
-    GDAL_HTTP_BLOCK_SIZE = "16777216", # Increased to 16MB
     GDAL_HTTP_MULTIPLEX = "YES",
-    GDAL_HTTP_CONNECTION_POOL = "YES", # NEW: Enable connection pooling
     CPL_VSIL_CURL_ALLOWED_EXTENSIONS = ".tif .TIF", # NEW: Allow both case variants
     CPL_VSIL_CURL_USE_HEAD = "NO", # NEW: Skip HEAD requests
-    CPL_VSIL_CURL_NON_CACHED = "YES", # NEW: Better range handling
 
     # Existing settings
-    GDAL_DISABLE_READDIR_ON_OPEN = "YES",
+    GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
     GDAL_MAX_DATASET_POOL_SIZE = "500",
     GDAL_INGESTED_BYTES_AT_OPEN = "32000",
     GDAL_HTTP_VERSION = "2",
     GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-    GDAL_NUM_THREADS = "ALL_CPUS",
-
-    # Streaming optimization
-    VSI_STREAMABLE_CHUNKS_CACHE_SIZE = "25000000" # NEW: Cache for streaming
+    GDAL_NUM_THREADS = "ALL_CPUS"
   )
 
   gdal_warp_opts <- c(
@@ -114,7 +108,6 @@ gdal_init_opts <- function() {
     # Memory and threading options
     "-wm",
     "50%",
-    "-multi",
 
     # Overview options
     "-ovr",
