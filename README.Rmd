@@ -76,7 +76,7 @@ Here is a simple example where we: define a bounding box, search a STAC catalog
 for Sentinel-2 data, create a VRT, and then create a composite image 
 using a median pixel function.
 
-```{r example, fig.width=10, fig.height=6}
+```{r example, fig.width=10, fig.height=8}
 library(vrtility)
 library(tictoc)
 

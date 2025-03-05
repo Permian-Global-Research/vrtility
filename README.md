@@ -115,7 +115,7 @@ median_composite <- vrt_collect(
 
 ``` r
 toc()
-#> 141.64 sec elapsed
+#> 152.448 sec elapsed
 ```
 
 ``` r
