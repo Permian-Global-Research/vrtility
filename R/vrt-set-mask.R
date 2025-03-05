@@ -4,10 +4,10 @@
 #' @rdname vrt_set_maskfun
 vrt_set_maskfun <- function(
   x,
-  mask_band,
   valid_bits,
   mask_pix_fun = vrtility::bitmask_numba,
-  drop_mask_band = TRUE
+  drop_mask_band = TRUE,
+  ...
 ) {
   UseMethod("vrt_set_maskfun")
 }
@@ -29,11 +29,12 @@ vrt_set_maskfun.default <- function(x, ...) {
 #' the VRT block.
 #' @return A VRT block with the mask band set.
 #' @export
-#' @rdname vrt_set_maskfun
+#' @rdname vrtility-internal
+#' @keywords internal
 vrt_set_maskfun.vrt_block <- function(
   x,
-  mask_band,
   valid_bits,
+  mask_band,
   mask_pix_fun = vrtility::bitmask_numba,
   drop_mask_band = TRUE
 ) {
@@ -104,14 +105,25 @@ vrt_set_maskfun.vrt_block <- function(
 #' @export
 vrt_set_maskfun.vrt_collection <- function(
   x,
-  mask_band,
   valid_bits,
   mask_pix_fun = vrtility::bitmask_numba,
   drop_mask_band = TRUE
 ) {
+  mask_band <- check_mask_band(x)
   purrr::map(
     x$vrt,
-    ~ vrt_set_maskfun(.x, mask_band, valid_bits, mask_pix_fun, drop_mask_band)
+    ~ vrt_set_maskfun(.x, valid_bits, mask_band, mask_pix_fun, drop_mask_band)
   ) |>
     build_vrt_collection(maskfun = mask_pix_fun(), pixfun = x$pixfun)
+}
+
+
+check_mask_band <- function(x) {
+  if (nchar(x$mask_band_name) == 0) {
+    cli::cli_abort(c(
+      "!" = "No mask band is assigned.",
+      "i" = "This must be set in `vrt_collect()`"
+    ))
+  }
+  return(x$mask_band_name)
 }
