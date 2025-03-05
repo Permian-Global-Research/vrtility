@@ -61,8 +61,8 @@ gdal_init_opts <- function() {
 
     # Optimize VSI caching for COGs
     VSI_CACHE_SIZE = "25000000", # Increase cache size
-    CPL_VSIL_CURL_CHUNK_SIZE = "262144",
-    CPL_VSIL_CURL_CACHE_SIZE = "33554432",
+    # CPL_VSIL_CURL_CHUNK_SIZE = "262144",
+    # CPL_VSIL_CURL_CACHE_SIZE = "33554432",
 
     # Optimize HTTP connections
     GDAL_HTTP_MAX_RETRY = "5",
@@ -108,6 +108,7 @@ gdal_init_opts <- function() {
     # Memory and threading options
     "-wm",
     "50%",
+    # "-multi",
 
     # Overview options
     "-ovr",
