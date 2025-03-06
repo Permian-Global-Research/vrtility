@@ -174,7 +174,7 @@ save_vrt.default <- function(x, ...) {
 #' @export
 #' @param outfile A character string of the output file
 #' @rdname vrt_stack
-save_vrt.vrt_stack <- function(
+save_vrt.vrt_block <- function(
   x,
   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 ) {
