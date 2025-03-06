@@ -40,6 +40,7 @@ plot_raster_src <- function(
   target_divisor <- dev_size[1] * 1.5
 
   ds <- new(gdalraster::GDALRaster, x)
+  on.exit(ds$close())
   r <- gdalraster::read_ds(
     ds,
     bands = bands,
@@ -52,8 +53,6 @@ plot_raster_src <- function(
         ceiling(ds$getRasterYSize() / target_divisor)
     )
   )
-
-  ds$close()
 
   gdalraster::plot_raster(
     r,
