@@ -5,7 +5,7 @@
 \alias{vrt_stack.vrt_collection}
 \alias{print.vrt_stack}
 \alias{save_vrt}
-\alias{save_vrt.vrt_stack}
+\alias{save_vrt.vrt_block}
 \title{Stack VRT files from a vrt_collection object}
 \usage{
 vrt_stack(x, ...)
@@ -16,7 +16,7 @@ vrt_stack(x, ...)
 
 save_vrt(x, outfile)
 
-\method{save_vrt}{vrt_stack}(
+\method{save_vrt}{vrt_block}(
   x,
   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 )

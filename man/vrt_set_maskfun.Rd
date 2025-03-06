@@ -3,6 +3,7 @@
 \name{bitmask_numpy}
 \alias{bitmask_numpy}
 \alias{bitmask_numba}
+\alias{build_bitmask_numpy}
 \alias{vrt_set_maskfun}
 \alias{vrt_set_maskfun.vrt_collection}
 \title{Masking functions for pixel-based processing}
@@ -10,6 +11,8 @@
 bitmask_numpy()
 
 bitmask_numba()
+
+build_bitmask_numpy()
 
 vrt_set_maskfun(
   x,
@@ -37,9 +40,15 @@ Masking functions for pixel-based processing
 
 Masking functions for pixel-based processing
 
+Masking functions for pixel-based processing
+
 Set mask band of a VRT collection
 }
 \details{
+This function is a simple bit mask function that can be used to
+mask out pixels based on a bit mask. There is no bitwise transformation
+applied to the provided valid_bits.
+
 This function is a simple bit mask function that can be used to
 mask out pixels based on a bit mask. There is no bitwise transformation
 applied to the provided valid_bits.

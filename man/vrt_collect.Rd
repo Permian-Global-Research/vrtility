@@ -14,7 +14,7 @@ vrt_collect(
   mask_band = NULL,
   resampling = c("blinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = FALSE
+  quiet = TRUE
 )
 
 \method{vrt_collect}{doc_items}(
@@ -25,7 +25,7 @@ vrt_collect(
   mask_band = NULL,
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = FALSE
+  quiet = TRUE
 )
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
