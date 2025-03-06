@@ -45,10 +45,9 @@ vrt_set_maskfun.vrt_block <- function(
   vx <- xml2::read_xml(x$vrt)
 
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
-
   descs <- purrr::map_chr(
     bands,
-    ~ xml2::xml_attr(.x, "Description", default = "")
+    ~ xml2::xml_text(xml2::xml_find_first(.x, ".//Description"))
   )
 
   mask_idx <- which(descs == mask_band)
@@ -60,14 +59,45 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  mask_src <- xml2::xml_find_all(
-    bands[[mask_idx]],
-    ".//SimpleSource | .//ComplexSource"
-  )
-  mask_src_chr <- xml2::read_xml(as.character(mask_src))
+  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  ts <- save_vrt(x)
+  ds <- new(gdalraster::GDALRaster, ts)
+  band_files <- setdiff(ds$getFileList(), ds$getFilename())
+  msk_file <- band_files[mask_idx]
 
+  gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
+
+  msk_vrt_xml <- xml2::read_xml(mskvrt)
+  msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
+  drop_nodatavalue(msk_band)
+  xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
+  xml2::xml_add_child(msk_band, "PixelFunctionType", "bitmask")
+  xml2::xml_add_child(msk_band, "PixelFunctionLanguage", "Python")
+  pf_args <- xml2::xml_add_child(msk_band, "PixelFunctionArguments")
+  xml2::xml_set_attr(
+    pf_args,
+    "valid_values",
+    paste(valid_bits, collapse = ",")
+  )
+  cdata_node <- xml2::xml_cdata(build_bitmask_numpy())
+  pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
+  xml2::xml_add_child(pixel_func_code, cdata_node)
+
+  wrp_msk_pf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
+  wmxmlsrc <- xml2::read_xml(as.character(
+    xml2::xml_find_first(
+      bands[[mask_idx]],
+      ".//SimpleSource | .//ComplexSource"
+    )
+  ))
+
+  source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
+  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf))
+
+  # update all other bands
   purrr::walk(bands[-mask_idx], function(.x) {
-    xml2::xml_add_child(.x, mask_src_chr)
+    xml2::xml_add_child(.x, wmxmlsrc)
 
     no_data <- xml2::xml_find_first(.x, ".//NoDataValue") |>
       xml2::xml_double()
