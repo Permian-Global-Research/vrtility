@@ -8,12 +8,14 @@
 #' source raster. functionality here is deliberately limited. could expand if
 #' needed. Issue we have is with srcs with different srs. This function enables
 #' us to transform the srs right at the start of the vrt blocking process.
-vrt_to_warped_vrt <- function(src, t_srs, te, tr, resampling = "bilinear") {
+vrt_to_warped_vrt <- function(
+  src,
+  t_srs,
+  te,
+  tr = NULL,
+  resampling = "bilinear"
+) {
   tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-
-  ds <- new(gdalraster::GDALRaster, src)
-  data_type <- ds$getDataTypeName(1)
-  resampling <- if (data_type == "Byte") "near" else resampling
 
   call_vrt_warp(
     src,

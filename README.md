@@ -10,12 +10,11 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 <!-- badges: end -->
 
 The goal of vrtility is to make the best use of GDAL’s VRT capabilities
-for efficient processing of large raster datasets. This package’s
-primary focus is on the use of GDAL VRT pixel functions using
-[numba](https://numba.pydata.org/). for very efficient raster
-processing. At present the only function provided is a simple median.
-There is definitely scope to expand this functionality! Comments and
-contributions are most welcome!
+for efficient processing of large raster datasets - mainly with Earth
+Observation in mind. This package’s primary focus is on the use of GDAL
+VRT pixel functions using [numba](https://numba.pydata.org/). At present
+the only function provided is a simple median. Things are under active
+development! Comments and contributions are most welcome!
 
 ## Features
 
@@ -25,13 +24,12 @@ contributions are most welcome!
 
 - use of numba in python pixel function(s)
 
+- modular design
+
 ## TO DO:
 
-- [ ] Add more efficient masking.
 - [ ] Add additional pixel functions (geometric median in particular).
 - [ ] time series functions…
-
-…
 
 ## Installation
 
@@ -63,8 +61,13 @@ or if on MacOS or Windows, you can install it with pip:
 ## Example
 
 Here is a simple example where we: define a bounding box, search a STAC
-catalog for Sentinel-2 data, create a VRT, and then create a composite
-image using a median pixel function.
+catalog for Sentinel-2 data, create a vrt_collection object (basically a
+list of warped VRTs). We then apply the masking using pixel functions (I
+can’t get internal or external masks to work for these VRTs), finally
+these images are stacked (combined into a single VRT with multiple
+layers in each VRTRasterBand), the median pixel function is then added
+to the VRT and all of this is then “lazily” calculated at the end of the
+vrt pipeline using gdalwarp.
 
 ``` r
 library(vrtility)
@@ -76,7 +79,7 @@ bbox <- gdalraster::bbox_from_wkt(
   extend_y = 0.125
 )
 
-trs <- to_generic_projected(bbox)
+trs <- to_projected(bbox)
 
 te <- gdalraster::bbox_transform(
   bbox,
@@ -99,10 +102,9 @@ s2_stac <- sentinel2_stac_query(
 tic()
 median_composite <- vrt_collect(
   s2_stac,
-  t_srs = trs, te = te, tr = c(10, 10)
+  t_srs = trs, te = te, tr = c(10, 10), mask_band = "SCL"
 ) |>
-  vrt_set_maskfun(
-    "SCL",
+  vrt_set_maskfun(,
     valid_bits = c(4, 5, 6, 7, 11)
   ) |>
   vrt_stack() |>
@@ -115,7 +117,7 @@ median_composite <- vrt_collect(
 
 ``` r
 toc()
-#> 141.64 sec elapsed
+#> 129.186 sec elapsed
 ```
 
 ``` r

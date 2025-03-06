@@ -12,7 +12,13 @@ set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
     mvrt_bands,
     descriptions,
     function(x, y) {
-      xml2::xml_set_attr(x, "Description", y)
+      desc <- xml2::xml_find_first(x, ".//Description")
+      if (is.na(desc)) {
+        desc <- xml2::xml_add_child(x, "Description", y)
+      }
+      xml2::xml_set_text(desc, y)
+
+      # xml2::xml_set_attr(x, "Description", y)
     }
   )
 
