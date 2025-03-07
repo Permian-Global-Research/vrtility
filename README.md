@@ -105,10 +105,13 @@ median_composite <- vrt_collect(
   t_srs = trs, te = te, tr = c(10, 10), mask_band = "SCL"
 ) |>
   vrt_set_maskfun(,
-    valid_bits = c(4, 5, 6, 7, 11)
+    valid_bits = c(4, 5, 6, 7, 11),
+    mask_pixfun = bitmask_numpy
   ) |>
   vrt_stack() |>
-  vrt_set_pixelfun() |>
+  vrt_set_pixelfun(
+    pixfun = numpy_median
+  ) |>
   vrt_warp(
     outfile = fs::file_temp(ext = "tif")
   )
@@ -117,7 +120,7 @@ median_composite <- vrt_collect(
 
 ``` r
 toc()
-#> 129.186 sec elapsed
+#> 118.643 sec elapsed
 ```
 
 ``` r

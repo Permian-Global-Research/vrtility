@@ -22,6 +22,8 @@ save_vrt(x, outfile)
 )
 }
 \arguments{
+\item{x}{A vrt_collection object}
+
 \item{...}{Additional arguments not used}
 
 \item{quiet}{Logical. If TRUE, suppress GDAL progress bar}
@@ -34,10 +36,19 @@ save_vrt(x, outfile)
 
 \item{outfile}{A character string of the output file}
 }
+\value{
+A vrt_stack object
+}
 \description{
 Stack VRT files from a vrt_collection object
 
 Print a vrt_block object
 
 Save a vrt_block object to disk
+}
+\details{
+This function stacks VRT files from a vrt_collection object into a
+single VRT file containing multiple layers for each RasterBand. The VRT
+files are stacked in the order they are provided in the vrt_collection
+object. If this is derived from a rstac object, the order should be ordered by date.
 }
