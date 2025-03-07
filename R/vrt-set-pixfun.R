@@ -4,7 +4,7 @@
 #' @export
 #' @rdname vrt_set_pixelfun
 #'
-vrt_set_pixelfun <- function(x, pixfun = vrtility::numba_median) {
+vrt_set_pixelfun <- function(x, pixfun = vrtility::median_numba()) {
   UseMethod("vrt_set_pixelfun")
 }
 
@@ -24,9 +24,9 @@ vrt_set_pixelfun.default <- function(x, ...) {
 #' @rdname vrt_set_pixelfun
 vrt_set_pixelfun.vrt_stack <- function(
   x,
-  pixfun = vrtility::numba_median
+  pixfun = vrtility::median_numba()
 ) {
-  v_assert_type(pixfun, "pixfun", "function", nullok = FALSE)
+  v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
 
   vx <- xml2::read_xml(x$vrt)
 
@@ -42,7 +42,7 @@ vrt_set_pixelfun.vrt_stack <- function(
     pf_args <- xml2::xml_add_child(.x, "PixelFunctionArguments")
     xml2::xml_set_attr(pf_args, "no_data_value", no_data)
 
-    cdata_node <- xml2::xml_cdata(pixfun())
+    cdata_node <- xml2::xml_cdata(pixfun)
     pixel_func_code <- xml2::xml_add_child(.x, "PixelFunctionCode")
     xml2::xml_add_child(pixel_func_code, cdata_node)
   })
@@ -50,5 +50,5 @@ vrt_set_pixelfun.vrt_stack <- function(
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
-  build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun())
+  build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun)
 }
