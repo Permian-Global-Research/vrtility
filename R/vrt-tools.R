@@ -1,4 +1,6 @@
 #' Load the official GDAL VRT XML schema
+#' @param schema a character string of the xml schema - mainly intended only
+#' for use with the official gdal VRT schema.
 #' @description Loads a copy of the official xml schema from the provided
 #' vrt_xml_schema dataset.
 #' @rdname vrt_tools
@@ -6,6 +8,6 @@
 #' @examples
 #' vrt_schema()
 #' @export
-vrt_schema <- function() {
-  xml2::read_xml(vrt_xml_schema)
+vrt_schema <- function(schema = vrtility::vrt_xml_schema) {
+  xml2::read_xml(schema)
 }
