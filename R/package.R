@@ -109,8 +109,8 @@ gdal_init_opts <- function() {
     "-wm",
     "50%",
     "-multi",
-    "-wo",
-    "NUM_THREADS=ALL_CPUS",
+    # "-wo",
+    # "NUM_THREADS=ALL_CPUS",
 
     # Overview options
     "-ovr",
