@@ -189,7 +189,6 @@ call_vrt_warp <- function(
   config_options,
   quiet = FALSE
 ) {
-  # TODO: this wont warn about stac_vrt so add at some point.
   v_assert_type(src_files, "src_files", "character")
   v_assert_type(outfile, "outfile", "character")
   v_assert_type(t_srs, "t_srs", "character")
