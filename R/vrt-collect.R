@@ -5,6 +5,10 @@
 #' @param te numeric vector of the target extent in the form
 #' c(xmin, ymin, xmax, ymax) using the same SRS as in `t_srs`.
 #' @param tr numeric vector of the target resolution in the form c(xres, yres)
+#' @param mask_band character or numeric vector of the mask band name or index.
+#' @param resampling character vector of the resampling methods to be used for
+#' each band. The default is "bilinear". "near" sampling will be used for the
+#' mask_band if provided.
 #' @param quiet logical indicating whether to suppress progress bar.
 #' @rdname vrt_collect
 #' @export
@@ -279,6 +283,9 @@ build_vrt_collection <- function(
 
 
 #' @export
+#' @param xml logical indicating whether to print the XML of the VRT collection.
+#' @param pixfun logical indicating whether to print the pixel function.
+#' @param maskfun logical indicating whether to print the mask function.
 #' @param blocks A logical indicating whether to print the blocks instead of
 #' the collection summary.
 #' @param ... Additional arguments not used
