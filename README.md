@@ -12,19 +12,26 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 The goal of vrtility is to make the best use of GDAL’s VRT capabilities
 for efficient processing of large raster datasets - mainly with Earth
 Observation in mind. This package’s primary focus is on the use of GDAL
-VRT pixel functions using [numba](https://numba.pydata.org/). At present
-the only function provided is a simple median. Things are under active
-development! Comments and contributions are most welcome!
+VRT pixel functions using python. These python pixel functions are used
+to apply cloud masks and summarise pixel values (e.g. median) from
+multiple images (i.e create a composite image). For now we’re just using
+the python pixel function capabilities but hope to add C++ or
+expressions in time.
 
 ## Features
 
 - No intermediate downloads - the use of nested VRTs enables the
   download and processing of only the required data in a single gdalwarp
-  call.
+  call. This reduces disk read/write time.
 
-- use of numba in python pixel function(s)
+- use of numba in python pixel function(s) - not always faster but can
+  be.
 
-- modular design
+- modular design: We’re basically creating remote sensing pipelines
+  using nested VRTs. This allows for the easy addition of new pixel
+  functions and masking functions. but could easily be adapted for
+  deriving spectral indices or calculating complex time series
+  functions.
 
 ## TO DO:
 
@@ -105,29 +112,24 @@ median_composite <- vrt_collect(
   t_srs = trs, te = te, tr = c(10, 10), mask_band = "SCL"
 ) |>
   vrt_set_maskfun(,
-    valid_bits = c(4, 5, 6, 7, 11),
-    mask_pixfun = bitmask_numpy
+    valid_bits = c(4, 5, 6, 7, 11)
   ) |>
   vrt_stack() |>
-  vrt_set_pixelfun(
-    pixfun = numpy_median
-  ) |>
+  vrt_set_pixelfun() |>
   vrt_warp(
-    outfile = fs::file_temp(ext = "tif")
+    outfile = fs::file_temp(ext = "tif"),
+    quiet = TRUE
   )
-#> 0...10...20...30...40...50...60...70...80...90...100 - done.
-```
-
-``` r
 toc()
-#> 118.643 sec elapsed
+#> 124.631 sec elapsed
 ```
 
 ``` r
 
 plot_raster_src(
   median_composite,
-  c(3, 2, 1)
+  c(3, 2, 1),
+  minmax_def = c(rep(750, 3), rep(2750, 3))
 )
 ```
 

@@ -15,7 +15,11 @@ https://raw.githubusercontent.com/OSGeo/gdal/master/frmts/vrt/data/gdalvrt.xsd
 \usage{
 vrt_xml_schema
 
-vrt_schema()
+vrt_schema(schema = vrtility::vrt_xml_schema)
+}
+\arguments{
+\item{schema}{a character string of the xml schema - mainly intended only
+for use with the official gdal VRT schema.}
 }
 \value{
 An xml_document object
