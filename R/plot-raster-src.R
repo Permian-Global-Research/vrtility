@@ -41,16 +41,26 @@ plot_raster_src <- function(
 
   ds <- new(gdalraster::GDALRaster, x)
   on.exit(ds$close())
+
+  rxs <- ds$getRasterXSize()
+  rys <- ds$getRasterYSize()
+
   r <- gdalraster::read_ds(
     ds,
     bands = bands,
-    out_xsize = ceiling(
-      ds$getRasterXSize() /
-        ceiling(ds$getRasterXSize() / target_divisor)
+    out_xsize = pmin(
+      rxs,
+      ceiling(
+        rxs /
+          ceiling(rxs / target_divisor)
+      )
     ),
-    out_ysize = ceiling(
-      ds$getRasterYSize() /
-        ceiling(ds$getRasterYSize() / target_divisor)
+    out_ysize = pmin(
+      rys,
+      ceiling(
+        rys /
+          ceiling(rys / target_divisor)
+      )
     )
   )
 
