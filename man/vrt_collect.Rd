@@ -41,7 +41,19 @@ c(xmin, ymin, xmax, ymax) using the same SRS as in \code{t_srs}.}
 
 \item{tr}{numeric vector of the target resolution in the form c(xres, yres)}
 
+\item{mask_band}{character or numeric vector of the mask band name or index.}
+
+\item{resampling}{character vector of the resampling methods to be used for
+each band. The default is "bilinear". "near" sampling will be used for the
+mask_band if provided.}
+
 \item{quiet}{logical indicating whether to suppress progress bar.}
+
+\item{xml}{logical indicating whether to print the XML of the VRT collection.}
+
+\item{pixfun}{logical indicating whether to print the pixel function.}
+
+\item{maskfun}{logical indicating whether to print the mask function.}
 
 \item{blocks}{A logical indicating whether to print the blocks instead of
 the collection summary.}

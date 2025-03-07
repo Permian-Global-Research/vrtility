@@ -1,5 +1,11 @@
 #' Stack VRT files from a vrt_collection object
+#' @param x A vrt_collection object
 #' @param ... Additional arguments passed to methods
+#' @details This function stacks VRT files from a vrt_collection object into a
+#' single VRT file containing multiple layers for each RasterBand. The VRT
+#' files are stacked in the order they are provided in the vrt_collection
+#' object. If this is derived from a rstac object, the order should be ordered by date.
+#' @return A vrt_stack object
 #' @export
 #' @rdname vrt_stack
 vrt_stack <- function(x, ...) {
@@ -70,6 +76,8 @@ build_vrt_stack <- function(
   pixfun = NULL,
   ...
 ) {
+  # validate the vrt against the schema
+  v_assert_valid_schema(x)
   # read and verify modified VRT
   gdr <- new(gdalraster::GDALRaster, x)
   ras_count <- gdr$getRasterCount()

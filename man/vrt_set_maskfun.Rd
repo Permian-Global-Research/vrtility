@@ -4,6 +4,7 @@
 \alias{bitmask_numpy}
 \alias{bitmask_numba}
 \alias{vrt_set_maskfun}
+\alias{vrt_set_maskfun.vrt_block}
 \alias{vrt_set_maskfun.vrt_collection}
 \title{Masking functions for pixel-based processing}
 \usage{
@@ -14,22 +15,43 @@ bitmask_numba()
 vrt_set_maskfun(
   x,
   valid_bits,
-  mask_pix_fun = vrtility::bitmask_numba,
-  drop_mask_band = TRUE,
-  ...
+  mask_band,
+  mask_pixfun = vrtility::bitmask_numpy,
+  drop_mask_band = TRUE
+)
+
+\method{vrt_set_maskfun}{vrt_block}(
+  x,
+  valid_bits,
+  mask_band,
+  mask_pixfun = vrtility::bitmask_numpy,
+  drop_mask_band = TRUE
 )
 
 \method{vrt_set_maskfun}{vrt_collection}(
   x,
   valid_bits,
-  mask_pix_fun = vrtility::bitmask_numba,
+  mask_band,
+  mask_pixfun = vrtility::bitmask_numpy,
   drop_mask_band = TRUE
 )
 }
 \arguments{
 \item{x}{A VRT collection}
+
+\item{valid_bits}{A numeric vector of valid bits}
+
+\item{mask_band}{The name of the mask band}
+
+\item{mask_pixfun}{A function that returns the Python code for the mask
+pixel function}
+
+\item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
+the VRT block.}
 }
 \value{
+A VRT block with the mask band set.
+
 A VRT collection with the mask band set.
 }
 \description{
