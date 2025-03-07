@@ -108,7 +108,9 @@ gdal_init_opts <- function() {
     # Memory and threading options
     "-wm",
     "50%",
-    # "-multi",
+    "-multi",
+    "-wo",
+    "NUM_THREADS=ALL_CPUS",
 
     # Overview options
     "-ovr",
