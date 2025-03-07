@@ -17,8 +17,6 @@ set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
         desc <- xml2::xml_add_child(x, "Description", y)
       }
       xml2::xml_set_text(desc, y)
-
-      # xml2::xml_set_attr(x, "Description", y)
     }
   )
 
