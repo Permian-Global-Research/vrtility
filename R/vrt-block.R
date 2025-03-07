@@ -16,7 +16,10 @@ build_vrt_block <- function(
   pixfun = NULL,
   ...
 ) {
-  # read and verify modified VRT
+  # validate the vrt against the schema
+  v_assert_valid_schema(x)
+
+  # read and verify and get attrs for modified VRT
   gdr <- new(gdalraster::GDALRaster, x)
   ras_count <- gdr$getRasterCount()
   assets <- purrr::map_chr(
@@ -28,7 +31,6 @@ build_vrt_block <- function(
     function(.x) gdr$getNoDataValue(.x)
   )
   dttm <- gdr$getMetadataItem(0, "datetime", "")
-
   mask_band_name <- gdr$getMetadataItem(0, "mask_band_name", "")
 
   rvrt <- list(
