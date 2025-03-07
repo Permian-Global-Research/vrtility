@@ -29,3 +29,39 @@ v_assert_length <- function(x, name, length, nullok = TRUE) {
     )
   }
 }
+
+v_assert_valid_schema <- function(x) {
+  v_assert_true(
+    fs::file_exists(x),
+    "fs::file_exists(x)"
+  )
+  val_result <- xml2::xml_validate(xml2::read_xml(x), vrt_schema())
+  if (!val_result) {
+    error_msgs <- attr(val_result, "errors")
+    cli::cli_abort(
+      c(
+        "!" = "Error when creating VRT block: invalid VRT XML:",
+        purrr::map_chr(error_msgs, ~ cli::format_bullets_raw(c("x" = .x)))
+      )
+    )
+  }
+  invisible()
+}
+
+v_assert_true <- function(x, name) {
+  if (!x) {
+    cli::cli_abort(
+      "'{name}' must be TRUE",
+      class = "vrtility_true_error"
+    )
+  }
+}
+
+v_assert_false <- function(x, name) {
+  if (x) {
+    cli::cli_abort(
+      "'{name}' must be FALSE",
+      class = "vrtility_false_error"
+    )
+  }
+}
