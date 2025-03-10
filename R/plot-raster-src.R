@@ -16,7 +16,7 @@ plot_raster_src <- function(
   maxColorValue = 1,
   normalize = TRUE,
   minmax_def = NULL,
-  minmax_pct_cut = if (length(bands) == 3) c(1, 95) else NULL,
+  minmax_pct_cut = NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
     NULL,
   xlim = NULL,
@@ -44,6 +44,15 @@ plot_raster_src <- function(
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
+
+  if (is.null(minmax_def) && nbands == 3) {
+    minmax_def <- purrr::map(
+      bands,
+      ~ ds$getMinMax(.x, approx_ok = TRUE) * (1 / 2.2)
+    ) |>
+      purrr::transpose() |>
+      unlist()
+  }
 
   r <- gdalraster::read_ds(
     ds,
