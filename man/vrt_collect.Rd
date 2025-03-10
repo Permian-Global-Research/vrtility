@@ -6,32 +6,25 @@
 \alias{print.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(
-  x,
-  t_srs,
-  te,
-  tr,
-  mask_band = NULL,
-  resampling = c("blinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
-    "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE
-)
+vrt_collect(x)
 
-\method{vrt_collect}{doc_items}(
-  x,
-  t_srs,
-  te,
-  tr,
-  mask_band = NULL,
-  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
-    "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE
-)
+\method{vrt_collect}{doc_items}(x)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
 }
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
+
+\item{xml}{logical indicating whether to print the XML of the VRT collection.}
+
+\item{pixfun}{logical indicating whether to print the pixel function.}
+
+\item{maskfun}{logical indicating whether to print the mask function.}
+
+\item{blocks}{A logical indicating whether to print the blocks instead of
+the collection summary.}
+
+\item{...}{Additional arguments not used}
 
 \item{t_srs}{character target SRS must be a numeric EPSG code, or SRS like
 character such as a proj4 string or WKT.}
@@ -48,17 +41,6 @@ each band. The default is "bilinear". "near" sampling will be used for the
 mask_band if provided.}
 
 \item{quiet}{logical indicating whether to suppress progress bar.}
-
-\item{xml}{logical indicating whether to print the XML of the VRT collection.}
-
-\item{pixfun}{logical indicating whether to print the pixel function.}
-
-\item{maskfun}{logical indicating whether to print the mask function.}
-
-\item{blocks}{A logical indicating whether to print the blocks instead of
-the collection summary.}
-
-\item{...}{Additional arguments not used}
 }
 \description{
 Construct the base VRT object for composing VRT pipelines.

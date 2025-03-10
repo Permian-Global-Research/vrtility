@@ -14,24 +14,24 @@ bitmask_numba()
 
 vrt_set_maskfun(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
 
 \method{vrt_set_maskfun}{vrt_block}(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
 
 \method{vrt_set_maskfun}{vrt_collection}(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
@@ -39,9 +39,9 @@ vrt_set_maskfun(
 \arguments{
 \item{x}{A VRT collection}
 
-\item{valid_bits}{A numeric vector of valid bits}
-
 \item{mask_band}{The name of the mask band}
+
+\item{valid_bits}{A numeric vector of valid bits}
 
 \item{mask_pixfun}{A function that returns the Python code for the mask
 pixel function}
