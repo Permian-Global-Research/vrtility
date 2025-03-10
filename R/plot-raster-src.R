@@ -40,7 +40,7 @@ plot_raster_src <- function(
   target_divisor <- dev_size[1] * 1.5
 
   ds <- new(gdalraster::GDALRaster, x)
-  on.exit(ds$close())
+  on.exit(if (ds$isOpen()) ds$close())
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
@@ -82,6 +82,8 @@ plot_raster_src <- function(
       minmax_def <- rep(mm, each = nbands)
     }
   }
+
+  ds$close()
 
   gdalraster::plot_raster(
     r,
