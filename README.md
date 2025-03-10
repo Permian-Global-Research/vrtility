@@ -86,50 +86,32 @@ bbox <- gdalraster::bbox_from_wkt(
   extend_y = 0.125
 )
 
-trs <- to_projected(bbox)
-
-te <- gdalraster::bbox_transform(
-  bbox,
-  gdalraster::srs_to_wkt("EPSG:4326"),
-  trs
-)
+te <- bbox_to_projected(bbox)
+trs <- attr(te, "wkt")
 
 s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 35,
-  assets = c(
-    "B02",
-    "B03",
-    "B04",
-    "SCL"
-  )
+  assets = c("B02", "B03", "B04", "SCL")
 )
 tic()
-median_composite <- vrt_collect(
-  s2_stac,
-  t_srs = trs, te = te, tr = c(10, 10), mask_band = "SCL"
-) |>
-  vrt_set_maskfun(,
-    valid_bits = c(4, 5, 6, 7, 11)
-  ) |>
+median_composite <- vrt_collect(s2_stac) |>
+  vrt_set_maskfun(mask_band = "SCL", valid_bits = c(4, 5, 6, 7, 11)) |>
+  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
   vrt_stack() |>
   vrt_set_pixelfun() |>
-  vrt_warp(
-    outfile = fs::file_temp(ext = "tif"),
-    quiet = TRUE
-  )
+  vrt_compute(outfile = fs::file_temp(ext = "tif"), quiet = TRUE)
 toc()
-#> 124.631 sec elapsed
+#> 108.841 sec elapsed
 ```
 
 ``` r
 
 plot_raster_src(
   median_composite,
-  c(3, 2, 1),
-  minmax_def = c(rep(750, 3), rep(2750, 3))
+  c(3, 2, 1)
 )
 ```
 
