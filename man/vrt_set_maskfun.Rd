@@ -16,7 +16,7 @@ vrt_set_maskfun(
   x,
   valid_bits,
   mask_band,
-  mask_pixfun = vrtility::bitmask_numpy,
+  mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
 
@@ -24,7 +24,7 @@ vrt_set_maskfun(
   x,
   valid_bits,
   mask_band,
-  mask_pixfun = vrtility::bitmask_numpy,
+  mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
 
@@ -32,7 +32,7 @@ vrt_set_maskfun(
   x,
   valid_bits,
   mask_band,
-  mask_pixfun = vrtility::bitmask_numpy,
+  mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 )
 }

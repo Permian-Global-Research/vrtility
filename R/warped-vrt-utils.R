@@ -17,7 +17,7 @@ vrt_to_warped_vrt <- function(
 ) {
   tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  call_vrt_warp(
+  call_vrt_compute(
     src,
     tfw,
     t_srs,

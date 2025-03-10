@@ -11,11 +11,11 @@
 #' @param quiet A logical indicating whether to suppress output
 #' @return A character string of the path to the output raster
 #' @export
-#' @rdname vrt_warp
+#' @rdname vrt_compute
 #' @details This is the primary function to call processing of raster data. The
 #' behaviour of the warper is dependent on the form of the input vrt datasets
 #' and the associated options.
-vrt_warp <- function(
+vrt_compute <- function(
   x,
   outfile,
   t_srs = x$srs,
@@ -28,18 +28,18 @@ vrt_warp <- function(
   v_assert_type(outfile, "outfile", "character")
   v_assert_length(te, "te", 4)
 
-  UseMethod("vrt_warp")
+  UseMethod("vrt_compute")
 }
 
 #' @noRd
 #' @export
-vrt_warp.default <- function(x, ...) {
-  cli::cli_abort(c("vrt_warp() not implemented for class {class(x)[1]}"))
+vrt_compute.default <- function(x, ...) {
+  cli::cli_abort(c("vrt_compute() not implemented for class {class(x)[1]}"))
 }
 
 #' @export
-#' @rdname vrt_warp
-vrt_warp.vrt_block <- function(
+#' @rdname vrt_compute
+vrt_compute.vrt_block <- function(
   x,
   outfile,
   t_srs = x$srs,
@@ -56,7 +56,7 @@ vrt_warp.vrt_block <- function(
 
   warp_options <- combine_warp_opts(warp_options, te, tr)
 
-  vrt_warp_method(
+  vrt_compute_method(
     x = tmp_vrt,
     outfile = outfile,
     t_srs = t_srs,
@@ -67,8 +67,8 @@ vrt_warp.vrt_block <- function(
 }
 
 #' @export
-#' @rdname vrt_warp
-vrt_warp.vrt_collection <- function(
+#' @rdname vrt_compute
+vrt_compute.vrt_collection <- function(
   x,
   outfile,
   t_srs = x$srs,
@@ -92,7 +92,7 @@ vrt_warp.vrt_collection <- function(
     x[[1]],
     uniq_pths,
     function(.x, .y) {
-      vrt_warp(
+      vrt_compute(
         .x,
         outfile = .y,
         t_srs = t_srs,
@@ -109,7 +109,7 @@ vrt_warp.vrt_collection <- function(
 #' A wrapper to call the warper from the s3 methods
 #' @noRd
 #' @keywords internal
-vrt_warp_method <- function(
+vrt_compute_method <- function(
   x,
   outfile,
   t_srs,
@@ -144,7 +144,7 @@ vrt_warp_method <- function(
       # Initialize reticulate first
       reticulate::use_python(py_bin, required = TRUE)
 
-      call_vrt_warp(
+      call_vrt_compute(
         src_files = x,
         outfile = outfile,
         t_srs = t_srs,
@@ -162,7 +162,7 @@ vrt_warp_method <- function(
 #' @param unset A logical indicating whether to unset the options
 #' @keywords internal
 #' @noRd
-set_config <- function(x, unset = FALSE) {
+set_config <- function(x) {
   # Store original values
   original_values <- purrr::map_chr(
     names(x),
@@ -170,18 +170,16 @@ set_config <- function(x, unset = FALSE) {
   ) |>
     purrr::set_names(names(x))
 
-  # If unset, use original values, otherwise use input values
-  values_to_set <- if (unset) original_values else x
-
   # Set the config options
-  purrr::iwalk(values_to_set, ~ gdalraster::set_config_option(.y, .x))
+  purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
+  invisible(original_values)
 }
 
 
 #' A very thin wrapper around the `gdalraster::warp` function
 #' @keywords internal
 #' @noRd
-call_vrt_warp <- function(
+call_vrt_compute <- function(
   src_files,
   outfile,
   t_srs,
@@ -195,8 +193,9 @@ call_vrt_warp <- function(
   v_assert_type(warp_options, "warp_options", "character")
   v_assert_type(config_options, "config_options", "character")
 
-  set_config(config_options)
-  on.exit(set_config(config_options, unset = TRUE))
+  browser()
+  orig_config <- set_config(config_options)
+  on.exit(set_config(orig_config))
 
   gdalraster::warp(
     src_files,
