@@ -10,6 +10,7 @@
 #' us to transform the srs right at the start of the vrt blocking process.
 vrt_to_warped_vrt <- function(
   src,
+  band,
   t_srs,
   te,
   tr = NULL,
@@ -23,6 +24,8 @@ vrt_to_warped_vrt <- function(
     t_srs,
     warp_options = combine_warp_opts(
       c(
+        "-b",
+        band,
         "-r",
         resampling
       ),
