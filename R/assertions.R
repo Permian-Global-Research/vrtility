@@ -65,3 +65,30 @@ v_assert_false <- function(x, name) {
     )
   }
 }
+
+v_assert_res <- function(x) {
+  v_assert_type(x, "tr", "numeric", nullok = FALSE, multiple = TRUE)
+  if (length(x) == 1) {
+    x <- c(x, x)
+  }
+  if (length(x) != 2) {
+    cli::cli_abort(
+      "tr must have length 1 or 2",
+      class = "vrtility_length_error"
+    )
+  }
+  return(x)
+}
+
+
+assert_srs_len <- function(x) {
+  if (length(x$srs) > 1) {
+    cli::cli_abort(
+      c(
+        "The {class(x)[1]} has {length(x$srs)} spatial reference systems but 
+        must have a single projection.",
+        "i" = "use `vrt_warp()` to unify the projection of the {class(x)[1]}."
+      )
+    )
+  }
+}
