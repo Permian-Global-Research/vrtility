@@ -22,40 +22,8 @@
 #' files of multiple epochs. We can then composite or summarise these layers
 #' using the pixel functions.
 vrt_collect <- function(
-  x,
-  t_srs,
-  te,
-  tr,
-  mask_band = NULL,
-  resampling = c(
-    "blinear",
-    "near",
-    "cubic",
-    "cubicspline",
-    "lanczos",
-    "average",
-    "rms",
-    "mode",
-    "max",
-    "min",
-    "med",
-    "q1",
-    "q3",
-    "sum"
-  ),
-  quiet = TRUE
+  x
 ) {
-  v_assert_type(t_srs, "t_srs", "character")
-  v_assert_type(te, "te", "numeric")
-  v_assert_length(te, "te", 4)
-  v_assert_type(tr, "tr", "numeric")
-  v_assert_type(
-    mask_band,
-    "mask_band",
-    c("character", "numeric"),
-    multiple = TRUE,
-    nullok = TRUE
-  )
   UseMethod("vrt_collect")
 }
 
@@ -71,56 +39,9 @@ vrt_collect.default <- function(x, ...) {
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(
-  x,
-  t_srs,
-  te,
-  tr,
-  mask_band = NULL,
-  resampling = c(
-    "bilinear",
-    "near",
-    "cubic",
-    "cubicspline",
-    "lanczos",
-    "average",
-    "rms",
-    "mode",
-    "max",
-    "min",
-    "med",
-    "q1",
-    "q3",
-    "sum"
-  ),
-  quiet = TRUE
+  x
 ) {
-  if (length(tr) == 1) {
-    tr <- c(tr, tr)
-  }
-  v_assert_length(tr, "tr", 2)
-  resampling <- rlang::arg_match(resampling)
-
   assets <- rstac::items_assets(x)
-  t_srs <- to_wkt(t_srs)
-
-  if (!is.null(mask_band)) {
-    if (is.character(mask_band)) {
-      mas_band_idx <- which(assets == mask_band)
-    } else {
-      mas_band_idx <- mask_band
-      mask_band <- assets[mas_band_idx]
-      if (is.na(mask_band)) {
-        cli::cli_abort(
-          c(
-            "!" = "The numeric band id for the image mask ({mas_band_idx})
-            does not exist."
-          )
-        )
-      }
-    }
-  } else {
-    mas_band_idx <- NULL
-  }
 
   vrt_items <- purrr::map(assets, function(a) {
     its_asset <- rstac::assets_select(x, asset_names = a)
@@ -152,21 +73,9 @@ vrt_collect.doc_items <- function(
 
         tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-        srcs_vrt_warped <- purrr::map2_chr(
-          srcs,
-          seq_len(length(srcs)),
-          function(.x, .y) {
-            if (!is.null(mask_band) && .y == mas_band_idx) {
-              resampling <- "near"
-            }
-            vrt_to_warped_vrt(.x, t_srs, te, tr, resampling)
-          },
-          .progress = !quiet
-        )
-
         gdalraster::buildVRT(
           tf,
-          srcs_vrt_warped,
+          srcs,
           cl_arg = c(
             "-separate"
           ),
@@ -179,21 +88,12 @@ vrt_collect.doc_items <- function(
           as_file = TRUE
         )
 
-        tf <- if (!is.null(mask_band)) {
-          set_vrt_metadata(
-            tf,
-            keys = c("datetime", "mask_band_name"),
-            values = c(dttm, mask_band),
-            as_file = TRUE
-          )
-        } else {
-          set_vrt_metadata(
-            tf,
-            keys = "datetime",
-            values = dttm,
-            as_file = TRUE
-          )
-        }
+        tf <- set_vrt_metadata(
+          tf,
+          keys = "datetime",
+          values = dttm,
+          as_file = TRUE
+        )
 
         build_vrt_block(tf)
       }
