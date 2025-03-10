@@ -1,231 +1,177 @@
-#' Generate a composite raster from (virtual) raster sources.
-#' @param x A vrt_block, vrt_stack, or vrt_collection object
-#' @param outfile A character string of the output file path
-#' @param t_srs A character string of the target SRS
-#' @param te A numeric vector of the target extent in the form
-#' c(xmin, ymin, xmax, ymax) and must be the same SRS as in `t_srs`.
-#' @param tr A numeric vector of the target resolution in the form c(xres, yres)
-#' @param warp_options A character vector of options to pass to the warp
-#' @param config_options A character vector of options to set in the GDAL
-#' environment
-#' @param quiet A logical indicating whether to suppress output
-#' @return A character string of the path to the output raster
+#' Construct A warped VRT or warped VRT collection.
+#' @param x A vrt_collection or vrt_block (most likely the former).
+#' @param t_srs character target SRS must be a numeric EPSG code, or SRS like
+#' character such as a proj4 string or WKT.
+#' @param te numeric vector of the target extent in the form
+#' c(xmin, ymin, xmax, ymax) using the same SRS as in `t_srs`.
+#' @param tr numeric vector of the target resolution in the form c(xres, yres)
+#' @param resampling character vector of the resampling methods to be used for
+#' each band. The default is "bilinear". "near" sampling will be used for the
+#' mask_band if provided.
+#' @param quiet logical indicating whether to suppress progress bar.
+#' @rdname vrt_warp
 #' @export
-#' @rdname vrt_compute
-#' @details This is the primary function to call processing of raster data. The
-#' behaviour of the warper is dependent on the form of the input vrt datasets
-#' and the associated options.
-vrt_compute <- function(
+#' @details This function generates warped VRT objects types. This is
+#' particularly useful when we want to create a vrt_stack but our input images
+#' span multiple spatial reference systems. In such a situation, before warping
+#' our input data we must align with our desired oputput grid.
+vrt_warp <- function(
   x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
-) {
-  v_assert_type(outfile, "outfile", "character")
-  v_assert_length(te, "te", 4)
-
-  UseMethod("vrt_compute")
-}
-
-#' @noRd
-#' @export
-vrt_compute.default <- function(x, ...) {
-  cli::cli_abort(c("vrt_compute() not implemented for class {class(x)[1]}"))
-}
-
-#' @export
-#' @rdname vrt_compute
-vrt_compute.vrt_block <- function(
-  x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
-) {
-  v_assert_length(tr, "tr", 2)
-  tmp_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  file_src <- xml2::read_xml(x$vrt)
-  xml2::write_xml(file_src, tmp_vrt)
-
-  warp_options <- combine_warp_opts(warp_options, te, tr)
-
-  vrt_compute_method(
-    x = tmp_vrt,
-    outfile = outfile,
-    t_srs = t_srs,
-    warp_options = warp_options,
-    config_options = config_options,
-    quiet = quiet
-  )
-}
-
-#' @export
-#' @rdname vrt_compute
-vrt_compute.vrt_collection <- function(
-  x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
-) {
-  v_assert_length(tr, "tr", 2)
-
-  uniq_pths <- purrr::imap_chr(
-    x[[1]],
-    function(.x, .y) {
-      if (nchar(.x$date_time) > 0) .x$date_time else .y
-    }
-  ) |>
-    unique_fp(outfile)
-
-  purrr::map2_chr(
-    x[[1]],
-    uniq_pths,
-    function(.x, .y) {
-      vrt_compute(
-        .x,
-        outfile = .y,
-        t_srs = t_srs,
-        te = te,
-        warp_options = warp_options,
-        config_options = config_options,
-        quiet = TRUE
-      )
-    },
-    .progress = !quiet
-  )
-}
-
-#' A wrapper to call the warper from the s3 methods
-#' @noRd
-#' @keywords internal
-vrt_compute_method <- function(
-  x,
-  outfile,
   t_srs,
   te,
-  res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  tr,
+  resampling,
+  quiet
 ) {
-  # First, ensure we have the correct paths
-  py_bin <- Sys.getenv("VRTILITY_PY_EXECUTABLE", unset = NA)
+  v_assert_type(t_srs, "t_srs", "character")
+  v_assert_type(te, "te", "numeric")
+  v_assert_length(te, "te", 4)
+  v_assert_type(tr, "tr", "numeric")
+  UseMethod("vrt_warp")
+}
 
-  if (is.na(py_bin)) {
-    cli::cli_abort(c(
-      "Cannot locate the {cli::style_bold('VRTILITY_PYTHON')} environment",
-      "i" = "You may need to run
-        {cli::code_highlight('`build_vrtility_python()`')} to install it"
-    ))
+#' @noRd
+#' @export
+vrt_collect.default <- function(x, ...) {
+  cli::cli_abort(
+    "{cli::code_highlight('vrt_collect()')}
+    not implemented for class {class(x)[1]}"
+  )
+}
+
+#' @rdname vrt_warp
+#' @export
+vrt_warp.vrt_block <- function(
+  x,
+  t_srs,
+  te,
+  tr,
+  resampling = c(
+    "bilinear",
+    "near",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  quiet = TRUE
+) {
+  tr <- v_assert_res(tr)
+  resampling <- rlang::arg_match(resampling)
+
+  mask_band <- x$mask_band_name
+  assets <- x$assets
+  dttm <- x$date_time
+
+  if (!is.null(mask_band)) {
+    if (is.character(mask_band)) {
+      mas_band_idx <- which(assets == mask_band)
+    } else {
+      mas_band_idx <- mask_band
+      mask_band <- assets[mas_band_idx]
+      if (is.na(mask_band)) {
+        cli::cli_abort(
+          c(
+            "!" = "The numeric band id for the image mask ({mas_band_idx})
+            does not exist."
+          )
+        )
+      }
+    }
+  } else {
+    mas_band_idx <- NULL
   }
 
-  py_env <- dirname(dirname(py_bin))
+  resamp_methods <- rep(resampling, length(assets))
+  resamp_methods[mas_band_idx] <- "near"
 
-  # Modified environment setup
-  withr::with_envvar(
-    new = c(
-      # Only set essential variables
-      "RETICULATE_PYTHON" = py_bin,
-      "VIRTUALENV" = py_env,
-      "PATH" = paste(fs::path(py_env, "bin"), Sys.getenv("PATH"), sep = ":")
-    ),
-    code = {
-      # Initialize reticulate first
-      reticulate::use_python(py_bin, required = TRUE)
-
-      call_vrt_compute(
-        src_files = x,
-        outfile = outfile,
-        t_srs = t_srs,
-        warp_options = warp_options,
-        config_options = config_options,
-        quiet = quiet
-      )
+  tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  save_vrt(x, tf)
+  vrtwl <- purrr::map2_chr(
+    seq_along(assets),
+    resamp_methods,
+    function(.x, .y) {
+      vrt_to_warped_vrt(tf, .x, t_srs, te, tr, .y)
     }
   )
-}
 
+  outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-#' Set the GDAL configuration options
-#' @param x A named character vector of the configuration options
-#' @param unset A logical indicating whether to unset the options
-#' @keywords internal
-#' @noRd
-set_config <- function(x) {
-  # Store original values
-  original_values <- purrr::map_chr(
-    names(x),
-    ~ gdalraster::get_config_option(.x)
-  ) |>
-    purrr::set_names(names(x))
-
-  # Set the config options
-  purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
-  invisible(original_values)
-}
-
-
-#' A very thin wrapper around the `gdalraster::warp` function
-#' @keywords internal
-#' @noRd
-call_vrt_compute <- function(
-  src_files,
-  outfile,
-  t_srs,
-  warp_options,
-  config_options,
-  quiet = FALSE
-) {
-  v_assert_type(src_files, "src_files", "character")
-  v_assert_type(outfile, "outfile", "character")
-  v_assert_type(t_srs, "t_srs", "character")
-  v_assert_type(warp_options, "warp_options", "character")
-  v_assert_type(config_options, "config_options", "character")
-
-  browser()
-  orig_config <- set_config(config_options)
-  on.exit(set_config(orig_config))
-
-  gdalraster::warp(
-    src_files,
-    outfile,
-    t_srs = t_srs,
-    cl_arg = warp_options,
-    quiet = quiet
+  gdalraster::buildVRT(
+    outtf,
+    vrtwl,
+    cl_arg = c(
+      "-separate"
+    ),
+    quiet = TRUE
   )
 
-  return(outfile)
-}
-
-combine_warp_opts <- function(warp_opts, te, res = NULL) {
-  opts_check(warp_opts, "-te")
-  opts_check(warp_opts, "-tr")
-
-  warp_opts <- c(
-    warp_opts,
-    "-te",
-    te
+  outtf <- set_vrt_descriptions(
+    x = outtf,
+    assets,
+    as_file = TRUE
   )
 
-  if (!is.null(res)) {
-    warp_opts <- c(
-      warp_opts,
-      "-tr",
-      res,
-      if ("-tap" %in% warp_opts) NULL else "-tap"
+  if (is.null(mask_band)) {
+    outtf <- set_vrt_metadata(
+      outtf,
+      keys = "datetime",
+      values = dttm,
+      as_file = TRUE
+    )
+  } else {
+    outtf <- set_vrt_metadata(
+      outtf,
+      keys = c("datetime", "mask_band_name"),
+      values = c(dttm, mask_band),
+      as_file = TRUE
     )
   }
 
-  return(warp_opts)
+  build_vrt_block(outtf)
+}
+
+
+#' @rdname vrt_warp
+#' @export
+vrt_warp.vrt_collection <- function(
+  x,
+  t_srs,
+  te,
+  tr,
+  resampling = c(
+    "bilinear",
+    "near",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  quiet = TRUE
+) {
+  v_assert_length(tr, "tr", 2)
+  resampling <- rlang::arg_match(resampling)
+
+  warped_blocks <- purrr::map(
+    x[[1]],
+    ~ vrt_warp(.x, t_srs, te, tr, resampling, quiet)
+  )
+
+  build_vrt_collection(warped_blocks)
 }
