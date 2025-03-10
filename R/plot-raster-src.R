@@ -64,23 +64,16 @@ plot_raster_src <- function(
     )
   )
 
-  if (is.null(minmax_def) && nbands == 3) {
-    if (is.null(minmax_pct_cut)) {
-      mm <- purrr::map(
-        bands,
-        ~ ds$getMinMax(.x, approx_ok = TRUE)
-      ) |>
-        purrr::reduce(~ c(min(.x[1], .y[1]), max(.x[2], .y[2])))
-      minmax_def <- rep(mm, each = nbands) * (1 / 2.2)
-    } else {
-      mm <- stats::quantile(
-        r,
-        probs = c(minmax_pct_cut[1] / 100, minmax_pct_cut[2] / 100),
-        na.rm = TRUE,
-        names = FALSE
-      )
-      minmax_def <- rep(mm, each = nbands)
-    }
+  if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
+    mm <- stats::quantile(
+      r,
+      probs = c(2 / 100, 99 / 100),
+      na.rm = TRUE,
+      names = FALSE
+    )
+    mm[1] <- mm[1] * (0.8)
+
+    minmax_def <- rep(mm, each = nbands)
   }
 
   ds$close()
