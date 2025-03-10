@@ -25,22 +25,6 @@ vrt_collect(x)
 the collection summary.}
 
 \item{...}{Additional arguments not used}
-
-\item{t_srs}{character target SRS must be a numeric EPSG code, or SRS like
-character such as a proj4 string or WKT.}
-
-\item{te}{numeric vector of the target extent in the form
-c(xmin, ymin, xmax, ymax) using the same SRS as in \code{t_srs}.}
-
-\item{tr}{numeric vector of the target resolution in the form c(xres, yres)}
-
-\item{mask_band}{character or numeric vector of the mask band name or index.}
-
-\item{resampling}{character vector of the resampling methods to be used for
-each band. The default is "bilinear". "near" sampling will be used for the
-mask_band if provided.}
-
-\item{quiet}{logical indicating whether to suppress progress bar.}
 }
 \description{
 Construct the base VRT object for composing VRT pipelines.
@@ -49,10 +33,12 @@ Construct the base VRT object for composing VRT pipelines.
 For now the main way to create a vrt_collection object, which forms
 the basis of the vrrt-based pipelines in vrtility is using a doc_items
 object from the \code{rstac} package. For more info on how to create a doc_items
-object see \code{\link[=sentinel2_stac_query]{sentinel2_stac_query()}}. To build a vrt_stack object a vrt_collection
-is required first. The vrt_collection object is essentially a list of warped
-VRT files. When vrt_stack is called on a vrt_collection object, the VRT files
-are stacked into a single VRT file where each band in the VRT contains the
-files of multiple epochs. We can then composite or summarise these layers
-using the pixel functions.
+object see \code{\link[=sentinel2_stac_query]{sentinel2_stac_query()}}. To build a vrt_stack object a
+vrt_collection is required first. The vrt_collection object is essentially a
+list of VRT files. At this stage no alignment is carried out -  and the
+rasters are virtualised as-is. In this state, we can apply masks fro example
+and when summarisation is required we can use vrt_stack - however, in order
+to create a stack the collection must xontain images from a single spatial
+reference system (SRS). If there are mutliple SRS values, use \code{vrt_warp()}
+to unify the projection of the collection.
 }
