@@ -16,7 +16,7 @@ plot_raster_src <- function(
   maxColorValue = 1,
   normalize = TRUE,
   minmax_def = NULL,
-  minmax_pct_cut = if (length(bands) == 3) c(1, 95) else NULL,
+  minmax_pct_cut = NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
     NULL,
   xlim = NULL,
@@ -40,7 +40,7 @@ plot_raster_src <- function(
   target_divisor <- dev_size[1] * 1.5
 
   ds <- new(gdalraster::GDALRaster, x)
-  on.exit(ds$close())
+  on.exit(if (ds$isOpen()) ds$close())
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
@@ -63,6 +63,20 @@ plot_raster_src <- function(
       )
     )
   )
+
+  if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
+    mm <- stats::quantile(
+      r,
+      probs = c(2 / 100, 99 / 100),
+      na.rm = TRUE,
+      names = FALSE
+    )
+    mm[1] <- mm[1] * (0.8)
+
+    minmax_def <- rep(mm, each = nbands)
+  }
+
+  ds$close()
 
   gdalraster::plot_raster(
     r,

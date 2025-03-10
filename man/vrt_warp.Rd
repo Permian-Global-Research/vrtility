@@ -4,68 +4,53 @@
 \alias{vrt_warp}
 \alias{vrt_warp.vrt_block}
 \alias{vrt_warp.vrt_collection}
-\title{Generate a composite raster from (virtual) raster sources.}
+\title{Construct A warped VRT or warped VRT collection.}
 \usage{
-vrt_warp(
-  x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
-)
+vrt_warp(x, t_srs, te, tr, resampling, quiet)
 
 \method{vrt_warp}{vrt_block}(
   x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  t_srs,
+  te,
+  tr,
+  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  quiet = TRUE
 )
 
 \method{vrt_warp}{vrt_collection}(
   x,
-  outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  t_srs,
+  te,
+  tr,
+  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  quiet = TRUE
 )
 }
 \arguments{
-\item{x}{A vrt_block, vrt_stack, or vrt_collection object}
+\item{x}{A vrt_collection or vrt_block (most likely the former).}
 
-\item{outfile}{A character string of the output file path}
+\item{t_srs}{character target SRS must be a numeric EPSG code, or SRS like
+character such as a proj4 string or WKT.}
 
-\item{t_srs}{A character string of the target SRS}
+\item{te}{numeric vector of the target extent in the form
+c(xmin, ymin, xmax, ymax) using the same SRS as in \code{t_srs}.}
 
-\item{te}{A numeric vector of the target extent in the form
-c(xmin, ymin, xmax, ymax) and must be the same SRS as in \code{t_srs}.}
+\item{tr}{numeric vector of the target resolution in the form c(xres, yres)}
 
-\item{tr}{A numeric vector of the target resolution in the form c(xres, yres)}
+\item{resampling}{character vector of the resampling methods to be used for
+each band. The default is "bilinear". "near" sampling will be used for the
+mask_band if provided.}
 
-\item{warp_options}{A character vector of options to pass to the warp}
-
-\item{config_options}{A character vector of options to set in the GDAL
-environment}
-
-\item{quiet}{A logical indicating whether to suppress output}
-}
-\value{
-A character string of the path to the output raster
+\item{quiet}{logical indicating whether to suppress progress bar.}
 }
 \description{
-Generate a composite raster from (virtual) raster sources.
+Construct A warped VRT or warped VRT collection.
 }
 \details{
-This is the primary function to call processing of raster data. The
-behaviour of the warper is dependent on the form of the input vrt datasets
-and the associated options.
+This function generates warped VRT objects types. This is
+particularly useful when we want to create a vrt_stack but our input images
+span multiple spatial reference systems. In such a situation, before warping
+our input data we must align with our desired oputput grid.
 }

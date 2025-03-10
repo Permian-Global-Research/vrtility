@@ -56,7 +56,7 @@ bbox_to_wkt <- function(bbox) {
 }
 
 
-#' Project an bounding box to a generic projected coordinate system
+#' Project a lat/long bounding box to a generic projected coordinate system
 #' @param x numeric vector of length 4 representing a bounding box (in lat/long)
 #' @param proj a character vector. The projection to use. One of "laea", "aeqd",
 #' "utm", "pconic", or "eqdc".
@@ -66,10 +66,9 @@ bbox_to_wkt <- function(bbox) {
 #' string.
 #' @param opts a character vector. Additional proj options to pass to the
 #' proj string. see details for more information.
-#' @param return_as a character vector. Whether to return the proj4 string or
-#' WKT representation of the projected coordinate system.
-#' @return a character vector. The proj4 string or WKT representation of the
-#' projected coordinate system.
+#' @return a numeric vector of length 4 representing the projected bounding box
+#' in the new coordinate system. Attributes include the new proj4 and wkt
+#' string.
 #' @export
 #' @details For further info about the available "generic" projects see:
 #' for utm: \url{https://proj.org/en/9.4/operations/projections/utm.html}
@@ -77,20 +76,27 @@ bbox_to_wkt <- function(bbox) {
 #' for aeqd: \url{https://proj.org/en/9.4/operations/projections/aeqd.html}
 #' for pconic: \url{https://proj.org/en/9.4/operations/projections/pconic.html}
 #' for eqdc: \url{https://proj.org/en/9.4/operations/projections/eqdc.html}
-to_projected <- function(
+#' @examples
+#' bbox <- gdalraster::bbox_from_wkt(
+#'   wkt = wk::wkt("POINT (144.3 -7.6)"),
+#'   extend_x = 0.17,
+#'   extend_y = 0.125
+#' )
+#'
+#' bbox_to_projected(bbox)
+#'
+bbox_to_projected <- function(
   x,
   proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
   ellps = "WGS84",
   no_defs = TRUE,
-  opts = "",
-  return_as = c("wkt", "proj4")
+  opts = ""
 ) {
   # arg assertions
   x <- validate_bbox(x)
   proj <- rlang::arg_match(proj)
   v_assert_type(no_defs, "no_defs", "logical")
   v_assert_type(opts, "opts", "character")
-  return_as <- rlang::arg_match(return_as)
 
   # get centroid in latlong
   cent_coor <- gdalraster::g_centroid(bbox_to_wkt(x))
@@ -146,7 +152,18 @@ to_projected <- function(
     )
   ))
 
-  switch(return_as, proj4 = prj, wkt = gdalraster::srs_to_wkt(prj))
+  proj4 <- prj
+  wkt <- gdalraster::srs_to_wkt(prj)
+
+  te <- gdalraster::bbox_transform(
+    x,
+    gdalraster::srs_to_wkt("EPSG:4326"),
+    wkt
+  )
+  attr(te, "proj4") <- proj4
+  attr(te, "wkt") <- wkt
+
+  return(te)
 }
 
 

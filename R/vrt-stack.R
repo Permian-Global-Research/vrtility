@@ -25,6 +25,8 @@ vrt_stack.default <- function(x, ...) {
 #' @param quiet Logical. If TRUE, suppress GDAL progress bar
 #' @rdname vrt_stack
 vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
+  assert_srs_len(x)
+
   vrt_paths <- purrr::map_chr(
     x[[1]],
     function(.x) {
@@ -40,7 +42,6 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
   gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
-    cl_arg = c("-allow_projection_difference"), # TODO: is this still  needed with warped VRT?
     quiet = quiet
   )
 
@@ -188,5 +189,5 @@ save_vrt.vrt_block <- function(
 ) {
   vrt_xml <- xml2::read_xml(x$vrt)
   xml2::write_xml(vrt_xml, outfile)
-  return(outfile)
+  invisible(outfile)
 }

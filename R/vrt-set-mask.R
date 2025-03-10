@@ -10,8 +10,8 @@
 #' @rdname vrt_set_maskfun
 vrt_set_maskfun <- function(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 ) {
@@ -32,8 +32,8 @@ vrt_set_maskfun.default <- function(x, ...) {
 #' @rdname vrt_set_maskfun
 vrt_set_maskfun.vrt_block <- function(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 ) {
@@ -92,7 +92,9 @@ vrt_set_maskfun.vrt_block <- function(
   ))
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
-  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf))
+  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf)) #
+
+  xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
 
   # update all other bands
   purrr::walk(bands[-mask_idx], function(.x) {
@@ -124,6 +126,14 @@ vrt_set_maskfun.vrt_block <- function(
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
+
+  tf <- set_vrt_metadata(
+    tf,
+    keys = "mask_band_name",
+    values = mask_band,
+    as_file = TRUE
+  )
+
   build_vrt_block(tf, maskfun = mask_pixfun, pixfun = x$pixfun)
 }
 
@@ -134,26 +144,28 @@ vrt_set_maskfun.vrt_block <- function(
 #' @export
 vrt_set_maskfun.vrt_collection <- function(
   x,
-  valid_bits,
   mask_band,
+  valid_bits,
   mask_pixfun = vrtility::bitmask_numba(),
   drop_mask_band = TRUE
 ) {
-  mask_band <- check_mask_band(x)
+  check_mask_band(x, mask_band)
   purrr::map(
     x$vrt,
-    ~ vrt_set_maskfun(.x, valid_bits, mask_band, mask_pixfun, drop_mask_band)
+    ~ vrt_set_maskfun(.x, mask_band, valid_bits, mask_pixfun, drop_mask_band)
   ) |>
     build_vrt_collection(maskfun = mask_pixfun, pixfun = x$pixfun)
 }
 
 
-check_mask_band <- function(x) {
-  if (nchar(x$mask_band_name) == 0) {
-    cli::cli_abort(c(
-      "!" = "No mask band is assigned.",
-      "i" = "This must be set in `vrt_collect()`"
-    ))
+check_mask_band <- function(x, mb) {
+  if (!mb %in% x$assets) {
+    cli::cli_abort(
+      c(
+        "Could not find band named: {mb}",
+        "i" = "Available bands: ",
+        ">" = (paste(x$assets, collapse = ", "))
+      )
+    )
   }
-  return(x$mask_band_name)
 }

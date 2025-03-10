@@ -10,6 +10,7 @@
 #' us to transform the srs right at the start of the vrt blocking process.
 vrt_to_warped_vrt <- function(
   src,
+  band,
   t_srs,
   te,
   tr = NULL,
@@ -17,12 +18,14 @@ vrt_to_warped_vrt <- function(
 ) {
   tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  call_vrt_warp(
+  call_vrt_compute(
     src,
     tfw,
     t_srs,
     warp_options = combine_warp_opts(
       c(
+        "-b",
+        band,
         "-r",
         resampling
       ),
