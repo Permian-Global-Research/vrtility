@@ -46,24 +46,7 @@ You can install the development version of vrtility from
 ``` r
 # install.packages("pak")
 pak::pkg_install("Permian-Global-Research/vrtility")
-# next set up the required Python environment
-vrtility::build_vrtility_python()
 ```
-
-### Possible extra steps.
-
-For now, {vrtility} requires the use of a virtual python environment -
-this is a lighter and safer way to manage python envs than with conda or
-the system python, respectively. It may be necessary to install the
-virtualenv package for python3.
-
-This can be done on Debian/Ubuntu with:
-
-    sudo apt-get install python3-venv
-
-or if on MacOS or Windows, you can install it with pip:
-
-    python3 -m pip install virtualenv
 
 ## Example
 
@@ -96,6 +79,13 @@ s2_stac <- sentinel2_stac_query(
   max_cloud_cover = 35,
   assets = c("B02", "B03", "B04", "SCL")
 )
+# number of items:
+length(s2_stac$features)
+#> [1] 12
+```
+
+``` r
+
 tic()
 median_composite <- vrt_collect(s2_stac) |>
   vrt_set_maskfun(mask_band = "SCL", valid_bits = c(4, 5, 6, 7, 11)) |>
@@ -104,7 +94,7 @@ median_composite <- vrt_collect(s2_stac) |>
   vrt_set_pixelfun() |>
   vrt_compute(outfile = fs::file_temp(ext = "tif"), quiet = TRUE)
 toc()
-#> 108.841 sec elapsed
+#> 116.443 sec elapsed
 ```
 
 ``` r

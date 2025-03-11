@@ -58,6 +58,11 @@ set_py_env_vals sets the environment variables required by the
 vrtility package - typically not required.
 }
 \details{
+In general this function shouldnt be required but if, for example,
+you wish to use a custom python pixel function which uses a python package
+not installed by default (currently only numpy and numba), then you can use
+this function to install the package, making sure to set action as "add".
+
 set_py_env_vals is only required if you are running reticulate::py_env in
 some non-standard way. In general it is a lot easier to  use #
 vrtility_py_require which will automatically set the necessary options.
