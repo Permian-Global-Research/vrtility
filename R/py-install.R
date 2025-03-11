@@ -7,6 +7,10 @@
 #' @return Invisible
 #' @export
 #' @rdname vrtility_python
+#' @details In general this function shouldnt be required but if, for example,
+#' you wish to use a custom python pixel function which uses a python package
+#' not installed by default (currently only numpy and numba), then you can use
+#' this function to install the package, making sure to set action as "add".
 vrtility_py_require <- function(
   packages = NULL,
   python_version = ">=3.9",
