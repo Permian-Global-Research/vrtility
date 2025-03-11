@@ -3,6 +3,7 @@
 \name{vrt_compute}
 \alias{vrt_compute}
 \alias{vrt_compute.vrt_block}
+\alias{vrt_compute.vrt_stack_warped}
 \alias{vrt_compute.vrt_collection}
 \title{Generate a composite raster from (virtual) raster sources.}
 \usage{
@@ -23,6 +24,17 @@ vrt_compute(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
+  warp_options = getOption("vrt.gdal.warp.options"),
+  config_options = getOption("vrt.gdal.config.options"),
+  quiet = FALSE
+)
+
+\method{vrt_compute}{vrt_stack_warped}(
+  x,
+  outfile,
+  t_srs,
+  te,
+  tr,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE

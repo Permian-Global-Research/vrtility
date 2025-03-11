@@ -57,7 +57,18 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
     as_file = TRUE
   )
 
-  build_vrt_stack(main_vrt, pix_fun = x$pixfun, maskfun = x$maskfun)
+  if (inherits(x, "vrt_collection_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+
+  build_vrt_stack(
+    main_vrt,
+    pix_fun = x$pixfun,
+    maskfun = x$maskfun,
+    warped = warped
+  )
 }
 
 
@@ -75,6 +86,7 @@ build_vrt_stack <- function(
   x,
   maskfun = NULL,
   pixfun = NULL,
+  warped = FALSE,
   ...
 ) {
   # validate the vrt against the schema
@@ -109,7 +121,13 @@ build_vrt_stack <- function(
     maskfun = maskfun
   )
 
-  class(rvrt) <- c("vrt_stack", "vrt_block", "list")
+  if (warped) {
+    warped <- "vrt_stack_warped"
+  } else {
+    warped <- NULL
+  }
+
+  class(rvrt) <- c(warped, "vrt_stack", "vrt_block", "list")
 
   return(rvrt)
 }
