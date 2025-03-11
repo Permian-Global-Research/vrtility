@@ -19,7 +19,7 @@ Imports:
     httr,
     lubridate,
     purrr,
-    reticulate,
+    reticulate (>= 1.41.0.1),
     rlang,
     rstac,
     scales,
