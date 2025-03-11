@@ -27,7 +27,7 @@ plot_raster_src(
   yaxs = "r",
   legend = if (nbands == 1) TRUE else FALSE,
   digits = 2,
-  na_col = rgb(0, 0, 0, 0),
+  na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 )
 }
