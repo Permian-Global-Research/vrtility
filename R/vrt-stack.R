@@ -92,7 +92,7 @@ build_vrt_stack <- function(
   # validate the vrt against the schema
   v_assert_valid_schema(x)
   # read and verify modified VRT
-  gdr <- new(gdalraster::GDALRaster, x)
+  gdr <- methods::new(gdalraster::GDALRaster, x)
   ras_count <- gdr$getRasterCount()
   assets <- purrr::map_chr(
     seq_len(ras_count),
