@@ -103,6 +103,7 @@ build_vrt_collection <- function(
   x,
   pixfun = NULL,
   maskfun = NULL,
+  warped = FALSE,
   ...
 ) {
   bbox <- purrr::map(x, function(.x) .x$bbox) |>
@@ -168,7 +169,13 @@ build_vrt_collection <- function(
     maskfun = maskfun
   )
 
-  class(rvrt) <- c("vrt_collection", "vrt_block", "list")
+  if (warped) {
+    warped <- "vrt_collection_warped"
+  } else {
+    warped <- NULL
+  }
+
+  class(rvrt) <- c(warped, "vrt_collection", "vrt_block", "list")
 
   return(rvrt)
 }

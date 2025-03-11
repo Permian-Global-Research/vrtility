@@ -50,5 +50,11 @@ vrt_set_pixelfun.vrt_stack <- function(
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
-  build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun)
+
+  if (inherits(x, "vrt_stack_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+  build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
 }
