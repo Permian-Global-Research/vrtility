@@ -18,11 +18,13 @@ Imports:
     grDevices,
     httr,
     lubridate,
+    methods,
     purrr,
     reticulate (>= 1.41.0.1),
     rlang,
     rstac,
     scales,
+    stats,
     withr,
     wk,
     xml2

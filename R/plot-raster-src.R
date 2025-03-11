@@ -31,15 +31,15 @@ plot_raster_src <- function(
   yaxs = "r",
   legend = if (nbands == 1) TRUE else FALSE,
   digits = 2,
-  na_col = rgb(0, 0, 0, 0),
+  na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
-  dpi <- dev.size("px")[1] / dev.size("in")[1]
+  dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
   target_divisor <- dev_size[1] * 1.5
 
-  ds <- new(gdalraster::GDALRaster, x)
+  ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(if (ds$isOpen()) ds$close())
 
   rxs <- ds$getRasterXSize()

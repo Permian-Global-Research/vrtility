@@ -60,7 +60,7 @@ vrt_set_maskfun.vrt_block <- function(
 
   mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   ts <- save_vrt(x)
-  ds <- new(gdalraster::GDALRaster, ts)
+  ds <- methods::new(gdalraster::GDALRaster, ts)
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
   msk_file <- band_files[mask_idx]
 
