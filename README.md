@@ -7,6 +7,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of vrtility is to make the best use of GDAL’s VRT capabilities
@@ -94,7 +95,7 @@ median_composite <- vrt_collect(s2_stac) |>
   vrt_set_pixelfun() |>
   vrt_compute(outfile = fs::file_temp(ext = "tif"), quiet = TRUE)
 toc()
-#> 116.443 sec elapsed
+#> 108.865 sec elapsed
 ```
 
 ``` r
