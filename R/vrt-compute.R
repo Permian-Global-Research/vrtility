@@ -107,7 +107,7 @@ vrt_compute.vrt_stack <- function(
   if (any(missing(t_srs), missing(te), missing(tr))) {
     cli::cli_abort(
       c(
-        "The following arguments are required for a `vrt_stacked_warp` object:",
+        "The following arguments are required for a `vrt_stack` object:",
         ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
       )
     )
