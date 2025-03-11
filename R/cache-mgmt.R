@@ -99,3 +99,16 @@ vrt_cache_destroy <- function() {
 
   invisible()
 }
+
+#' onload cache checks
+#' @noRd
+#' @keywords internal
+cache_init_checks <- function() {
+  op <- options()
+  op_vrtility <- list(
+    vrt.cache = tempdir()
+  )
+
+  toset <- !(names(op_vrtility) %in% names(op))
+  if (any(toset)) options(op_vrtility[toset])
+}

@@ -9,9 +9,9 @@ compute_with_py_env <- function(
 
   if (is.na(py_bin)) {
     cli::cli_abort(c(
-      "Cannot locate the {cli::style_bold('VRTILITY_PYTHON')} environment",
+      "Cannot locate an appropriate python environment",
       "i" = "You may need to run
-        {cli::code_highlight('`build_vrtility_python()`')} to install it"
+        {cli::code_highlight('`vrtility_py_require()`')} to install it"
     ))
   }
 

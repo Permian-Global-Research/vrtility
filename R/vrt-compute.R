@@ -18,16 +18,14 @@
 vrt_compute <- function(
   x,
   outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
+  t_srs,
+  te,
+  tr,
   warp_options = getOption("vrt.gdal.warp.options"),
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
 ) {
   v_assert_type(outfile, "outfile", "character")
-  v_assert_length(te, "te", 4)
-
   UseMethod("vrt_compute")
 }
 
@@ -49,8 +47,8 @@ vrt_compute.vrt_block <- function(
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
 ) {
+  v_assert_length(te, "te", 4)
   v_assert_length(tr, "tr", 2)
-  # browser()
   tmp_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   file_src <- xml2::read_xml(x$vrt)
   xml2::write_xml(file_src, tmp_vrt)
@@ -72,6 +70,31 @@ vrt_compute.vrt_block <- function(
 #' @export
 #' @rdname vrt_compute
 vrt_compute.vrt_stack_warped <- function(
+  x,
+  outfile,
+  t_srs = x$srs,
+  te = x$bbox,
+  tr = x$res,
+  warp_options = getOption("vrt.gdal.warp.options"),
+  config_options = getOption("vrt.gdal.config.options"),
+  quiet = FALSE
+) {
+  class(x) <- setdiff(class(x), "vrt_stack_warped")
+  vrt_compute(
+    x = x,
+    outfile = outfile,
+    t_srs = t_srs,
+    te = te,
+    tr = tr,
+    warp_options = warp_options,
+    config_options = config_options,
+    quiet = quiet
+  )
+}
+
+#' @export
+#' @rdname vrt_compute
+vrt_compute.vrt_stack <- function(
   x,
   outfile,
   t_srs,

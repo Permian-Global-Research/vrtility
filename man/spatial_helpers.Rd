@@ -2,6 +2,10 @@
 % Please edit documentation in R/spatial-utils.R
 \name{bbox_to_projected}
 \alias{bbox_to_projected}
+\alias{to_wkt}
+\alias{to_wkt.default}
+\alias{to_wkt.numeric}
+\alias{to_wkt.character}
 \title{Project a lat/long bounding box to a generic projected coordinate system}
 \usage{
 bbox_to_projected(
@@ -11,9 +15,17 @@ bbox_to_projected(
   no_defs = TRUE,
   opts = ""
 )
+
+to_wkt(x)
+
+\method{to_wkt}{default}(x)
+
+\method{to_wkt}{numeric}(x)
+
+\method{to_wkt}{character}(x)
 }
 \arguments{
-\item{x}{numeric vector of length 4 representing a bounding box (in lat/long)}
+\item{x}{The object to convert to wkt.}
 
 \item{proj}{a character vector. The projection to use. One of "laea", "aeqd",
 "utm", "pconic", or "eqdc".}
@@ -31,9 +43,13 @@ proj string. see details for more information.}
 a numeric vector of length 4 representing the projected bounding box
 in the new coordinate system. Attributes include the new proj4 and wkt
 string.
+
+A character string of the object in wkt format.
 }
 \description{
 Project a lat/long bounding box to a generic projected coordinate system
+
+Convert an object to wkt.
 }
 \details{
 For further info about the available "generic" projects see:
@@ -51,5 +67,4 @@ bbox <- gdalraster::bbox_from_wkt(
 )
 
 bbox_to_projected(bbox)
-
 }

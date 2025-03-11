@@ -1,9 +1,8 @@
 #' Validate a bounding box
 #' @param bbox A numeric vector of length 4 representing a bounding box
 #' @return A numeric vector of length 4 representing a bounding box
-#' @export
-#' @examples
-#' validate_bbox(c(-180, -90, 180, 90))
+#' @noRd
+#' @keywords internal
 validate_bbox <- function(bbox) {
   v_assert_type(bbox, "bbox", "numeric")
   v_assert_length(bbox, "bbox", 4)
@@ -42,8 +41,8 @@ validate_bbox <- function(bbox) {
 #' Convert a bounding box to a WKT string
 #' @param bbox A numeric vector of length 4 representing a bounding box
 #' @return A WKT string
+#' @noRd
 #' @keywords internal
-#' @export
 bbox_to_wkt <- function(bbox) {
   wk::wkt(
     glue::glue(
@@ -84,7 +83,7 @@ bbox_to_wkt <- function(bbox) {
 #' )
 #'
 #' bbox_to_projected(bbox)
-#'
+#' @rdname spatial_helpers
 bbox_to_projected <- function(
   x,
   proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
@@ -171,13 +170,12 @@ bbox_to_projected <- function(
 #' @param x The object to convert to wkt.
 #' @return A character string of the object in wkt format.
 #' @export
-#' @rdname vrtility-internal
-#' @keywords internal
+#' @rdname spatial_helpers
 to_wkt <- function(x) {
   UseMethod("to_wkt")
 }
 
-#' @rdname vrtility-internal
+#' @rdname spatial_helpers
 #' @export
 to_wkt.default <- function(x) {
   rlang::abort(
@@ -187,13 +185,13 @@ to_wkt.default <- function(x) {
 }
 
 #' @export
-#' @rdname vrtility-internal
+#' @rdname spatial_helpers
 to_wkt.numeric <- function(x) {
   gdalraster::epsg_to_wkt(x)
 }
 
 #' @export
-#' @rdname vrtility-internal
+#' @rdname spatial_helpers
 to_wkt.character <- function(x) {
   gdalraster::srs_to_wkt(x)
 }
