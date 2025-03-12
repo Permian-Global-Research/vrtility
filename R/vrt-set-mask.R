@@ -58,13 +58,31 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   ts <- save_vrt(x)
   ds <- methods::new(gdalraster::GDALRaster, ts)
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  msk_file <- band_files[mask_idx]
+  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
+  if (length(band_files) == 1) {
+    # gdalraster::buildVRT(
+    #   mskvrt,
+    #   band_files,
+    #   cl_arg = c("-b", mask_idx),
+    #   quiet = TRUE
+    # )
+    # browser()
+    gdalraster::translate(
+      band_files,
+      dst_filename = mskvrt,
+      cl_arg = c("-b", mask_idx),
+      quiet = TRUE
+    )
+    # browser()
+    # plot_raster_src(mskvrt)
+  } else {
+    msk_file <- band_files[mask_idx]
+    gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
+  }
 
   msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
@@ -150,11 +168,22 @@ vrt_set_maskfun.vrt_collection <- function(
   drop_mask_band = TRUE
 ) {
   check_mask_band(x, mask_band)
-  purrr::map(
+  masked_blocks <- purrr::map(
     x$vrt,
     ~ vrt_set_maskfun(.x, mask_band, valid_bits, mask_pixfun, drop_mask_band)
-  ) |>
-    build_vrt_collection(maskfun = mask_pixfun, pixfun = x$pixfun)
+  )
+
+  if (inherits(x, "vrt_collection_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+  build_vrt_collection(
+    masked_blocks,
+    maskfun = mask_pixfun,
+    pixfun = x$pixfun,
+    warped = warped
+  )
 }
 
 
