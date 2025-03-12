@@ -64,21 +64,12 @@ vrt_set_maskfun.vrt_block <- function(
   mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   if (length(band_files) == 1) {
-    # gdalraster::buildVRT(
-    #   mskvrt,
-    #   band_files,
-    #   cl_arg = c("-b", mask_idx),
-    #   quiet = TRUE
-    # )
-    # browser()
-    gdalraster::translate(
+    gdalraster::buildVRT(
+      mskvrt,
       band_files,
-      dst_filename = mskvrt,
       cl_arg = c("-b", mask_idx),
       quiet = TRUE
     )
-    # browser()
-    # plot_raster_src(mskvrt)
   } else {
     msk_file <- band_files[mask_idx]
     gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
@@ -111,8 +102,10 @@ vrt_set_maskfun.vrt_block <- function(
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
   xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf)) #
-
+  sourceband <- xml2::xml_find_first(wmxmlsrc, ".//SourceBand")
+  xml2::xml_remove(sourceband)
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
+  # browser()
 
   # update all other bands
   purrr::walk(bands[-mask_idx], function(.x) {
