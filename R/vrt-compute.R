@@ -105,19 +105,15 @@ vrt_compute.vrt_stack <- function(
   quiet = FALSE
 ) {
   if (any(missing(t_srs), missing(te), missing(tr))) {
-    cli::cli_abort(
-      c(
-        "The following arguments are required for a `vrt_stack` object:",
-        ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
-      )
-    )
+    missing_args_error("vrt_stack")
   }
   NextMethod()
 }
 
+
 #' @export
 #' @rdname vrt_compute
-vrt_compute.vrt_collection <- function(
+vrt_compute.vrt_collection_warped <- function(
   x,
   outfile,
   t_srs = x$srs,
@@ -127,12 +123,41 @@ vrt_compute.vrt_collection <- function(
   config_options = getOption("vrt.gdal.config.options"),
   quiet = FALSE
 ) {
+  class(x) <- setdiff(class(x), "vrt_collection_warped")
+  vrt_compute(
+    x = x,
+    outfile = outfile,
+    t_srs = t_srs,
+    te = te,
+    tr = tr,
+    warp_options = warp_options,
+    config_options = config_options,
+    quiet = quiet
+  )
+}
+
+
+#' @export
+#' @rdname vrt_compute
+vrt_compute.vrt_collection <- function(
+  x,
+  outfile,
+  t_srs,
+  te,
+  tr,
+  warp_options = getOption("vrt.gdal.warp.options"),
+  config_options = getOption("vrt.gdal.config.options"),
+  quiet = FALSE
+) {
+  if (any(missing(t_srs), missing(te), missing(tr))) {
+    missing_args_error("vrt_collection")
+  }
   v_assert_length(tr, "tr", 2)
 
   uniq_pths <- purrr::imap_chr(
-    x[[1]],
+    unname(x[[1]]),
     function(.x, .y) {
-      if (nchar(.x$date_time) > 0) .x$date_time else .y
+      if (nchar(.x$date_time) > 0) .x$date_time else as.character(.y)
     }
   ) |>
     unique_fp(outfile)
@@ -226,4 +251,15 @@ combine_warp_opts <- function(warp_opts, te, res = NULL) {
   }
 
   return(warp_opts)
+}
+
+#' @noRd
+#' @keywords internal
+missing_args_error <- function(x_class) {
+  cli::cli_abort(
+    c(
+      "The following arguments are required for a `{x_class}` object:",
+      ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
+    )
+  )
 }
