@@ -92,3 +92,20 @@ assert_srs_len <- function(x) {
     )
   }
 }
+
+
+assert_files_exist <- function(x) {
+  chkpths <- fs::file_exists(x)
+  if (!all(chkpths)) {
+    cli::cli_abort(
+      c(
+        "The following paths could not be located:",
+        purrr::map_chr(
+          names(which(!chkpths)),
+          ~ cli::format_bullets_raw(c(">" = .x))
+        )
+      )
+    )
+  }
+  invisible(x)
+}
