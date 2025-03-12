@@ -7,6 +7,9 @@ scratch.R
 *.tif
 *.vrt
 
+# But track TIF files in inst directory
+!inst/**/*.tif
+
 /.quarto/
 /air.toml
 /.vscode/
