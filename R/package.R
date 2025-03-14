@@ -43,7 +43,7 @@
 #' }
 #' @section VRT helpers:
 #' \describe{
-#' \item{\code{\link{save_vrt}}}{Save a VRT object to a file}
+#' \item{\code{\link{vrt_save}}}{Save a VRT object to a file}
 #' \item{\code{\link{vrt_schema}}}{(data object)The official GDAL VRT schema as a character object}
 #' }
 #'
@@ -58,5 +58,4 @@
 .onLoad <- function(libname, pkgname) {
   vrtility_py_require(c("numpy", "numba"))
   cache_init_checks()
-  gdal_init_opts()
 }
