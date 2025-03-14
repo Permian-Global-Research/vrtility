@@ -132,6 +132,9 @@ The default is transparent (\code{"#00000000"}, the return value of
 
 \item{...}{Other parameters to be passed to \code{plot.default()}.}
 
+\item{config_options}{A named character vector of gdal config options to set
+before attempting to read the VRT.}
+
 \item{item}{The numeric index of the item, in the vrt_collection, to plot}
 }
 \description{

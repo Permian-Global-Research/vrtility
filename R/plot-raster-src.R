@@ -106,6 +106,8 @@ plot_raster_src <- function(
 }
 
 
+#' @param config_options A named character vector of gdal config options to set
+#' before attempting to read the VRT.
 #' @export
 #' @rdname plot_raster
 #' @inheritParams plot_raster_src
@@ -120,10 +122,12 @@ plot.vrt_block <- function(x, ..., config_options = gdal_config_opts()) {
 #' @rdname plot_raster
 plot.vrt_stack <- function(x, ..., config_options = gdal_config_opts()) {
   if (!inherits(x, "vrt_stack_warped")) {
-    cli::inform(
-      "i" = "You are plotting a non-warped vrt_stack - this is probably okay",
-      " " = "But, as no extent parameters are set, the plot may not be as 
-      expected.",
+    cli::cli_inform(
+      c(
+        "i" = "You are plotting a non-warped vrt_stack - this is probably okay",
+        " " = "But, as no extent parameters are set, the plot may not be as 
+      expected."
+      )
     )
   }
   NextMethod()
