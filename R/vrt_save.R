@@ -23,7 +23,21 @@ vrt_save.vrt_block <- function(
   if (fs::path_ext(outfile) != "vrt") {
     cli::cli_abort("The `outfile` extension must be'.vrt'.")
   }
+
   vrt_xml <- xml2::read_xml(x$vrt)
-  xml2::write_xml(vrt_xml, outfile)
+
+  if (fs::path_has_parent(outfile, getOption("vrt.cache"))) {
+    xml2::write_xml(vrt_xml, outfile)
+  } else {
+    vrt_xml <- xml2::read_xml(x$vrt)
+    tempvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+    xml2::write_xml(
+      vrt_xml,
+      tempvrt
+    )
+
+    gdalraster::buildVRT(outfile, tempvrt, quiet = TRUE)
+  }
+
   invisible(outfile)
 }
