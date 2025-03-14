@@ -7,7 +7,7 @@
 vrt_save(x, outfile)
 }
 \arguments{
-\item{x}{A vrt_{x} object.}
+\item{x}{A \code{vrt_stack} of \code{vrt_block} object.}
 
 \item{outfile}{A character string of the output file}
 }
