@@ -57,15 +57,6 @@ v_assert_true <- function(x, name) {
   }
 }
 
-v_assert_false <- function(x, name) {
-  if (x) {
-    cli::cli_abort(
-      "'{name}' must be FALSE",
-      class = "vrtility_false_error"
-    )
-  }
-}
-
 v_assert_res <- function(x) {
   v_assert_type(x, "tr", "numeric", nullok = FALSE, multiple = TRUE)
   if (length(x) == 1) {
