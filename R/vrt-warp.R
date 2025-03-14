@@ -94,7 +94,7 @@ vrt_warp.vrt_block <- function(
   resamp_methods[mas_band_idx] <- "near"
 
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  save_vrt(x, tf)
+  vrt_save(x, tf)
   vrtwl <- purrr::map2_chr(
     seq_along(assets),
     resamp_methods,

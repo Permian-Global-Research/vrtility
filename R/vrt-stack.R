@@ -180,32 +180,3 @@ print.vrt_stack <- function(
   )
   invisible(x)
 }
-
-
-#' Save a vrt_block object to disk
-#' @export
-#' @rdname vrt_stack
-save_vrt <- function(x, outfile) {
-  UseMethod("save_vrt")
-}
-
-#' @keywords internal
-#' @noRd
-save_vrt.default <- function(x, ...) {
-  cli::cli_abort(
-    "The save_vrt method is not implemented for class {class(x)}",
-    class = "vrtility_type_error"
-  )
-}
-
-#' @export
-#' @param outfile A character string of the output file
-#' @rdname vrt_stack
-save_vrt.vrt_block <- function(
-  x,
-  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-) {
-  vrt_xml <- xml2::read_xml(x$vrt)
-  xml2::write_xml(vrt_xml, outfile)
-  invisible(outfile)
-}
