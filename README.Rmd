@@ -58,13 +58,27 @@ pak::pkg_install("Permian-Global-Research/vrtility")
 
 ## Example
 
-Here is a simple example where we: define a bounding box, search a STAC catalog
-for Sentinel-2 data, create a vrt_collection object (basically a list of warped 
-VRTs). We then apply the masking using pixel functions (I can't get internal or 
-external masks to work for these VRTs), finally these images are stacked 
-(combined into a single VRT with multiple layers in each VRTRasterBand), the
-median pixel function is then added to the VRT and all of this is then "lazily"
-calculated at the end of the vrt pipeline using gdalwarp.
+Here is a simple example where we: 
+
+1. Define a bounding box and search a STAC catalog for Sentinel-2 data
+
+2. Create a `vrt_collection` object - essentially a list of individual VRTs 
+(each making up one image) which we refer to as `vrt_block`s in this package. 
+
+3. Then, we apply the mask using pixel functions. This simply modifies the XML
+of the VRT "blocks".
+
+4. Because this set of images have more than one common spatial reference system 
+(SRS) we convert the `vrt_block`s in the `vrt_collection` to  warped VRTs, 
+giving us a `vrt_collection_warped` object. 
+
+5. These images are then "stacked" (combined into a single VRT with multiple 
+layers in each VRTRasterBand), giving us a `vrt_stack` object.
+
+6. A median pixel function is then added to the `vrt_stack`. 
+
+7. all of this is then "lazily" computed at the end of the vrt pipeline using 
+gdalwarp.
 
 ```{r example, fig.width=10, fig.height=8}
 library(vrtility)
@@ -105,5 +119,59 @@ plot_raster_src(
   median_composite,
   c(3, 2, 1)
 )
+```
+
+
+We can also use on-disk raster files too, as shown here with this example 
+dataset - note that the inputs have multiple spatial reference systems and
+therefore we need to warp them (as in the above example) before stacking. If 
+your images are all in the same CRS, you will save a lot of time by warping only
+once in `vrt_compute`. We can plot thse `vrt_{x}` objects using the `plot` 
+but note that for very large rasters where we are computing pixel functions this
+can be slow and we are better off using `vrt_compute` to write to disk and then
+plotting the output.
+
+```{r example2, fig.width=10, fig.height=8}
+s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
+
+ex_collect <- vrt_collect(s2files)
+par(mfrow = c(2, 2))
+purrr::walk(
+  seq_len(ex_collect$n_items),
+  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
+)
+
+ex_collect_mask <- vrt_set_maskfun(
+  ex_collect,
+  mask_band = "SCL",
+  valid_bits = c(4, 5, 6, 7, 11)
+)
+
+purrr::walk(
+  seq_len(ex_collect_mask$n_items),
+  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+)
+
+# extract a block to use as a template for warping
+t_block <- ex_collect[[1]][[4]]
+
+ex_composite <- vrt_warp(
+  ex_collect_mask,
+  t_srs = t_block$srs,
+  te = t_block$bbox,
+  tr = c(20, 20)
+) |>
+  vrt_stack() |>
+  vrt_set_pixelfun(pixfun = median_numpy())
+
+par(mfrow = c(1, 1))
+plot(ex_composite, bands = c(3, 2, 1), quiet = TRUE)
+
+# write to disk if we wanted to...
+# vrt_compute(
+#   ex_composite,
+#   outfile = fs::file_temp(ext = "tif"),
+#   engine = "warp"
+# )
 ```
 
