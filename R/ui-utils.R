@@ -185,10 +185,7 @@ crs_printer <- function(x) {
 opts_check <- function(x, o) {
   if (o %in% x) {
     cli::cli_warn(
-      c(
-        "!" = "The {o} option is already set in the warp options",
-        "i" = "It is recommended to set the -te option using the `te` argument"
-      )
+      "The {o} option is already set in the warp options"
     )
   }
 }
