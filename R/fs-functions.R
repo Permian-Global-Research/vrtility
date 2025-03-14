@@ -1,3 +1,5 @@
+#' @noRd
+#' @keywords internal
 unique_fp <- function(uid, basepath) {
   dir <- fs::path_dir(basepath)
   basefile <- fs::path_ext_remove(fs::path_file(basepath))
