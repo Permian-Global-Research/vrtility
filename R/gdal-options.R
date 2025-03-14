@@ -112,7 +112,29 @@ gdalwarp_options <- function(
     if (multi) "-multi" else NULL,
     "-wm",
     warp_memory,
-    if (!is.null(num_threads))
-      c("-wo", paste0("NUM_THREADS=", num_threads)) else NULL
+    if (!is.null(num_threads)) {
+      c("-wo", paste0("NUM_THREADS=", num_threads))
+    } else {
+      NULL
+    }
   )
+}
+
+#' Set the GDAL configuration options
+#' @param x A named character vector of the configuration options
+#' @export
+#' @rdname gdal_options
+#' @examples
+#' set_gdal_config(gdal_config_opts())
+set_gdal_config <- function(x) {
+  # Store original values
+  original_values <- purrr::map_chr(
+    names(x),
+    ~ gdalraster::get_config_option(.x)
+  ) |>
+    purrr::set_names(names(x))
+
+  # Set the config options
+  purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
+  invisible(original_values)
 }
