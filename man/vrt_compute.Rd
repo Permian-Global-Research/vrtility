@@ -15,9 +15,13 @@ vrt_compute(
   t_srs,
   te,
   tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling,
+  engine,
+  warp_options,
+  creation_options,
+  config_options,
+  add_cl_arg,
+  quiet
 )
 
 \method{vrt_compute}{vrt_block}(
@@ -26,9 +30,14 @@ vrt_compute(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 )
 
 \method{vrt_compute}{vrt_stack_warped}(
@@ -37,9 +46,14 @@ vrt_compute(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 )
 
 \method{vrt_compute}{vrt_stack}(
@@ -48,9 +62,14 @@ vrt_compute(
   t_srs,
   te,
   tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 )
 
 \method{vrt_compute}{vrt_collection_warped}(
@@ -59,9 +78,14 @@ vrt_compute(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 )
 
 \method{vrt_compute}{vrt_collection}(
@@ -70,9 +94,14 @@ vrt_compute(
   t_srs,
   te,
   tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 )
 }
 \arguments{
@@ -87,10 +116,23 @@ c(xmin, ymin, xmax, ymax) and must be the same SRS as in \code{t_srs}.}
 
 \item{tr}{A numeric vector of the target resolution in the form c(xres, yres)}
 
-\item{warp_options}{A character vector of options to pass to the warp}
+\item{resampling}{A character vector of the resampling method to be used.
+see details.}
+
+\item{engine}{A character vector of the engine to use for processing the
+raster data. See details.}
+
+\item{warp_options}{A character vector of options to pass to gdalwarp}
+
+\item{creation_options}{A character vector of options to pass to the
+the gdal "engine".}
 
 \item{config_options}{A character vector of options to set in the GDAL
 environment}
+
+\item{add_cl_arg}{A character vector of additional command line arguments
+that are not captured in \code{gdalwarp_options()} - these are not checked for
+validity.}
 
 \item{quiet}{A logical indicating whether to suppress output}
 }
@@ -101,7 +143,12 @@ A character string of the path to the output raster
 Generate a composite raster from (virtual) raster sources.
 }
 \details{
-This is the primary function to call processing of raster data. The
-behaviour of the warper is dependent on the form of the input vrt datasets
-and the associated options.
+The \code{resampling} default is "near", which should be chosen in vrt_warp has
+already been used but "bilinear" may be prefereable where the input data is
+has not yet been virtually aligned/resampled.
+
+The choice of \code{engine} will depend on the nature of the computation being
+carried out. In the majority of cases warping is preferred, especically when
+we are not processing the entirity of the input dataset (as is usually the
+case when working with online data sources).
 }

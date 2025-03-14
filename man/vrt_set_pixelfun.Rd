@@ -7,7 +7,7 @@
 \usage{
 vrt_set_pixelfun(x, pixfun = vrtility::median_numba())
 
-\method{vrt_set_pixelfun}{vrt_stack}(x, pixfun = vrtility::median_numba())
+\method{vrt_set_pixelfun}{vrt_stack}(x, pixfun = vrtility::median_numpy())
 }
 \arguments{
 \item{x}{A vrt_stack object}

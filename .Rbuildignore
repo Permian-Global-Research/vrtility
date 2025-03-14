@@ -5,6 +5,7 @@
 ^LICENSE\.md$
 ^\.vscode$
 ^air.toml$
+^.lintr$
 ^example-data$
 ^data-raw$
 ^\.github$

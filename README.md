@@ -23,7 +23,7 @@ expressions in time.
 
 - No intermediate downloads - the use of nested VRTs enables the
   download and processing of only the required data in a single gdalwarp
-  call. This reduces disk read/write time.
+  (or gdal_translate) call. This reduces disk read/write time.
 
 - use of numba in python pixel function(s) - not always faster but can
   be.
@@ -93,9 +93,12 @@ median_composite <- vrt_collect(s2_stac) |>
   vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
   vrt_stack() |>
   vrt_set_pixelfun() |>
-  vrt_compute(outfile = fs::file_temp(ext = "tif"), quiet = TRUE)
+  vrt_compute(
+    outfile = fs::file_temp(ext = "tif"),
+    warp_options = gdalwarp_options(num_threads = "ALL_CPUS")
+  )
 toc()
-#> 108.865 sec elapsed
+#> 97.966 sec elapsed
 ```
 
 ``` r
