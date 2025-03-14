@@ -108,10 +108,16 @@ plot_raster_src <- function(
 
 #' @param config_options A named character vector of gdal config options to set
 #' before attempting to read the VRT.
+#' @param quiet Logical indicating whether to suppress messages.
 #' @export
 #' @rdname plot_raster
 #' @inheritParams plot_raster_src
-plot.vrt_block <- function(x, ..., config_options = gdal_config_opts()) {
+plot.vrt_block <- function(
+  x,
+  ...,
+  config_options = gdal_config_opts(),
+  quiet = FALSE
+) {
   orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
   src <- vrt_save(x)
@@ -120,15 +126,22 @@ plot.vrt_block <- function(x, ..., config_options = gdal_config_opts()) {
 
 #' @export
 #' @rdname plot_raster
-plot.vrt_stack <- function(x, ..., config_options = gdal_config_opts()) {
+plot.vrt_stack <- function(
+  x,
+  ...,
+  config_options = gdal_config_opts(),
+  quiet = FALSE
+) {
   if (!inherits(x, "vrt_stack_warped")) {
-    cli::cli_inform(
-      c(
-        "i" = "You are plotting a non-warped vrt_stack - this is probably okay",
-        " " = "But, as no extent parameters are set, the plot may not be as 
+    if (!quiet) {
+      cli::cli_inform(
+        c(
+          "i" = "You are plotting a non-warped vrt_stack - this is probably okay",
+          " " = "But, as no extent parameters are set, the plot may not be as
       expected."
+        )
       )
-    )
+    }
   }
   NextMethod()
 }
@@ -136,15 +149,22 @@ plot.vrt_stack <- function(x, ..., config_options = gdal_config_opts()) {
 
 #' @export
 #' @rdname plot_raster
-plot.vrt_stack_warped <- function(x, ..., config_options = gdal_config_opts()) {
-  cli::cli_inform(
-    c(
-      "i" = "You a plotting a warped raster - this might be okay...",
-      " " = "But, If this is taking a long time you are probably better",
-      " " = "off saving the file first with `vrt_compute` and then plotting",
-      " " = "with `plot_raster_src()`."
+plot.vrt_stack_warped <- function(
+  x,
+  ...,
+  config_options = gdal_config_opts(),
+  quiet = FALSE
+) {
+  if (!quiet) {
+    cli::cli_inform(
+      c(
+        "i" = "You a plotting a warped raster - this might be okay...",
+        " " = "But, If this is taking a long time you are probably better",
+        " " = "off saving the file first with `vrt_compute` and then plotting",
+        " " = "with `plot_raster_src()`."
+      )
     )
-  )
+  }
   NextMethod()
 }
 
@@ -155,7 +175,8 @@ plot.vrt_collection <- function(
   x,
   item,
   ...,
-  config_options = gdal_config_opts()
+  config_options = gdal_config_opts(),
+  quiet = FALSE
 ) {
   x <- x[[1]][[item]]
   plot(x, ..., config_options = config_options)
