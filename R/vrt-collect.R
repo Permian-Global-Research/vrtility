@@ -1,5 +1,8 @@
 #' Construct the base VRT object for composing VRT pipelines.
 #' @param x An object to be used to create a vrt_x object see details.
+#' @param band_descriptions A character vector of band descriptions.
+#' @param datetimes A character vector of datetimes.
+#' @return A vrt_collection object.
 #' @rdname vrt_collect
 #' @export
 #' @details For now the main way to create a vrt_collection object, which forms
@@ -14,7 +17,9 @@
 #' reference system (SRS). If there are mutliple SRS values, use `vrt_warp()`
 #' to unify the projection of the collection.
 vrt_collect <- function(
-  x
+  x,
+  band_descriptions,
+  datetimes
 ) {
   UseMethod("vrt_collect")
 }
@@ -30,8 +35,77 @@ vrt_collect.default <- function(x, ...) {
 
 #' @rdname vrt_collect
 #' @export
+vrt_collect.character <- function(
+  x,
+  band_descriptions = NULL,
+  datetimes = rep("", length(x))
+) {
+  assert_files_exist(x)
+  v_assert_type(
+    band_descriptions,
+    "band_descriptions",
+    "character",
+    nullok = TRUE
+  )
+  v_assert_type(datetimes, "datetimes", "character", nullok = TRUE)
+  v_assert_length(datetimes, "datetimes", length(x), nullok = TRUE)
+
+  vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
+    tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+
+    gdalraster::buildVRT(
+      tf,
+      .x,
+      quiet = TRUE
+    )
+
+    ds <- methods::new(gdalraster::GDALRaster, .x)
+    on.exit(ds$close())
+    nbands <- ds$getRasterCount()
+    v_assert_length(band_descriptions, "band_descriptions", nbands)
+
+    if (is.null(band_descriptions)) {
+      band_descriptions <- purrr::map_chr(
+        seq_len(nbands),
+        ~ ds$getDescription(.x)
+      )
+      if (any(band_descriptions == "")) {
+        cli::cli_warn(
+          c(
+            "!" = "Some/all bands do not have descriptions.",
+            "i" = "Using generic band descriptions."
+          )
+        )
+        band_descriptions <- paste0("band_", seq_len(nbands))
+      }
+    }
+
+    tf <- set_vrt_descriptions(
+      x = tf,
+      band_descriptions,
+      as_file = TRUE
+    )
+
+    tf <- set_vrt_metadata(
+      tf,
+      keys = "datetime",
+      values = .y,
+      as_file = TRUE
+    )
+
+    build_vrt_block(tf)
+  })
+
+  build_vrt_collection(
+    vrt_items
+  )
+}
+
+#' @rdname vrt_collect
+#' @export
 vrt_collect.doc_items <- function(
-  x
+  x,
+  ...
 ) {
   assets <- rstac::items_assets(x)
 
@@ -106,17 +180,28 @@ build_vrt_collection <- function(
   warped = FALSE,
   ...
 ) {
-  bbox <- purrr::map(x, function(.x) .x$bbox) |>
-    purrr::reduce(
-      function(.x, .y) {
-        c(
-          min(.x[1], .y[1]),
-          min(.x[2], .y[2]),
-          max(.x[3], .y[3]),
-          max(.x[4], .y[4])
-        )
-      }
-    )
+  uniq_crs <- purrr::map(
+    x,
+    function(.x) .x$srs
+  ) |>
+    unlist() |>
+    unique()
+
+  if (length(uniq_crs) > 1) {
+    bbox <- NA
+  } else {
+    bbox <- purrr::map(x, function(.x) .x$bbox) |>
+      purrr::reduce(
+        function(.x, .y) {
+          c(
+            min(.x[1], .y[1]),
+            min(.x[2], .y[2]),
+            max(.x[3], .y[3]),
+            max(.x[4], .y[4])
+          )
+        }
+      )
+  }
 
   sd <- purrr::map_chr(
     x,
@@ -126,13 +211,6 @@ build_vrt_collection <- function(
   uniq_assets <- purrr::map(
     x,
     function(.x) .x$assets
-  ) |>
-    unlist() |>
-    unique()
-
-  uniq_crs <- purrr::map(
-    x,
-    function(.x) .x$srs
   ) |>
     unlist() |>
     unique()

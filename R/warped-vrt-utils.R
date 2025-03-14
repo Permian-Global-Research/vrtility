@@ -18,19 +18,18 @@ vrt_to_warped_vrt <- function(
 ) {
   tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  call_vrt_compute(
+  call_gdal_warp(
     src,
     tfw,
     t_srs,
-    warp_options = combine_warp_opts(
-      c(
-        "-b",
-        band,
-        "-r",
-        resampling
-      ),
+    cl_arg = c(
+      "-b",
+      band,
+      "-r",
+      resampling,
+      "-te",
       te,
-      tr
+      if (!is.null(tr)) c("-tr", tr) else NULL
     ),
     config_options = getOption("vrt.gdal.config.options"),
     quiet = TRUE

@@ -5,25 +5,44 @@
 #' @param te A numeric vector of the target extent in the form
 #' c(xmin, ymin, xmax, ymax) and must be the same SRS as in `t_srs`.
 #' @param tr A numeric vector of the target resolution in the form c(xres, yres)
-#' @param warp_options A character vector of options to pass to the warp
+#' @param resampling A character vector of the resampling method to be used.
+#' see details.
+#' @param engine A character vector of the engine to use for processing the
+#' raster data. See details.
+#' @param warp_options A character vector of options to pass to gdalwarp
+#' @param creation_options A character vector of options to pass to the
+#' the gdal "engine".
 #' @param config_options A character vector of options to set in the GDAL
 #' environment
+#' @param add_cl_arg A character vector of additional command line arguments
+#' that are not captured in `gdalwarp_options()` - these are not checked for
+#' validity.
 #' @param quiet A logical indicating whether to suppress output
 #' @return A character string of the path to the output raster
 #' @export
 #' @rdname vrt_compute
-#' @details This is the primary function to call processing of raster data. The
-#' behaviour of the warper is dependent on the form of the input vrt datasets
-#' and the associated options.
+#' @details
+#' The `resampling` default is "near", which should be chosen in vrt_warp has
+#' already been used but "bilinear" may be prefereable where the input data is
+#' has not yet been virtually aligned/resampled.
+#'
+#' The choice of `engine` will depend on the nature of the computation being
+#' carried out. In the majority of cases warping is preferred, especically when
+#' we are not processing the entirity of the input dataset (as is usually the
+#' case when working with online data sources).
 vrt_compute <- function(
   x,
   outfile,
   t_srs,
   te,
   tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling,
+  engine,
+  warp_options,
+  creation_options,
+  config_options,
+  add_cl_arg,
+  quiet
 ) {
   v_assert_type(outfile, "outfile", "character")
   UseMethod("vrt_compute")
@@ -43,28 +62,74 @@ vrt_compute.vrt_block <- function(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c(
+    "near",
+    "bilinear",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 ) {
   v_assert_length(te, "te", 4)
   v_assert_length(tr, "tr", 2)
-  tmp_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  file_src <- xml2::read_xml(x$vrt)
-  xml2::write_xml(file_src, tmp_vrt)
+  v_assert_type(outfile, "outfile", "character")
+  v_assert_type(t_srs, "t_srs", "character")
+  v_assert_type(warp_options, "warp_options", "character")
+  v_assert_type(creation_options, "creation_options", "character")
+  v_assert_type(config_options, "config_options", "character")
 
-  warp_options <- combine_warp_opts(warp_options, te, tr)
+  resampling <- rlang::arg_match(resampling)
+  engine <- rlang::arg_match(engine)
 
-  compute_with_py_env(
-    call_vrt_compute(
-      src_files = tmp_vrt,
-      outfile = outfile,
-      t_srs = t_srs,
-      warp_options = warp_options,
-      config_options = config_options,
-      quiet = quiet
+  tmp_vrt <- vrt_save(x)
+
+  if (engine == "warp") {
+    cl_arg <- combine_warp_opts(
+      creation_options,
+      warp_options,
+      resampling,
+      te,
+      tr,
+      add_cl_arg
     )
-  )
+
+    result <- compute_with_py_env(
+      call_gdal_warp(
+        src_files = tmp_vrt,
+        outfile = outfile,
+        t_srs = t_srs,
+        config_options = config_options,
+        cl_arg = cl_arg,
+        quiet = quiet
+      )
+    )
+  } else {
+    result <- compute_with_py_env(
+      call_gdal_tanslate(
+        src_files = tmp_vrt,
+        outfile = outfile,
+        config_options = config_options,
+        cl_arg = c(creation_options, "-r", resampling),
+        quiet = quiet
+      )
+    )
+  }
+  return(result)
 }
 
 #' @export
@@ -75,9 +140,28 @@ vrt_compute.vrt_stack_warped <- function(
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c(
+    "near",
+    "bilinear",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 ) {
   class(x) <- setdiff(class(x), "vrt_stack_warped")
   vrt_compute(
@@ -86,8 +170,12 @@ vrt_compute.vrt_stack_warped <- function(
     t_srs = t_srs,
     te = te,
     tr = tr,
+    resampling = resampling,
+    engine = engine,
     warp_options = warp_options,
+    creation_options = creation_options,
     config_options = config_options,
+    add_cl_arg = add_cl_arg,
     quiet = quiet
   )
 }
@@ -100,39 +188,125 @@ vrt_compute.vrt_stack <- function(
   t_srs,
   te,
   tr,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  resampling = c(
+    "near",
+    "bilinear",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 ) {
   if (any(missing(t_srs), missing(te), missing(tr))) {
-    cli::cli_abort(
-      c(
-        "The following arguments are required for a `vrt_stack` object:",
-        ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
-      )
-    )
+    missing_args_error("vrt_stack")
   }
   NextMethod()
 }
+
+
+#' @export
+#' @rdname vrt_compute
+vrt_compute.vrt_collection_warped <- function(
+  x,
+  outfile,
+  t_srs = x$srs,
+  te = x$bbox,
+  tr = x$res,
+  resampling = c(
+    "near",
+    "bilinear",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
+) {
+  class(x) <- setdiff(class(x), "vrt_collection_warped")
+  vrt_compute(
+    x = x,
+    outfile = outfile,
+    t_srs = t_srs,
+    te = te,
+    tr = tr,
+    resampling = resampling,
+    engine = engine,
+    warp_options = warp_options,
+    creation_options = creation_options,
+    config_options = config_options,
+    add_cl_arg = add_cl_arg,
+    quiet = quiet
+  )
+}
+
 
 #' @export
 #' @rdname vrt_compute
 vrt_compute.vrt_collection <- function(
   x,
   outfile,
-  t_srs = x$srs,
-  te = x$bbox,
-  tr = x$res,
-  warp_options = getOption("vrt.gdal.warp.options"),
-  config_options = getOption("vrt.gdal.config.options"),
-  quiet = FALSE
+  t_srs,
+  te,
+  tr,
+  resampling = c(
+    "near",
+    "bilinear",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  engine = c("warp", "translate"),
+  warp_options = gdalwarp_options(),
+  creation_options = gdal_creation_options(),
+  config_options = gdal_config_opts(),
+  add_cl_arg = NULL,
+  quiet = TRUE
 ) {
+  if (any(missing(t_srs), missing(te), missing(tr))) {
+    missing_args_error("vrt_collection")
+  }
   v_assert_length(tr, "tr", 2)
 
   uniq_pths <- purrr::imap_chr(
-    x[[1]],
+    unname(x[[1]]),
     function(.x, .y) {
-      if (nchar(.x$date_time) > 0) .x$date_time else .y
+      if (nchar(.x$date_time) > 0) .x$date_time else as.character(.y)
     }
   ) |>
     unique_fp(outfile)
@@ -146,8 +320,13 @@ vrt_compute.vrt_collection <- function(
         outfile = .y,
         t_srs = t_srs,
         te = te,
+        tr = tr,
+        resampling = resampling,
+        engine = engine,
         warp_options = warp_options,
+        creation_options = creation_options,
         config_options = config_options,
+        add_cl_arg = add_cl_arg,
         quiet = TRUE
       )
     },
@@ -178,19 +357,15 @@ set_config <- function(x) {
 #' A very thin wrapper around the `gdalraster::warp` function
 #' @keywords internal
 #' @noRd
-call_vrt_compute <- function(
+call_gdal_warp <- function(
   src_files,
   outfile,
   t_srs,
-  warp_options,
+  cl_arg,
   config_options,
   quiet = FALSE
 ) {
-  v_assert_type(src_files, "src_files", "character")
-  v_assert_type(outfile, "outfile", "character")
-  v_assert_type(t_srs, "t_srs", "character")
-  v_assert_type(warp_options, "warp_options", "character")
-  v_assert_type(config_options, "config_options", "character")
+  v_assert_true(fs::file_exists(src_files), "src_files")
 
   orig_config <- set_config(config_options)
   on.exit(set_config(orig_config))
@@ -199,18 +374,52 @@ call_vrt_compute <- function(
     src_files,
     outfile,
     t_srs = t_srs,
-    cl_arg = warp_options,
+    cl_arg = cl_arg,
     quiet = quiet
   )
 
   return(outfile)
 }
 
-combine_warp_opts <- function(warp_opts, te, res = NULL) {
+call_gdal_tanslate <- function(
+  src_files,
+  outfile,
+  cl_arg,
+  config_options,
+  quiet = FALSE
+) {
+  v_assert_true(fs::file_exists(src_files), "src_files")
+
+  orig_config <- set_config(config_options)
+  on.exit(set_config(orig_config))
+
+  gdalraster::translate(
+    src_files,
+    outfile,
+    cl_arg = cl_arg,
+    quiet = quiet
+  )
+
+  return(outfile)
+}
+
+
+combine_warp_opts <- function(
+  creation_options,
+  warp_opts,
+  resampling,
+  te,
+  res = NULL,
+  add_args = NULL
+) {
   opts_check(warp_opts, "-te")
   opts_check(warp_opts, "-tr")
+  opts_check(warp_opts, "-r")
 
   warp_opts <- c(
+    creation_options,
+    "-r",
+    resampling,
     warp_opts,
     "-te",
     te
@@ -225,5 +434,20 @@ combine_warp_opts <- function(warp_opts, te, res = NULL) {
     )
   }
 
+  if (!is.null(add_args)) {
+    warp_opts <- c(warp_opts, add_args)
+  }
+
   return(warp_opts)
+}
+
+#' @noRd
+#' @keywords internal
+missing_args_error <- function(x_class) {
+  cli::cli_abort(
+    c(
+      "The following arguments are required for a `{x_class}` object:",
+      ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
+    )
+  )
 }

@@ -4,8 +4,6 @@
 \alias{vrt_stack}
 \alias{vrt_stack.vrt_collection}
 \alias{print.vrt_stack}
-\alias{save_vrt}
-\alias{save_vrt.vrt_block}
 \title{Stack VRT files from a vrt_collection object}
 \usage{
 vrt_stack(x, ...)
@@ -13,13 +11,6 @@ vrt_stack(x, ...)
 \method{vrt_stack}{vrt_collection}(x, quiet = TRUE, ...)
 
 \method{print}{vrt_stack}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, ...)
-
-save_vrt(x, outfile)
-
-\method{save_vrt}{vrt_block}(
-  x,
-  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-)
 }
 \arguments{
 \item{x}{A vrt_collection object}
@@ -33,8 +24,6 @@ save_vrt(x, outfile)
 \item{pixfun}{A logical indicating whether to print the pixel function}
 
 \item{maskfun}{A logical indicating whether to print the mask function}
-
-\item{outfile}{A character string of the output file}
 }
 \value{
 A vrt_stack object
@@ -43,8 +32,6 @@ A vrt_stack object
 Stack VRT files from a vrt_collection object
 
 Print a vrt_block object
-
-Save a vrt_block object to disk
 }
 \details{
 This function stacks VRT files from a vrt_collection object into a

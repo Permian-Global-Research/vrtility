@@ -12,8 +12,8 @@ vrt_set_maskfun <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
-  drop_mask_band = TRUE
+  mask_pixfun,
+  drop_mask_band
 ) {
   UseMethod("vrt_set_maskfun")
 }
@@ -34,7 +34,7 @@ vrt_set_maskfun.vrt_block <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
+  mask_pixfun = vrtility::bitmask_numpy(),
   drop_mask_band = TRUE
 ) {
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
@@ -58,13 +58,22 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  ts <- save_vrt(x)
+  ts <- vrt_save(x)
   ds <- methods::new(gdalraster::GDALRaster, ts)
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  msk_file <- band_files[mask_idx]
+  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
+  if (length(band_files) == 1) {
+    gdalraster::buildVRT(
+      mskvrt,
+      band_files,
+      cl_arg = c("-b", mask_idx),
+      quiet = TRUE
+    )
+  } else {
+    msk_file <- band_files[mask_idx]
+    gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
+  }
 
   msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
@@ -93,8 +102,10 @@ vrt_set_maskfun.vrt_block <- function(
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
   xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf)) #
-
+  sourceband <- xml2::xml_find_first(wmxmlsrc, ".//SourceBand")
+  xml2::xml_remove(sourceband)
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
+  # browser()
 
   # update all other bands
   purrr::walk(bands[-mask_idx], function(.x) {
@@ -146,15 +157,26 @@ vrt_set_maskfun.vrt_collection <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
+  mask_pixfun = vrtility::bitmask_numpy(),
   drop_mask_band = TRUE
 ) {
   check_mask_band(x, mask_band)
-  purrr::map(
+  masked_blocks <- purrr::map(
     x$vrt,
     ~ vrt_set_maskfun(.x, mask_band, valid_bits, mask_pixfun, drop_mask_band)
-  ) |>
-    build_vrt_collection(maskfun = mask_pixfun, pixfun = x$pixfun)
+  )
+
+  if (inherits(x, "vrt_collection_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+  build_vrt_collection(
+    masked_blocks,
+    maskfun = mask_pixfun,
+    pixfun = x$pixfun,
+    warped = warped
+  )
 }
 
 

@@ -2,18 +2,27 @@
 % Please edit documentation in R/vrt-collect.R
 \name{vrt_collect}
 \alias{vrt_collect}
+\alias{vrt_collect.character}
 \alias{vrt_collect.doc_items}
 \alias{print.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x)
+vrt_collect(x, band_descriptions, datetimes)
 
-\method{vrt_collect}{doc_items}(x)
+\method{vrt_collect}{character}(x, band_descriptions = NULL, datetimes = rep("", length(x)))
+
+\method{vrt_collect}{doc_items}(x, ...)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
 }
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
+
+\item{band_descriptions}{A character vector of band descriptions.}
+
+\item{datetimes}{A character vector of datetimes.}
+
+\item{...}{Additional arguments not used}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 
@@ -23,8 +32,9 @@ vrt_collect(x)
 
 \item{blocks}{A logical indicating whether to print the blocks instead of
 the collection summary.}
-
-\item{...}{Additional arguments not used}
+}
+\value{
+A vrt_collection object.
 }
 \description{
 Construct the base VRT object for composing VRT pipelines.
