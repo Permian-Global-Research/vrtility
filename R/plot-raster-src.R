@@ -1,4 +1,4 @@
-#' plot a raster file
+#' plot a raster file or `vrt_x` object
 #' @description A wrapper around `gdalraster::plot_raster` that simplifies the
 #' process of plotting a raster file.
 #' @param x A path to a raster file
@@ -6,6 +6,7 @@
 #' 1 or 3.
 #' @param pal a character vector of colors to use when plotting a single band.
 #' @inheritParams gdalraster::plot_raster
+#' @rdname plot_raster
 #' @export
 plot_raster_src <- function(
   x,
@@ -102,4 +103,56 @@ plot_raster_src <- function(
     na_col = na_col,
     ...
   )
+}
+
+
+#' @export
+#' @rdname plot_raster
+#' @inheritParams plot_raster_src
+plot.vrt_block <- function(x, ..., config_options = gdal_config_opts()) {
+  orig_config <- set_gdal_config(config_options)
+  on.exit(set_gdal_config(orig_config))
+  src <- vrt_save(x)
+  compute_with_py_env(plot_raster_src(src, ...))
+}
+
+#' @export
+#' @rdname plot_raster
+plot.vrt_stack <- function(x, ..., config_options = gdal_config_opts()) {
+  if (!inherits(x, "vrt_stack_warped")) {
+    cli::inform(
+      "i" = "You are plotting a non-warped vrt_stack - this is probably okay",
+      " " = "But, as no extent parameters are set, the plot may not be as 
+      expected.",
+    )
+  }
+  NextMethod()
+}
+
+
+#' @export
+#' @rdname plot_raster
+plot.vrt_stack_warped <- function(x, ..., config_options = gdal_config_opts()) {
+  cli::cli_inform(
+    c(
+      "i" = "You a plotting a warped raster - this might be okay...",
+      " " = "But, If this is taking a long time you are probably better",
+      " " = "off saving the file first with `vrt_compute` and then plotting",
+      " " = "with `plot_raster_src()`."
+    )
+  )
+  NextMethod()
+}
+
+#' @param item The numeric index of the item, in the vrt_collection, to plot
+#' @export
+#' @rdname plot_raster
+plot.vrt_collection <- function(
+  x,
+  item,
+  ...,
+  config_options = gdal_config_opts()
+) {
+  x <- x[[1]][[item]]
+  plot(x, ..., config_options = config_options)
 }
