@@ -1,4 +1,5 @@
 #' Save a vrt_block object to disk
+#' @param x A vrt_{x} object.
 #' @param outfile A character string of the output file
 #' @export
 vrt_save <- function(x, outfile) {
