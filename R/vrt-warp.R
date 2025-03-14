@@ -173,5 +173,10 @@ vrt_warp.vrt_collection <- function(
     ~ vrt_warp(.x, t_srs, te, tr, resampling, quiet)
   )
 
-  build_vrt_collection(warped_blocks, warped = TRUE)
+  build_vrt_collection(
+    warped_blocks,
+    pixfun = x$pixfun,
+    maskfun = x$maskfun,
+    warped = TRUE
+  )
 }
