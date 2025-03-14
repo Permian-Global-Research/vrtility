@@ -272,3 +272,120 @@
       Number of Items: 5
       Assets: B02, B03, B04, SCL
 
+# vrt_collect works with rstac doc_items
+
+    Code
+      print(ex_collect_mask)
+    Message
+      > <VRT Collection>
+      Mask Function: [hidden]
+        run print(x, maskfun = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Start Date: 2024-06-02 11:21:19 UTC
+      End Date: 2024-08-26 11:21:11 UTC
+      Number of Items: 5
+      Assets: B02, B03, B04
+
+---
+
+    Code
+      print(ex_collect_mask, blocks = TRUE, maskfun = TRUE)
+    Output
+      [[1]]
+    Message
+      > <VRT Block>
+      VRT XML: [hidden]
+        run print(x, xml = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Assets: B02, B03, B04
+      No Data Value(s): 0, 0, 0
+      Date Time: 2024-08-26 11:21:11 UTC
+    Output
+      
+      [[2]]
+    Message
+      > <VRT Block>
+      VRT XML: [hidden]
+        run print(x, xml = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Assets: B02, B03, B04
+      No Data Value(s): 0, 0, 0
+      Date Time: 2024-08-16 11:21:11 UTC
+    Output
+      
+      [[3]]
+    Message
+      > <VRT Block>
+      VRT XML: [hidden]
+        run print(x, xml = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Assets: B02, B03, B04
+      No Data Value(s): 0, 0, 0
+      Date Time: 2024-08-01 11:21:19 UTC
+    Output
+      
+      [[4]]
+    Message
+      > <VRT Block>
+      VRT XML: [hidden]
+        run print(x, xml = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Assets: B02, B03, B04
+      No Data Value(s): 0, 0, 0
+      Date Time: 2024-06-17 11:21:21 UTC
+    Output
+      
+      [[5]]
+    Message
+      > <VRT Block>
+      VRT XML: [hidden]
+        run print(x, xml = TRUE) to view
+    Output
+      
+       VRT SRS: 
+      PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+      
+    Message
+      Bounding Box: 399960 5590200 509760 5700000
+      Pixel res: 12.5, 12.5
+      Assets: B02, B03, B04
+      No Data Value(s): 0, 0, 0
+      Date Time: 2024-06-02 11:21:19 UTC
+    Output
+      
+

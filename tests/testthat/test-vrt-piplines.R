@@ -54,8 +54,13 @@ test_that("full vrt pipeline works", {
   expect_snapshot(print(ex_collect_mask_warp_stack_med))
   expect_snapshot(print(ex_collect_mask_warp_stack_med, pixfun = TRUE))
 
+  ex_collect_mask_warp_stack_med_numba <- vrt_set_pixelfun(
+    ex_collect_mask_warp_stack,
+    pixfun = median_numba()
+  )
+
   exe_comp <- vrt_compute(
-    ex_collect_mask_warp_stack_med,
+    ex_collect_mask_warp_stack_med_numba,
     outfile = fs::file_temp(ext = "tif"),
     engine = "translate"
   )
@@ -77,4 +82,78 @@ test_that("full vrt pipeline works", {
     "s2 exeter plots",
     plot_raster_src(exe_compwarp, c(3, 2, 1))
   )
+
+  # numba mask no median
+  ex_collect_mask <- ex_collect |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      valid_bits = c(4, 5, 6, 7, 11),
+      drop_mask_band = FALSE,
+      mask_pixfun = bitmask_numba()
+    ) |>
+    vrt_warp(
+      t_srs = t_block$srs,
+      te = t_block$bbox,
+      tr = t_block$res
+    ) |>
+    vrt_stack() |>
+    vrt_compute(outfile = fs::file_temp(ext = "tif"))
+
+  expect_true(fs::file_size(ex_collect_mask) > 0)
+})
+
+
+test_that("vrt_collect works with rstac doc_items", {
+  skip_if_offline()
+  skip_on_cran()
+
+  bbox <- gdalraster::bbox_from_wkt(
+    wkt = wk::wkt("POINT (-3.51 50.72)"),
+    extend_x = 0.05,
+    extend_y = 0.03
+  )
+
+  te <- bbox_to_projected(bbox)
+  trs <- attr(te, "wkt")
+
+  s2_stac <- sentinel2_stac_query(
+    bbox = bbox,
+    start_date = "2024-06-01",
+    end_date = "2024-08-30",
+    max_cloud_cover = 50,
+    assets = c("B02", "B03", "B04", "SCL")
+  )
+  # number of items:
+  expect_equal(length(s2_stac$features), 5)
+  expect_type(s2_stac, "list")
+  expect_s3_class(s2_stac, "doc_items")
+
+  ex_collect <- vrt_collect(s2_stac)
+
+  expect_equal(ex_collect$n_items, 5)
+  expect_equal(ex_collect$bbox, c(399960, 5590200, 509760, 5700000))
+  expect_equal(
+    ex_collect$date_time,
+    c(
+      "2024-08-26T11:21:11.024000Z",
+      "2024-08-16T11:21:11.024000Z",
+      "2024-08-01T11:21:19.024000Z",
+      "2024-06-17T11:21:21.024000Z",
+      "2024-06-02T11:21:19.024000Z"
+    )
+  )
+
+  ex_collect_mask <- ex_collect |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      valid_bits = c(4, 5, 6, 7, 11),
+      drop_mask_band = TRUE
+    )
+
+  expect_false(is.null(ex_collect_mask$maskfun))
+  expect_false(is.null(ex_collect_mask$mask_band_name))
+  expect_s3_class(ex_collect_mask, "vrt_collection")
+
+  expect_snapshot(print(ex_collect_mask))
+  expect_snapshot(print(ex_collect_mask, blocks = TRUE, maskfun = TRUE))
 })
