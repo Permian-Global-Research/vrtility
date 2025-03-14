@@ -12,8 +12,7 @@ scratch.R
 
 /.quarto/
 /air.toml
+/.lintr
 /.vscode/
 
 /example-data/*
-
-.lintr
