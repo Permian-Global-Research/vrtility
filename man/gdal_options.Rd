@@ -4,6 +4,7 @@
 \alias{gdal_config_opts}
 \alias{gdal_creation_options}
 \alias{gdalwarp_options}
+\alias{set_gdal_config}
 \title{Create GDAL configuration options.}
 \usage{
 gdal_config_opts(
@@ -39,6 +40,8 @@ gdal_creation_options(
 )
 
 gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = "ALL_CPUS")
+
+set_gdal_config(x)
 }
 \arguments{
 \item{GDAL_VRT_ENABLE_PYTHON}{Enable Python this is required for vrtility pixel functions}
@@ -100,6 +103,8 @@ to -multi on the CLI}
 NUM_THREADS on the CLI. "ALL_CPUS" (the default) will use all available CPUs,
 alternartively an integer can be supplied - or NULL to use a single threaded
 process.}
+
+\item{x}{A named character vector of the configuration options}
 }
 \value{
 Character vector of options
@@ -110,6 +115,8 @@ Create GDAL configuration options.
 Create GDAL creation options
 
 Create GDAL warp options
+
+Set the GDAL configuration options
 }
 \details{
 output_format, equaivalent to \code{-of} from the gdaltranslate or gdalwarp CLIs.
@@ -119,6 +126,7 @@ If NULL, then the output format will be inferred from the file extension.
 gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 gdal_creation_options(COMPRESS = "JPEG", JPEG_QUALITY = "90")
 gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = 4)
+set_gdal_config(gdal_config_opts())
 }
 \seealso{
 \href{https://gdal.org/en/stable/user/configoptions.html}{GDAL Configuration Options}

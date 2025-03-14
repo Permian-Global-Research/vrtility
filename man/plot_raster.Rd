@@ -2,7 +2,11 @@
 % Please edit documentation in R/plot-raster-src.R
 \name{plot_raster_src}
 \alias{plot_raster_src}
-\title{plot a raster file}
+\alias{plot.vrt_block}
+\alias{plot.vrt_stack}
+\alias{plot.vrt_stack_warped}
+\alias{plot.vrt_collection}
+\title{plot a raster file or \code{vrt_x} object}
 \usage{
 plot_raster_src(
   x,
@@ -30,6 +34,14 @@ plot_raster_src(
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 )
+
+\method{plot}{vrt_block}(x, ..., config_options = gdal_config_opts())
+
+\method{plot}{vrt_stack}(x, ..., config_options = gdal_config_opts())
+
+\method{plot}{vrt_stack_warped}(x, ..., config_options = gdal_config_opts())
+
+\method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_opts())
 }
 \arguments{
 \item{x}{A path to a raster file}
@@ -119,6 +131,8 @@ The default is transparent (\code{"#00000000"}, the return value of
 \code{rgb(0,0,0,0)}).}
 
 \item{...}{Other parameters to be passed to \code{plot.default()}.}
+
+\item{item}{The numeric index of the item, in the vrt_collection, to plot}
 }
 \description{
 A wrapper around \code{gdalraster::plot_raster} that simplifies the
