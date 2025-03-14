@@ -24,7 +24,7 @@ vrt_set_pixelfun.default <- function(x, ...) {
 #' @rdname vrt_set_pixelfun
 vrt_set_pixelfun.vrt_stack <- function(
   x,
-  pixfun = vrtility::median_numba()
+  pixfun = vrtility::median_numpy()
 ) {
   v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
 

@@ -12,8 +12,8 @@ vrt_set_maskfun <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
-  drop_mask_band = TRUE
+  mask_pixfun,
+  drop_mask_band
 ) {
   UseMethod("vrt_set_maskfun")
 }
@@ -34,7 +34,7 @@ vrt_set_maskfun.vrt_block <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
+  mask_pixfun = vrtility::bitmask_numpy(),
   drop_mask_band = TRUE
 ) {
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
@@ -58,7 +58,7 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  ts <- save_vrt(x)
+  ts <- vrt_save(x)
   ds <- methods::new(gdalraster::GDALRaster, ts)
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
   mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
@@ -157,7 +157,7 @@ vrt_set_maskfun.vrt_collection <- function(
   x,
   mask_band,
   valid_bits,
-  mask_pixfun = vrtility::bitmask_numba(),
+  mask_pixfun = vrtility::bitmask_numpy(),
   drop_mask_band = TRUE
 ) {
   check_mask_band(x, mask_band)
