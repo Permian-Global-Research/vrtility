@@ -35,13 +35,13 @@ plot_raster_src(
   ...
 )
 
-\method{plot}{vrt_block}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_block}(x, ..., config_options = gdal_config_opts(), quiet = FALSE)
 
-\method{plot}{vrt_stack}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_stack}(x, ..., config_options = gdal_config_opts(), quiet = FALSE)
 
-\method{plot}{vrt_stack_warped}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_stack_warped}(x, ..., config_options = gdal_config_opts(), quiet = FALSE)
 
-\method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_opts(), quiet = FALSE)
 }
 \arguments{
 \item{x}{A path to a raster file}
@@ -134,6 +134,8 @@ The default is transparent (\code{"#00000000"}, the return value of
 
 \item{config_options}{A named character vector of gdal config options to set
 before attempting to read the VRT.}
+
+\item{quiet}{Logical indicating whether to suppress messages.}
 
 \item{item}{The numeric index of the item, in the vrt_collection, to plot}
 }
