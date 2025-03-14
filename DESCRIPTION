@@ -30,6 +30,7 @@ Imports:
     xml2
 Suggests: 
     testthat (>= 3.0.0),
+    vdiffr,
     tictoc
 Config/testthat/edition: 3
 Depends: 
