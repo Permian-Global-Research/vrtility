@@ -54,13 +54,8 @@ test_that("full vrt pipeline works", {
   expect_snapshot(print(ex_collect_mask_warp_stack_med))
   expect_snapshot(print(ex_collect_mask_warp_stack_med, pixfun = TRUE))
 
-  ex_collect_mask_warp_stack_med_numba <- vrt_set_pixelfun(
-    ex_collect_mask_warp_stack,
-    pixfun = median_numba()
-  )
-
   exe_comp <- vrt_compute(
-    ex_collect_mask_warp_stack_med_numba,
+    ex_collect_mask_warp_stack_med,
     outfile = fs::file_temp(ext = "tif"),
     engine = "translate"
   )
@@ -93,6 +88,7 @@ test_that("full vrt pipeline works", {
       tr = t_block$res
     ) |>
     vrt_stack() |>
+    vrt_set_pixelfun(pixfun = median_numba()) |>
     vrt_compute(outfile = fs::file_temp(ext = "tif"))
 
   expect_true(fs::file_size(ex_collect_mask) > 0)
