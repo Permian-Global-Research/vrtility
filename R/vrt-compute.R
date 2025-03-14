@@ -335,25 +335,6 @@ vrt_compute.vrt_collection <- function(
 }
 
 
-#' Set the GDAL configuration options
-#' @param x A named character vector of the configuration options
-#' @param unset A logical indicating whether to unset the options
-#' @keywords internal
-#' @noRd
-set_config <- function(x) {
-  # Store original values
-  original_values <- purrr::map_chr(
-    names(x),
-    ~ gdalraster::get_config_option(.x)
-  ) |>
-    purrr::set_names(names(x))
-
-  # Set the config options
-  purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
-  invisible(original_values)
-}
-
-
 #' A very thin wrapper around the `gdalraster::warp` function
 #' @keywords internal
 #' @noRd
@@ -367,8 +348,8 @@ call_gdal_warp <- function(
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
-  orig_config <- set_config(config_options)
-  on.exit(set_config(orig_config))
+  orig_config <- set_gdal_config(config_options)
+  on.exit(set_gdal_config(orig_config))
 
   gdalraster::warp(
     src_files,
@@ -381,6 +362,9 @@ call_gdal_warp <- function(
   return(outfile)
 }
 
+#' A very thin wrapper around the `gdalraster::translate` function
+#' @keywords internal
+#' @noRd
 call_gdal_tanslate <- function(
   src_files,
   outfile,
@@ -390,8 +374,8 @@ call_gdal_tanslate <- function(
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
-  orig_config <- set_config(config_options)
-  on.exit(set_config(orig_config))
+  orig_config <- set_gdal_config(config_options)
+  on.exit(set_gdal_config(orig_config))
 
   gdalraster::translate(
     src_files,
@@ -403,7 +387,9 @@ call_gdal_tanslate <- function(
   return(outfile)
 }
 
-
+#' Combine multiple warper input arguments
+#' @noRd
+#' @keywords internal
 combine_warp_opts <- function(
   creation_options,
   warp_opts,

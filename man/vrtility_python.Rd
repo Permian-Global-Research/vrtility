@@ -3,6 +3,7 @@
 \name{vrtility_py_require}
 \alias{vrtility_py_require}
 \alias{set_py_env_vals}
+\alias{compute_with_py_env}
 \title{Setup the vrtility Python environment}
 \usage{
 vrtility_py_require(
@@ -14,6 +15,8 @@ vrtility_py_require(
 )
 
 set_py_env_vals()
+
+compute_with_py_env(code)
 }
 \arguments{
 \item{packages}{A character vector of Python packages to be available during
@@ -45,6 +48,8 @@ will not remove it.
 \item \code{"set"}: Clears all existing requirements and replaces them with the
 provided ones. Packages and the Python version can be set independently.
 }}
+
+\item{code}{The code to execute}
 }
 \value{
 Invisible
@@ -67,4 +72,7 @@ this function to install the package, making sure to set action as "add".
 set_py_env_vals is only required if you are running reticulate::py_env in
 some non-standard way. In general it is a lot easier to  use #
 vrtility_py_require which will automatically set the necessary options.
+}
+\examples{
+compute_with_py_env(print("Hello World"))
 }

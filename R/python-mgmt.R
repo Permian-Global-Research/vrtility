@@ -52,9 +52,13 @@ set_py_env_vals <- function() {
 }
 
 
-#' A wrapper to call code with the VRTILITY_PYTHON environment
-#' @noRd
-#' @keywords internal
+#' Call code that is executed in an environment with access to the vrtility
+#' python environment
+#' @param code The code to execute
+#' @export
+#' @rdname vrtility_python
+#' @examples
+#' compute_with_py_env(print("Hello World"))
 compute_with_py_env <- function(
   code
 ) {

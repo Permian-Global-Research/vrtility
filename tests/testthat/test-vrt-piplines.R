@@ -70,6 +70,7 @@ test_that("full vrt pipeline works", {
   expect_true(fs::file_size(exe_compwarp) > 0)
 
   ds <- methods::new(gdalraster::GDALRaster, exe_compwarp)
+  withr::defer(if (ds$isOpen()) ds$close())
   r <- gdalraster::read_ds(ds)
   expect_gt(sum(r, na.rm = TRUE), 6e+08)
 
