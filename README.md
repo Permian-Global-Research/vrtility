@@ -8,6 +8,8 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
 The goal of vrtility is to make the best use of GDAL’s VRT capabilities
@@ -98,7 +100,7 @@ median_composite <- vrt_collect(s2_stac) |>
     warp_options = gdalwarp_options(num_threads = "ALL_CPUS")
   )
 toc()
-#> 97.966 sec elapsed
+#> 99.694 sec elapsed
 ```
 
 ``` r
