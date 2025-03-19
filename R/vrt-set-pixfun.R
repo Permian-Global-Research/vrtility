@@ -4,7 +4,7 @@
 #' @export
 #' @rdname vrt_set_pixelfun
 #'
-vrt_set_pixelfun <- function(x, pixfun = vrtility::median_numba()) {
+vrt_set_pixelfun <- function(x, pixfun) {
   UseMethod("vrt_set_pixelfun")
 }
 
@@ -29,13 +29,12 @@ vrt_set_pixelfun.vrt_stack <- function(
   v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
 
   vx <- xml2::read_xml(x$vrt)
+  no_data <- xml2::xml_find_first(vx, ".//NoDataValue") |>
+    xml2::xml_double()
 
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
 
   purrr::walk(bands, function(.x) {
-    no_data <- xml2::xml_find_first(.x, ".//NoDataValue") |>
-      xml2::xml_double()
-
     xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
     xml2::xml_add_child(.x, "PixelFunctionType", "pixfun")
     xml2::xml_add_child(.x, "PixelFunctionLanguage", "Python")
