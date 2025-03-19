@@ -55,7 +55,7 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
     masked_data = np.ma.array(stacked, mask=mask, shrink=False)
     
     # Calculate median on masked array directly
-    out_ar[:] = np.ma.median(masked_data, axis=0)
+    out_ar[:] = np.ma.median(masked_data, axis=0).filled(fill_value=no_data_val)
 "
   )
 }
