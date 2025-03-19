@@ -9,7 +9,7 @@ validate_bbox <- function(bbox) {
 
   bbox_poly <- bbox_to_wkt(bbox)
 
-  if (!gdalraster::g_is_valid(bbox_poly)) {
+  if (!suppressWarnings(gdalraster::g_is_valid(bbox_poly))) {
     rlang::abort(
       "Bounding box (bbox) is not valid",
       class = "vrtility_bbox_not_valid"
