@@ -85,7 +85,7 @@ vrt_compute(
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 )
 
 \method{vrt_compute}{vrt_collection}(
@@ -101,7 +101,7 @@ vrt_compute(
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 )
 }
 \arguments{

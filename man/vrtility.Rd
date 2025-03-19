@@ -71,6 +71,10 @@ pixel functions in time.
 }
 }
 
+\seealso{
+Some useful links:
+\href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}
+}
 \author{
 \strong{Maintainer}: Hugh Graham \email{hugh.graham@permianglobal.com} (\href{https://orcid.org/0000-0001-9451-5010}{ORCID})
 

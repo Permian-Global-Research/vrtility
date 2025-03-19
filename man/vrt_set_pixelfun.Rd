@@ -5,7 +5,7 @@
 \alias{vrt_set_pixelfun.vrt_stack}
 \title{Set the pixel function of a VRT stack object}
 \usage{
-vrt_set_pixelfun(x, pixfun = vrtility::median_numba())
+vrt_set_pixelfun(x, pixfun)
 
 \method{vrt_set_pixelfun}{vrt_stack}(x, pixfun = vrtility::median_numpy())
 }
