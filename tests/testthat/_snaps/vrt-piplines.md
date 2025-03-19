@@ -166,12 +166,12 @@
       > <VRT Collection>
       Mask Function:
       import numpy as np
-      def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+      def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                         raster_ysize, buf_radius, gt, **kwargs):
-          valid_vals =  [int(x) for x in kwargs['valid_values'].decode().split(',')]
-          no_data_val = int(kwargs['no_data_value'])
-          
-          out_ar[:] = np.where(in_ar[1] > 0, in_ar[0], no_data_val)  
+          mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
+          mask = np.isin(in_ar[0], mask_vals)
+          # breakpoint()
+          out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
     Output
       
       
@@ -254,7 +254,7 @@
           masked_data = np.ma.array(stacked, mask=mask, shrink=False)
           
           # Calculate median on masked array directly
-          out_ar[:] = np.ma.median(masked_data, axis=0)
+          out_ar[:] = np.ma.median(masked_data, axis=0).filled(fill_value=no_data_val)
     Output
       
     Message
