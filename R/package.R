@@ -47,6 +47,9 @@
 #' \item{\code{\link{vrt_schema}}}{(data object)The official GDAL VRT schema as a character object}
 #' }
 #'
+#' @seealso
+#' Some useful links:
+#' \href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}
 #'
 #'
 #' @docType package
