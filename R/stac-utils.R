@@ -8,6 +8,15 @@ vrtility_usr_agent <- function() {
   )
 }
 
+#' format a date for a STAC query
+#' @param x A character string of a date
+#' @return A character string of the date in the correct format
+#' @noRd
+#' @keywords internal
+format_stac_date <- function(x) {
+  format(lubridate::as_datetime(x), "%Y-%m-%dT%H:%M:%SZ")
+}
+
 
 #' Query a STAC source
 #' @param bbox A numeric vector of length 4 representing a bounding box
@@ -18,6 +27,7 @@ vrtility_usr_agent <- function() {
 #' @param limit The number of items to return
 #' @param ... Additional arguments to pass to the query
 #' @return A list of items
+#' @rdname stac_utilities
 #' @export
 stac_query <- function(
   bbox,
@@ -36,7 +46,11 @@ stac_query <- function(
   v_assert_type(limit, "limit", "numeric")
 
   if (!is.null(start_date)) {
-    datetime <- paste0(start_date, "/", end_date)
+    datetime <- paste0(
+      format_stac_date(start_date),
+      "/",
+      format_stac_date(end_date)
+    )
   } else {
     datetime <- NULL
   }
@@ -72,6 +86,7 @@ stac_query <- function(
 #' @returns A STACItemCollection object with signed assets url.
 #'
 #' @export
+#' @rdname stac_utilities
 #' @details copied from the `rsi` package
 sign_planetary_computer <- function(
   items,
@@ -108,6 +123,7 @@ sign_planetary_computer <- function(
 #' Planetary Computer API's signing method (only required if using the
 #' Planetary Computer STAC API).
 #' @return A stac_vrt object
+#' @rdname stac_utilities
 #' @export
 sentinel2_stac_query <- function(
   bbox,
@@ -142,10 +158,7 @@ sentinel2_stac_query <- function(
   )
 
   if (!is.null(max_cloud_cover)) {
-    stac_its <- stac_its |>
-      rstac::items_filter(
-        filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
-      )
+    stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
   }
 
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
@@ -155,4 +168,58 @@ sentinel2_stac_query <- function(
   }
 
   return(stac_its)
+}
+
+
+hls_stac_query <- function(
+  bbox,
+  start_date,
+  end_date,
+  assets = c(
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B8A",
+    "B09",
+    "B10",
+    "B11",
+    "B12",
+    "Fmask"
+  ),
+  max_cloud_cover = 10,
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
+  collection = c("HLSS30_2.0", "HLSL30_2.0")
+) {
+  collection <- rlang::arg_match(collection)
+  stac_its <- stac_query(
+    bbox = bbox,
+    stac_source = stac_source,
+    start_date = start_date,
+    end_date = end_date,
+    collection = collection
+  )
+
+  if (!is.null(max_cloud_cover)) {
+    stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
+  }
+
+  rstac::assets_select(stac_its, asset_names = assets)
+}
+
+#' Filter a STAC item collection by cloud cover
+#' @param items A STACItemCollection
+#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
+#' @return A STACItemCollection
+#' @noRd
+#' @keywords internal
+stac_cloud_filter <- function(items, max_cloud_cover) {
+  items |>
+    rstac::items_filter(
+      filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+    )
 }
