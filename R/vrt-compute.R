@@ -247,7 +247,7 @@ vrt_compute.vrt_collection_warped <- function(
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 ) {
   class(x) <- setdiff(class(x), "vrt_collection_warped")
   vrt_compute(
@@ -296,7 +296,7 @@ vrt_compute.vrt_collection <- function(
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 ) {
   if (any(missing(t_srs), missing(te), missing(tr))) {
     missing_args_error("vrt_collection")
@@ -344,7 +344,7 @@ call_gdal_warp <- function(
   t_srs,
   cl_arg,
   config_options,
-  quiet = FALSE
+  quiet = TRUE
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
@@ -370,7 +370,7 @@ call_gdal_tanslate <- function(
   outfile,
   cl_arg,
   config_options,
-  quiet = FALSE
+  quiet = TRUE
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
