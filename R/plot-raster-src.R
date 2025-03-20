@@ -5,6 +5,8 @@
 #' @param bands a numeric vector of band numbers to plot must be of length
 #' 1 or 3.
 #' @param pal a character vector of colors to use when plotting a single band.
+#' @param adj_low a numeric value to adjust the lower quantile value by. useful
+#' for example when sea presents as very dark.
 #' @inheritParams gdalraster::plot_raster
 #' @rdname plot_raster
 #' @export
@@ -16,6 +18,7 @@ plot_raster_src <- function(
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
+  adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
@@ -68,11 +71,11 @@ plot_raster_src <- function(
   if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
     mm <- stats::quantile(
       r,
-      probs = c(2 / 100, 99 / 100),
+      probs = c(0, 0.98),
       na.rm = TRUE,
       names = FALSE
     )
-    mm[1] <- mm[1] * (0.8)
+    mm[1] <- mm[1] * adj_low
 
     minmax_def <- rep(mm, each = nbands)
   }

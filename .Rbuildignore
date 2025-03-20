@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^scratch.R$
+^scratch2.R$
 ^LICENSE\.md$
 ^\.vscode$
 ^air.toml$

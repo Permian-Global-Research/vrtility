@@ -43,6 +43,8 @@ nested VRTs. This allows for the easy addition of new pixel functions and
 masking functions. but could easily be adapted for deriving spectral indices
 or calculating complex time series functions. 
 
+- parallel processing of VRTs using `dask` and `rioxarray`
+
 ## TO DO:
 - [ ] Add additional pixel functions (geometric median in particular).
 - [ ] time series functions...
@@ -77,9 +79,9 @@ layers in each VRTRasterBand), giving us a `vrt_stack` object.
 
 6. A median pixel function is then added to the `vrt_stack`. 
 
-7. all of this is then "lazily" computed at the end of the vrt pipeline using 
-gdalwarp.
-
+7. all of this is then "lazily" computed at the end of the vrt pipeline python's
+`rioxarry` package along with `dask` for parallel processing. To make use of the
+rioxarray "engine", we have to use vrt_warp on our `vrt_collection` first.
 ```{r example, fig.width=10, fig.height=8}
 library(vrtility)
 library(tictoc)
@@ -105,13 +107,16 @@ length(s2_stac$features)
 
 tic()
 median_composite <- vrt_collect(s2_stac) |>
-  vrt_set_maskfun(mask_band = "SCL", valid_bits = c(4, 5, 6, 7, 11)) |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+  ) |>
   vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
   vrt_stack() |>
   vrt_set_pixelfun() |>
   vrt_compute(
     outfile = fs::file_temp(ext = "tif"),
-    warp_options = gdalwarp_options(num_threads = "ALL_CPUS")
+    engine = "rioxarray"
   )
 toc()
 
@@ -144,7 +149,7 @@ purrr::walk(
 ex_collect_mask <- vrt_set_maskfun(
   ex_collect,
   mask_band = "SCL",
-  valid_bits = c(4, 5, 6, 7, 11)
+  mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
 purrr::walk(

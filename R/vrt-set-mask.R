@@ -1,18 +1,34 @@
 #' Set mask band of a VRT collection
 #' @param x A VRT type object (collection or block)
-#' @param valid_bits A numeric vector of valid bits
+#' @param mask_values A numeric vector of integer or bit values to be masked.
 #' @param mask_band The name of the mask band
-#' @param mask_pixfun A function that returns the Python code for the mask
-#' pixel function
+#' @param build_mask_pixfun A character string of the Python code to build the
+#' mask. Provided functions include [build_intmask()] and [build_bitmask()].
+#' See details.
+#' @param set_mask_pixfun A character string of the Python code to set the mask.
+#' Provided functions include [set_mask_numpy()] and [set_mask_numba()]. See
+#' details.
 #' @param drop_mask_band Logical. If TRUE, the mask band will be removed from
 #' the VRT block.
 #' @export
 #' @rdname vrt_set_maskfun
+#' @details
+#' The `build_mask_pixfun` function is used to build the mask band. Where the
+#' mask abnd is a true bitmask and bit-wise operations are required, the
+#' [build_bitmask()] function should be used. For integer-based masking, where
+#' the mask band is provided as a single band with integer values, the
+#' [build_intmask()] function should be used.
+#'
+#' The `set_mask_pixfun` function is used to apply the mask to the other bands.
+#' In general [set_mask_numpy()] should be used, however, for large rasters
+#' [set_mask_numba()] can be used to speed up the process.
+#'
 vrt_set_maskfun <- function(
   x,
   mask_band,
-  valid_bits,
-  mask_pixfun,
+  mask_values,
+  build_mask_pixfun,
+  set_mask_pixfun,
   drop_mask_band
 ) {
   UseMethod("vrt_set_maskfun")
@@ -33,15 +49,20 @@ vrt_set_maskfun.default <- function(x, ...) {
 vrt_set_maskfun.vrt_block <- function(
   x,
   mask_band,
-  valid_bits,
-  mask_pixfun = vrtility::bitmask_numpy(),
+  mask_values,
+  build_mask_pixfun = vrtility::build_intmask(),
+  set_mask_pixfun = vrtility::set_mask_numpy(),
   drop_mask_band = TRUE
 ) {
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
-  v_assert_type(valid_bits, "valid_bits", "numeric", nullok = FALSE)
-  v_assert_type(mask_pixfun, "mask_pix_fun", "character", nullok = FALSE)
+  v_assert_type(mask_values, "valid_bits", "numeric", nullok = FALSE)
+  v_assert_type(build_mask_pixfun, "mask_pix_fun", "character", nullok = FALSE)
+  v_assert_type(set_mask_pixfun, "set_mask_pixfun", "character", nullok = FALSE)
 
   vx <- xml2::read_xml(x$vrt)
+
+  no_data <- xml2::xml_find_first(vx, ".//NoDataValue") |>
+    xml2::xml_double()
 
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
   descs <- purrr::map_chr(
@@ -84,10 +105,10 @@ vrt_set_maskfun.vrt_block <- function(
   pf_args <- xml2::xml_add_child(msk_band, "PixelFunctionArguments")
   xml2::xml_set_attr(
     pf_args,
-    "valid_values",
-    paste(valid_bits, collapse = ",")
+    "mask_values",
+    paste(mask_values, collapse = ",")
   )
-  cdata_node <- xml2::xml_cdata(build_bitmask_numpy())
+  cdata_node <- xml2::xml_cdata(build_mask_pixfun)
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
 
@@ -105,14 +126,10 @@ vrt_set_maskfun.vrt_block <- function(
   sourceband <- xml2::xml_find_first(wmxmlsrc, ".//SourceBand")
   xml2::xml_remove(sourceband)
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
-  # browser()
 
   # update all other bands
   purrr::walk(bands[-mask_idx], function(.x) {
     xml2::xml_add_child(.x, wmxmlsrc)
-
-    no_data <- xml2::xml_find_first(.x, ".//NoDataValue") |>
-      xml2::xml_double()
 
     xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
     xml2::xml_add_child(.x, "PixelFunctionType", "bitmask")
@@ -121,17 +138,19 @@ vrt_set_maskfun.vrt_block <- function(
     xml2::xml_set_attr(
       pf_args,
       "valid_values",
-      paste(valid_bits, collapse = ",")
+      paste(mask_values, collapse = ",")
     )
     xml2::xml_set_attr(pf_args, "no_data_value", no_data)
 
-    cdata_node <- xml2::xml_cdata(mask_pixfun)
+    cdata_node <- xml2::xml_cdata(set_mask_pixfun)
     pixel_func_code <- xml2::xml_add_child(.x, "PixelFunctionCode")
     xml2::xml_add_child(pixel_func_code, cdata_node)
   })
 
   if (drop_mask_band) {
     xml2::xml_remove(bands[[mask_idx]])
+  } else {
+    set_nodatavalue(bands[[mask_idx]], no_data)
   }
 
   # Write back to block
@@ -145,7 +164,7 @@ vrt_set_maskfun.vrt_block <- function(
     as_file = TRUE
   )
 
-  build_vrt_block(tf, maskfun = mask_pixfun, pixfun = x$pixfun)
+  build_vrt_block(tf, maskfun = build_mask_pixfun, pixfun = x$pixfun)
 }
 
 #' @param x A VRT collection
@@ -156,14 +175,22 @@ vrt_set_maskfun.vrt_block <- function(
 vrt_set_maskfun.vrt_collection <- function(
   x,
   mask_band,
-  valid_bits,
-  mask_pixfun = vrtility::bitmask_numpy(),
+  mask_values,
+  build_mask_pixfun = vrtility::build_intmask(),
+  set_mask_pixfun = vrtility::set_mask_numpy(),
   drop_mask_band = TRUE
 ) {
   check_mask_band(x, mask_band)
   masked_blocks <- purrr::map(
     x$vrt,
-    ~ vrt_set_maskfun(.x, mask_band, valid_bits, mask_pixfun, drop_mask_band)
+    ~ vrt_set_maskfun(
+      .x,
+      mask_band,
+      mask_values,
+      build_mask_pixfun,
+      set_mask_pixfun,
+      drop_mask_band
+    )
   )
 
   if (inherits(x, "vrt_collection_warped")) {
@@ -173,7 +200,7 @@ vrt_set_maskfun.vrt_collection <- function(
   }
   build_vrt_collection(
     masked_blocks,
-    maskfun = mask_pixfun,
+    maskfun = build_mask_pixfun,
     pixfun = x$pixfun,
     warped = warped
   )

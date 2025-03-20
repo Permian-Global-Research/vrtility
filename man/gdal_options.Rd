@@ -41,7 +41,7 @@ gdal_creation_options(
 
 gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = "ALL_CPUS")
 
-set_gdal_config(x)
+set_gdal_config(x, scope = c("gdalraster", "sys"))
 }
 \arguments{
 \item{GDAL_VRT_ENABLE_PYTHON}{Enable Python this is required for vrtility pixel functions}
@@ -105,6 +105,9 @@ alternartively an integer can be supplied - or NULL to use a single threaded
 process.}
 
 \item{x}{A named character vector of the configuration options}
+
+\item{scope}{A character vector of the scope to set the options in. Either
+"gdalraster" or "sys".}
 }
 \value{
 Character vector of options

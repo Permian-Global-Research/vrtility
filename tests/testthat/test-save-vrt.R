@@ -8,7 +8,7 @@ test_that("save_vrt works", {
   ex_vrt <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
-      valid_bits = c(4, 5, 6, 7, 11),
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
       drop_mask_band = FALSE
     ) |>
     vrt_warp(

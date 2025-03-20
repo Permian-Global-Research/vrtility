@@ -48,8 +48,10 @@ pixel functions in time.
 
 \describe{
 \item{\code{\link{vrt_set_pixelfun}}}{Set a pixel function for a vrt stack object}
-\item{\code{\link{bitmask_numba}}}{A pixel function to apply a bitmask}
-\item{\code{\link{bitmask_numpy}}}{A pixel function to compute the median}
+\item{\code{\link{set_mask_numpy}}}{A pixel function to apply a bitmask}
+\item{\code{\link{set_mask_numba}}}{A pixel function to apply a bitmask with numba}
+\item{\code{\link{build_intmask}}}{A pixel function to build a mask from a mask band where the mask values are integers}
+\item{\code{\link{build_bitmask}}}{A pixel function to build a mask from a mask band where the mask values are bit positions}
 \item{\code{\link{median_numba}}}{A pixel function to compute the median}
 \item{\code{\link{median_numpy}}}{A pixel function to compute the median}
 }
@@ -71,6 +73,9 @@ pixel functions in time.
 }
 }
 
+\seealso{
+\href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}{LPCLOUD STAC Browser}
+}
 \author{
 \strong{Maintainer}: Hugh Graham \email{hugh.graham@permianglobal.com} (\href{https://orcid.org/0000-0001-9451-5010}{ORCID})
 

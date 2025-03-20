@@ -16,6 +16,7 @@ plot_raster_src(
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
+  adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
   col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else NULL,
@@ -73,6 +74,9 @@ range is \verb{[0,1]}, normalized to the full range of the pixel data by default
 (\code{min(data)}, \code{max(data)}, per band). Ignored if \code{col_tbl} is used.
 Set \code{normalize} to \code{FALSE} if a color map function is used that
 operates on raw pixel values (see \code{col_map_fn} below).}
+
+\item{adj_low}{a numeric value to adjust the lower quantile value by. useful
+for example when sea presents as very dark.}
 
 \item{minmax_def}{Normalize to user-defined min/max values (in terms of
 the pixel data, per band). For single-band grayscale, a numeric vector of

@@ -14,6 +14,8 @@
 #' the gdal "engine".
 #' @param config_options A character vector of options to set in the GDAL
 #' environment
+#' @param dask_workers An integer of the number of dask workers to use when
+#' using the rioxarray engine.
 #' @param add_cl_arg A character vector of additional command line arguments
 #' that are not captured in `gdalwarp_options()` - these are not checked for
 #' validity.
@@ -29,7 +31,11 @@
 #' The choice of `engine` will depend on the nature of the computation being
 #' carried out. In the majority of cases warping is preferred, especically when
 #' we are not processing the entirity of the input dataset (as is usually the
-#' case when working with online data sources).
+#' case when working with online data sources). The `rioxarray` engine is
+#' experimental but potentially MUCH faster when working with COGs... Before
+#' using the rioxarray engine, ensure that the VRT collection has been warped
+#' with `vrt_warp` before using `vrt_stack` or `vrt_compute`.
+#' @importFrom reticulate `%as%`
 vrt_compute <- function(
   x,
   outfile,
@@ -41,6 +47,7 @@ vrt_compute <- function(
   warp_options,
   creation_options,
   config_options,
+  dask_workers,
   add_cl_arg,
   quiet
 ) {
@@ -78,10 +85,11 @@ vrt_compute.vrt_block <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "translate"),
+  engine = c("warp", "rioxarray", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
+  dask_workers = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -118,7 +126,23 @@ vrt_compute.vrt_block <- function(
         quiet = quiet
       )
     )
-  } else {
+  } else if (engine == "rioxarray") {
+    # really this should only be run if it is warped already...
+    if (!x$warped) {
+      cli::cli_abort(
+        c(
+          "The `rioxarray` engine should only be used with warped VRTs",
+          "i" = "Use `vrt_warp on the collection before`vrt_stack` or vrt_compute`"
+        )
+      )
+    }
+
+    # doesnt need to be wrapped witht the py env.
+    # result <- compute_with_py_env(
+    result <- call_rioxarray_dask(tmp_vrt, outfile, dask_workers)
+    # )
+  } else if (engine == "translate") {
+    tmp_vrt <- vrt_save(x)
     result <- compute_with_py_env(
       call_gdal_tanslate(
         src_files = tmp_vrt,
@@ -156,10 +180,11 @@ vrt_compute.vrt_stack_warped <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "translate"),
+  engine = c("warp", "rioxarray", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
+  dask_workers = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -208,6 +233,7 @@ vrt_compute.vrt_stack <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
+  dask_workers = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -242,12 +268,13 @@ vrt_compute.vrt_collection_warped <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "translate"),
+  engine = c("warp", "rioxarray", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
+  dask_workers = NULL,
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 ) {
   class(x) <- setdiff(class(x), "vrt_collection_warped")
   vrt_compute(
@@ -295,8 +322,9 @@ vrt_compute.vrt_collection <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
+  dask_workers = NULL,
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = FALSE
 ) {
   if (any(missing(t_srs), missing(te), missing(tr))) {
     missing_args_error("vrt_collection")
@@ -344,7 +372,7 @@ call_gdal_warp <- function(
   t_srs,
   cl_arg,
   config_options,
-  quiet = FALSE
+  quiet = TRUE
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
@@ -370,7 +398,7 @@ call_gdal_tanslate <- function(
   outfile,
   cl_arg,
   config_options,
-  quiet = FALSE
+  quiet = TRUE
 ) {
   v_assert_true(fs::file_exists(src_files), "src_files")
 
@@ -386,6 +414,38 @@ call_gdal_tanslate <- function(
 
   return(outfile)
 }
+
+#' @noRd
+#' @keywords internal
+call_rioxarray_dask <- function(wf, outfile, dask_workers) {
+  opt <- Sys.getenv("GDAL_VRT_ENABLE_PYTHON")
+  on.exit(Sys.setenv(GDAL_VRT_ENABLE_PYTHON = opt))
+  Sys.setenv(GDAL_VRT_ENABLE_PYTHON = "YES")
+
+  dask.distributed <- reticulate::import("dask.distributed")
+  rioxarray <- reticulate::import("rioxarray")
+  set_gdal_config(gdal_config_opts(), scope = "sys")
+  with(dask.distributed$LocalCluster(n_workers = dask_workers) %as% cluster, {
+    with(dask.distributed$Client(cluster) %as% client, {
+      cli::cli_alert_info(
+        "Dask dashboard @: {client$dashboard_link}"
+      )
+      xds <- rioxarray$open_rasterio(
+        wf,
+        chunks = TRUE,
+        lock = FALSE,
+        # lock=Lock("rio-read", client=client), # when too many file handles open
+      )
+      xds$rio$to_raster(
+        outfile,
+        tiled = TRUE,
+        lock = dask.distributed$Lock("rio", client = client),
+      )
+    })
+  })
+  return(outfile)
+}
+
 
 #' Combine multiple warper input arguments
 #' @noRd

@@ -73,13 +73,10 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
 
 
 #' constructor for vrt_block class
-#' @param xml An xml_document object
-#' @param bbox A numeric vector of the bounding box
-#' @param start_date A character string of the start date
-#' @param end_date A character string of the end date
-#' @param n_its An integer of the number of items
-#' @param assets A character vector of the asset names
-#' @param pixfun A function of the pixel function
+#' @param x A vrt_collection type object
+#' @param maskfun The code of the mask function
+#' @param pixfun The code of the pixel function
+#' @param ... Additional arguments not used.
 #' @keywords internal
 #' @noRd
 build_vrt_stack <- function(
@@ -118,7 +115,8 @@ build_vrt_stack <- function(
     assets = assets,
     no_data_val = no_data_val,
     pixfun = pixfun,
-    maskfun = maskfun
+    maskfun = maskfun,
+    warped = warped
   )
 
   if (warped) {

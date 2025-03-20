@@ -15,7 +15,7 @@ test_that("full vrt pipeline works", {
   ex_collect_mask <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
-      valid_bits = c(4, 5, 6, 7, 11),
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
       drop_mask_band = FALSE
     )
 
@@ -79,9 +79,9 @@ test_that("full vrt pipeline works", {
   ex_collect_mask <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
-      valid_bits = c(4, 5, 6, 7, 11),
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
       drop_mask_band = FALSE,
-      mask_pixfun = bitmask_numba()
+      set_mask_pixfun = set_mask_numba()
     ) |>
     vrt_warp(
       t_srs = t_block$srs,
@@ -145,7 +145,7 @@ test_that("vrt_collect works with rstac doc_items", {
   ex_collect_mask <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
-      valid_bits = c(4, 5, 6, 7, 11),
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
       drop_mask_band = TRUE
     )
 
