@@ -244,7 +244,8 @@ build_vrt_collection <- function(
     assets = uniq_assets,
     mask_band_name = mask_band_name,
     pixfun = pixfun,
-    maskfun = maskfun
+    maskfun = maskfun,
+    warped = warped
   )
 
   if (warped) {
