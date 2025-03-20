@@ -115,7 +115,8 @@ build_vrt_stack <- function(
     assets = assets,
     no_data_val = no_data_val,
     pixfun = pixfun,
-    maskfun = maskfun
+    maskfun = maskfun,
+    warped = warped
   )
 
   if (warped) {
