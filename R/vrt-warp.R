@@ -120,23 +120,33 @@ vrt_warp.vrt_block <- function(
     as_file = TRUE
   )
 
+  if (inherits(x, "vrt_stack")) {
+    dttm_lab <- paste0("datetime_", seq_along(x$date_time))
+  } else {
+    dttm_lab <- "datetime"
+  }
   if (is.null(mask_band)) {
     outtf <- set_vrt_metadata(
       outtf,
-      keys = "datetime",
+      keys = dttm_lab,
       values = dttm,
       as_file = TRUE
     )
   } else {
     outtf <- set_vrt_metadata(
       outtf,
-      keys = c("datetime", "mask_band_name"),
+      keys = c(dttm_lab, "mask_band_name"),
       values = c(dttm, mask_band),
       as_file = TRUE
     )
   }
 
-  build_vrt_block(outtf)
+  build_vrt_block(
+    outtf,
+    mask_fun = x$maskfun,
+    pix_fun = x$pixfun,
+    warped = TRUE
+  )
 }
 
 
