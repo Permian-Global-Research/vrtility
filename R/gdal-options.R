@@ -122,19 +122,34 @@ gdalwarp_options <- function(
 
 #' Set the GDAL configuration options
 #' @param x A named character vector of the configuration options
+#' @param scope A character vector of the scope to set the options in. Either
+#' "gdalraster" or "sys".
 #' @export
 #' @rdname gdal_options
 #' @examples
 #' set_gdal_config(gdal_config_opts())
-set_gdal_config <- function(x) {
+set_gdal_config <- function(x, scope = c("gdalraster", "sys")) {
+  scope <- rlang::arg_match(scope)
   # Store original values
-  original_values <- purrr::map_chr(
-    names(x),
-    ~ gdalraster::get_config_option(.x)
-  ) |>
-    purrr::set_names(names(x))
 
   # Set the config options
+  if (scope == "gdalraster") {
+    original_values <- purrr::map_chr(
+      names(x),
+      ~ gdalraster::get_config_option(.x)
+    ) |>
+      purrr::set_names(names(x))
+
+    purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
+  } else {
+    original_values <- purrr::map_chr(
+      names(x),
+      ~ Sys.getenv(.x)
+    ) |>
+      purrr::set_names(names(x))
+
+    do.call(Sys.setenv, as.list(x))
+  }
   purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
   invisible(original_values)
 }
