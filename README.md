@@ -36,6 +36,8 @@ expressions in time.
   deriving spectral indices or calculating complex time series
   functions.
 
+- parallel processing of VRTs using `dask` and `rioxarray`
+
 ## TO DO:
 
 - [ ] Add additional pixel functions (geometric median in particular).
@@ -76,7 +78,9 @@ Here is a simple example where we:
 6.  A median pixel function is then added to the `vrt_stack`.
 
 7.  all of this is then “lazily” computed at the end of the vrt pipeline
-    using gdalwarp.
+    python’s `rioxarry` package along with `dask` for parallel
+    processing. To make use of the rioxarray “engine”, we have to use
+    vrt_warp on our `vrt_collection` first.
 
 ``` r
 library(vrtility)
@@ -116,10 +120,14 @@ median_composite <- vrt_collect(s2_stac) |>
   vrt_set_pixelfun() |>
   vrt_compute(
     outfile = fs::file_temp(ext = "tif"),
-    warp_options = gdalwarp_options(num_threads = "ALL_CPUS")
+    engine = "rioxarray"
   )
+#> ℹ Dask dashboard @: http://127.0.0.1:8787/status
+```
+
+``` r
 toc()
-#> 118.214 sec elapsed
+#> 77.903 sec elapsed
 ```
 
 ``` r

@@ -2,7 +2,7 @@
 
 # dev space
 scratch.R
-
+scratch2.R
 # files to ignore
 *.tif
 *.vrt
