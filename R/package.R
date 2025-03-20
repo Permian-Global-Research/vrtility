@@ -31,8 +31,10 @@
 #' @section VRT pixel functions:
 #' \describe{
 #' \item{\code{\link{vrt_set_pixelfun}}}{Set a pixel function for a vrt stack object}
-#' \item{\code{\link{bitmask_numba}}}{A pixel function to apply a bitmask}
-#' \item{\code{\link{bitmask_numpy}}}{A pixel function to compute the median}
+#' \item{\code{\link{set_mask_numpy}}}{A pixel function to apply a bitmask}
+#' \item{\code{\link{set_mask_numba}}}{A pixel function to apply a bitmask with numba}
+#' \item{\code{\link{build_intmask}}}{A pixel function to build a mask from a mask band where the mask values are integers}
+#' \item{\code{\link{build_bitmask}}}{A pixel function to build a mask from a mask band where the mask values are bit positions}
 #' \item{\code{\link{median_numba}}}{A pixel function to compute the median}
 #' \item{\code{\link{median_numpy}}}{A pixel function to compute the median}
 #' }
@@ -48,9 +50,7 @@
 #' }
 #'
 #' @seealso
-#' Some useful links:
-#' \href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}
-#'
+#' \href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}{LPCLOUD STAC Browser}
 #'
 #' @docType package
 #' @aliases vrtility-package
@@ -59,6 +59,16 @@
 
 
 .onLoad <- function(libname, pkgname) {
-  vrtility_py_require(c("numpy", "numba"))
+  if (is.na(Sys.getenv("RETICULATE_USE_MANAGED_VENV", unset = NA))) {
+    Sys.setenv(RETICULATE_USE_MANAGED_VENV = "yes")
+  }
+  vrtility_py_require(c(
+    "numpy",
+    "numba",
+    "dask",
+    "distributed",
+    "rioxarray",
+    "bokeh"
+  ))
   cache_init_checks()
 }
