@@ -7,6 +7,7 @@
 #' @param no_data_val A numeric vector of the no data values
 #' @param maskfun A function of the mask function
 #' @param pixfun A function of the pixel function
+#' @param warped A logical indicating whether the VRT is warped
 #' @param ... Additional arguments not used
 #' @keywords internal
 #' @noRd
@@ -14,6 +15,7 @@ build_vrt_block <- function(
   x,
   maskfun = NULL,
   pixfun = NULL,
+  warped = NULL,
   ...
 ) {
   # validate the vrt against the schema
@@ -43,7 +45,8 @@ build_vrt_block <- function(
     no_data_val = no_data_val,
     mask_band_name = mask_band_name,
     pixfun = pixfun,
-    maskfun = maskfun
+    maskfun = maskfun,
+    warped = warped
   )
 
   class(rvrt) <- c("vrt_block", "list")
