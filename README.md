@@ -12,14 +12,20 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
-The goal of vrtility is to make the best use of GDAL’s VRT capabilities
+vrtility is an R package that aims to make the best use of
+[GDAL](https://gdal.org/en/stable/index.html)’s
+[VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
 Observation in mind. This package’s primary focus is on the use of GDAL
 VRT pixel functions using python. These python pixel functions are used
 to apply cloud masks and summarise pixel values (e.g. median) from
-multiple images (i.e create a composite image). For now we’re just using
-the python pixel function capabilities but hope to add C++ or
-expressions in time.
+multiple images (i.e create a composite image). These main features are
+made possible by the
+[{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
+and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
+
+\[!CAUTION\] This package is under active development and is likely to
+change. Contributions and suggestions are still very welcome!
 
 ## Features
 
@@ -37,11 +43,6 @@ expressions in time.
   functions.
 
 - parallel processing of VRTs using `dask` and `rioxarray`
-
-## TO DO:
-
-- [ ] Add additional pixel functions (geometric median in particular).
-- [ ] time series functions…
 
 ## Installation
 
@@ -78,8 +79,9 @@ Here is a simple example where we:
 6.  A median pixel function is then added to the `vrt_stack`.
 
 7.  all of this is then “lazily” computed at the end of the vrt pipeline
-    python’s `rioxarry` package along with `dask` for parallel
-    processing. To make use of the rioxarray “engine”, we have to use
+    python’s [rioxarry](https://corteva.github.io/rioxarray/stable/)
+    package along with [dask](https://www.dask.org/) for parallel
+    processing. To make use of the `rioxarray` “engine”, we must use
     vrt_warp on our `vrt_collection` first.
 
 ``` r
@@ -127,7 +129,7 @@ median_composite <- vrt_collect(s2_stac) |>
 
 ``` r
 toc()
-#> 77.903 sec elapsed
+#> 68.597 sec elapsed
 ```
 
 ``` r
@@ -143,10 +145,10 @@ plot_raster_src(
 We can also use on-disk raster files too, as shown here with this
 example dataset - note that the inputs have multiple spatial reference
 systems and therefore we need to warp them (as in the above example)
-before stacking. If your images are all in the same CRS, you will save a
-lot of time by warping only once in `vrt_compute`. We can plot thse
-`vrt_{x}` objects using the `plot` but note that for very large rasters
-where we are computing pixel functions this can be slow and we are
+before stacking. If your images are all in the same CRS, you might save
+a lot of time by warping only once in `vrt_compute`. We can plot these
+`vrt_{x}` objects using `plot()` but note that for very large rasters,
+where we are computing pixel functions, this can be slow and we are
 better off using `vrt_compute` to write to disk and then plotting the
 output.
 
@@ -208,3 +210,10 @@ plot(ex_composite, bands = c(3, 2, 1), quiet = TRUE)
 #   engine = "warp"
 # )
 ```
+
+## TO DO:
+
+- [ ] Add additional pixel functions (geometric median in particular).
+- [ ] Add default C++ pixel functions.
+- [ ] time series functions…
+- [ ] Add custom C++ or expression based pixel functions
