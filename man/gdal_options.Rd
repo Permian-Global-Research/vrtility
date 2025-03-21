@@ -8,7 +8,6 @@
 \title{Create GDAL configuration options.}
 \usage{
 gdal_config_opts(
-  GDAL_VRT_ENABLE_PYTHON = "YES",
   VSI_CACHE = "TRUE",
   GDAL_CACHEMAX = "50\%",
   VSI_CACHE_SIZE = "268435456",
@@ -44,8 +43,6 @@ gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = "ALL_CPUS")
 set_gdal_config(x, scope = c("gdalraster", "sys"))
 }
 \arguments{
-\item{GDAL_VRT_ENABLE_PYTHON}{Enable Python this is required for vrtility pixel functions}
-
 \item{VSI_CACHE}{cache related}
 
 \item{GDAL_CACHEMAX}{cache related}
