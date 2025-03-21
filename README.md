@@ -129,7 +129,7 @@ median_composite <- vrt_collect(s2_stac) |>
 
 ``` r
 toc()
-#> 79.214 sec elapsed
+#> 67.255 sec elapsed
 ```
 
 ``` r
