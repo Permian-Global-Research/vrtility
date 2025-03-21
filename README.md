@@ -24,8 +24,10 @@ made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-\[!CAUTION\] This package is under active development and is likely to
-change. Contributions and suggestions are still very welcome!
+\[!CAUTION\]
+
+This package is under active development and is likely to change.
+Contributions and suggestions are still very welcome!
 
 ## Features
 
@@ -129,7 +131,7 @@ median_composite <- vrt_collect(s2_stac) |>
 
 ``` r
 toc()
-#> 68.597 sec elapsed
+#> 71.121 sec elapsed
 ```
 
 ``` r
