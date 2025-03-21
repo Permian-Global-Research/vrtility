@@ -1,5 +1,4 @@
 #' Create GDAL configuration options.
-#' @param GDAL_VRT_ENABLE_PYTHON Enable Python this is required for vrtility pixel functions
 #' @param VSI_CACHE cache related
 #' @param GDAL_CACHEMAX cache related
 #' @param VSI_CACHE_SIZE cache related
@@ -22,7 +21,6 @@
 #' @examples
 #' gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 gdal_config_opts <- function(
-  GDAL_VRT_ENABLE_PYTHON = "YES",
   VSI_CACHE = "TRUE",
   GDAL_CACHEMAX = "50%",
   VSI_CACHE_SIZE = "268435456",
