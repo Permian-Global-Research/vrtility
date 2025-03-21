@@ -161,7 +161,7 @@
 ---
 
     Code
-      print(ex_collect_mask_warp, maskfun = TRUE)
+      print(ex_collect_mask_warp, xml = TRUE, maskfun = TRUE)
     Message
       > <VRT Collection>
       Mask Function:

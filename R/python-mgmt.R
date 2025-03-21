@@ -78,10 +78,9 @@ compute_with_py_env <- function(
   # Modified environment setup
   withr::with_envvar(
     new = c(
-      # Only set essential variables
-      "RETICULATE_PYTHON" = py_bin,
-      "VIRTUALENV" = py_env,
-      "PATH" = paste(fs::path(py_env, "bin"), Sys.getenv("PATH"), sep = ":")
+      GDAL_VRT_ENABLE_PYTHON = "YES",
+      RETICULATE_PYTHON = py_bin,
+      PATH = paste(fs::path(py_env, "bin"), Sys.getenv("PATH"), sep = ":")
     ),
     code = code
   )

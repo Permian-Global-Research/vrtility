@@ -3,8 +3,6 @@
 #' @param band_names A character vector of the band names
 #' @export
 vrt_set_band_names <- function(x, band_names) {
-  v_assert_type(band_names, "band_names", "character", nullok = FALSE)
-  v_assert_length(band_names, "band_names", length(x$assets))
   UseMethod("vrt_set_band_names")
 }
 
@@ -21,6 +19,8 @@ vrt_set_band_names.default <- function(x, ...) {
 
 #' @export
 vrt_set_band_names.vrt_block <- function(x, band_names) {
+  v_assert_type(band_names, "band_names", "character", nullok = FALSE)
+  v_assert_length(band_names, "band_names", length(x$assets))
   tf <- vrt_save(x)
   of <- set_vrt_descriptions(tf, band_names, as_file = TRUE)
 
@@ -29,6 +29,8 @@ vrt_set_band_names.vrt_block <- function(x, band_names) {
 
 #' @export
 vrt_set_band_names.vrt_stack <- function(x, band_names) {
+  v_assert_type(band_names, "band_names", "character", nullok = FALSE)
+  v_assert_length(band_names, "band_names", length(x$assets))
   tf <- vrt_save(x)
   of <- set_vrt_descriptions(tf, band_names, as_file = TRUE)
   build_vrt_stack(of, maskfun = x$maskfun, pixfun = x$pixfun)
@@ -36,6 +38,8 @@ vrt_set_band_names.vrt_stack <- function(x, band_names) {
 
 #' @export
 vrt_set_band_names.vrt_collection <- function(x, band_names) {
+  v_assert_type(band_names, "band_names", "character", nullok = FALSE)
+  v_assert_length(band_names, "band_names", length(x$assets))
   block_list <- purrr::map(x[[1]], ~ vrt_set_band_names(.x, band_names))
 
   build_vrt_collection(block_list, maskfun = x$maskfun, pixfun = x$pixfun)

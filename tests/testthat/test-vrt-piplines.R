@@ -35,7 +35,7 @@ test_that("full vrt pipeline works", {
   expect_equal(ex_collect_mask_warp$srs, t_block$srs)
   expect_s3_class(ex_collect_mask_warp, "vrt_collection_warped")
   expect_snapshot(print(ex_collect_mask_warp))
-  expect_snapshot(print(ex_collect_mask_warp, maskfun = TRUE))
+  expect_snapshot(print(ex_collect_mask_warp, xml = TRUE, maskfun = TRUE))
 
   coll_compute <- vrt_compute(
     ex_collect_mask_warp,
@@ -74,9 +74,10 @@ test_that("full vrt pipeline works", {
   r <- gdalraster::read_ds(ds)
   expect_gt(sum(r, na.rm = TRUE), 6e+08)
 
-  # numba mask no median
-  testthat::skip_on_os("mac") # numba issues on mac https://github.com/numba/numba/issues/9812
-  ex_collect_mask <- ex_collect |>
+  # numba mask and median
+  # numba issues on mac https://github.com/numba/numba/issues/9812
+  testthat::skip_on_os("mac")
+  ex_collect_mask_vrt <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
       mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
@@ -89,10 +90,22 @@ test_that("full vrt pipeline works", {
       tr = t_block$res
     ) |>
     vrt_stack() |>
-    vrt_set_pixelfun(pixfun = median_numba()) |>
-    vrt_compute(outfile = fs::file_temp(ext = "tif"))
+    vrt_set_pixelfun(pixfun = median_numba())
+
+  ex_collect_mask <- vrt_compute(
+    ex_collect_mask_vrt,
+    outfile = fs::file_temp(ext = "tif")
+  )
 
   expect_true(fs::file_size(ex_collect_mask) > 0)
+
+  ex_collect_mask_riox <- vrt_compute(
+    ex_collect_mask_vrt,
+    outfile = fs::file_temp(ext = "tif"),
+    engine = "rioxarray"
+  )
+
+  expect_true(fs::file_size(ex_collect_mask_riox) > 0)
 
   testthat::skip_on_os("windows")
   vdiffr::expect_doppelganger(
@@ -155,4 +168,31 @@ test_that("vrt_collect works with rstac doc_items", {
 
   expect_snapshot(print(ex_collect_mask))
   expect_snapshot(print(ex_collect_mask, blocks = TRUE, maskfun = TRUE))
+})
+
+test_that("pipeline extras", {
+  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+
+  ex_collect <- vrt_collect(s2files)
+  expect_error(vrt_set_pixelfun(ex_collect))
+
+  one_srs_collect <- vrt_collect(s2files[1:2])
+  one_srs_collect_stack <- vrt_stack(one_srs_collect)
+  one_srs_collect_stack_pf <- vrt_set_pixelfun(one_srs_collect_stack)
+  expect_false(is.null(one_srs_collect_stack_pf$pixfun))
+
+  one_srs_collect_stack_pf_mask <- vrt_set_maskfun(
+    one_srs_collect_stack_pf,
+    mask_band = "FAKEMASK",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+  ) |>
+    expect_error()
+
+  expect_error(
+    vrt_set_maskfun(
+      "won't work",
+      mask_band = "DOESNTEXIST",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+    )
+  )
 })
