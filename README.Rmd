@@ -33,9 +33,8 @@ composite image). These main features are made possible by the
 [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
 
-[!CAUTION]
-
-This package is under active development and is likely to change. Contributions
+> [!CAUTION]
+> This package is under active development and is likely to change. Contributions
 and suggestions are still very welcome!
 
 ## Features
