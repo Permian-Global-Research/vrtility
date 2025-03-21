@@ -32,9 +32,10 @@ composite image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html) and 
 [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-
+```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
+```
 
 ## Features
 
