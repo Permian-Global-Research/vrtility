@@ -104,7 +104,7 @@ vrt_compute.vrt_block <- function(
   resampling <- rlang::arg_match(resampling)
   engine <- rlang::arg_match(engine)
 
-  tmp_vrt <- vrt_save(x)
+  tmp_vrt <- normalizePath(vrt_save(x))
 
   if (engine == "warp") {
     cl_arg <- combine_warp_opts(
