@@ -17,10 +17,10 @@ vrtility is an R package that aims to make the best use of
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
 Observation in mind. This package’s primary focus is on the use of GDAL
-VRT pixel functions using python. These python pixel functions are used
-to apply cloud masks and summarise pixel values (e.g. median) from
-multiple images (i.e create a composite image). These main features are
-made possible by the
+VRT pixel functions using python. These [numpy](https://numpy.org/)
+based python pixel functions are used to apply cloud masks and summarise
+pixel values (e.g. median) from multiple images (i.e create a composite
+image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
@@ -33,21 +33,19 @@ and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
   download and processing of only the required data in a single gdalwarp
   (or gdal_translate) call. This reduces disk read/write time.
 
-- use of numba in python pixel function(s) - not always faster but can
-  be.
-
 - modular design: We’re basically creating remote sensing pipelines
   using nested VRTs. This allows for the easy addition of new pixel
   functions and masking functions. but could easily be adapted for
   deriving spectral indices or calculating complex time series
   functions.
 
-- parallel processing of VRTs using `dask` and `rioxarray`
+- extremely efficient parallel processing using gdalraster and
+  [mirai](https://shikokuchuo.net/mirai/) when using the “gdalraster”
+  compute engine.
 
 ## Installation
 
-You can install the development version of vrtility from
-[GitHub](https://github.com/) with:
+You can install the development version of vrtility from GitHub with:
 
 ``` r
 # install.packages("pak")
@@ -78,15 +76,14 @@ Here is a simple example where we:
 
 6.  A median pixel function is then added to the `vrt_stack`.
 
-7.  all of this is then “lazily” computed at the end of the vrt pipeline
-    python’s [rioxarry](https://corteva.github.io/rioxarray/stable/)
-    package along with [dask](https://www.dask.org/) for parallel
-    processing. To make use of the `rioxarray` “engine”, we must use
-    vrt_warp on our `vrt_collection` first.
+7.  all of this is then executed at the end of the vrt pipeline using
+    `vrt_compute`. Here we are using the `gdalraster` engine to write
+    the output which, in combination with the mirai package downloads
+    and processes the data in parallel across bands and within bands (as
+    determined by the `nsplits` argument).
 
 ``` r
 library(vrtility)
-library(tictoc)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (144.3 -7.6)"),
@@ -111,28 +108,27 @@ length(s2_stac$features)
 
 ``` r
 
-tic()
-median_composite <- vrt_collect(s2_stac) |>
-  vrt_set_maskfun(
-    mask_band = "SCL",
-    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
-  ) |>
-  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
-  vrt_stack() |>
-  vrt_set_pixelfun() |>
-  vrt_compute(
-    outfile = fs::file_temp(ext = "tif"),
-    engine = "rioxarray"
-  )
-#> ℹ Dask dashboard @: http://127.0.0.1:8787/status
+system.time(
+  median_composite <- vrt_collect(s2_stac) |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+    ) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
+    vrt_stack() |>
+    vrt_set_pixelfun() |>
+    vrt_compute(
+      outfile = fs::file_temp(ext = "tif"),
+      engine = "gdalraster",
+      nsplits = 3L
+    )
+)
+#>    user  system elapsed 
+#>   1.707   0.413  41.392
 ```
 
 ``` r
-toc()
-#> 49.075 sec elapsed
-```
 
-``` r
 
 plot_raster_src(
   median_composite,
@@ -140,7 +136,7 @@ plot_raster_src(
 )
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example1-1.png" width="100%" />
 
 We can also use on-disk raster files too, as shown here with this
 example dataset - note that the inputs have multiple spatial reference
