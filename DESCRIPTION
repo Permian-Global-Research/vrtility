@@ -21,7 +21,7 @@ Imports:
     lubridate,
     methods,
     mirai,
-    purrr (>= 1.0.4),
+    purrr (>= 1.0.4.9000),
     reticulate (>= 1.41.0.1),
     rlang,
     rstac,
@@ -38,3 +38,5 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 4.1.0)
 LazyData: true
+Remotes: 
+    tidyverse/purrr
