@@ -29,63 +29,30 @@ vrt_save.vrt_block <- function(
   if (fs::path_has_parent(outfile, getOption("vrt.cache"))) {
     xml2::write_xml(vrt_xml, outfile)
   } else {
-    vrt_xml <- xml2::read_xml(x$vrt)
-    tempvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+    all_files <- xml2::xml_find_all(vrt_xml, ".//SourceFilename")
+
+    purrr::walk(all_files, function(x) {
+      src_path <- xml2::xml_text(x)
+      abs_path <- fs::path(getOption("vrt.cache"), src_path)
+      if (!fs::file_exists(abs_path)) {
+        cli::cli_abort(
+          c(
+            "!" = "The file {abs_path} does not exist."
+          )
+        )
+      }
+      xml2::xml_set_text(x, abs_path)
+      rel_to_att <- xml2::xml_attr(x, "relativeToVRT")
+      if (rel_to_att != "0") {
+        xml2::xml_set_attr(x, "relativeToVRT", "0")
+      }
+    })
+
     xml2::write_xml(
       vrt_xml,
-      tempvrt
+      outfile
     )
-
-    gdalraster::buildVRT(outfile, tempvrt, quiet = TRUE)
   }
 
   invisible(normalizePath(outfile))
 }
-
-# #' Save a vrt_block object to disk
-# #' @param x A `vrt_stack` of `vrt_block` object.
-# #' @param outfile A character string of the output file
-# #' @param bands A numeric vector of band numbers to include in the output. The
-# #' default is `NULL`, which includes all bands.
-# #' @export
-# vrt_save <- function(x, outfile) {
-#   UseMethod("vrt_save")
-# }
-
-# #' @keywords internal
-# #' @noRd
-# vrt_save.default <- function(x, ...) {
-#   cli::cli_abort(
-#     "The vrt_save method is not implemented for class {class(x)}",
-#     class = "vrtility_type_error"
-#   )
-# }
-
-# #' @export
-# vrt_save.vrt_block <- function(
-#   x,
-#   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
-#   bands = NULL
-# ) {
-#   if (fs::path_ext(outfile) != "vrt") {
-#     cli::cli_abort("The `outfile` extension must be'.vrt'.")
-#   }
-#   v_assert_type(bands, "bands", "numeric", nullok = TRUE)
-
-#   vrt_xml <- xml2::read_xml(x$vrt)
-#   tempvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-#   xml2::write_xml(
-#     vrt_xml,
-#     tempvrt
-#   )
-
-#   cl_arg <- if (!is.null(bands)) {
-#     paste0("-b ", paste(bands, collapse = ","))
-#   } else {
-#     NULL
-#   }
-
-#   gdalraster::buildVRT(outfile, tempvrt, cl_arg = cl_arg, quiet = TRUE)
-
-#   invisible(normalizePath(outfile))
-# }
