@@ -2,7 +2,6 @@
 % Please edit documentation in R/mask-pixel-funs.R, R/vrt-set-mask.R
 \name{set_mask_numpy}
 \alias{set_mask_numpy}
-\alias{set_mask_numba}
 \alias{build_intmask}
 \alias{build_bitmask}
 \alias{vrt_set_maskfun}
@@ -11,8 +10,6 @@
 \title{Masking functions for pixel-based processing}
 \usage{
 set_mask_numpy()
-
-set_mask_numba()
 
 build_intmask()
 
@@ -57,7 +54,7 @@ mask. Provided functions include \code{\link[=build_intmask]{build_intmask()}} a
 See details.}
 
 \item{set_mask_pixfun}{A character string of the Python code to set the mask.
-Provided functions include \code{\link[=set_mask_numpy]{set_mask_numpy()}} and \code{\link[=set_mask_numba]{set_mask_numba()}}. See
+Provided functions include \code{\link[=set_mask_numpy]{set_mask_numpy()}}. See
 details.}
 
 \item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
@@ -75,15 +72,9 @@ Masking functions for pixel-based processing
 
 Masking functions for pixel-based processing
 
-Masking functions for pixel-based processing
-
 Set mask band of a VRT collection
 }
 \details{
-This function is a simple bit mask function that can be used to
-mask out pixels based on a bit mask. There is no bitwise transformation
-applied to the provided valid_bits.
-
 This function is a simple bit mask function that can be used to
 mask out pixels based on a bit mask. There is no bitwise transformation
 applied to the provided valid_bits.
@@ -97,12 +88,12 @@ mask out pixels based on a bit mask. The valid_bits are used to determine
 which bits to mask out.
 
 The \code{build_mask_pixfun} function is used to build the mask band. Where the
-mask abnd is a true bitmask and bit-wise operations are required, the
+mask band is a true bitmask and bit-wise operations are required, the
 \code{\link[=build_bitmask]{build_bitmask()}} function should be used. For integer-based masking, where
 the mask band is provided as a single band with integer values, the
 \code{\link[=build_intmask]{build_intmask()}} function should be used.
 
 The \code{set_mask_pixfun} function is used to apply the mask to the other bands.
-In general \code{\link[=set_mask_numpy]{set_mask_numpy()}} should be used, however, for large rasters
-\code{\link[=set_mask_numba]{set_mask_numba()}} can be used to speed up the process.
+In general \code{\link[=set_mask_numpy]{set_mask_numpy()}} should be used, although a custom function can
+be provided.
 }

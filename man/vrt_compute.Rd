@@ -20,7 +20,7 @@ vrt_compute(
   warp_options,
   creation_options,
   config_options,
-  dask_workers,
+  nsplits,
   add_cl_arg,
   quiet
 )
@@ -33,11 +33,11 @@ vrt_compute(
   tr = x$res,
   resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -50,11 +50,11 @@ vrt_compute(
   tr = x$res,
   resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -67,11 +67,11 @@ vrt_compute(
   tr,
   resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  engine = c("warp", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -84,11 +84,11 @@ vrt_compute(
   tr = x$res,
   resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = FALSE
 )
@@ -101,11 +101,11 @@ vrt_compute(
   tr,
   resampling = c("near", "bilinear", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  engine = c("warp", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = FALSE
 )
@@ -136,8 +136,8 @@ the gdal "engine".}
 \item{config_options}{A character vector of options to set in the GDAL
 environment}
 
-\item{dask_workers}{An integer of the number of dask workers to use when
-using the rioxarray engine.}
+\item{nsplits}{An integer of the number of splits to use when using the
+gdalraster engine.}
 
 \item{add_cl_arg}{A character vector of additional command line arguments
 that are not captured in \code{gdalwarp_options()} - these are not checked for
@@ -159,8 +159,5 @@ has not yet been virtually aligned/resampled.
 The choice of \code{engine} will depend on the nature of the computation being
 carried out. In the majority of cases warping is preferred, especically when
 we are not processing the entirity of the input dataset (as is usually the
-case when working with online data sources). The \code{rioxarray} engine is
-experimental but potentially MUCH faster when working with COGs... Before
-using the rioxarray engine, ensure that the VRT collection has been warped
-with \code{vrt_warp} before using \code{vrt_stack} or \code{vrt_compute}.
+case when working with online data sources).
 }
