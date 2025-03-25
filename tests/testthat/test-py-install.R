@@ -1,6 +1,6 @@
 test_that("python can be installed", {
   expect_invisible(
-    vrtility_py_require(c("numpy", "numba"))
+    vrtility_py_require(c("numpy"))
   )
 })
 

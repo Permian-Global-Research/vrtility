@@ -14,8 +14,8 @@
 #' the gdal "engine".
 #' @param config_options A character vector of options to set in the GDAL
 #' environment
-#' @param dask_workers An integer of the number of dask workers to use when
-#' using the rioxarray engine.
+#' @param nsplits An integer of the number of splits to use when using the
+#' gdalraster engine.
 #' @param add_cl_arg A character vector of additional command line arguments
 #' that are not captured in `gdalwarp_options()` - these are not checked for
 #' validity.
@@ -31,11 +31,8 @@
 #' The choice of `engine` will depend on the nature of the computation being
 #' carried out. In the majority of cases warping is preferred, especically when
 #' we are not processing the entirity of the input dataset (as is usually the
-#' case when working with online data sources). The `rioxarray` engine is
-#' experimental but potentially MUCH faster when working with COGs... Before
-#' using the rioxarray engine, ensure that the VRT collection has been warped
-#' with `vrt_warp` before using `vrt_stack` or `vrt_compute`.
-#' @importFrom reticulate `%as%`
+#' case when working with online data sources).
+#'
 vrt_compute <- function(
   x,
   outfile,
@@ -47,7 +44,7 @@ vrt_compute <- function(
   warp_options,
   creation_options,
   config_options,
-  dask_workers,
+  nsplits,
   add_cl_arg,
   quiet
 ) {
@@ -85,11 +82,11 @@ vrt_compute.vrt_block <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -104,7 +101,7 @@ vrt_compute.vrt_block <- function(
   resampling <- rlang::arg_match(resampling)
   engine <- rlang::arg_match(engine)
 
-  tmp_vrt <- vrt_save(x)
+  tmp_vrt <- normalizePath(vrt_save(x))
 
   if (engine == "warp") {
     cl_arg <- combine_warp_opts(
@@ -126,26 +123,19 @@ vrt_compute.vrt_block <- function(
         quiet = quiet
       )
     )
-  } else if (engine == "rioxarray") {
-    # really this should only be run if it is warped already...
-    if (!x$warped) {
-      cli::cli_abort(
-        c(
-          "The `rioxarray` engine should only be used with warped VRTs",
-          "i" = "Use `vrt_warp on the collection before`vrt_stack` or vrt_compute`"
-        )
-      )
-    }
+  } else if (engine == "gdalraster") {
+    if (!x$warped) warp_first_error(engine)
 
-    result <- compute_with_py_env(
-      call_rioxarray_dask(
-        tmp_vrt,
-        outfile,
-        dask_workers
-      )
+    # compute_with_py_env used internally.
+    result <- call_gdalraster_mirai(
+      src_files = tmp_vrt,
+      outfile = outfile,
+      cl_arg = NULL,
+      config_options = config_options,
+      nsplits = nsplits,
+      quiet = quiet
     )
   } else if (engine == "translate") {
-    tmp_vrt <- vrt_save(x)
     result <- compute_with_py_env(
       call_gdal_tanslate(
         src_files = tmp_vrt,
@@ -183,11 +173,11 @@ vrt_compute.vrt_stack_warped <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -203,6 +193,7 @@ vrt_compute.vrt_stack_warped <- function(
     warp_options = warp_options,
     creation_options = creation_options,
     config_options = config_options,
+    nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet
   )
@@ -232,11 +223,11 @@ vrt_compute.vrt_stack <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -271,11 +262,11 @@ vrt_compute.vrt_collection_warped <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "rioxarray", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = FALSE
 ) {
@@ -291,6 +282,7 @@ vrt_compute.vrt_collection_warped <- function(
     warp_options = warp_options,
     creation_options = creation_options,
     config_options = config_options,
+    nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet
   )
@@ -321,11 +313,11 @@ vrt_compute.vrt_collection <- function(
     "q3",
     "sum"
   ),
-  engine = c("warp", "translate"),
+  engine = c("warp", "gdalraster", "translate"),
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  dask_workers = NULL,
+  nsplits = 1L,
   add_cl_arg = NULL,
   quiet = FALSE
 ) {
@@ -357,6 +349,7 @@ vrt_compute.vrt_collection <- function(
         warp_options = warp_options,
         creation_options = creation_options,
         config_options = config_options,
+        nsplits = nsplits,
         add_cl_arg = add_cl_arg,
         quiet = TRUE
       )
@@ -373,6 +366,16 @@ missing_args_error <- function(x_class) {
     c(
       "The following arguments are required for a `{x_class}` object:",
       ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
+    )
+  )
+}
+
+
+warp_first_error <- function(engine) {
+  cli::cli_abort(
+    c(
+      "The `{engine}` engine should only be used with warped VRTs",
+      "i" = "Use `vrt_warp on the collection before`vrt_stack` or vrt_compute`"
     )
   )
 }

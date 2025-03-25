@@ -6,7 +6,7 @@
 #' mask. Provided functions include [build_intmask()] and [build_bitmask()].
 #' See details.
 #' @param set_mask_pixfun A character string of the Python code to set the mask.
-#' Provided functions include [set_mask_numpy()] and [set_mask_numba()]. See
+#' Provided functions include [set_mask_numpy()]. See
 #' details.
 #' @param drop_mask_band Logical. If TRUE, the mask band will be removed from
 #' the VRT block.
@@ -14,14 +14,14 @@
 #' @rdname vrt_set_maskfun
 #' @details
 #' The `build_mask_pixfun` function is used to build the mask band. Where the
-#' mask abnd is a true bitmask and bit-wise operations are required, the
+#' mask band is a true bitmask and bit-wise operations are required, the
 #' [build_bitmask()] function should be used. For integer-based masking, where
 #' the mask band is provided as a single band with integer values, the
 #' [build_intmask()] function should be used.
 #'
 #' The `set_mask_pixfun` function is used to apply the mask to the other bands.
-#' In general [set_mask_numpy()] should be used, however, for large rasters
-#' [set_mask_numba()] can be used to speed up the process.
+#' In general [set_mask_numpy()] should be used, although a custom function can
+#' be provided.
 #'
 vrt_set_maskfun <- function(
   x,
