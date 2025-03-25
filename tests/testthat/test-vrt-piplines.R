@@ -74,38 +74,14 @@ test_that("full vrt pipeline works", {
   r <- gdalraster::read_ds(ds)
   expect_gt(sum(r, na.rm = TRUE), 6e+08)
 
-  # numba mask and median
-  # numba issues on mac https://github.com/numba/numba/issues/9812
-  testthat::skip_on_os("mac")
-  ex_collect_mask_vrt <- ex_collect |>
-    vrt_set_maskfun(
-      mask_band = "SCL",
-      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
-      drop_mask_band = FALSE,
-      set_mask_pixfun = set_mask_numba()
-    ) |>
-    vrt_warp(
-      t_srs = t_block$srs,
-      te = t_block$bbox,
-      tr = t_block$res
-    ) |>
-    vrt_stack() |>
-    vrt_set_pixelfun(pixfun = median_numba())
-
-  ex_collect_mask <- vrt_compute(
-    ex_collect_mask_vrt,
-    outfile = fs::file_temp(ext = "tif")
-  )
-
-  expect_true(fs::file_size(ex_collect_mask) > 0)
-
-  ex_collect_mask_riox <- vrt_compute(
-    ex_collect_mask_vrt,
+  ex_collect_mask_gdr <- vrt_compute(
+    ex_collect_mask_warp_stack_med,
     outfile = fs::file_temp(ext = "tif"),
-    engine = "rioxarray"
+    engine = "gdalraster",
+    nsplits = 2L
   )
 
-  expect_true(fs::file_size(ex_collect_mask_riox) > 0)
+  expect_true(fs::file_size(ex_collect_mask_gdr) > 0)
 
   testthat::skip_on_os("windows")
   vdiffr::expect_doppelganger(
