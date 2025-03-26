@@ -3,6 +3,7 @@
 # dev space
 scratch.R
 scratch2.R
+benchmark.R
 # files to ignore
 *.tif
 *.vrt

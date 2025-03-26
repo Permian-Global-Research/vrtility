@@ -3,6 +3,7 @@
 ^README\.Rmd$
 ^scratch.R$
 ^scratch2.R$
+^benchmark.R$
 ^LICENSE\.md$
 ^\.vscode$
 ^air.toml$
