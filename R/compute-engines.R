@@ -91,7 +91,7 @@ call_gdal_tanslate <- function(
   return(outfile)
 }
 
-
+#TODO: this function is a beast - could use some refactoring
 #' @importFrom methods new
 #' @importFrom gdalraster GDALRaster
 call_gdalraster_mirai <- function(
@@ -170,7 +170,11 @@ call_gdalraster_mirai <- function(
                       tmp_dir = save_dir,
                       ext = "tif"
                     ),
+                    fmt = "GTiff",
                     nbands = 1,
+                    dtName = inner_ds_in$getDataTypeName(b),
+                    options = c("COMPRESS=LZW"),
+                    init = nodata_val,
                     dstnodata = nodata_val
                   )
                   inner_ds_out <- methods::new(
@@ -178,6 +182,7 @@ call_gdalraster_mirai <- function(
                     inner_ds_out_src,
                     read_only = FALSE
                   )
+
                   on.exit(inner_ds_out$close())
 
                   # read the "block" just rows for now - should we optimize?
@@ -210,18 +215,30 @@ call_gdalraster_mirai <- function(
             ),
             .parallel = TRUE
           )
-
+          nodat_val <- ds_in$getNoDataValue(1)
           tvrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
           gdalraster::buildVRT(
             tvrt,
             inner_chunks,
-            quiet = TRUE
+            quiet = TRUE,
+            cl_arg = c(
+              "-srcnodata",
+              nodat_val,
+              "-vrtnodata",
+              nodat_val
+            )
           )
           ttiff <- fs::file_temp(tmp_dir = save_dir, ext = "tif")
           gdalraster::translate(
             tvrt,
             ttiff,
-            quiet = TRUE
+            quiet = TRUE,
+            cl_arg = c(
+              "-co",
+              "COMPRESS=ZSTD",
+              "-a_nodata",
+              nodat_val
+            )
           )
 
           return(ttiff)
@@ -235,14 +252,21 @@ call_gdalraster_mirai <- function(
     .parallel = TRUE
   )
 
+  no_datval <- ds_main$getNoDataValue(1)
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   gdalraster::buildVRT(
     tf,
     unlist(band_files),
-    cl_arg = c("-separate"),
+    cl_arg = c("-separate", "-srcnodata", no_datval, "-vrtnodata", no_datval),
     quiet = TRUE
   )
-  gdalraster::translate(tf, outfile, quiet = TRUE)
+  # TODO: we really need to transfer the provided clargs here.
+  gdalraster::translate(
+    tf,
+    outfile,
+    quiet = TRUE,
+    cl_arg = c("-co", "COMPRESS=LZW", "-a_nodata", no_datval)
+  )
 
   return(outfile)
 }
