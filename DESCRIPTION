@@ -40,3 +40,4 @@ Depends:
 LazyData: true
 Remotes: 
     tidyverse/purrr
+URL: https://permian-global-research.github.io/vrtility/

@@ -1,0 +1,61 @@
+url: https://permian-global-research.github.io/vrtility/
+template:
+  bootstrap: 5
+  light-switch: yes
+  theme: gruvbox-light
+  theme-dark: gruvbox-dark
+reference:
+- title: VRT Core Functions
+  desc: Core functions for Virtual Raster management
+  contents:
+  - vrt_collect
+  - vrt_set_maskfun
+  - vrt_warp
+  - vrt_stack
+  - vrt_set_pixelfun
+  - vrt_compute
+- title: VRT helpers
+  desc: Helper functions for VRT objects
+  contents:
+  - vrt_set_band_names
+  - vrt_save
+  - vrt_schema
+- title: VRT pixel functions
+  desc: Functions to modify VRT properties
+  contents:
+  - build_bitmask
+  - build_intmask
+  - median_numpy
+- title: GDAL Configuration
+  desc: GDAL configuration and setup functions
+  contents:
+  - gdal_config_opts
+  - set_gdal_config
+  - gdal_creation_options
+  - gdalwarp_options
+- title: Python Integration
+  desc: Python environment and computation environment
+  contents:
+  - compute_with_py_env
+  - set_py_env_vals
+  - vrtility_py_require
+- title: STAC Functions
+  desc: STAC query and planetary computer functions
+  contents:
+  - stac_query
+  - sentinel2_stac_query
+  - sign_planetary_computer
+- title: Raster visualisation
+  desc: plotting functions for raster files and vrt_x objects
+  contents: plot_raster_src
+- title: Cache management
+  desc: Helper functions for managing / altering vrtility cache settings
+  contents:
+  - vrt_cache_destroy
+  - vrt_cache_set
+- title: Spatial helper functions
+  desc: Helper functions for spatial operations
+  contents:
+  - bbox_to_projected
+  - to_wkt
+
