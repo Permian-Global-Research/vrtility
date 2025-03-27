@@ -85,6 +85,13 @@ Here is a simple example where we:
 ``` r
 library(vrtility)
 
+#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
+mirai::daemons(6)
+#> [1] 6
+```
+
+``` r
+
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (144.3 -7.6)"),
   extend_x = 0.17,
@@ -108,7 +115,7 @@ length(s2_stac$features)
 
 ``` r
 
-system.time(
+system.time({
   median_composite <- vrt_collect(s2_stac) |>
     vrt_set_maskfun(
       mask_band = "SCL",
@@ -122,13 +129,12 @@ system.time(
       engine = "gdalraster",
       nsplits = 3L
     )
-)
+})
 #>    user  system elapsed 
-#>   1.707   0.413  41.392
+#>   2.182   0.127  38.621
 ```
 
 ``` r
-
 
 plot_raster_src(
   median_composite,
@@ -137,6 +143,25 @@ plot_raster_src(
 ```
 
 <img src="man/figures/README-example1-1.png" width="100%" />
+
+## Asynchronous download/processing
+
+{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
+parallelisation. By setting `mirai::daemons(n)` before running the vrt
+pipeline, we can improve performance, depending on the speed of the
+server holding the data. In some cases this will make little difference
+for example, the Microsoft Planetary Computer STAC API is already pretty
+fast. However, for NASA’s Earthdata STAC API, this can make a huge
+difference. Paralellism is available in three functions at present:
+`vrt_collect`, `vrt_set_maskfun` and `vrt_compute`. In order to use
+asynchronous processing, in the `vrt_compute` function, we need to set
+`engine = "gdalraster"`. The “gdalraster” engine is always parallelised
+across bands by default, then a further nested parallelisation step is
+possible within bands by setting `nsplits` to a value greater than 1. If
+you want to reduce the number of processes used, explicitly set
+`mirai::daemons(1)` or just use the “warp” engine.
+
+## Using on-disk rasters
 
 We can also use on-disk raster files too, as shown here with this
 example dataset - note that the inputs have multiple spatial reference

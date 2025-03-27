@@ -130,7 +130,8 @@ vrt_compute.vrt_block <- function(
     result <- call_gdalraster_mirai(
       src_files = tmp_vrt,
       outfile = outfile,
-      cl_arg = NULL,
+      resampling = resampling,
+      cl_arg = c(creation_options, add_cl_arg),
       config_options = config_options,
       nsplits = nsplits,
       quiet = quiet

@@ -67,8 +67,8 @@ gdal_creation_options <- function(
   NUM_THREADS = "ALL_CPUS",
   BIGTIFF = "YES",
   TILED = "YES",
-  BLOCKXSIZE = "256",
-  BLOCKYSIZE = "256",
+  BLOCKXSIZE = "128", # changed from 256
+  BLOCKYSIZE = "128",
   COPY_SRC_OVERVIEWS = "YES",
   ...
 ) {
