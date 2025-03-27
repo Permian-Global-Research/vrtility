@@ -1,7 +1,7 @@
-#' #' User agent for vrtility
-#' #' @return A user agent string
-#' #' @keywords internal
-#' #' @noRd
+#' User agent for vrtility
+#' @return A user agent string
+#' @keywords internal
+#' @noRd
 vrtility_usr_agent <- function() {
   httr::user_agent(
     "vrtility (https://github.com/Permian-Global-Research/vrtility)"

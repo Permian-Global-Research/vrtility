@@ -1,6 +1,8 @@
 #' Check if a path is in the temporary directory
 #' @param path A character string of the path to check
 #' @return A logical indicating if the path is in the temporary directory
+#' @noRd
+#' @keywords internal
 is_temp_dir <- function(path) {
   # Get normalized paths
   norm_path <- fs::path_norm(path)

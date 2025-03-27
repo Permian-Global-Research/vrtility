@@ -53,6 +53,7 @@
 #' @docType package
 #' @aliases vrtility-package
 #' @name vrtility
+#' @keywords internal
 "_PACKAGE"
 
 
