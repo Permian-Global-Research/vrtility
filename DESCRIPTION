@@ -3,13 +3,15 @@ Title: R package for efficient raster processing using GDAL VRTs
 Version: 0.0.4.0
 Authors@R: 
     person("Hugh", "Graham", , "hugh.graham@permianglobal.com", role = c("aut", "cre"),
-          comment = c(ORCID = "0000-0001-9451-5010"))
-Description: Experimental package for efficient raster processing with GDAL VRTs.
+           comment = c(ORCID = "0000-0001-9451-5010"))
+Description: Experimental package for efficient raster processing with
+    GDAL VRTs.
 License: Apache License (>= 2)
-SystemRequirements: Python (>= 3.6)
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+URL: https://permian-global-research.github.io/vrtility/,
+    https://github.com/Permian-Global-Research/vrtility
+BugReports: https://github.com/Permian-Global-Research/vrtility/issues
+Depends: 
+    R (>= 4.2.0)
 Imports: 
     carrier,
     cli,
@@ -31,13 +33,14 @@ Imports:
     wk,
     xml2
 Suggests: 
+    earthdatalogin,
     testthat (>= 3.0.0),
-    vdiffr,
-    earthdatalogin
-Config/testthat/edition: 3
-Depends: 
-    R (>= 4.1.0)
-LazyData: true
+    vdiffr
 Remotes: 
     tidyverse/purrr
-URL: https://permian-global-research.github.io/vrtility/
+Config/testthat/edition: 3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+SystemRequirements: Python (>= 3.6)
