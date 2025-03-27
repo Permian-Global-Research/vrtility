@@ -10,6 +10,9 @@
 #' details.
 #' @param drop_mask_band Logical. If TRUE, the mask band will be removed from
 #' the VRT block.
+#' @param cache_dir A character string of the directory to use for temporary
+#' files. In general this should be left alone. main purpose is to manage cache
+#' location when running asyncronously with mirai.
 #' @export
 #' @rdname vrt_set_maskfun
 #' @details
@@ -29,7 +32,8 @@ vrt_set_maskfun <- function(
   mask_values,
   build_mask_pixfun,
   set_mask_pixfun,
-  drop_mask_band
+  drop_mask_band,
+  cache_dir
 ) {
   UseMethod("vrt_set_maskfun")
 }
@@ -52,7 +56,8 @@ vrt_set_maskfun.vrt_block <- function(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE
+  drop_mask_band = TRUE,
+  cache_dir = getOption("vrt.cache")
 ) {
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
   v_assert_type(mask_values, "valid_bits", "numeric", nullok = FALSE)
@@ -82,7 +87,7 @@ vrt_set_maskfun.vrt_block <- function(
   ts <- vrt_save(x)
   ds <- methods::new(gdalraster::GDALRaster, ts)
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  mskvrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
 
   if (length(band_files) == 1) {
     gdalraster::buildVRT(
@@ -112,7 +117,7 @@ vrt_set_maskfun.vrt_block <- function(
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
 
-  wrp_msk_pf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  wrp_msk_pf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
   wmxmlsrc <- xml2::read_xml(as.character(
     xml2::xml_find_first(
@@ -154,7 +159,7 @@ vrt_set_maskfun.vrt_block <- function(
   }
 
   # Write back to block
-  tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  tf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
   xml2::write_xml(vx, tf)
 
   tf <- set_vrt_metadata(
@@ -178,19 +183,33 @@ vrt_set_maskfun.vrt_collection <- function(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE
+  drop_mask_band = TRUE,
+  cache_dir = getOption("vrt.cache")
 ) {
   check_mask_band(x, mask_band)
+  # if (using_daemons()) {
+  #   mirai::everywhere(library(vrtility))
+  # }
   masked_blocks <- purrr::map(
     x$vrt,
-    ~ vrt_set_maskfun(
-      .x,
-      mask_band,
-      mask_values,
-      build_mask_pixfun,
-      set_mask_pixfun,
-      drop_mask_band
-    )
+    carrier::crate(
+      ~ vrtility::vrt_set_maskfun(
+        .x,
+        mask_band = mask_band,
+        mask_values = mask_values,
+        build_mask_pixfun = build_mask_pixfun,
+        set_mask_pixfun = set_mask_pixfun,
+        drop_mask_band = drop_mask_band,
+        cache_dir = cache_dir
+      ),
+      mask_band = mask_band,
+      mask_values = mask_values,
+      build_mask_pixfun = build_mask_pixfun,
+      set_mask_pixfun = set_mask_pixfun,
+      drop_mask_band = drop_mask_band,
+      cache_dir = getOption("vrt.cache")
+    ),
+    .parallel = using_daemons()
   )
 
   if (inherits(x, "vrt_collection_warped")) {
