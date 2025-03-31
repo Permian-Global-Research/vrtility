@@ -10,7 +10,8 @@
 \usage{
 bbox_to_projected(
   x,
-  proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
+  proj_specific = NULL,
+  proj_generic = c("laea", "aeqd", "utm", "pconic", "eqdc"),
   ellps = "WGS84",
   no_defs = TRUE,
   opts = ""
@@ -27,8 +28,12 @@ to_wkt(x)
 \arguments{
 \item{x}{The object to convert to wkt.}
 
-\item{proj}{a character vector. The projection to use. One of "laea", "aeqd",
-"utm", "pconic", or "eqdc".}
+\item{proj_specific}{a character vector. The projection to use.
+A PROJ-readable string or an EPSG code. If NULL, a generic projection
+will be used.}
+
+\item{proj_generic}{a character vector. The projection to use. One of
+"laea", "aeqd", "utm", "pconic", or "eqdc".}
 
 \item{ellps}{a character vector. The ellipsoid to use. Select from
 \code{sf_proj_info(type = "ellps")}.}
@@ -47,9 +52,9 @@ string.
 A character string of the object in wkt format.
 }
 \description{
-Project a lat/long bounding box to a generic projected coordinate system
-
-Convert an object to wkt.
+This function takes a lat/long bounding box and projects it to
+either a prescibed projected coordinate system or a generic projected
+coordinate system suitable for the AOI.
 }
 \details{
 For further info about the available "generic" projects see:
@@ -67,4 +72,12 @@ bbox <- gdalraster::bbox_from_wkt(
 )
 
 bbox_to_projected(bbox)
+
+bbox_to_projected(bbox, proj_generic = "utm")
+
+bbox_to_projected(
+ c(-3.56, 50.69, -3.46, 50.75),
+ proj_specific = "EPSG:27700"
+)
+
 }
