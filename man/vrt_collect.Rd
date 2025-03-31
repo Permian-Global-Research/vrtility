@@ -52,3 +52,18 @@ to create a stack the collection must xontain images from a single spatial
 reference system (SRS). If there are mutliple SRS values, use \code{vrt_warp()}
 to unify the projection of the collection.
 }
+\examples{
+s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+vrt_collect(s2files)
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+s2q <- sentinel2_stac_query(
+ bbox = c(-12.386, -37.214, -12.186, -37.014),
+ start_date = "2023-01-01",
+ end_date = "2023-01-31",
+ max_cloud_cover = 10,
+ assets = c("B02", "B03", "B04", "B08", "SCL")
+)
+
+vrt_collect(s2q)
+\dontshow{\}) # examplesIf}
+}
