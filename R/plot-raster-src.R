@@ -49,6 +49,12 @@ plot_raster_src <- function(
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
 
+  rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
+  gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "BILINEAR")
+  on.exit(
+    gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", rior_or),
+    add = TRUE
+  )
   r <- gdalraster::read_ds(
     ds,
     bands = bands,
