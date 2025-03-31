@@ -81,6 +81,12 @@ Generate a Sentinel 2 stac collection doc_imes object
 
 Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
 }
+\details{
+In order to access HLS data you will need a NASA Earthdata account. You can
+create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
+an account, you can set your credentials using the \code{earthdatalogin} package
+as shown in the examples.
+}
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 s2_its <- stac_query(
@@ -96,31 +102,30 @@ mpc_singed <- sign_planetary_computer(s2_its)
 \dontshow{\}) # examplesIf}
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 sentinel2_stac_query(
- bbox = c(-12.386, -37.214, -12.186, -37.014),
- start_date = "2023-01-01",
- end_date = "2023-01-31",
- max_cloud_cover = 10,
- assets = c("B02", "B03", "B04", "B08", "SCL")
+  bbox = c(-12.386, -37.214, -12.186, -37.014),
+  start_date = "2023-01-01",
+  end_date = "2023-01-31",
+  max_cloud_cover = 10,
+  assets = c("B02", "B03", "B04", "B08", "SCL")
 )
-
 \dontshow{\}) # examplesIf}
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 hls_query <- hls_stac_query(
- c( 144.130,  -7.725, 144.470,  -7.475),
- start_date = "2023-01-01",
- end_date = "2023-12-31",
- assets = c("B04", "B03", "B02", "Fmask"),
- collection = "HLSS30_2.0",
- max_cloud_cover = 35
+  c(144.130, -7.725, 144.470, -7.475),
+  start_date = "2023-01-01",
+  end_date = "2023-12-31",
+  assets = c("B04", "B03", "B02", "Fmask"),
+  collection = "HLSS30_2.0",
+  max_cloud_cover = 35
 )
 # in order to download these items (or call further vrt_x functions) you
-will first need to set your credentials. The easiest way to do this is with
-the `earthdatalogin` package. First set your EARTHDATA_USER and
-EARTHDATA_PASSWORD environment variables and then run the following command:
+# will first need to set your credentials. The easiest way to do this is with
+# the `earthdatalogin` package. First set your EARTHDATA_USER and
+# EARTHDATA_PASSWORD environment variables and then run the following command:
 
 earthdatalogin::edl_netrc(
- username = Sys.getenv("EARTHDATA_USER"),
- password = Sys.getenv("EARTHDATA_PASSWORD")
+  username = Sys.getenv("EARTHDATA_USER"),
+  password = Sys.getenv("EARTHDATA_PASSWORD")
 )
 \dontshow{\}) # examplesIf}
 }
