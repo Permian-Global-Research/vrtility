@@ -1,0 +1,159 @@
+---
+title: "Harmonized Landsat Sentinel-2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Harmonized Landsat Sentinel-2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+
+
+
+```{r setup}
+# library(vrtility)
+devtools::load_all()
+
+mirai::daemons(6)
+
+bbox <- gdalraster::bbox_from_wkt(
+  wkt = wk::wkt("POINT (144.3 -7.6)"),
+  extend_x = 0.17,
+  extend_y = 0.125
+)
+
+te <- bbox_to_projected(bbox)
+trs <- attr(te, "wkt")
+```
+
+
+```{r hlssl}
+hlssl_stac <- hls_stac_query(
+  bbox = bbox,
+  start_date = "2023-01-01",
+  end_date = "2023-12-31",
+  max_cloud_cover = 35,
+  collection = "HLSL30_2.0"
+)
+print(hlssl_stac)
+```
+
+```{r hlsss}
+hlsss_stac <- hls_stac_query(
+  bbox = bbox,
+  start_date = "2023-01-01",
+  end_date = "2023-12-31",
+  max_cloud_cover = 35,
+  collection = "HLSS30_2.0"
+)
+print(hlsss_stac)
+```
+
+```{r earthdata-creds}
+earthdatalogin::edl_netrc(
+  username = Sys.getenv("EARTHDATA_USER"),
+  password = Sys.getenv("EARTHDATA_PASSWORD")
+)
+```
+
+```{r hls-collect}
+hls_sl_col <- vrt_collect(hlssl_stac)
+print(hls_sl_col)
+
+hls_ss_col <- vrt_collect(hlsss_stac)
+print(hls_ss_col)
+```
+
+```{r hls-mask}
+hls_sl_col_mask <- vrt_set_maskfun(
+  hls_sl_col,
+  mask_band = "Fmask",
+  mask_values = c(0, 1, 2, 3),
+  build_mask_pixfun = build_bitmask(),
+  drop_mask_band = TRUE
+)
+
+hls_ss_col_mask <- vrt_set_maskfun(
+  hls_ss_col,
+  mask_band = "Fmask",
+  mask_values = c(0, 1, 2, 3),
+  build_mask_pixfun = build_bitmask(),
+  drop_mask_band = TRUE
+)
+
+# let's check out a vrt and inspect the mask function that we used.
+print(hls_sl_col_mask, maskfun = TRUE)
+```
+
+
+HLS data for the landsat and sentinel collections contain different numbers
+of bands. They share X bands but both have sensor-specific bands. Confusingly,
+the two collections also have shared names that represent different bands and
+wavelengths. So, let's rename all the bands so that every wavelength is uniquely
+named and then add empty bands to each collection so that the number of bands is the
+same for each collection.
+
+```{r band-align-hls}
+hls_ls_align <- vrt_set_band_names(
+  hls_sl_col_mask,
+  c("A", "B", "G", "R", "N2", "S1", "S2", "C", "T1", "T2")
+) |>
+  vrt_add_empty_band(after = 4, description = "RE1") |>
+  vrt_add_empty_band(after = 5, description = "RE2") |>
+  vrt_add_empty_band(after = 6, description = "RE3") |>
+  vrt_add_empty_band(after = 7, description = "N") |>
+  vrt_add_empty_band(after = 9, description = "WV") |>
+  vrt_move_band(band_idx = 13, after = 10)
+
+
+
+hls_ss_align <- vrt_set_band_names(
+  hls_ss_col_mask,
+  c("A", "B", "G", "R", "RE1", "RE2", "RE3", "N", "N2", "WV", "C", "S1", "S2")
+) |>
+  vrt_add_empty_band(after = 13, description = "T1", scale_value = 0.01) |>
+  vrt_add_empty_band(after = 14, description = "T2", scale_value = 0.01)
+```
+
+Now we can combine the two collections into a single collection.
+
+```{r hls-merge}
+hls_merge_coll <- c(
+  hls_ls_align,
+  hls_ss_align
+)
+```
+
+Now we need to warp all vrt_blocks in the collection to the same spatial
+reference system, extent and pixel size.
+
+```{r hls-warp}
+hls_warp <- vrt_warp(
+  hls_merge_coll,
+  t_srs = trs,
+  te = te,
+  tr = c(30, 30),
+  resampling = "bilinear"
+)
+```
+
+Now we can stack the warped vrt collection - this can be thought of as a virtual 
+raster cube.
+
+```{r hls-stack}
+hls_stack <- vrt_stack(hls_warp) |>
+  vrt_set_pixelfun(pixfun = median_numpy())
+```
+
+```{r hls-compute}
+outfile <- tempfile(fileext = ".tif")
+hls_stack <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 3)
+```
