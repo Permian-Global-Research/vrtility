@@ -16,6 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
+  </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/Permian-Global-Research/vrtility/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -49,7 +53,7 @@
 
       <dl><dt>
 
-          <code><a href="vrt_collect.html">vrt_collect()</a></code> <code><a href="vrt_collect.html">print(<i>&lt;vrt_collection&gt;</i>)</a></code>
+          <code><a href="vrt_collect.html">vrt_collect()</a></code> <code><a href="vrt_collect.html">print(<i>&lt;vrt_collection&gt;</i>)</a></code> <code><a href="vrt_collect.html">c(<i>&lt;vrt_collection&gt;</i>)</a></code>
 
         </dt>
         <dd>Construct the base VRT object for composing VRT pipelines.</dd>
@@ -106,6 +110,18 @@
 
         </dt>
         <dd>Save a vrt_block object to disk</dd>
+      </dl><dl><dt>
+
+          <code><a href="vrt_add_empty_band.html">vrt_add_empty_band()</a></code>
+
+        </dt>
+        <dd>Add an empty band to a VRT_x object</dd>
+      </dl><dl><dt>
+
+          <code><a href="vrt_move_band.html">vrt_move_band()</a></code>
+
+        </dt>
+        <dd>Add an empty band to a VRT_x object</dd>
       </dl><dl><dt>
 
           <code><a href="vrt_tools.html">vrt_xml_schema</a></code> <code><a href="vrt_tools.html">vrt_schema()</a></code>
@@ -182,7 +198,7 @@
 
       <dl><dt>
 
-          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sign_planetary_computer()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code>
+          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sign_planetary_computer()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code> <code><a href="stac_utilities.html">hls_stac_query()</a></code>
 
         </dt>
         <dd>Query a STAC source</dd>

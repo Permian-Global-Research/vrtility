@@ -18,6 +18,10 @@ process of plotting a raster file."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
+  </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/Permian-Global-Research/vrtility/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -52,6 +56,7 @@ process of plotting a raster file.</p>
 <span>  bands <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pal <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">10</span>, <span class="st">"Viridis"</span><span class="op">)</span>,</span>
 <span>  nbands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">bands</span><span class="op">)</span>,</span>
+<span>  title <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  col_tbl <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  maxColorValue <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -110,6 +115,11 @@ process of plotting a raster file.</p>
 3 (RGB). For RGB, <code>data</code> are interleaved by band. If <code>nbands</code> is <code>NULL</code> (the
 default), then <code>nbands = 3</code> is assumed if the input data contain 3 bands,
 otherwise band 1 is used.</p></dd>
+
+
+<dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
+<dd><p>logical. If TRUE the band description will be used as a title. ignored
+if main is provided.</p></dd>
 
 
 <dt id="arg-col-tbl">col_tbl<a class="anchor" aria-label="anchor" href="#arg-col-tbl"></a></dt>
