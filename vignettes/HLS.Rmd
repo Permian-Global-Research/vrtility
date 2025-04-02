@@ -344,10 +344,6 @@ outfile <- tempfile(fileext = ".tif")
 hls_composite <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 2)
 #> ! Active mirai daemons have been detected, but fewer than the number of bands.
 #> ℹ No changes were made to this mirai configuartion but this could result in performance issues
-#> Error in `purrr::map()` at vrtility/R/call-gdalraster-mirai.R:91:3:
-#> ℹ In index: 15.
-#> Caused by error in `purrr::pmap_chr()`:
-#> ℹ In index: .
 ```
 
 Now let's take a look at the composite RGB image!
@@ -357,7 +353,7 @@ Now let's take a look at the composite RGB image!
 plot_raster_src(
   hls_composite,
   bands = c(9, 3, 2),
-  minmax_pct_cut = c(2, 95)
+  minmax_pct_cut = c(25, 97)
 )
 ```
 
