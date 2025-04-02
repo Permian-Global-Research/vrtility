@@ -132,11 +132,9 @@ map_bands_and_chunks <- function(
                         glue::glue(
                           "BLOCKXSIZE={inner_ds_in$getBlockSize(b)[1]}"
                         ),
-                        "-co",
                         glue::glue(
                           "BLOCKYSIZE={inner_ds_in$getBlockSize(b)[2]}"
                         ),
-                        "-co",
                         "BIGTIFF=IF_NEEDED" # Automatic large file handling
                       ),
                       init = nodata_val
