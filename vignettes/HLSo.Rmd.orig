@@ -257,7 +257,7 @@ Now let's take a look at the composite RGB image!
 plot_raster_src(
   hls_composite,
   bands = c(9, 3, 2),
-  minmax_pct_cut = c(2, 95)
+  minmax_pct_cut = c(25, 97)
 )
 ```
 
