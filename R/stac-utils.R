@@ -220,7 +220,7 @@ sentinel2_stac_query <- function(
 #' create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
 #' an account, you can set your credentials using the `earthdatalogin` package
 #' as shown in the examples.
-
+#' @export
 hls_stac_query <- function(
   bbox,
   start_date,
