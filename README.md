@@ -45,7 +45,7 @@ and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
 ## Installation
 
-You can install the development version of vrtility from GitHub with:
+You can install vrtility from GitHub with:
 
 ``` r
 # install.packages("pak")
@@ -131,7 +131,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   2.182   0.127  38.621
+#>   1.216   0.075  36.184
 ```
 
 ``` r
