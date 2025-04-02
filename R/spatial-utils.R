@@ -92,12 +92,12 @@ bbox_to_wkt <- function(bbox) {
 #'
 #' bbox_to_projected(bbox, proj_generic = "utm")
 #'
+#'
+#' @examplesIf interactive()
 #' bbox_to_projected(
 #'  c(-3.56, 50.69, -3.46, 50.75),
 #'  proj_specific = "EPSG:27700"
 #' )
-#'
-
 #' @rdname spatial_helpers
 bbox_to_projected <- function(
   x,

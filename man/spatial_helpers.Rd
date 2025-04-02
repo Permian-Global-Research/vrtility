@@ -75,9 +75,11 @@ bbox_to_projected(bbox)
 
 bbox_to_projected(bbox, proj_generic = "utm")
 
+
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 bbox_to_projected(
  c(-3.56, 50.69, -3.46, 50.75),
  proj_specific = "EPSG:27700"
 )
-
+\dontshow{\}) # examplesIf}
 }
