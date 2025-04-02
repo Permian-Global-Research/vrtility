@@ -120,7 +120,7 @@ vrt_collect.doc_items <- function(
   x,
   ...
 ) {
-  assets <- rstac::items_assets(x)
+  assets <- stringr::str_sort(rstac::items_assets(x), numeric = TRUE)
 
   items_uri <- purrr::map(assets, function(a) {
     its_asset <- rstac::assets_select(x, asset_names = a)
@@ -327,4 +327,32 @@ print.vrt_collection <- function(
     )
   )
   invisible(x)
+}
+
+#' @export
+#' @rdname vrt_collect
+#' @details
+#' You can use the `c` method to combine multiple vrt_collection objects. All
+#' collections must have the same number of bands.
+c.vrt_collection <- function(x, ...) {
+  dots <- rlang::dots_list(...)
+  nbands <- length(x$assets)
+
+  purrr::walk(dots, function(vrtc) {
+    v_assert_type(vrtc, "...", "vrt_collection")
+    v_assert_length(vrtc$assets, "...", nbands)
+  })
+
+  clist <- (c(x[[1]], purrr::flatten(purrr::map(dots, function(x) x[[1]]))))
+
+  unique_attr <- function(at) {
+    unlist(unique(x[at], purrr::flatten(purrr::map(dots, function(x) x[at]))))
+  }
+
+  build_vrt_collection(
+    clist,
+    pixfun = unique_attr("pixfun"),
+    maskfun = unique_attr("maskfun"),
+    warped = all(unique_attr("warped")),
+  )
 }
