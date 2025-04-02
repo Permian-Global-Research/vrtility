@@ -2,6 +2,7 @@
 #' @param x An object to be used to create a vrt_x object see details.
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @return A vrt_collection object.
 #' @rdname vrt_collect
 #' @export
@@ -32,13 +33,13 @@
 #'
 vrt_collect <- function(
   x,
-  band_descriptions,
-  datetimes
+  ...
 ) {
   UseMethod("vrt_collect")
 }
 
 #' @noRd
+#' @keywords internal
 #' @export
 vrt_collect.default <- function(x, ...) {
   cli::cli_abort(
@@ -47,12 +48,17 @@ vrt_collect.default <- function(x, ...) {
   )
 }
 
+#' @param band_descriptions A character vector of band descriptions.
+#' @param datetimes A character vector of datetimes.
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.character <- function(
   x,
   band_descriptions = NULL,
-  datetimes = rep("", length(x))
+  datetimes = rep("", length(x)),
+  config_opts = gdal_config_opts(),
+  ...
 ) {
   assert_files_exist(x)
   v_assert_type(
@@ -63,6 +69,10 @@ vrt_collect.character <- function(
   )
   v_assert_type(datetimes, "datetimes", "character", nullok = TRUE)
   v_assert_length(datetimes, "datetimes", length(x), nullok = TRUE)
+
+  orig_config <- set_gdal_config(config_opts)
+  on.exit(set_gdal_config(orig_config))
+
   vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
     tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
@@ -114,12 +124,17 @@ vrt_collect.character <- function(
   )
 }
 
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(
   x,
+  config_opts = gdal_config_opts(),
   ...
 ) {
+  orig_config <- set_gdal_config(config_opts)
+  on.exit(set_gdal_config(orig_config))
+
   assets <- stringr::str_sort(rstac::items_assets(x), numeric = TRUE)
 
   items_uri <- purrr::map(assets, function(a) {
@@ -137,46 +152,49 @@ vrt_collect.doc_items <- function(
 
   vrt_items <- purrr::map(
     items_uri,
-    function(x) {
-      srcs <- purrr::map_chr(x, ~ .x$uri)
-      dttm <- unique(purrr::map_chr(x, ~ .x$dttm))
+    carrier::crate(
+      function(x) {
+        srcs <- purrr::map_chr(x, ~ .x$uri)
+        dttm <- unique(purrr::map_chr(x, ~ .x$dttm))
 
-      if (length(dttm) > 1) {
-        cli::cli_warn(
-          c(
-            "!" = "Multiple datetimes detected in for the following sources:",
-            "{srcs}",
-            "i" = "Using the first datetime."
+        if (length(dttm) > 1) {
+          cli::cli_warn(
+            c(
+              "!" = "Multiple datetimes detected in for the following sources:",
+              "{srcs}",
+              "i" = "Using the first datetime."
+            )
           )
+          dttm <- dttm[1]
+        }
+
+        tf <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+
+        gdalraster::buildVRT(
+          tf,
+          srcs,
+          cl_arg = c(
+            "-separate"
+          ),
+          quiet = TRUE
         )
-        dttm <- dttm[1]
-      }
+        tf <- vrtility::set_vrt_descriptions(
+          x = tf,
+          names(x),
+          as_file = TRUE
+        )
 
-      tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+        tf <- vrtility::set_vrt_metadata(
+          tf,
+          keys = "datetime",
+          values = dttm,
+          as_file = TRUE
+        )
 
-      gdalraster::buildVRT(
-        tf,
-        srcs,
-        cl_arg = c(
-          "-separate"
-        ),
-        quiet = TRUE
-      )
-      tf <- set_vrt_descriptions(
-        x = tf,
-        names(x),
-        as_file = TRUE
-      )
-
-      tf <- set_vrt_metadata(
-        tf,
-        keys = "datetime",
-        values = dttm,
-        as_file = TRUE
-      )
-
-      build_vrt_block(tf)
-    },
+        vrtility::build_vrt_block(tf)
+      },
+      save_dir = getOption("vrt.cache")
+    ),
     .parallel = using_daemons()
   )
 
