@@ -18,3 +18,4 @@ benchmark.R
 
 /example-data/*
 docs
+inst/doc
