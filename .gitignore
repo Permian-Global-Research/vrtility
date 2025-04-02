@@ -19,3 +19,5 @@ benchmark.R
 /example-data/*
 docs
 inst/doc
+/doc/
+/Meta/

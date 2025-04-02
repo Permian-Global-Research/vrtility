@@ -8,11 +8,17 @@
 \alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x, band_descriptions, datetimes)
+vrt_collect(x, ...)
 
-\method{vrt_collect}{character}(x, band_descriptions = NULL, datetimes = rep("", length(x)))
+\method{vrt_collect}{character}(
+  x,
+  band_descriptions = NULL,
+  datetimes = rep("", length(x)),
+  config_opts = gdal_config_opts(),
+  ...
+)
 
-\method{vrt_collect}{doc_items}(x, ...)
+\method{vrt_collect}{doc_items}(x, config_opts = gdal_config_opts(), ...)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
 
@@ -21,11 +27,13 @@ vrt_collect(x, band_descriptions, datetimes)
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
 
+\item{...}{Additional arguments not used}
+
 \item{band_descriptions}{A character vector of band descriptions.}
 
 \item{datetimes}{A character vector of datetimes.}
 
-\item{...}{Additional arguments not used}
+\item{config_opts}{A named character vector of GDAL configuration options.}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 

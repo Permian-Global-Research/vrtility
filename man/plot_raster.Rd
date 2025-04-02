@@ -13,6 +13,7 @@ plot_raster_src(
   bands = 1,
   pal = grDevices::hcl.colors(10, "Viridis"),
   nbands = length(bands),
+  title = TRUE,
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
@@ -56,6 +57,9 @@ plot_raster_src(
 3 (RGB). For RGB, \code{data} are interleaved by band. If \code{nbands} is \code{NULL} (the
 default), then \code{nbands = 3} is assumed if the input data contain 3 bands,
 otherwise band 1 is used.}
+
+\item{title}{logical. If TRUE the band description will be used as a title. ignored
+if main is provided.}
 
 \item{col_tbl}{A color table as a matrix or data frame with four or five
 columns. Column 1 contains the numeric pixel values. Columns 2:4 contain

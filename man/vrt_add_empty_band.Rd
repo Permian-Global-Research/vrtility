@@ -4,12 +4,21 @@
 \alias{vrt_add_empty_band}
 \title{Add an empty band to a VRT_x object}
 \usage{
-vrt_add_empty_band(x, after, description, save_dir)
+vrt_add_empty_band(x, after, description, save_dir, scale_value)
 }
 \arguments{
 \item{x}{A VRT_x object}
 
 \item{after}{numeric indicating the band number to add the empty band after}
+
+\item{description}{A character string describing the empty band}
+
+\item{save_dir}{A character string indicating the directory to save the VRT -
+typically not required mainly here for manaing temp file locs in parallel.}
+
+\item{scale_value}{A numeric value to set the scale of the new band. If NULL,
+the scale of the first band in the VRT will be used. Be careful, Landsat for
+example has different scales for different bands.ddoc}
 }
 \description{
 Add an empty band to a VRT_x object
