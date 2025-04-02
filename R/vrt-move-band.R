@@ -1,6 +1,12 @@
 #' @title Add an empty band to a VRT_x object
-#' @param after numeric indicating the band number to add the empty band after
 #' @param x A VRT_x object
+#' @param band_idx numeric indicating the band number of the band to move.
+#' @param after numeric indicating the band after which the new band should be
+#' places. Note this is based on the initial state of the band ordering. eg. do
+#' not add 1 if you are moving the band forward.
+#' @param save_dir A character string indicating the directory to save the
+#' modified VRT. Defaults to the cache directory.
+#' @export
 vrt_move_band <- function(x, band_idx, after, save_dir) {
   v_assert_type(after, "after", "numeric", nullok = FALSE)
   UseMethod("vrt_move_band")
@@ -8,6 +14,7 @@ vrt_move_band <- function(x, band_idx, after, save_dir) {
 
 #' @noRd
 #' @keywords internal
+#' @export
 vrt_move_band.default <- function(x, ...) {
   cli::cli_abort(
     "The vrt_move_band method is not implemented for class {class(x)}",
