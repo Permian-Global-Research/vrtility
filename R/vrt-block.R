@@ -1,16 +1,11 @@
 #' constructor for vrt_block class
-#' @param xml An xml_document object
-#' @param srs A character string of the spatial reference system
-#' @param bbox A numeric vector of the bounding box
-#' @param date_time A character string of the date time
-#' @param assets A character vector of the asset names
-#' @param no_data_val A numeric vector of the no data values
+#' @param x An xml_document object
 #' @param maskfun A function of the mask function
 #' @param pixfun A function of the pixel function
 #' @param warped A logical indicating whether the VRT is warped
 #' @param ... Additional arguments not used
 #' @keywords internal
-#' @noRd
+#' @export
 build_vrt_block <- function(
   x,
   maskfun = NULL,
