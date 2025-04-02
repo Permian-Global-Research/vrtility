@@ -346,7 +346,7 @@ hls_composite <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits 
 #> ℹ No changes were made to this mirai configuartion but this could result in performance issues
 ```
 
-Now let's take a look at the composite RGB image!
+Now let's take a look at a false-colour composite!
 
 
 ``` r
