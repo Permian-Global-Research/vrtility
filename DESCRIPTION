@@ -29,11 +29,14 @@ Imports:
     rstac,
     scales,
     stats,
+    stringr,
     withr,
     wk,
     xml2
 Suggests: 
     earthdatalogin,
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0),
     vdiffr
 Remotes: 
@@ -44,3 +47,4 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 SystemRequirements: Python (>= 3.6)
+VignetteBuilder: knitr

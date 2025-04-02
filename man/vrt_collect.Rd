@@ -5,6 +5,7 @@
 \alias{vrt_collect.character}
 \alias{vrt_collect.doc_items}
 \alias{print.vrt_collection}
+\alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
 vrt_collect(x, band_descriptions, datetimes)
@@ -14,6 +15,8 @@ vrt_collect(x, band_descriptions, datetimes)
 \method{vrt_collect}{doc_items}(x, ...)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
+
+\method{c}{vrt_collection}(x, ...)
 }
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
@@ -51,6 +54,9 @@ and when summarisation is required we can use vrt_stack - however, in order
 to create a stack the collection must xontain images from a single spatial
 reference system (SRS). If there are mutliple SRS values, use \code{vrt_warp()}
 to unify the projection of the collection.
+
+You can use the \code{c} method to combine multiple vrt_collection objects. All
+collections must have the same number of bands.
 }
 \examples{
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
