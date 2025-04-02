@@ -1,6 +1,14 @@
 #' @title Add an empty band to a VRT_x object
 #' @param after numeric indicating the band number to add the empty band after
 #' @param x A VRT_x object
+#' @param description A character string describing the empty band
+#' @param save_dir A character string indicating the directory to save the VRT -
+#' typically not required mainly here for manaing temp file locs in parallel.
+#' @param scale_value A numeric value to set the scale of the new band. If NULL,
+#' the scale of the first band in the VRT will be used. Be careful, Landsat for
+#' example has different scales for different bands.ddoc
+#'
+#' @export
 vrt_add_empty_band <- function(x, after, description, save_dir, scale_value) {
   v_assert_type(after, "after", "numeric", nullok = FALSE)
   UseMethod("vrt_add_empty_band")
