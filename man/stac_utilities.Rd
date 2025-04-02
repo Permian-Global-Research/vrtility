@@ -4,19 +4,12 @@
 \alias{stac_query}
 \alias{sign_planetary_computer}
 \alias{sentinel2_stac_query}
+\alias{hls_stac_query}
 \title{Query a STAC source}
 \usage{
-stac_query(
-  bbox,
-  stac_source,
-  collection,
-  start_date,
-  end_date,
-  limit = 999,
-  ...
-)
+stac_query(bbox, stac_source, collection, start_date, end_date, limit = 999)
 
-sign_planetary_computer(items, subscription_key = Sys.getenv("rsi_pc_key"))
+sign_planetary_computer(items, subscription_key = Sys.getenv("MPC_TOKEN"))
 
 sentinel2_stac_query(
   bbox,
@@ -27,7 +20,20 @@ sentinel2_stac_query(
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "sentinel-2-l2a",
-  mpc_sign = TRUE
+  mpc_sign = TRUE,
+  limit = 999
+)
+
+hls_stac_query(
+  bbox,
+  start_date,
+  end_date,
+  assets = c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B10",
+    "B11", "B12", "Fmask"),
+  max_cloud_cover = 10,
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
+  collection = c("HLSS30_2.0", "HLSL30_2.0"),
+  limit = 999
 )
 }
 \arguments{
@@ -37,20 +43,19 @@ sentinel2_stac_query(
 
 \item{collection}{A character string of the collection to query}
 
-\item{start_date}{A character string of the start date}
+\item{start_date}{The start date for the query}
 
-\item{end_date}{A character string of the end date}
+\item{end_date}{The end date for the query}
 
 \item{limit}{The number of items to return}
 
-\item{...}{Additional arguments to pass to the query}
-
 \item{items}{A STACItemCollection.}
 
-\item{subscription_key}{Optionally, a subscription key associated with your
-Planetary Computer account. At the time of writing, this is required for
-downloading Sentinel 1 RTC products, as well as NAIP imagery. This key will
-be automatically used if the environment variable \code{rsi_pc_key} is set.}
+\item{subscription_key}{Optionally (but strongly recommended), a
+subscription key associated with your MPC account. At the time of writing,
+this is required for downloading Sentinel 1 RTC products, as well as NAIP
+imagery. This key willb be automatically used if the environment
+variable \code{MPC_TOKEN} is set.}
 
 \item{assets}{A character vector of the asset names to include}
 
@@ -70,10 +75,57 @@ A stac_vrt object
 \description{
 Query a STAC source
 
-Sign STAC items retrieved from the Planetary Computer
+Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 
 Generate a Sentinel 2 stac collection doc_imes object
+
+Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
 }
 \details{
-copied from the \code{rsi} package
+In order to access HLS data you will need a NASA Earthdata account. You can
+create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
+an account, you can set your credentials using the \code{earthdatalogin} package
+as shown in the examples.
+}
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+s2_its <- stac_query(
+ bbox = c(-12.386, -37.214, -12.186, -37.014),
+ stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+ collection = "sentinel-2-l2a",
+ start_date = "2023-01-01",
+ end_date = "2023-01-31",
+ limit = 10
+)
+
+mpc_singed <- sign_planetary_computer(s2_its)
+\dontshow{\}) # examplesIf}
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+sentinel2_stac_query(
+  bbox = c(-12.386, -37.214, -12.186, -37.014),
+  start_date = "2023-01-01",
+  end_date = "2023-01-31",
+  max_cloud_cover = 10,
+  assets = c("B02", "B03", "B04", "B08", "SCL")
+)
+\dontshow{\}) # examplesIf}
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+hls_query <- hls_stac_query(
+  c(144.130, -7.725, 144.470, -7.475),
+  start_date = "2023-01-01",
+  end_date = "2023-12-31",
+  assets = c("B04", "B03", "B02", "Fmask"),
+  collection = "HLSS30_2.0",
+  max_cloud_cover = 35
+)
+# in order to download these items (or call further vrt_x functions) you
+# will first need to set your credentials. The easiest way to do this is with
+# the `earthdatalogin` package. First set your EARTHDATA_USER and
+# EARTHDATA_PASSWORD environment variables and then run the following command:
+
+earthdatalogin::edl_netrc(
+  username = Sys.getenv("EARTHDATA_USER"),
+  password = Sys.getenv("EARTHDATA_PASSWORD")
+)
+\dontshow{\}) # examplesIf}
 }

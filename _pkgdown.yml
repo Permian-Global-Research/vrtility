@@ -19,6 +19,8 @@ reference:
     contents:
       - vrt_set_band_names
       - vrt_save
+      - vrt_add_empty_band
+      - vrt_move_band
       - vrt_schema
   - title: VRT pixel functions
     desc: Functions to modify VRT properties

@@ -15,6 +15,16 @@
 #' particularly useful when we want to create a vrt_stack but our input images
 #' span multiple spatial reference systems. In such a situation, before warping
 #' our input data we must align with our desired oputput grid.
+#' @examples
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' ex_collect <- vrt_collect(s2files)
+#' t_block <- ex_collect[[1]][[1]]
+#' vrt_warp(
+#' ex_collect,
+#'    t_srs = t_block$srs,
+#'    te = t_block$bbox,
+#'    tr = t_block$res
+#'  )
 vrt_warp <- function(
   x,
   t_srs,

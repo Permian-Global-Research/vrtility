@@ -56,9 +56,15 @@ bbox_to_wkt <- function(bbox) {
 
 
 #' Project a lat/long bounding box to a generic projected coordinate system
+#' @description This function takes a lat/long bounding box and projects it to
+#' either a prescibed projected coordinate system or a generic projected
+#' coordinate system suitable for the AOI.
 #' @param x numeric vector of length 4 representing a bounding box (in lat/long)
-#' @param proj a character vector. The projection to use. One of "laea", "aeqd",
-#' "utm", "pconic", or "eqdc".
+#' @param proj_specific a character vector. The projection to use.
+#' A PROJ-readable string or an EPSG code. If NULL, a generic projection
+#' will be used.
+#' @param proj_generic a character vector. The projection to use. One of
+#' "laea", "aeqd", "utm", "pconic", or "eqdc".
 #' @param ellps a character vector. The ellipsoid to use. Select from
 #' `sf_proj_info(type = "ellps")`.
 #' @param no_defs a logical. Whether to include the +no_defs option in the proj
@@ -83,75 +89,100 @@ bbox_to_wkt <- function(bbox) {
 #' )
 #'
 #' bbox_to_projected(bbox)
+#'
+#' bbox_to_projected(bbox, proj_generic = "utm")
+#'
+#'
+#' @examplesIf interactive()
+#' bbox_to_projected(
+#'  c(-3.56, 50.69, -3.46, 50.75),
+#'  proj_specific = "EPSG:27700"
+#' )
 #' @rdname spatial_helpers
 bbox_to_projected <- function(
   x,
-  proj = c("laea", "aeqd", "utm", "pconic", "eqdc"),
+  proj_specific = NULL,
+  proj_generic = c("laea", "aeqd", "utm", "pconic", "eqdc"),
   ellps = "WGS84",
   no_defs = TRUE,
   opts = ""
 ) {
   # arg assertions
   x <- validate_bbox(x)
-  proj <- rlang::arg_match(proj)
-  v_assert_type(no_defs, "no_defs", "logical")
-  v_assert_type(opts, "opts", "character")
 
-  # get centroid in latlong
-  cent_coor <- gdalraster::g_centroid(bbox_to_wkt(x))
+  if (!is.null(proj_specific)) {
+    prj <- proj_specific
 
-  # configure proj args
-  n_or_s <- ifelse(
-    cent_coor[2] == 0,
-    "",
-    ifelse(cent_coor[2] > 0, "+north", "+south")
-  )
+    if (!gdalraster::srs_is_projected(prj)) {
+      cli::cli_abort(
+        c(
+          "x" = "`proj_specific` must be a valid projected coordinate system",
+          "i" = "Use either a WKT / PROJ4 string or an EPSG code"
+        ),
+        class = "vrtility_proj_specific_not_valid"
+      )
+    }
+  } else {
+    proj <- rlang::arg_match(proj_generic)
 
-  no_defs <- ifelse(no_defs, "+no_defs", "")
+    v_assert_type(no_defs, "no_defs", "logical")
+    v_assert_type(opts, "opts", "character")
 
-  if (proj %in% c("pconic", "eqdc")) {
-    lat_1 <- x[4]
-    lat_2 <- x[2]
+    # get centroid in latlong
+    cent_coor <- gdalraster::g_centroid(bbox_to_wkt(x))
+
+    # configure proj args
+    n_or_s <- ifelse(
+      cent_coor[2] == 0,
+      "",
+      ifelse(cent_coor[2] > 0, "+north", "+south")
+    )
+
+    no_defs <- ifelse(no_defs, "+no_defs", "")
+
+    if (proj %in% c("pconic", "eqdc")) {
+      lat_1 <- x[4]
+      lat_2 <- x[2]
+    }
+
+    # construct proj4 string
+    prj <- trimws(switch(
+      proj,
+      laea = glue::glue(
+        "+proj=laea +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
+        "+ellps={ellps} {no_defs}",
+        opts,
+        .sep = " "
+      ),
+      utm = glue::glue(
+        "+proj=utm +zone={round((180 + cent_coor[1]) / 6)} {n_or_s}",
+        "+ellps={ellps} {no_defs}",
+        opts,
+        .sep = " "
+      ),
+      aeqd = glue::glue(
+        "+proj=aeqd +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
+        "+ellps={ellps} {no_defs}",
+        opts,
+        .sep = " "
+      ),
+      pconic = glue::glue(
+        "+proj=pconic +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
+        "+lat_1={lat_1} +lat_2={lat_2}",
+        "+ellps={ellps} {no_defs}",
+        opts,
+        .sep = " "
+      ),
+      eqdc = glue::glue(
+        "+proj=eqdc +lon_0={cent_coor[1]}",
+        "+lat_1={lat_1} +lat_2={lat_2}",
+        "+ellps={ellps} {no_defs}",
+        opts,
+        .sep = " "
+      )
+    ))
   }
 
-  # construct proj4 string
-  prj <- trimws(switch(
-    proj,
-    laea = glue::glue(
-      "+proj=laea +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
-      "+ellps={ellps} {no_defs}",
-      opts,
-      .sep = " "
-    ),
-    utm = glue::glue(
-      "+proj=utm +zone={round((180 + cent_coor[1]) / 6)} {n_or_s}",
-      "+ellps={ellps} {no_defs}",
-      opts,
-      .sep = " "
-    ),
-    aeqd = glue::glue(
-      "+proj=aeqd +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
-      "+ellps={ellps} {no_defs}",
-      opts,
-      .sep = " "
-    ),
-    pconic = glue::glue(
-      "+proj=pconic +lon_0={cent_coor[1]} +lat_0={cent_coor[2]}",
-      "+lat_1={lat_1} +lat_2={lat_2}",
-      "+ellps={ellps} {no_defs}",
-      opts,
-      .sep = " "
-    ),
-    eqdc = glue::glue(
-      "+proj=eqdc +lon_0={cent_coor[1]}",
-      "+lat_1={lat_1} +lat_2={lat_2}",
-      "+ellps={ellps} {no_defs}",
-      opts,
-      .sep = " "
-    )
-  ))
-
-  proj4 <- prj
   wkt <- gdalraster::srs_to_wkt(prj)
 
   te <- gdalraster::bbox_transform(
@@ -159,7 +190,6 @@ bbox_to_projected <- function(
     gdalraster::srs_to_wkt("EPSG:4326"),
     wkt
   )
-  attr(te, "proj4") <- proj4
   attr(te, "wkt") <- wkt
 
   return(te)

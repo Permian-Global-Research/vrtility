@@ -47,8 +47,19 @@ call_gdalraster_mirai <- function(
     quiet = TRUE
   )
 
+  bnames <- purrr::map_chr(
+    seq_len(nbands),
+    ~ ds_main$getDescription(.x)
+  )
+
+  tf_named <- set_vrt_descriptions(
+    x = tf,
+    descriptions = bnames,
+    as_file = TRUE
+  )
+
   gdalraster::translate(
-    tf,
+    tf_named,
     outfile,
     quiet = TRUE,
     cl_arg = cl_arg
@@ -132,11 +143,9 @@ map_bands_and_chunks <- function(
                         glue::glue(
                           "BLOCKXSIZE={inner_ds_in$getBlockSize(b)[1]}"
                         ),
-                        "-co",
                         glue::glue(
                           "BLOCKYSIZE={inner_ds_in$getBlockSize(b)[2]}"
                         ),
-                        "-co",
                         "BIGTIFF=IF_NEEDED" # Automatic large file handling
                       ),
                       init = nodata_val

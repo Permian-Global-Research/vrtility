@@ -5,24 +5,35 @@
 \alias{vrt_collect.character}
 \alias{vrt_collect.doc_items}
 \alias{print.vrt_collection}
+\alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x, band_descriptions, datetimes)
+vrt_collect(x, ...)
 
-\method{vrt_collect}{character}(x, band_descriptions = NULL, datetimes = rep("", length(x)))
+\method{vrt_collect}{character}(
+  x,
+  band_descriptions = NULL,
+  datetimes = rep("", length(x)),
+  config_opts = gdal_config_opts(),
+  ...
+)
 
-\method{vrt_collect}{doc_items}(x, ...)
+\method{vrt_collect}{doc_items}(x, config_opts = gdal_config_opts(), ...)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
+
+\method{c}{vrt_collection}(x, ...)
 }
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
+
+\item{...}{Additional arguments not used}
 
 \item{band_descriptions}{A character vector of band descriptions.}
 
 \item{datetimes}{A character vector of datetimes.}
 
-\item{...}{Additional arguments not used}
+\item{config_opts}{A named character vector of GDAL configuration options.}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 
@@ -51,4 +62,22 @@ and when summarisation is required we can use vrt_stack - however, in order
 to create a stack the collection must xontain images from a single spatial
 reference system (SRS). If there are mutliple SRS values, use \code{vrt_warp()}
 to unify the projection of the collection.
+
+You can use the \code{c} method to combine multiple vrt_collection objects. All
+collections must have the same number of bands.
+}
+\examples{
+s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+vrt_collect(s2files)
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+s2q <- sentinel2_stac_query(
+ bbox = c(-12.386, -37.214, -12.186, -37.014),
+ start_date = "2023-01-01",
+ end_date = "2023-01-31",
+ max_cloud_cover = 10,
+ assets = c("B02", "B03", "B04", "B08", "SCL")
+)
+
+vrt_collect(s2q)
+\dontshow{\}) # examplesIf}
 }

@@ -1,7 +1,14 @@
 v_assert_type <- function(
   x,
   name,
-  type = c("character", "numeric", "logical", "function", "stac_vrt"),
+  type = c(
+    "character",
+    "numeric",
+    "logical",
+    "function",
+    "stac_vrt",
+    "vrt_collection"
+  ),
   nullok = TRUE,
   multiple = FALSE
 ) {
@@ -38,6 +45,7 @@ v_assert_valid_schema <- function(x) {
   val_result <- xml2::xml_validate(xml2::read_xml(x), vrt_schema())
   if (!val_result) {
     error_msgs <- attr(val_result, "errors")
+
     cli::cli_abort(
       c(
         "!" = "Error when creating VRT block: invalid VRT XML:",

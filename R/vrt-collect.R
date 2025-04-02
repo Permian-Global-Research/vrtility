@@ -2,6 +2,7 @@
 #' @param x An object to be used to create a vrt_x object see details.
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @return A vrt_collection object.
 #' @rdname vrt_collect
 #' @export
@@ -16,15 +17,29 @@
 #' to create a stack the collection must xontain images from a single spatial
 #' reference system (SRS). If there are mutliple SRS values, use `vrt_warp()`
 #' to unify the projection of the collection.
+#' @examples
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' vrt_collect(s2files)
+#' @examplesIf interactive()
+#' s2q <- sentinel2_stac_query(
+#'  bbox = c(-12.386, -37.214, -12.186, -37.014),
+#'  start_date = "2023-01-01",
+#'  end_date = "2023-01-31",
+#'  max_cloud_cover = 10,
+#'  assets = c("B02", "B03", "B04", "B08", "SCL")
+#' )
+#'
+#' vrt_collect(s2q)
+#'
 vrt_collect <- function(
   x,
-  band_descriptions,
-  datetimes
+  ...
 ) {
   UseMethod("vrt_collect")
 }
 
 #' @noRd
+#' @keywords internal
 #' @export
 vrt_collect.default <- function(x, ...) {
   cli::cli_abort(
@@ -33,12 +48,17 @@ vrt_collect.default <- function(x, ...) {
   )
 }
 
+#' @param band_descriptions A character vector of band descriptions.
+#' @param datetimes A character vector of datetimes.
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.character <- function(
   x,
   band_descriptions = NULL,
-  datetimes = rep("", length(x))
+  datetimes = rep("", length(x)),
+  config_opts = gdal_config_opts(),
+  ...
 ) {
   assert_files_exist(x)
   v_assert_type(
@@ -49,6 +69,10 @@ vrt_collect.character <- function(
   )
   v_assert_type(datetimes, "datetimes", "character", nullok = TRUE)
   v_assert_length(datetimes, "datetimes", length(x), nullok = TRUE)
+
+  orig_config <- set_gdal_config(config_opts)
+  on.exit(set_gdal_config(orig_config))
+
   vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
     tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
@@ -100,13 +124,18 @@ vrt_collect.character <- function(
   )
 }
 
+#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(
   x,
+  config_opts = gdal_config_opts(),
   ...
 ) {
-  assets <- rstac::items_assets(x)
+  orig_config <- set_gdal_config(config_opts)
+  on.exit(set_gdal_config(orig_config))
+
+  assets <- stringr::str_sort(rstac::items_assets(x), numeric = TRUE)
 
   items_uri <- purrr::map(assets, function(a) {
     its_asset <- rstac::assets_select(x, asset_names = a)
@@ -123,46 +152,49 @@ vrt_collect.doc_items <- function(
 
   vrt_items <- purrr::map(
     items_uri,
-    function(x) {
-      srcs <- purrr::map_chr(x, ~ .x$uri)
-      dttm <- unique(purrr::map_chr(x, ~ .x$dttm))
+    carrier::crate(
+      function(x) {
+        srcs <- purrr::map_chr(x, ~ .x$uri)
+        dttm <- unique(purrr::map_chr(x, ~ .x$dttm))
 
-      if (length(dttm) > 1) {
-        cli::cli_warn(
-          c(
-            "!" = "Multiple datetimes detected in for the following sources:",
-            "{srcs}",
-            "i" = "Using the first datetime."
+        if (length(dttm) > 1) {
+          cli::cli_warn(
+            c(
+              "!" = "Multiple datetimes detected in for the following sources:",
+              "{srcs}",
+              "i" = "Using the first datetime."
+            )
           )
+          dttm <- dttm[1]
+        }
+
+        tf <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+
+        gdalraster::buildVRT(
+          tf,
+          srcs,
+          cl_arg = c(
+            "-separate"
+          ),
+          quiet = TRUE
         )
-        dttm <- dttm[1]
-      }
+        tf <- vrtility::set_vrt_descriptions(
+          x = tf,
+          names(x),
+          as_file = TRUE
+        )
 
-      tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+        tf <- vrtility::set_vrt_metadata(
+          tf,
+          keys = "datetime",
+          values = dttm,
+          as_file = TRUE
+        )
 
-      gdalraster::buildVRT(
-        tf,
-        srcs,
-        cl_arg = c(
-          "-separate"
-        ),
-        quiet = TRUE
-      )
-      tf <- set_vrt_descriptions(
-        x = tf,
-        names(x),
-        as_file = TRUE
-      )
-
-      tf <- set_vrt_metadata(
-        tf,
-        keys = "datetime",
-        values = dttm,
-        as_file = TRUE
-      )
-
-      build_vrt_block(tf)
-    },
+        vrtility::build_vrt_block(tf)
+      },
+      save_dir = getOption("vrt.cache")
+    ),
     .parallel = using_daemons()
   )
 
@@ -313,4 +345,32 @@ print.vrt_collection <- function(
     )
   )
   invisible(x)
+}
+
+#' @export
+#' @rdname vrt_collect
+#' @details
+#' You can use the `c` method to combine multiple vrt_collection objects. All
+#' collections must have the same number of bands.
+c.vrt_collection <- function(x, ...) {
+  dots <- rlang::dots_list(...)
+  nbands <- length(x$assets)
+
+  purrr::walk(dots, function(vrtc) {
+    v_assert_type(vrtc, "...", "vrt_collection")
+    v_assert_length(vrtc$assets, "...", nbands)
+  })
+
+  clist <- (c(x[[1]], purrr::flatten(purrr::map(dots, function(x) x[[1]]))))
+
+  unique_attr <- function(at) {
+    unlist(unique(x[at], purrr::flatten(purrr::map(dots, function(x) x[at]))))
+  }
+
+  build_vrt_collection(
+    clist,
+    pixfun = unique_attr("pixfun"),
+    maskfun = unique_attr("maskfun"),
+    warped = all(unique_attr("warped")),
+  )
 }

@@ -54,7 +54,7 @@ engine.
 
 ## Installation
 
-You can install the development version of vrtility from GitHub with:
+You can install vrtility from GitHub with:
 
 ``` r
 # install.packages("pak")

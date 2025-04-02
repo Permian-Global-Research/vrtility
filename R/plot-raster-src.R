@@ -7,6 +7,8 @@
 #' @param pal a character vector of colors to use when plotting a single band.
 #' @param adj_low a numeric value to adjust the lower quantile value by. useful
 #' for example when sea presents as very dark.
+#' @param title logical. If TRUE the band description will be used as a title. ignored
+#' if main is provided.
 #' @inheritParams gdalraster::plot_raster
 #' @rdname plot_raster
 #' @export
@@ -15,6 +17,7 @@ plot_raster_src <- function(
   bands = 1,
   pal = grDevices::hcl.colors(10, "Viridis"),
   nbands = length(bands),
+  title = TRUE,
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
@@ -44,11 +47,17 @@ plot_raster_src <- function(
   target_divisor <- dev_size[1] * 1.5
 
   ds <- methods::new(gdalraster::GDALRaster, x)
-  on.exit(if (ds$isOpen()) ds$close())
+  on.exit(ds$close())
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
 
+  rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
+  gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "BILINEAR")
+  on.exit(
+    gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", rior_or),
+    add = TRUE
+  )
   r <- gdalraster::read_ds(
     ds,
     bands = bands,
@@ -80,7 +89,9 @@ plot_raster_src <- function(
     minmax_def <- rep(mm, each = nbands)
   }
 
-  ds$close()
+  if (nchar(main) == 0 && nbands == 1 && title) {
+    main <- ds$getDescription(bands)
+  }
 
   gdalraster::plot_raster(
     r,

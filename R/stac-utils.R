@@ -25,18 +25,29 @@ format_stac_date <- function(x) {
 #' @param start_date The start date for the query
 #' @param end_date The end date for the query
 #' @param limit The number of items to return
-#' @param ... Additional arguments to pass to the query
 #' @return A list of items
 #' @rdname stac_utilities
 #' @export
+#' @examplesIf interactive()
+#' s2_its <- stac_query(
+#'  bbox = c(-12.386, -37.214, -12.186, -37.014),
+#'  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+#'  collection = "sentinel-2-l2a",
+#'  start_date = "2023-01-01",
+#'  end_date = "2023-01-31",
+#'  limit = 10
+#' )
+#'
+#' mpc_singed <- sign_planetary_computer(s2_its)
+#'
+
 stac_query <- function(
   bbox,
   stac_source,
   collection,
   start_date,
   end_date,
-  limit = 999,
-  ...
+  limit = 999
 ) {
   validate_bbox(bbox)
   v_assert_type(stac_source, "stac_source", "character")
@@ -75,26 +86,31 @@ stac_query <- function(
 }
 
 
-#' Sign STAC items retrieved from the Planetary Computer
+#' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 #'
 #' @param items A STACItemCollection.
-#' @param subscription_key Optionally, a subscription key associated with your
-#' Planetary Computer account. At the time of writing, this is required for
-#' downloading Sentinel 1 RTC products, as well as NAIP imagery. This key will
-#' be automatically used if the environment variable `rsi_pc_key` is set.
+#' @param subscription_key Optionally (but strongly recommended), a
+#' subscription key associated with your MPC account. At the time of writing,
+#' this is required for downloading Sentinel 1 RTC products, as well as NAIP
+#' imagery. This key willb be automatically used if the environment
+#' variable `MPC_TOKEN` is set.
 #'
 #' @returns A STACItemCollection object with signed assets url.
 #'
 #' @export
 #' @rdname stac_utilities
-#' @details copied from the `rsi` package
 sign_planetary_computer <- function(
   items,
-  subscription_key = Sys.getenv("rsi_pc_key")
+  subscription_key = Sys.getenv("MPC_TOKEN")
 ) {
-  # check for the variable used by sits if the rsi one isn't set
-  if (subscription_key == "") subscription_key <- Sys.getenv("MPC_TOKEN")
   if (subscription_key == "") {
+    cli::cli_warn(
+      c(
+        "!" = "No subscription key provided. Using default signing method.",
+        " " = "This may not work for some items or could be slower.",
+        "i" = "Set your key using the `MPC_TOKEN` environment variable."
+      )
+    )
     rstac::items_sign(
       items,
       rstac::sign_planetary_computer(vrtility_usr_agent())
@@ -113,8 +129,6 @@ sign_planetary_computer <- function(
 
 #' Generate a Sentinel 2 stac collection doc_imes object
 #' @param bbox A numeric vector of the bounding box (length 4) in lat/long
-#' @param start_date A character string of the start date
-#' @param end_date A character string of the end date
 #' @param assets A character vector of the asset names to include
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
 #' @param stac_source A character string of the STAC source
@@ -125,6 +139,15 @@ sign_planetary_computer <- function(
 #' @return A stac_vrt object
 #' @rdname stac_utilities
 #' @export
+#' @examplesIf interactive()
+#' sentinel2_stac_query(
+#'   bbox = c(-12.386, -37.214, -12.186, -37.014),
+#'   start_date = "2023-01-01",
+#'   end_date = "2023-01-31",
+#'   max_cloud_cover = 10,
+#'   assets = c("B02", "B03", "B04", "B08", "SCL")
+#' )
+#'
 sentinel2_stac_query <- function(
   bbox,
   start_date,
@@ -147,14 +170,16 @@ sentinel2_stac_query <- function(
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "sentinel-2-l2a",
-  mpc_sign = TRUE
+  mpc_sign = TRUE,
+  limit = 999
 ) {
   stac_its <- stac_query(
     bbox = bbox,
     stac_source = stac_source,
     start_date = start_date,
     end_date = end_date,
-    collection = collection
+    collection = collection,
+    limit = limit
   )
 
   if (!is.null(max_cloud_cover)) {
@@ -170,7 +195,32 @@ sentinel2_stac_query <- function(
   return(stac_its)
 }
 
-
+#' Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
+#' @rdname stac_utilities
+#' @examplesIf interactive()
+#' hls_query <- hls_stac_query(
+#'   c(144.130, -7.725, 144.470, -7.475),
+#'   start_date = "2023-01-01",
+#'   end_date = "2023-12-31",
+#'   assets = c("B04", "B03", "B02", "Fmask"),
+#'   collection = "HLSS30_2.0",
+#'   max_cloud_cover = 35
+#' )
+#' # in order to download these items (or call further vrt_x functions) you
+#' # will first need to set your credentials. The easiest way to do this is with
+#' # the `earthdatalogin` package. First set your EARTHDATA_USER and
+#' # EARTHDATA_PASSWORD environment variables and then run the following command:
+#'
+#' earthdatalogin::edl_netrc(
+#'   username = Sys.getenv("EARTHDATA_USER"),
+#'   password = Sys.getenv("EARTHDATA_PASSWORD")
+#' )
+#' @details
+#' In order to access HLS data you will need a NASA Earthdata account. You can
+#' create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
+#' an account, you can set your credentials using the `earthdatalogin` package
+#' as shown in the examples.
+#' @export
 hls_stac_query <- function(
   bbox,
   start_date,
@@ -193,7 +243,8 @@ hls_stac_query <- function(
   ),
   max_cloud_cover = 10,
   stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
-  collection = c("HLSS30_2.0", "HLSL30_2.0")
+  collection = c("HLSS30_2.0", "HLSL30_2.0"),
+  limit = 999
 ) {
   collection <- rlang::arg_match(collection)
   stac_its <- stac_query(
@@ -201,7 +252,8 @@ hls_stac_query <- function(
     stac_source = stac_source,
     start_date = start_date,
     end_date = end_date,
-    collection = collection
+    collection = collection,
+    limit = limit
   )
 
   if (!is.null(max_cloud_cover)) {
@@ -220,6 +272,6 @@ hls_stac_query <- function(
 stac_cloud_filter <- function(items, max_cloud_cover) {
   items |>
     rstac::items_filter(
-      filter_fn = \(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+      filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
     )
 }

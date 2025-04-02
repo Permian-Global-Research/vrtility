@@ -25,6 +25,16 @@
 #' In general [set_mask_numpy()] should be used, although a custom function can
 #' be provided.
 #'
+#' @examples
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#'
+#' ex_collect <- vrt_collect(s2files)
+#' ex_collect |>
+#'   vrt_set_maskfun(
+#'     mask_band = "SCL",
+#'     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+#'     drop_mask_band = FALSE)
+#'
 vrt_set_maskfun <- function(
   x,
   mask_band,
