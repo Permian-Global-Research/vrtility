@@ -13,13 +13,13 @@ vrt_schema <- function(schema = vrtility::vrt_xml_schema) {
 }
 
 
-#' Set the descriptions for the bands in a VRT
+#' Iternal function to set the descriptions for the bands in a VRT
 #' @param x A character string of the path to the VRT
 #' @param descriptions A character vector of the descriptions
 #' @param as_file A logical indicating if the VRT should be saved to a file
 #' @return A character string of the path to the modified VRT
 #' @keywords internal
-#' @noRd
+#' @export
 set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
   mvrt <- xml2::read_xml(x)
   mvrt_bands <- xml2::xml_find_all(mvrt, "//VRTRasterBand")
@@ -43,8 +43,14 @@ set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
   }
 }
 
+#' Internal function to set metadata in a VRT
+#' @param x A character string of the path to the VRT
+#' @param keys A character vector of the metadata keys
+#' @param values A character vector of the metadata values
+#' @param as_file A logical indicating if the VRT should be saved to a file
+#' @return An xml_document object
 #' @keywords internal
-#' @noRd
+#' @export
 set_vrt_metadata <- function(x, keys, values, as_file = FALSE) {
   v_assert_length(keys, "keys", length(values))
   mvrt <- xml2::read_xml(x)
