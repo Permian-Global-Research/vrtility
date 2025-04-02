@@ -7,22 +7,21 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+
+
+An example of how we can build Harmonized Landsat Senintel (HLS) Composites
+by combining both Landsat 8 and Sentinel-2 collections to increase the 
+number of images available for compositing.
+
+
+``` r
+library(vrtility)
+
+mirai::daemons(10)
+#> [1] 10
 ```
 
-
-
-
-
-```{r setup}
-# library(vrtility)
-devtools::load_all()
-
-mirai::daemons(6)
+``` r
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (144.3 -7.6)"),
@@ -35,7 +34,8 @@ trs <- attr(te, "wkt")
 ```
 
 
-```{r hlssl}
+
+``` r
 hlssl_stac <- hls_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -44,9 +44,22 @@ hlssl_stac <- hls_stac_query(
   collection = "HLSL30_2.0"
 )
 print(hlssl_stac)
+#> ###Items
+#> - matched feature(s): 70
+#> - features (6 item(s) / 64 not fetched):
+#>   - HLS.L30.T55MBM.2023017T003226.v2.0
+#>   - HLS.L30.T54MZS.2023017T003226.v2.0
+#>   - HLS.L30.T55MBM.2023065T003210.v2.0
+#>   - HLS.L30.T54MZS.2023065T003210.v2.0
+#>   - HLS.L30.T55MBM.2023337T003219.v2.0
+#>   - HLS.L30.T54MZS.2023337T003219.v2.0
+#> - assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask
+#> - item's fields: 
+#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
-```{r hlsss}
+
+``` r
 hlsss_stac <- hls_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -55,24 +68,69 @@ hlsss_stac <- hls_stac_query(
   collection = "HLSS30_2.0"
 )
 print(hlsss_stac)
+#> ###Items
+#> - matched feature(s): 98
+#> - features (8 item(s) / 90 not fetched):
+#>   - HLS.S30.T54MZS.2023029T004701.v2.0
+#>   - HLS.S30.T55MBM.2023074T004709.v2.0
+#>   - HLS.S30.T55MBM.2023079T004701.v2.0
+#>   - HLS.S30.T55MBM.2023109T004701.v2.0
+#>   - HLS.S30.T54MZS.2023109T004701.v2.0
+#>   - HLS.S30.T55MBM.2023319T004701.v2.0
+#>   - HLS.S30.T55MBM.2023364T004709.v2.0
+#>   - HLS.S30.T54MZS.2023364T004709.v2.0
+#> - assets: 
+#> B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B8A, Fmask
+#> - item's fields: 
+#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
-```{r earthdata-creds}
-earthdatalogin::edl_netrc(
+
+``` r
+mirai::everywhere(earthdatalogin::edl_netrc(
   username = Sys.getenv("EARTHDATA_USER"),
   password = Sys.getenv("EARTHDATA_PASSWORD")
-)
+))
 ```
 
-```{r hls-collect}
+
+``` r
 hls_sl_col <- vrt_collect(hlssl_stac)
 print(hls_sl_col)
+#> → <VRT Collection>
+#> 
+#>  VRT SRS: 
+#> PROJCS["WGS 84 / UTM zone 55N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",147],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32655"]]
+#> 
+#>  PROJCS["WGS 84 / UTM zone 54N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",141],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32654"]]
+#> Bounding Box: NA
+#> Pixel res: 30, 30
+#> Start Date: 2023-01-17 00:32:26 UTC
+#> End Date: 2023-12-03 00:32:19 UTC
+#> Number of Items: 6
+#> Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask
+```
+
+``` r
 
 hls_ss_col <- vrt_collect(hlsss_stac)
 print(hls_ss_col)
+#> → <VRT Collection>
+#> 
+#>  VRT SRS: 
+#> PROJCS["WGS 84 / UTM zone 54N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",141],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32654"]]
+#> 
+#>  PROJCS["WGS 84 / UTM zone 55N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",147],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32655"]]
+#> Bounding Box: NA
+#> Pixel res: 30, 30
+#> Start Date: 2023-01-29 00:49:07 UTC
+#> End Date: 2023-12-30 00:49:10 UTC
+#> Number of Items: 8
+#> Assets: B01, B02, B03, B04, B05, B06, B07, B08, B8A, B09, B10, B11, B12, Fmask
 ```
 
-```{r hls-mask}
+
+``` r
 hls_sl_col_mask <- vrt_set_maskfun(
   hls_sl_col,
   mask_band = "Fmask",
@@ -91,6 +149,35 @@ hls_ss_col_mask <- vrt_set_maskfun(
 
 # let's check out a vrt and inspect the mask function that we used.
 print(hls_sl_col_mask, maskfun = TRUE)
+#> → <VRT Collection>
+#> Mask Function:
+#> import numpy as np
+#> def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+#>                   raster_ysize, buf_radius, gt, **kwargs):
+#>     # Convert comma-separated bit positions to integers
+#>     bit_positions = [int(x) for x in kwargs['mask_values'].decode().split(',')]
+#>     
+#>     # Initialize mask array with zeros
+#>     mask = np.zeros_like(in_ar[0], dtype=bool)
+#>     
+#>     # Combine masks for each bit position using OR
+#>     for bit in bit_positions:
+#>         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) > 0
+#>     
+#>     # Set output: 255 for valid pixels (mask True), 0 for invalid
+#>     out_ar[:] = np.where(mask, 0, 1)
+#> 
+#> 
+#>  VRT SRS: 
+#> PROJCS["WGS 84 / UTM zone 55N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",147],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32655"]]
+#> 
+#>  PROJCS["WGS 84 / UTM zone 54N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",141],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32654"]]
+#> Bounding Box: NA
+#> Pixel res: 30, 30
+#> Start Date: 2023-01-17 00:32:26 UTC
+#> End Date: 2023-12-03 00:32:19 UTC
+#> Number of Items: 6
+#> Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11
 ```
 
 
@@ -101,7 +188,8 @@ wavelengths. So, let's rename all the bands so that every wavelength is uniquely
 named and then add empty bands to each collection so that the number of bands is the
 same for each collection.
 
-```{r band-align-hls}
+
+``` r
 hls_ls_align <- vrt_set_band_names(
   hls_sl_col_mask,
   c("A", "B", "G", "R", "N2", "S1", "S2", "C", "T1", "T2")
@@ -125,7 +213,8 @@ hls_ss_align <- vrt_set_band_names(
 
 Now we can combine the two collections into a single collection.
 
-```{r hls-merge}
+
+``` r
 hls_merge_coll <- c(
   hls_ls_align,
   hls_ss_align
@@ -135,7 +224,8 @@ hls_merge_coll <- c(
 Now we need to warp all vrt_blocks in the collection to the same spatial
 reference system, extent and pixel size.
 
-```{r hls-warp}
+
+``` r
 hls_warp <- vrt_warp(
   hls_merge_coll,
   t_srs = trs,
@@ -148,12 +238,47 @@ hls_warp <- vrt_warp(
 Now we can stack the warped vrt collection - this can be thought of as a virtual 
 raster cube.
 
-```{r hls-stack}
+
+``` r
 hls_stack <- vrt_stack(hls_warp) |>
   vrt_set_pixelfun(pixfun = median_numpy())
 ```
 
-```{r hls-compute}
+
+``` r
 outfile <- tempfile(fileext = ".tif")
-hls_stack <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 3)
+hls_composite <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 2)
+#> ! Active mirai daemons have been detected, but fewer than the number of bands.
+#> ℹ No changes were made to this mirai configuartion but this could result in performance issues
 ```
+
+RGB composite
+
+
+``` r
+plot_raster_src(
+  hls_composite,
+  bands = c(4, 3, 2)
+)
+```
+
+![plot of chunk hls-plot](figure/hls-plot-1.png)
+
+Let's check out all the bands...
+
+
+``` r
+par(mfrow = c(5, 3), mar = c(0, 0, 1, 0))
+purrr::walk(1:15, function(i) {
+  plot_raster_src(
+    hls_composite,
+    bands = i,
+    pal = hcl.colors(256, "Rocket"),
+    legend = FALSE,
+    axes = FALSE
+  )
+})
+```
+
+![plot of chunk hls-plot-bands](figure/hls-plot-bands-1.png)
+
