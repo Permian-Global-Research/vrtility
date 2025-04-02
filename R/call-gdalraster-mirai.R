@@ -47,8 +47,19 @@ call_gdalraster_mirai <- function(
     quiet = TRUE
   )
 
+  bnames <- purrr::map_chr(
+    seq_len(nbands),
+    ~ ds_main$getDescription(.x)
+  )
+
+  tf_named <- set_vrt_descriptions(
+    x = tf,
+    descriptions = bnames,
+    as_file = TRUE
+  )
+
   gdalraster::translate(
-    tf,
+    tf_named,
     outfile,
     quiet = TRUE,
     cl_arg = cl_arg
