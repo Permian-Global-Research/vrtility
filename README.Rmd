@@ -21,6 +21,8 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
+<img src="man/figures/vrtility_hex.png"  align="right" height="300" style="float:right; height:300px;">
+
 vrtility is an R package that aims to make the best use of 
 [GDAL](https://gdal.org/en/stable/index.html)'s 
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities for 

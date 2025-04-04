@@ -21,3 +21,7 @@ docs
 inst/doc
 /doc/
 /Meta/
+
+/ml4eo-abstract/*
+
+/hex/*

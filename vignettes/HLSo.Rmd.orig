@@ -256,8 +256,8 @@ Now let's take a look at a false-colour composite!
 ```{r hls-plot, fig.width=10, fig.height=8, fig.cap= ""}
 plot_raster_src(
   hls_composite,
-  bands = c(9, 3, 2),
-  minmax_pct_cut = c(25, 97)
+  bands = c(9, 2, 4),
+  minmax_pct_cut = c(26, 99)
 )
 ```
 

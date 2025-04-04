@@ -12,6 +12,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
+<img src="man/figures/vrtility_hex.png"  align="right" height="300" style="float:right; height:300px;">
+
 vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
@@ -131,7 +133,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.216   0.075  36.184
+#>   1.845   0.092  36.696
 ```
 
 ``` r
