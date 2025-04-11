@@ -1,4 +1,14 @@
-raster_reduce_geomedian <- function(x) {
+#' @title block-level geomedian calculation
+#' @description internal functions used by `reduce_to_geomedian` but exported to
+#' enable mirai daemon access.
+#' @param x A list of lists of matrices, where each inner list represents a
+#' time point - the product of `read_block_arrays()`.
+#' @return  A list of lists of vectors, where each inner list represents a
+#' time point.
+#' @export
+#' @rdname geomedian_internal
+#' @keywords internal
+geomedian_reduction <- function(x) {
   # Get dimensions from first list element
   mast_dim <- dim(x[[1]][[1]])
   n_cells <- prod(mast_dim)
@@ -7,7 +17,6 @@ raster_reduce_geomedian <- function(x) {
 
   # Pre-allocate result list
   result <- vector("list", n_cells)
-
   # Create indices in row-major order (to match GDAL)
   cell_indices <- expand.grid(
     row = seq_len(n_rows),
@@ -41,17 +50,24 @@ raster_reduce_geomedian <- function(x) {
 
     # Only compute Gmedian if we have data
     if (nrow(bandmatrix) > 1) {
-      row_sums <- rowSums(bandmatrix, na.rm = TRUE)
+      colmeds <- Rfast::colMedians(bandmatrix, na.rm = TRUE)
+
+      # creating the Gamma constant.
+      gamma <- 18 +
+        (mean(Rfast::colVars(bandmatrix, std = TRUE, na.rm = TRUE)) /
+          mean(colmeds)) *
+          10
+
       result[[k]] <- as.vector(
         Gmedian::Gmedian(
           bandmatrix,
-          init = robustbase::colMedians(bandmatrix, na.rm = TRUE),
-          nstart = 500,
-          gamma = round(max(row_sums / ncol(bandmatrix), na.rm = TRUE) * 0.05),
+          init = colmeds,
+          nstart = 100,
+          gamma = gamma,
           alpha = 0.9
         )
       )
-
+      #TODO: maybe we also allow for the Weiszfeld method?
       # not particularly good at cloud filtering...
       # result[[k]] <- as.vector(
       #   Gmedian::Weiszfeld(
@@ -66,10 +82,17 @@ raster_reduce_geomedian <- function(x) {
     }
   }
 
-  result
+  return(result)
 }
 
-
+#' @title Restructure cell values from `geomedian_reduction()`
+#' @param cell_vals A list of lists of vectors, where each inner list represents
+#' a time point - the product of `geomedian_reduction()`.
+#' @return A numeric vector of length `n_bands * n_cells`, where `n_bands` is
+#' the number of bands and `n_cells` is the number of cells.
+#' @rdname geomedian_internal
+#' @export
+#' @keywords internal
 restructure_cells <- function(cell_vals) {
   # Get dimensions
   n_bands <- length(cell_vals[[1]])
@@ -102,7 +125,18 @@ restructure_cells <- function(cell_vals) {
   result
 }
 
-
+#' @title Read VRT block tiles
+#' @param x a VRT block object
+#' @param nbands number of bands
+#' @param xoff x offset
+#' @param yoff y offset
+#' @param xsize x size
+#' @param ysize y size
+#' @param save_dir directory to save temporary files
+#' @return a list of matrices, where each matrix corresponds to a band
+#' @export
+#' @rdname geomedian_internal
+#' @keywords internal
 read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
   purrr::map(
     x[[1]],
@@ -137,21 +171,65 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
   )
 }
 
-
+#' Create a geometric median composite.
+#' This function creates geometric median (aka the spatial or l1 median)
+#' composite of a warped VRT collection.
+#' @param x A vrt_collection_warped object.
+#' @param outfile The output file path.
+#' @param cache_dir The directory to save temporary files. (default should be
+#' fine - this is here mainly for explicit privision for mirai daemons)
+#' @param config_options A named character vector of GDAL configuration options.
+#' @param compression The compression method to use for the output file.
+#' @param return_internals Logical indicating whether to return the internals of
+#' the function (e.g., the jobs object) that is produced before promise
+#' evaluation.
+#' @param quiet Logical indicating whether to suppress the progress bar.
+#' @return A character vector of the output file path.
+#' @export
 reduce_to_geomedian <- function(
   x,
-  blocks,
-  nbands,
   outfile = fs::file_temp(ext = "tif"),
   cache_dir = getOption("vrt.cache"),
-  mem_limit = 60
+  config_options = gdal_config_opts(),
+  compression = "LZW",
+  return_internals = FALSE,
+  quiet = FALSE
 ) {
-  # Initialize output raster
+  v_assert_type(outfile, "outfile", "character", nullok = FALSE)
+  v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
+  v_assert_type(config_options, "config_options", "character", nullok = FALSE)
+  v_assert_type(compression, "compression", "character", nullok = FALSE)
+  v_assert_type(return_internals, "return_internals", "logical", nullok = FALSE)
+  v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
+
+  UseMethod("reduce_to_geomedian")
+}
+
+#' @export
+reduce_to_geomedian.vrt_collection_warped <- function(
+  x,
+  outfile = fs::file_temp(ext = "tif"),
+  cache_dir = getOption("vrt.cache"),
+  config_options = gdal_config_opts(),
+  compression = "LZW",
+  return_internals = FALSE,
+  quiet = FALSE
+) {
+  orig_config <- set_gdal_config(c(config_options))
+  on.exit(set_gdal_config(orig_config), add = TRUE)
+
+  # get template params
   vrt_template <- vrt_save(x[[1]][[1]])
   ds <- new(gdalraster::GDALRaster, vrt_template)
+  xs <- ds$getRasterXSize()
+  ys <- ds$getRasterYSize()
   nodataval <- ds$getNoDataValue(1)
   blksize <- ds$getBlockSize(1)
+  nbands <- ds$getRasterCount()
+  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2]))
+  blocks <- split(blocks_df, seq_len(nrow(blocks_df)))
   ds$close()
+  # Initialize output raster
 
   suppressMessages(gdalraster::rasterFromRaster(
     vrt_template,
@@ -159,9 +237,9 @@ reduce_to_geomedian <- function(
     fmt = "GTiff",
     init = nodataval,
     options = c(
-      "COMPRESS=LZW", # Good balance of compression/speed
-      "PREDICTOR=2", # Helps with continuous data
-      "TILED=YES", # Enable tiling for better read performance
+      glue::glue("COMPRESS={compression}"), # Good balance of compression/speed
+      "PREDICTOR=2",
+      "TILED=YES", # Enable tiling
       glue::glue(
         "BLOCKXSIZE={blksize[1]}"
       ),
@@ -182,7 +260,7 @@ reduce_to_geomedian <- function(
     function(b) {
       # Extract block parameters correctly from the 1-row dataframe
       block_params <- unlist(b)
-      ras_band_dat <- read_block_arrays(
+      ras_band_dat <- vrtility::read_block_arrays(
         x,
         nbands = nbands,
         xoff = block_params["nXOff"],
@@ -191,9 +269,9 @@ reduce_to_geomedian <- function(
         ysize = block_params["nYSize"],
         save_dir = cache_dir
       )
-      cell_vals <- raster_reduce_geomedian(ras_band_dat)
+      cell_vals <- vrtility::geomedian_reduction(ras_band_dat)
       list(
-        data = restructure_cells(cell_vals),
+        data = vrtility::restructure_cells(cell_vals),
         block = c(
           xoff = b["nXOff"],
           yoff = b["nYOff"],
@@ -208,6 +286,9 @@ reduce_to_geomedian <- function(
     .promise = list(
       # On success
       function(result) {
+        if (!ds$isOpen()) {
+          ds <- new(gdalraster::GDALRaster, outfile, read_only = FALSE)
+        }
         n_cells <- result$block[[3]] * result$block[[4]]
 
         # Calculate start and end indices for each band
@@ -235,11 +316,30 @@ reduce_to_geomedian <- function(
       },
       # On error
       function(error) {
-        warning(sprintf("Failed block: %s", conditionMessage(error)))
+        stop(
+          c(
+            "x" = "Failed to process block...",
+            " " = "{conditionMessage(error)}"
+          )
+        )
       }
     )
   )
 
-  # Return the jobs object for monitoring
-  jobs
+  if (!quiet) {
+    result <- jobs[.progress]
+  } else {
+    result <- jobs[]
+  }
+
+  if (return_internals) {
+    return(
+      list(
+        outfile = outfile,
+        internals = result
+      )
+    )
+  }
+
+  return(outfile)
 }
