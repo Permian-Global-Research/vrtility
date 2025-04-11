@@ -1,8 +1,7 @@
 .Rproj.user
 
 # dev space
-scratch.R
-scratch2.R
+scratch*
 benchmark.R
 # files to ignore
 *.tif
@@ -23,5 +22,5 @@ inst/doc
 /Meta/
 
 /ml4eo-abstract/*
-
+/big-test/*
 /hex/*

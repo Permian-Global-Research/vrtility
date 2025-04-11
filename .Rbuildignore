@@ -1,8 +1,10 @@
 ^vrtility\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
-^scratch.R$
-^scratch2.R$
+^scratch.*\.R$
+^big-test$
+^ml4eo-abstract$
+^hex$
 ^benchmark.R$
 ^LICENSE\.md$
 ^\.vscode$
