@@ -12,6 +12,7 @@ vrt_collect(x, ...)
 
 \method{vrt_collect}{character}(
   x,
+  bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
   config_opts = gdal_config_opts(),
@@ -28,6 +29,9 @@ vrt_collect(x, ...)
 \item{x}{An object to be used to create a vrt_x object see details.}
 
 \item{...}{Additional arguments not used}
+
+\item{bands}{A numeric vector of band indices to include in the VRT
+collection}
 
 \item{band_descriptions}{A character vector of band descriptions.}
 
