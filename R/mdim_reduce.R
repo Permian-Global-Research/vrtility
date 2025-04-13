@@ -1,5 +1,5 @@
 #' @title block-level geomedian calculation
-#' @description internal functions used by `reduce_to_geomedian` but exported to
+#' @description internal functions used by `mdim_reduce` but exported to
 #' enable mirai daemon access.
 #' @param x A list of lists of matrices, where each inner list represents a
 #' time point - the product of `read_block_arrays()`.
@@ -8,7 +8,7 @@
 #' @export
 #' @rdname geomedian_internal
 #' @keywords internal
-geomedian_reduction <- function(x) {
+mdim_reduction_apply <- function(x, mdim_fun) {
   # Get dimensions from first list element
   mast_dim <- dim(x[[1]][[1]])
   n_cells <- prod(mast_dim)
@@ -50,31 +50,7 @@ geomedian_reduction <- function(x) {
 
     # Only compute Gmedian if we have data
     if (nrow(bandmatrix) > 1) {
-      colmeds <- Rfast::colMedians(bandmatrix, na.rm = TRUE)
-
-      # creating the Gamma constant.
-      gamma <- 18 +
-        (mean(Rfast::colVars(bandmatrix, std = TRUE, na.rm = TRUE)) /
-          mean(colmeds)) *
-          10
-
-      result[[k]] <- as.vector(
-        Gmedian::Gmedian(
-          bandmatrix,
-          init = colmeds,
-          nstart = 100,
-          gamma = gamma,
-          alpha = 0.9
-        )
-      )
-      #TODO: maybe we also allow for the Weiszfeld method?
-      # not particularly good at cloud filtering...
-      # result[[k]] <- as.vector(
-      #   Gmedian::Weiszfeld(
-      #     bandmatrix,
-      #     nitermax = 1000
-      #   )$median
-      # )
+      result[[k]] <- mdim_fun(bandmatrix)
     } else if (nrow(bandmatrix) == 1) {
       result[[k]] <- as.vector(bandmatrix[1, ])
     } else {
@@ -147,7 +123,7 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
       ds <- methods::new(gdalraster::GDALRaster, tvrt)
       on.exit(ds$close())
       # Read and combine bands
-      band_data <- vrtility::compute_with_py_env(
+      band_data <- compute_with_py_env(
         purrr::map(
           seq_len(nbands),
           function(b) {
@@ -171,7 +147,8 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
   )
 }
 
-#' Create a geometric median composite.
+
+#' lower level function for running composite reductions that require all bands.
 #' This function creates geometric median (aka the spatial or l1 median)
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
@@ -186,8 +163,9 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
 #' @param quiet Logical indicating whether to suppress the progress bar.
 #' @return A character vector of the output file path.
 #' @export
-reduce_to_geomedian <- function(
+mdim_reduce <- function(
   x,
+  reduce_fun,
   outfile = fs::file_temp(ext = "tif"),
   cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
@@ -195,26 +173,17 @@ reduce_to_geomedian <- function(
   return_internals = FALSE,
   quiet = FALSE
 ) {
-  v_assert_type(outfile, "outfile", "character", nullok = FALSE)
-  v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
-  v_assert_type(config_options, "config_options", "character", nullok = FALSE)
-  v_assert_type(compression, "compression", "character", nullok = FALSE)
-  v_assert_type(return_internals, "return_internals", "logical", nullok = FALSE)
-  v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
+  # inital assertions and checks.
+  mdim_reduce_asserts_init(
+    outfile,
+    cache_dir,
+    config_options,
+    compression,
+    return_internals,
+    quiet
+  )
 
-  UseMethod("reduce_to_geomedian")
-}
-
-#' @export
-reduce_to_geomedian.vrt_collection_warped <- function(
-  x,
-  outfile = fs::file_temp(ext = "tif"),
-  cache_dir = getOption("vrt.cache"),
-  config_options = gdal_config_opts(),
-  compression = "LZW",
-  return_internals = FALSE,
-  quiet = FALSE
-) {
+  #set gdal config options
   orig_config <- set_gdal_config(c(config_options))
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
@@ -226,7 +195,12 @@ reduce_to_geomedian.vrt_collection_warped <- function(
   nodataval <- ds$getNoDataValue(1)
   blksize <- ds$getBlockSize(1)
   nbands <- ds$getRasterCount()
-  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2]))
+
+  #TODO: blocking needs work...
+  blocks_df1 <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2]))
+  blocks_df <- aggregate_blocks(blocks_df1, max_size = 1e6, direction = "row")
+  # blocks_df <- aggregate_blocks(blocks_df2, max_size = 7e5, direction = "col")
+  print(nrow(blocks_df))
   blocks <- split(blocks_df, seq_len(nrow(blocks_df)))
   ds$close()
   # Initialize output raster
@@ -260,7 +234,7 @@ reduce_to_geomedian.vrt_collection_warped <- function(
     function(b) {
       # Extract block parameters correctly from the 1-row dataframe
       block_params <- unlist(b)
-      ras_band_dat <- vrtility::read_block_arrays(
+      ras_band_dat <- read_block_arrays(
         x,
         nbands = nbands,
         xoff = block_params["nXOff"],
@@ -269,9 +243,9 @@ reduce_to_geomedian.vrt_collection_warped <- function(
         ysize = block_params["nYSize"],
         save_dir = cache_dir
       )
-      cell_vals <- vrtility::geomedian_reduction(ras_band_dat)
+      cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
       list(
-        data = vrtility::restructure_cells(cell_vals),
+        data = restructure_cells(cell_vals),
         block = c(
           xoff = b["nXOff"],
           yoff = b["nYOff"],
@@ -316,7 +290,7 @@ reduce_to_geomedian.vrt_collection_warped <- function(
       },
       # On error
       function(error) {
-        stop(
+        cli::cli_abort(
           c(
             "x" = "Failed to process block...",
             " " = "{conditionMessage(error)}"
@@ -342,4 +316,32 @@ reduce_to_geomedian.vrt_collection_warped <- function(
   }
 
   return(outfile)
+}
+
+
+mdim_reduce_asserts_init <- function(
+  outfile,
+  cache_dir,
+  config_options,
+  compression,
+  return_internals,
+  quiet
+) {
+  v_assert_type(outfile, "outfile", "character", nullok = FALSE)
+  v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
+  v_assert_type(config_options, "config_options", "character", nullok = FALSE)
+  v_assert_type(compression, "compression", "character", nullok = FALSE)
+  v_assert_type(return_internals, "return_internals", "logical", nullok = FALSE)
+  v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
+
+  if (!using_daemons()) {
+    cli::cli_abort(
+      c(
+        "x" = "No miriai daemons detected use:",
+        "{cli::code_highlight('mirai::daemons()')}",
+        "i" = "`mdim_reduce` is a compute intesntive function and is
+        designed to be run in parallel"
+      )
+    )
+  }
 }
