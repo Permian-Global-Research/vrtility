@@ -82,20 +82,32 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
 #' # Aggregate blocks in rows
 #' aggregate_blocks(blocks_df, max_size = 512)
 #' @export
-aggregate_blocks <- function(
+aggregate_blocks <- function(x, n) {
+  aggregate_blocks_internal(x, n_splits = n, direction = "row") |>
+    aggregate_blocks_internal(n_splits = n, direction = "col")
+}
+
+aggregate_blocks_internal <- function(
   blocks_df,
-  max_size = 1024,
-  direction = "row",
-  debug = FALSE
+  n_splits = 4,
+  direction = "row"
 ) {
+  if (n_splits > 2) n_splits <- n_splits - 1
+
+  max_size <- round(
+    prod(
+      max(blocks_df["nXOff"]) + tail(blocks_df["nXSize"], 1),
+      max(blocks_df["nYOff"]) + tail(blocks_df["nYSize"], 1)
+    ) /
+      n_splits
+  )
+
   # Sort blocks by row (nYOff) then column (nXOff)
   blocks_df <- blocks_df[order(blocks_df$nYOff, blocks_df$nXOff), ]
 
   # Split blocks by row (same nYOff)
-
   row_groups <- split(blocks_df, blocks_df$nYOff)
-  # browser()
-  if (debug) browser()
+
   if (all(lapply(row_groups, nrow) == 1)) {
     row_groups <- list(blocks_df)
   }
@@ -109,37 +121,34 @@ aggregate_blocks <- function(
   }
 
   # Aggregate blocks within each row
-  aggregated_blocks <- do.call(
-    rbind,
-    lapply(row_groups, function(row_blocks) {
-      # Initialize result for this row
-      # browser()
-      result_blocks <- data.frame()
-      current_block <- row_blocks[1, ]
-      current_size <- current_block[adj_col]
-      ncell <- current_size * current_block[alt_col]
+  aggregated_blocks <- purrr::map(row_groups, function(row_blocks) {
+    # Initialize result for this row
+    result_blocks <- data.frame()
+    current_block <- row_blocks[1, ]
+    current_size <- current_block[adj_col]
+    ncell <- current_size * current_block[alt_col]
 
-      for (i in 2:nrow(row_blocks)) {
-        if (
-          ncell + (row_blocks[i, adj_col] * row_blocks[i, alt_col]) <= max_size
-        ) {
-          # Merge with current block
-          current_block[adj_col] <- current_block[adj_col] +
-            row_blocks[i, adj_col]
-          current_size <- current_block[adj_col]
-          ncell <- current_size * current_block[alt_col]
-        } else {
-          # Add current block to results and start new block
-          result_blocks <- rbind(result_blocks, current_block)
-          current_block <- row_blocks[i, ]
-          current_size <- current_block[adj_col]
-          ncell <- current_size * current_block[alt_col]
-        }
+    for (i in 2:nrow(row_blocks)) {
+      if (
+        ncell + (row_blocks[i, adj_col] * row_blocks[i, alt_col]) <= max_size
+      ) {
+        # Merge with current block
+        current_block[adj_col] <- current_block[adj_col] +
+          row_blocks[i, adj_col]
+        current_size <- current_block[adj_col]
+        ncell <- current_size * current_block[alt_col]
+      } else {
+        # Add current block to results and start new block
+        result_blocks <- rbind(result_blocks, current_block)
+        current_block <- row_blocks[i, ]
+        current_size <- current_block[adj_col]
+        ncell <- current_size * current_block[alt_col]
       }
-      # Add final block
-      rbind(result_blocks, current_block)
-    })
-  )
+    }
+    # Add final block
+    rbind(result_blocks, current_block)
+  }) |>
+    purrr::list_rbind()
 
   rownames(aggregated_blocks) <- NULL
   aggregated_blocks
