@@ -238,13 +238,15 @@ map_bands_and_chunks <- function(
   )
 }
 
-
+#' @importFrom methods new
+#' @importFrom gdalraster GDALRaster
 call_gdalraster_mirai2 <- function(
   x,
   outfile = fs::file_temp(ext = "tif"),
+  nsplits = 2L,
   cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
-  compression = "LZW",
+  creation_options = gdal_creation_options(),
   quiet = FALSE,
   return_internals = FALSE
 ) {
@@ -253,46 +255,32 @@ call_gdalraster_mirai2 <- function(
 
   # get template params
   vrt_template <- vrt_save(x)
-  # browser()
   ds <- new(gdalraster::GDALRaster, vrt_template)
   xs <- ds$getRasterXSize()
   ys <- ds$getRasterYSize()
   nodataval <- ds$getNoDataValue(1)
   blksize <- ds$getBlockSize(1)
   nbands <- ds$getRasterCount()
-  # browser()
-  blocks_df1 <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2]))
+  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2])) |>
+    aggregate_blocks(nsplits) |>
+    merge(data.frame(band_n = seq_len(nbands)))
 
-  blocks_df2 <- aggregate_blocks(blocks_df1, max_size = 2e6, direction = "row")
-  blocks_df <- aggregate_blocks(blocks_df2, max_size = 2e6, direction = "col")
-  print(nrow(blocks_df))
   blocks <- split(blocks_df, seq_len(nrow(blocks_df)))
   ds$close()
+
   # Initialize output raster
-  # browser()
   suppressMessages(gdalraster::rasterFromRaster(
     vrt_template,
     outfile,
     fmt = "GTiff",
     init = nodataval,
-    options = c(
-      glue::glue("COMPRESS={compression}"), # Good balance of compression/speed
-      "PREDICTOR=2",
-      "TILED=YES", # Enable tiling
-      glue::glue(
-        "BLOCKXSIZE={blksize[1]}"
-      ),
-      glue::glue(
-        "BLOCKYSIZE={blksize[2]}"
-      ),
-      "BIGTIFF=IF_NEEDED" # Automatic large file handling
-    )
+    options = creation_options
   ))
 
   # inital data open in advance of promise eval.
   ds <- new(gdalraster::GDALRaster, outfile, read_only = FALSE)
   on.exit(ds$close(), add = TRUE)
-  # browser()
+
   # Create mirai map with promises
   jobs <- mirai::mirai_map(
     blocks,
@@ -304,25 +292,21 @@ call_gdalraster_mirai2 <- function(
       on.exit(ds$close())
       # Read and combine bands
       band_data <- vrtility::compute_with_py_env(
-        purrr::map(
-          seq_len(nbands),
-          function(b) {
-            ds$read(
-              band = b,
-              xoff = block_params["nXOff"],
-              yoff = block_params["nYOff"],
-              xsize = block_params["nXSize"],
-              ysize = block_params["nYSize"],
-              out_xsize = block_params["nXSize"],
-              out_ysize = block_params["nYSize"]
-            )
-          }
+        ds$read(
+          band = block_params["band_n"],
+          xoff = block_params["nXOff"],
+          yoff = block_params["nYOff"],
+          xsize = block_params["nXSize"],
+          ysize = block_params["nYSize"],
+          out_xsize = block_params["nXSize"],
+          out_ysize = block_params["nYSize"]
         )
       )
 
       list(
         data = unlist(band_data),
         block = c(
+          band_n = b["band_n"],
           xoff = b["nXOff"],
           yoff = b["nYOff"],
           xsize = b["nXSize"],
@@ -339,34 +323,17 @@ call_gdalraster_mirai2 <- function(
           ds <- new(gdalraster::GDALRaster, outfile, read_only = FALSE)
         }
 
-        n_cells <- result$block[[3]] * result$block[[4]]
-
-        # Calculate start and end indices for each band
-        band_starts <- seq(1, n_cells * nbands, by = n_cells)
-        band_ends <- band_starts + n_cells - 1
-
-        result$data[is.na(result$data)] <- nodataval
-
-        purrr::walk(
-          seq_len(nbands),
-          function(b) {
-            start_idx <- band_starts[b]
-            end_idx <- band_ends[b]
-            ds$write(
-              band = b,
-              xoff = result$block[[1]],
-              yoff = result$block[[2]],
-              xsize = result$block[[3]],
-              ysize = result$block[[4]],
-              rasterData = result$data[start_idx:end_idx]
-            )
-          }
+        ds$write(
+          band = result$block[[1]],
+          xoff = result$block[[2]],
+          yoff = result$block[[3]],
+          xsize = result$block[[4]],
+          ysize = result$block[[5]],
+          rasterData = result$data
         )
-        return(outfile)
       },
       # On error
       function(error) {
-        # browser()
         cli::cli_abort(
           c(
             "x" = "Failed to process block...",
