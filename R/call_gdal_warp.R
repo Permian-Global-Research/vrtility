@@ -42,7 +42,7 @@ combine_warp_opts <- function(
   opts_check(warp_opts, "-r")
 
   warp_opts <- c(
-    creation_options,
+    as.vector(rbind("-co", creation_options)),
     "-r",
     resampling,
     warp_opts,
