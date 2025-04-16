@@ -24,9 +24,15 @@ multiband_reduce(
   return_internals = FALSE
 )
 
-geomedian(nstart = 5, gamma = 10, alpha = 0.65, epsilon = 1e-08)
+geomedian(
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-08,
+  impute_na = TRUE
+)
 
-geomedian_weizfeld(epsilon = 1e-08, nitermax = 1000)
+geomedian_weizfeld(epsilon = 1e-08, nitermax = 1000, impute_na = TRUE)
 
 medoid(
   distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
