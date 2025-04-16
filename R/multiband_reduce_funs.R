@@ -9,13 +9,26 @@
 #' starting value for the algorithm, rather than the first row of the matrix.
 #' @rdname multiband_reduce
 #' @export
-geomedian <- function(nstart = 5, gamma = 10, alpha = 0.65, epsilon = 1e-8) {
+geomedian <- function(
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-8,
+  impute_na = TRUE
+) {
   function(x) {
-    colmeds <- Rfast::colMedians(x, na.rm = TRUE) # do we need this???
+    colstat <- matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1)
+    if (impute_na) {
+      na_indices <- which(is.na(x), arr.ind = TRUE)
+      if (length(na_indices) > 0) {
+        x[na_indices] <- colstat[na_indices[, 2]]
+      }
+    }
+
     as.vector(
       Gmedian::Gmedian(
         x,
-        init = colmeds,
+        init = colstat,
         nstart = nstart,
         gamma = gamma,
         alpha = alpha,
@@ -31,8 +44,19 @@ geomedian <- function(nstart = 5, gamma = 10, alpha = 0.65, epsilon = 1e-8) {
 #' \code{\link[Gmedian]{Weiszfeld}} and is idential but does not provide support
 #' for weights.
 #' @export
-geomedian_weizfeld <- function(epsilon = 1e-8, nitermax = 1000) {
+geomedian_weizfeld <- function(
+  epsilon = 1e-8,
+  nitermax = 1000,
+  impute_na = TRUE
+) {
   function(x) {
+    if (impute_na) {
+      colstat <- matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1)
+      na_indices <- which(is.na(x), arr.ind = TRUE)
+      if (length(na_indices) > 0) {
+        x[na_indices] <- colstat[na_indices[, 2]]
+      }
+    }
     as.vector(
       Gmedian::Weiszfeld(
         x,
@@ -80,29 +104,17 @@ medoid <- function(
 ) {
   distance_type <- rlang::arg_match(distance_type)
   # Pre-select the return function based on impute_na
-  return_fn <- if (impute_na) {
-    function(x, xc, i) xc$xc[i, ]
-  } else {
-    function(x, xc, i) x[i, ]
-  }
-  handle_na <- if (impute_na) {
-    function(xc) {
-      col_medians <- matrix(Rfast::colMedians(xc, na.rm = TRUE), nrow = 1)
-      na_indices <- which(is.na(xc), arr.ind = TRUE)
-      if (length(na_indices) > 0) {
-        xc[na_indices] <- col_medians[na_indices[, 2]]
-      }
-      return(list(xc = xc, col_medians = col_medians))
+  return_fn <- return_impute(impute_na)
+
+  handle_na <- handle_impute(
+    impute_na,
+    function(x) {
+      Rfast::colMedians(x, na.rm = TRUE)
+    },
+    function(x) {
+      Rfast::colMedians(x, na.rm = FALSE)
     }
-  } else {
-    function(xc) {
-      col_medians <- matrix(Rfast::colMedians(xc, na.rm = FALSE), nrow = 1)
-      col_medians <- col_medians[, colSums(is.na(xc)) == 0]
-      # drop columsn with na
-      xc <- xc[, colSums(is.na(xc)) == 0]
-      return(list(xc = xc, col_medians = col_medians))
-    }
-  }
+  )
 
   function(x) {
     # create copy
@@ -110,7 +122,69 @@ medoid <- function(
 
     nearest <- Rfast::dista(
       xc$xc,
-      xc$col_medians,
+      xc$colstat,
+      type = distance_type
+    )
+    return_fn(x, xc, which.min(nearest))
+  }
+}
+
+#' @param probability The probability of the quantile to use. Default is 0.4.
+#' @details The quantoid is equivalent to the medoid but uses a specified
+#' quantile value for calculating the distances.
+#' @export
+#' @rdname multiband_reduce
+quantoid <- function(
+  distance_type = c(
+    "euclidean",
+    "manhattan",
+    "minimum",
+    "maximum",
+    "minkowski",
+    "bhattacharyya",
+    "hellinger",
+    "kullback_leibler",
+    "jensen_shannon",
+    "canberra",
+    "chi_square",
+    "soergel",
+    "sorensen",
+    "cosine",
+    "wave_hedges",
+    "motyka",
+    "harmonic_mean",
+    "jeffries_matusita",
+    "gower",
+    "kulczynski",
+    "itakura_saito"
+  ),
+  probability = 0.4,
+  impute_na = TRUE
+) {
+  distance_type <- rlang::arg_match(distance_type)
+  # Pre-select the return function based on impute_na
+  return_fn <- return_impute(impute_na)
+  handle_na <- handle_impute(
+    impute_na,
+    function(x) {
+      apply(x, 2, function(x) {
+        stats::quantile(x, probs = probability, na.rm = TRUE)
+      })
+    },
+    function(x) {
+      apply(x, 2, function(x) {
+        stats::quantile(x, probs = probability, na.rm = TRUE)
+      })
+    }
+  )
+
+  function(x) {
+    # create copy
+    xc <- handle_na(x)
+
+    nearest <- Rfast::dista(
+      xc$xc,
+      xc$colstat,
       type = distance_type
     )
     return_fn(x, xc, which.min(nearest))
@@ -173,4 +247,37 @@ geomedoid <- function(
     )
     x[which.min(nearest), ]
   }
+}
+
+return_impute <- function(impute_na) {
+  f <- if (impute_na) {
+    function(x, xc, i) xc$xc[i, ]
+  } else {
+    function(x, xc, i) {
+      browser()
+      x[i, ]
+    }
+  }
+  return(f)
+}
+handle_impute <- function(impute_na, stat_t, stat_f) {
+  handle_na <- if (impute_na) {
+    function(xc) {
+      colstat <- matrix(stat_t(xc), nrow = 1)
+      na_indices <- which(is.na(xc), arr.ind = TRUE)
+      if (length(na_indices) > 0) {
+        xc[na_indices] <- colstat[na_indices[, 2]]
+      }
+      return(list(xc = xc, colstat = colstat))
+    }
+  } else {
+    function(xc) {
+      colstat <- matrix(stat_f(xc), nrow = 1)
+      colstat <- colstat[, colSums(is.na(xc)) == 0]
+      # drop columsn with na
+      xc <- xc[, colSums(is.na(xc)) == 0]
+      return(list(xc = xc, colstat = colstat))
+    }
+  }
+  return(handle_na)
 }
