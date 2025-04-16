@@ -16,60 +16,34 @@ mdim_reduction_apply <- function(x, mdim_fun) {
   n_cols <- mast_dim[2]
 
   # Pre-allocate result list
-  result <- vector("list", n_cells)
+  # result <- vector("list", n_cells)
   # Create indices in row-major order (to match GDAL)
   cell_indices <- expand.grid(
     row = seq_len(n_rows),
     col = seq_len(n_cols)
   )
-
-  # result <- vrtility::mdim_reduction_cpp(
-  #   x = x,
-  #   mdim_fun = mdim_fun,
-  #   row_indices = cell_indices$row,
-  #   col_indices = cell_indices$col,
-  #   n_cells = n_cells,
-  #   n_timepoints = length(x),
-  #   n_bands = length(x[[1]])
-  # )
-
-  for (k in seq_len(n_cells)) {
-    browser()
-    # browser()
-    i <- cell_indices$row[k]
-    j <- cell_indices$col[k]
-
-    # Extract values from each time point and band
-
-    bandmatrix <- t(vapply(
-      x, # List of time points
-      function(time_point) {
-        vapply(
-          time_point, # List of bands
-          function(m) m[i, j],
-          numeric(1)
-        )
-      },
-      numeric(length(x[[1]]))
-    ))
-
-    bandmatrix <- bandmatrix[
-      !apply(bandmatrix, 1, function(x) all(is.na(x))),
-      ,
-      drop = FALSE
-    ]
-
-    # Only compute Gmedian if we have data
-    if (nrow(bandmatrix) > 1) {
-      result[[k]] <- mdim_fun(bandmatrix)
-    } else if (nrow(bandmatrix) == 1) {
-      result[[k]] <- as.vector(bandmatrix[1, ])
-    } else {
-      result[[k]] <- rep(NA_real_, length(x[[1]]))
-    }
-  }
-
   # browser()
+
+  # Extract all band matrices using C++
+  band_matrices <- extract_band_matrices_cpp(
+    x = x,
+    row_indices = cell_indices$row,
+    col_indices = cell_indices$col,
+    n_cells = n_cells,
+    n_timepoints = length(x),
+    n_bands = length(x[[1]])
+  )
+
+  # Process matrices using lapply
+  result <- purrr::map(band_matrices, function(bandmatrix) {
+    if (nrow(bandmatrix) > 1) {
+      mdim_fun(bandmatrix)
+    } else if (nrow(bandmatrix) == 1) {
+      as.vector(bandmatrix[1, ])
+    } else {
+      rep(NA_real_, ncol(bandmatrix))
+    }
+  })
 
   return(result)
 }
@@ -84,17 +58,14 @@ mdim_reduction_apply <- function(x, mdim_fun) {
 #' @keywords internal
 restructure_cells <- function(cell_vals) {
   # Get dimensions
-  n_bands <- length(cell_vals)
+  n_bands <- length(cell_vals[[1]])
   n_cells <- length(cell_vals)
 
   # Pre-allocate result vector
   result <- numeric(length = n_bands * n_cells)
 
   # Calculate start indices for each band
-  band_starts <- try(seq(1, length(result), by = n_cells))
-  if (inherits(band_starts, "try-error")) {
-    browser()
-  }
+  band_starts <- seq(1, length(result), by = n_cells)
   band_ends <- band_starts + n_cells - 1
   # Fill result vector by band
   for (band in seq_len(n_bands)) {
@@ -252,7 +223,6 @@ multiband_reduce.vrt_collection_warped <- function(
 
   blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2])) |>
     aggregate_blocks(nsplits)
-  # browser()
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(
@@ -272,59 +242,47 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  if (!using_daemons()) {
-    mirai::daemons(1)
-    on.exit(mirai::daemons(0), add = TRUE)
-  }
-  mirai::everywhere(library(vrtility))
+  # mirai::everywhere(library(vrtility))
 
   # Create mirai map with promises
-  jobs <- mirai::mirai_map(
+  jobs <- purrr::pmap(
     blocks_df,
-    function(...) {
-      # browser()
-      # Extract block parameters correctly from the 1-row dataframe
-      block_params <- rlang::dots_list(...)
-      ras_band_dat <- read_block_arrays(
-        vrt_block,
-        nbands = nbands,
-        xoff = block_params[["nXOff"]],
-        yoff = block_params[["nYOff"]],
-        xsize = block_params[["nXSize"]],
-        ysize = block_params[["nYSize"]],
-        save_dir = cache_dir
-      )
-      cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
-      list(
-        data = restructure_cells(cell_vals),
-        block = block_params
-      )
-    },
-    vrt_block = x,
-    nbands = nbands,
-    cache_dir = cache_dir,
-    read_block_arrays = read_block_arrays,
-    reduce_fun = reduce_fun,
-    mdim_reduction_apply = mdim_reduction_apply,
-    restructure_cells = restructure_cells
+    carrier::crate(
+      function(...) {
+        # browser()
+        # Extract block parameters correctly from the 1-row dataframe
+        block_params <- rlang::dots_list(...)
+        ras_band_dat <- read_block_arrays(
+          vrt_block,
+          nbands = nbands,
+          xoff = block_params[["nXOff"]],
+          yoff = block_params[["nYOff"]],
+          xsize = block_params[["nXSize"]],
+          ysize = block_params[["nYSize"]],
+          save_dir = cache_dir
+        )
+        cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
+        list(
+          data = restructure_cells(cell_vals),
+          block = block_params
+        )
+      },
+      vrt_block = x,
+      nbands = nbands,
+      cache_dir = cache_dir,
+      read_block_arrays = read_block_arrays,
+      reduce_fun = reduce_fun,
+      mdim_reduction_apply = mdim_reduction_apply,
+      restructure_cells = restructure_cells
+    ),
+    .parallel = using_daemons(),
+    .progress = !quiet
   )
 
-  if (!quiet) {
-    result <- mirai::collect_mirai(jobs, c(".stop", ".progress"))
-  } else {
-    result <- mirai::collect_mirai(jobs, c(".stop"))
-  }
-
-  #####
   purrr::walk(jobs, function(j) {
-    # browser()
     n_cells <- j$block$nXSize * j$block$nYSize
-
     # Calculate start and end indices for each band
-    band_starts <- try(seq(1, n_cells * nbands, by = n_cells))
-    if (inherits(band_starts, "try-error")) {
-      browser()
-    }
+    band_starts <- seq(1, n_cells * nbands, by = n_cells)
     band_ends <- band_starts + n_cells - 1
 
     j$data[is.na(j$data)] <- nodataval
