@@ -5,6 +5,7 @@
 \alias{geomedian}
 \alias{geomedian_weizfeld}
 \alias{medoid}
+\alias{quantoid}
 \alias{geomedoid}
 \title{Run composite reductions that require all bands.
 \code{multiband_reduce} can be used to create composite reductions that require
@@ -32,6 +33,15 @@ medoid(
     "bhattacharyya", "hellinger", "kullback_leibler", "jensen_shannon", "canberra",
     "chi_square", "soergel", "sorensen", "cosine", "wave_hedges", "motyka",
     "harmonic_mean", "jeffries_matusita", "gower", "kulczynski", "itakura_saito"),
+  impute_na = TRUE
+)
+
+quantoid(
+  distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
+    "bhattacharyya", "hellinger", "kullback_leibler", "jensen_shannon", "canberra",
+    "chi_square", "soergel", "sorensen", "cosine", "wave_hedges", "motyka",
+    "harmonic_mean", "jeffries_matusita", "gower", "kulczynski", "itakura_saito"),
+  probability = 0.4,
   impute_na = TRUE
 )
 
@@ -77,6 +87,8 @@ satisfy \eqn{1/2< alpha <= 1}.}
 \item{distance_type}{The type of distance metric to use. See
 \code{\link[Rfast]{dista}} for a full description of options.}
 
+\item{probability}{The probability of the quantile to use. Default is 0.4.}
+
 \item{compression}{The compression method to use for the output file.}
 }
 \value{
@@ -102,6 +114,9 @@ the distance between the band-level medians and the values for each pixel. It
 then selects the pixel with the minimum distance as the medoid. The returned
 band pixel values are spectrally consistent and observed rather than
 synthetic.
+
+The quantoid is equivalent to the medoid but uses a specified
+quantile value for calculating the distances.
 
 The \code{geomedoid} function combines the \code{geomedian} and \code{medoid} - it
 first calculates the geometric median across all bands and then uses this
