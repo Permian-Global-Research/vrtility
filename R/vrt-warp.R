@@ -102,7 +102,6 @@ vrt_warp.vrt_block <- function(
 
   resamp_methods <- rep(resampling, length(assets))
   resamp_methods[mas_band_idx] <- "near"
-
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   vrt_save(x, tf)
   vrtwl <- purrr::map2_chr(
@@ -114,6 +113,7 @@ vrt_warp.vrt_block <- function(
   )
 
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  # browser()
 
   gdalraster::buildVRT(
     outtf,
@@ -192,6 +192,7 @@ vrt_warp.vrt_collection <- function(
     x[[1]],
     ~ vrt_warp(.x, t_srs, te, tr, resampling, quiet)
   )
+  # browser()
 
   build_vrt_collection(
     warped_blocks,

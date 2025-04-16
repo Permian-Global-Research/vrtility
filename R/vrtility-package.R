@@ -65,4 +65,23 @@
     "numpy"
   ))
   cache_init_checks()
+  vrt_ram_opts_set()
 }
+
+#' onload max RAM allocation options
+#' @noRd
+#' @keywords internal
+vrt_ram_opts_set <- function() {
+  op <- options()
+  op_vrtility <- list(
+    vrt.percent.ram = 60
+  )
+
+  toset <- !(names(op_vrtility) %in% names(op))
+  if (any(toset)) options(op_vrtility[toset])
+}
+
+# ## usethis namespace: start
+# #' @useDynLib vrtility, .registration = TRUE
+# ## usethis namespace: end
+# NULL

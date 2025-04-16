@@ -26,8 +26,10 @@ image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
+<!-- ```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
+``` -->
 
 ## Features
 
@@ -88,8 +90,8 @@ Here is a simple example where we:
 library(vrtility)
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
-#> [1] 6
+mirai::daemons(10)
+#> [1] 10
 ```
 
 ``` r
@@ -112,7 +114,7 @@ s2_stac <- sentinel2_stac_query(
 )
 # number of items:
 length(s2_stac$features)
-#> [1] 12
+#> [1] 14
 ```
 
 ``` r
@@ -128,12 +130,11 @@ system.time({
     vrt_set_pixelfun() |>
     vrt_compute(
       outfile = fs::file_temp(ext = "tif"),
-      engine = "gdalraster",
-      nsplits = 3L
+      engine = "gdalraster"
     )
 })
 #>    user  system elapsed 
-#>   1.845   0.092  36.696
+#>   5.522   0.457  48.981
 ```
 
 ``` r

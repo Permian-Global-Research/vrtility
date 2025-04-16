@@ -4,12 +4,12 @@
 \alias{aggregate_blocks}
 \title{Aggregate raster blocks}
 \usage{
-aggregate_blocks(blocks_df, max_size = 1024, direction = "row", debug = FALSE)
+aggregate_blocks(x, n)
 }
 \arguments{
-\item{blocks_df}{A data frame of block definitions with columns nXOff, nYOff, nXSize, nYSize}
+\item{n}{target number of chunks}
 
-\item{max_size}{Maximum size in pixels for aggregated blocks (default 1024)}
+\item{blocks_df}{A data frame of block definitions with columns nXOff, nYOff, nXSize, nYSize}
 
 \item{direction}{Direction of aggregation ("row" or "both")}
 }
@@ -24,3 +24,4 @@ blocks_df <- get_tiles(1000, 1000, 128, 128)
 # Aggregate blocks in rows
 aggregate_blocks(blocks_df, max_size = 512)
 }
+\keyword{internal}

@@ -213,7 +213,7 @@ hls_merge_coll <- c(
 
 Now we need to warp all vrt_blocks in the collection to the same spatial
 reference system, extent and pixel size. This is particularly important in this
-case because of the mutliple SRS in the collection. Also to make use of the
+case because of the multiple SRS in the collection. Also to make use of the
 fastest `vrt_compute` engine, we need to ensure that all blocks are in the same
 SRS with equal dimensions.
 
@@ -227,33 +227,40 @@ hls_warp <- vrt_warp(
 )
 ```
 
-Now we can stack the warped vrt collection - this can be thought of as a virtual 
-raster cube. Then, we can set a pixel function which defines how the mutliple
-images for each band are summarised. Here we use the median_numpy pixel 
-function to compute the cell-level median. 
+Now we want to "reduce" the imagery collection to a single composite image. The
+typical approach would be to use the band-level median which we can achieve 
+easily by first using the following:
+
+```{r simple-composite,  eval=FALSE}
+band_level_median <- vrt_stack(hls_warp) |>
+  vrt_set_pixelfun(pixfun = median_numpy()) |>
+  vrt_compute(fs::file_temp(ext = ".tif"),
+    engine = "gdalraster"
+  )
+```
+
+However, we can also create composites using more advanced statistical methods 
+that can improve on the filtering of outliers, increase scene consistency and
+ensure that spectral properties are preserved. Several functions are provided
+in the `vrtility` package to do this but the user can also provide their own 
+if desired. Here we will use the `geomedoid` function which is a  somewhat
+experimental function that combines the geometric median and medoid. The 
+geometric median is calculated and used to locate the image cell that has the
+smallest distance to the geometric median. 
 
 ```{r hls-stack}
-hls_stack <- vrt_stack(hls_warp) |>
-  vrt_set_pixelfun(pixfun = median_numpy())
+hls_stack <- multiband_reduce(hls_warp, reduce_fun = geomedoid())
 ```
 
-Finally we compute all of this using vrt_compute. Note that we specify the
-`gdalraster` engine. This is the fastest engine for computing large VRTs As it
-parallises downloads and processing across bands and also across raster rows
-using the nsplits argument. At the start of this workflow we set 10 mirai 
-daemons. Because these are already set, they will be used as "outer" daemons
-processing across bands - each of these daemons will then spawn 2 "inner"
-daemons to process the rows of each band. This means that we will have 20
-parallel processes running at once.
+Now let's take a look at the composite - first RGB and then a false colour 
+composite.
 
-```{r hls-compute}
-outfile <- tempfile(fileext = ".tif")
-hls_composite <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 2)
-```
+```{r hls-plot, fig.show="hold", out.width="50%", fig.cap= ""}
+plot_raster_src(
+  hls_composite,
+  bands = c(4, 3, 2)
+)
 
-Now let's take a look at a false-colour composite!
-
-```{r hls-plot, fig.width=10, fig.height=8, fig.cap= ""}
 plot_raster_src(
   hls_composite,
   bands = c(9, 2, 4),
@@ -276,7 +283,3 @@ purrr::walk(1:15, function(i) {
 })
 ```
 
-#### Note.
-
-This vignette is a work in progress and will be updated as the package matures.
-Principally, the major goal is to use the geometric median for compositing.

@@ -5,6 +5,14 @@ using_daemons <- function() {
   mirai::status()$connections > 0
 }
 
+#' check the number of daemons
+#' @return number of daemons
+#' @noRd
+#' @keywords internal
+n_daemons <- function() {
+  mirai::status()$connections
+}
+
 #' function for managing the setting of the outer mirai daemons responsible for
 #' managing the parallel processing across raster bands.
 #' @param n the number daemons to set

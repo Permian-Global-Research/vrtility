@@ -74,7 +74,7 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
 #' Aggregate raster blocks
 #'
 #' @param blocks_df A data frame of block definitions with columns nXOff, nYOff, nXSize, nYSize
-#' @param max_size Maximum size in pixels for aggregated blocks (default 1024)
+#' @param n target number of chunks
 #' @param direction Direction of aggregation ("row" or "both")
 #' @return A data frame of aggregated blocks
 #' @examples
@@ -82,9 +82,17 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
 #' # Aggregate blocks in rows
 #' aggregate_blocks(blocks_df, max_size = 512)
 #' @export
+#' @keywords internal
 aggregate_blocks <- function(x, n) {
-  aggregate_blocks_internal(x, n_splits = n, direction = "row") |>
-    aggregate_blocks_internal(n_splits = n, direction = "col")
+  row_blocks <- aggregate_blocks_internal(
+    x,
+    n_splits = n,
+    direction = "row"
+  )
+  if (nrow(row_blocks) <= n) {
+    return(row_blocks)
+  }
+  aggregate_blocks_internal(row_blocks, n_splits = n, direction = "col")
 }
 
 aggregate_blocks_internal <- function(
@@ -128,21 +136,29 @@ aggregate_blocks_internal <- function(
     current_size <- current_block[adj_col]
     ncell <- current_size * current_block[alt_col]
 
-    for (i in 2:nrow(row_blocks)) {
-      if (
-        ncell + (row_blocks[i, adj_col] * row_blocks[i, alt_col]) <= max_size
-      ) {
-        # Merge with current block
-        current_block[adj_col] <- current_block[adj_col] +
-          row_blocks[i, adj_col]
-        current_size <- current_block[adj_col]
-        ncell <- current_size * current_block[alt_col]
-      } else {
-        # Add current block to results and start new block
-        result_blocks <- rbind(result_blocks, current_block)
-        current_block <- row_blocks[i, ]
-        current_size <- current_block[adj_col]
-        ncell <- current_size * current_block[alt_col]
+    if (nrow(row_blocks) > 1) {
+      for (i in 2:nrow(row_blocks)) {
+        next_size <- as.numeric(row_blocks[i, adj_col] * row_blocks[i, alt_col])
+
+        # Add explicit NA check
+        if (is.na(ncell) || is.na(next_size) || is.na(max_size)) {
+          warning("NA values detected in block size calculations")
+          next
+        }
+
+        if (ncell + next_size <= max_size) {
+          # Merge with current block
+          current_block[adj_col] <- as.numeric(current_block[adj_col]) +
+            as.numeric(row_blocks[i, adj_col])
+          current_size <- as.numeric(current_block[adj_col])
+          ncell <- current_size * as.numeric(current_block[alt_col])
+        } else {
+          # Add current block to results and start new block
+          result_blocks <- rbind(result_blocks, current_block)
+          current_block <- row_blocks[i, ]
+          current_size <- as.numeric(current_block[adj_col])
+          ncell <- current_size * as.numeric(current_block[alt_col])
+        }
       }
     }
     # Add final block
@@ -152,4 +168,34 @@ aggregate_blocks_internal <- function(
 
   rownames(aggregated_blocks) <- NULL
   aggregated_blocks
+}
+
+#' Suggest number of chunks based on available RAM
+#' @param ys Number of rows in the raster
+#' @param xs Number of columns in the raster
+#' @param nbands Number of bands in the raster
+#' @return Suggested number of chunks (numeric)
+#' @noRd
+#' @keywords internal
+suggest_n_chunks <- function(ys, xs, nbands) {
+  free_ram <- memuse::Sys.meminfo()$freeram
+  estimated_ram <- memuse::howbig(
+    nrow = ys * xs,
+    ncol = 1,
+    representation = "dense"
+  ) *
+    nbands *
+    50
+
+  max_av_ram <- getOption("vrt.percent.ram")
+
+  avail_ram <- free_ram * max_av_ram / 100
+
+  if (using_daemons()) {
+    nprocs <- pmax(n_daemons(), 1)
+  } else {
+    nprocs <- 1
+  }
+
+  ceiling(1 / ((avail_ram / estimated_ram))) * nprocs
 }

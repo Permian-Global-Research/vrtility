@@ -34,10 +34,10 @@ multiple images (i.e create a composite image). These main features are made
 possible by the [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html) and 
 [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-```{=gfm}
+<!-- ```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
-```
+``` -->
 
 ## Features
 
@@ -94,7 +94,7 @@ argument).
 library(vrtility)
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
+mirai::daemons(10)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = wk::wkt("POINT (144.3 -7.6)"),
@@ -126,8 +126,7 @@ system.time({
     vrt_set_pixelfun() |>
     vrt_compute(
       outfile = fs::file_temp(ext = "tif"),
-      engine = "gdalraster",
-      nsplits = 3L
+      engine = "gdalraster"
     )
 })
 

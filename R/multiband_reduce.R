@@ -1,5 +1,5 @@
 #' @title block-level geomedian calculation
-#' @description internal functions used by `mdim_reduce` but exported to
+#' @description internal functions used by `multiband_reduce` but exported to
 #' enable mirai daemon access.
 #' @param x A list of lists of matrices, where each inner list represents a
 #' time point - the product of `read_block_arrays()`.
@@ -23,8 +23,19 @@ mdim_reduction_apply <- function(x, mdim_fun) {
     col = seq_len(n_cols)
   )
 
-  # Process each cell
+  # result <- vrtility::mdim_reduction_cpp(
+  #   x = x,
+  #   mdim_fun = mdim_fun,
+  #   row_indices = cell_indices$row,
+  #   col_indices = cell_indices$col,
+  #   n_cells = n_cells,
+  #   n_timepoints = length(x),
+  #   n_bands = length(x[[1]])
+  # )
+
   for (k in seq_len(n_cells)) {
+    browser()
+    # browser()
     i <- cell_indices$row[k]
     j <- cell_indices$col[k]
 
@@ -58,6 +69,8 @@ mdim_reduction_apply <- function(x, mdim_fun) {
     }
   }
 
+  # browser()
+
   return(result)
 }
 
@@ -71,14 +84,17 @@ mdim_reduction_apply <- function(x, mdim_fun) {
 #' @keywords internal
 restructure_cells <- function(cell_vals) {
   # Get dimensions
-  n_bands <- length(cell_vals[[1]])
+  n_bands <- length(cell_vals)
   n_cells <- length(cell_vals)
 
   # Pre-allocate result vector
   result <- numeric(length = n_bands * n_cells)
 
   # Calculate start indices for each band
-  band_starts <- seq(1, length(result), by = n_cells)
+  band_starts <- try(seq(1, length(result), by = n_cells))
+  if (inherits(band_starts, "try-error")) {
+    browser()
+  }
   band_ends <- band_starts + n_cells - 1
   # Fill result vector by band
   for (band in seq_len(n_bands)) {
@@ -148,8 +164,9 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
 }
 
 
-#' lower level function for running composite reductions that require all bands.
-#' This function creates geometric median (aka the spatial or l1 median)
+#' Run composite reductions that require all bands.
+#' `multiband_reduce` can be used to create composite reductions that require
+#' all band values, such as tyhe geometric median or medoid.
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
 #' @param outfile The output file path.
@@ -162,23 +179,55 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
 #' evaluation.
 #' @param quiet Logical indicating whether to suppress the progress bar.
 #' @return A character vector of the output file path.
+#' @rdname multiband_reduce
 #' @export
-mdim_reduce <- function(
+multiband_reduce <- function(
   x,
-  reduce_fun,
+  reduce_fun = vrtility::medoid(),
   outfile = fs::file_temp(ext = "tif"),
   cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
-  compression = "LZW",
-  return_internals = FALSE,
-  quiet = FALSE
+  creation_options = gdal_creation_options(),
+  quiet = FALSE,
+  nsplits = NULL,
+  return_internals = FALSE
+) {
+  UseMethod("multiband_reduce")
+}
+
+#' @noRd
+#' @keywords internal
+#' @export
+multiband_reduce.default <- function(x, ...) {
+  cli::cli_abort(
+    c(
+      "!" = "{class(x)[1]} object types are not supported for `multiband_reduce()`.",
+      "i" = "A `vrt_collection_warped` object. is required and can be created 
+      with:",
+      " " = "{cli::code_highlight('vrt_warp()')}."
+    )
+  )
+}
+
+
+#' @export
+multiband_reduce.vrt_collection_warped <- function(
+  x,
+  reduce_fun = vrtility::medoid(),
+  outfile = fs::file_temp(ext = "tif"),
+  cache_dir = getOption("vrt.cache"),
+  config_options = gdal_config_opts(),
+  creation_options = gdal_creation_options(),
+  quiet = FALSE,
+  nsplits = NULL,
+  return_internals = FALSE
 ) {
   # inital assertions and checks.
-  mdim_reduce_asserts_init(
+  multiband_reduce_asserts_init(
     outfile,
     cache_dir,
     config_options,
-    compression,
+    creation_options,
     return_internals,
     quiet
   )
@@ -189,128 +238,119 @@ mdim_reduce <- function(
 
   # get template params
   vrt_template <- vrt_save(x[[1]][[1]])
-  ds <- new(gdalraster::GDALRaster, vrt_template)
-  xs <- ds$getRasterXSize()
-  ys <- ds$getRasterYSize()
-  nodataval <- ds$getNoDataValue(1)
-  blksize <- ds$getBlockSize(1)
-  nbands <- ds$getRasterCount()
+  tds <- new(gdalraster::GDALRaster, vrt_template)
+  xs <- tds$getRasterXSize()
+  ys <- tds$getRasterYSize()
+  nodataval <- tds$getNoDataValue(1)
+  blksize <- tds$getBlockSize(1)
+  nbands <- tds$getRasterCount()
+  tds$close()
 
-  #TODO: blocking needs work...
-  blocks_df1 <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2]))
-  blocks_df <- aggregate_blocks(blocks_df1, max_size = 1e6, direction = "row")
-  # blocks_df <- aggregate_blocks(blocks_df2, max_size = 7e5, direction = "col")
-  print(nrow(blocks_df))
-  blocks <- split(blocks_df, seq_len(nrow(blocks_df)))
-  ds$close()
+  if (is.null(nsplits)) {
+    nsplits <- suggest_n_chunks(ys, xs, nbands)
+  }
+
+  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2])) |>
+    aggregate_blocks(nsplits)
+  # browser()
+
   # Initialize output raster
-
-  suppressMessages(gdalraster::rasterFromRaster(
+  nr <- suppressMessages(gdalraster::rasterFromRaster(
     vrt_template,
-    outfile,
+    normalizePath(outfile, mustWork = FALSE),
     fmt = "GTiff",
     init = nodataval,
-    options = c(
-      glue::glue("COMPRESS={compression}"), # Good balance of compression/speed
-      "PREDICTOR=2",
-      "TILED=YES", # Enable tiling
-      glue::glue(
-        "BLOCKXSIZE={blksize[1]}"
-      ),
-      glue::glue(
-        "BLOCKYSIZE={blksize[2]}"
-      ),
-      "BIGTIFF=IF_NEEDED" # Automatic large file handling
-    )
+    options = creation_options
   ))
 
-  # inital data open in advance of promise eval.
-  ds <- new(gdalraster::GDALRaster, outfile, read_only = FALSE)
+  ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
   on.exit(ds$close(), add = TRUE)
+  purrr::iwalk(x$assets, function(asset, band) {
+    ds$setDescription(
+      band = band,
+      description = asset
+    )
+  })
+
+  if (!using_daemons()) {
+    mirai::daemons(1)
+    on.exit(mirai::daemons(0), add = TRUE)
+  }
+  mirai::everywhere(library(vrtility))
 
   # Create mirai map with promises
   jobs <- mirai::mirai_map(
-    blocks,
-    function(b) {
+    blocks_df,
+    function(...) {
+      # browser()
       # Extract block parameters correctly from the 1-row dataframe
-      block_params <- unlist(b)
+      block_params <- rlang::dots_list(...)
       ras_band_dat <- read_block_arrays(
-        x,
+        vrt_block,
         nbands = nbands,
-        xoff = block_params["nXOff"],
-        yoff = block_params["nYOff"],
-        xsize = block_params["nXSize"],
-        ysize = block_params["nYSize"],
+        xoff = block_params[["nXOff"]],
+        yoff = block_params[["nYOff"]],
+        xsize = block_params[["nXSize"]],
+        ysize = block_params[["nYSize"]],
         save_dir = cache_dir
       )
       cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
       list(
         data = restructure_cells(cell_vals),
-        block = c(
-          xoff = b["nXOff"],
-          yoff = b["nYOff"],
-          xsize = b["nXSize"],
-          ysize = b["nYSize"]
-        )
+        block = block_params
       )
     },
-    x = x,
+    vrt_block = x,
     nbands = nbands,
     cache_dir = cache_dir,
-    .promise = list(
-      # On success
-      function(result) {
-        if (!ds$isOpen()) {
-          ds <- new(gdalraster::GDALRaster, outfile, read_only = FALSE)
-        }
-        n_cells <- result$block[[3]] * result$block[[4]]
-
-        # Calculate start and end indices for each band
-        band_starts <- seq(1, n_cells * nbands, by = n_cells)
-        band_ends <- band_starts + n_cells - 1
-
-        result$data[is.na(result$data)] <- nodataval
-
-        purrr::walk(
-          seq_len(nbands),
-          function(b) {
-            start_idx <- band_starts[b]
-            end_idx <- band_ends[b]
-            ds$write(
-              band = b,
-              xoff = result$block[[1]],
-              yoff = result$block[[2]],
-              xsize = result$block[[3]],
-              ysize = result$block[[4]],
-              rasterData = result$data[start_idx:end_idx]
-            )
-          }
-        )
-        return(outfile)
-      },
-      # On error
-      function(error) {
-        cli::cli_abort(
-          c(
-            "x" = "Failed to process block...",
-            " " = "{conditionMessage(error)}"
-          )
-        )
-      }
-    )
+    read_block_arrays = read_block_arrays,
+    reduce_fun = reduce_fun,
+    mdim_reduction_apply = mdim_reduction_apply,
+    restructure_cells = restructure_cells
   )
 
   if (!quiet) {
-    result <- jobs[.progress]
+    result <- mirai::collect_mirai(jobs, c(".stop", ".progress"))
   } else {
-    result <- jobs[]
+    result <- mirai::collect_mirai(jobs, c(".stop"))
   }
+
+  #####
+  purrr::walk(jobs, function(j) {
+    # browser()
+    n_cells <- j$block$nXSize * j$block$nYSize
+
+    # Calculate start and end indices for each band
+    band_starts <- try(seq(1, n_cells * nbands, by = n_cells))
+    if (inherits(band_starts, "try-error")) {
+      browser()
+    }
+    band_ends <- band_starts + n_cells - 1
+
+    j$data[is.na(j$data)] <- nodataval
+
+    purrr::walk(
+      seq_len(nbands),
+      function(b) {
+        start_idx <- band_starts[b]
+        end_idx <- band_ends[b]
+        ds$write(
+          band = b,
+          xoff = j$block$nXOff,
+          yoff = j$block$nYOff,
+          xsize = j$block$nXSize,
+          ysize = j$block$nYSize,
+          rasterData = j$data[start_idx:end_idx]
+        )
+      }
+    )
+  })
 
   if (return_internals) {
     return(
       list(
         outfile = outfile,
-        internals = result
+        internals = jobs
       )
     )
   }
@@ -319,29 +359,60 @@ mdim_reduce <- function(
 }
 
 
-mdim_reduce_asserts_init <- function(
+multiband_reduce_asserts_init <- function(
   outfile,
   cache_dir,
   config_options,
-  compression,
+  creation_options,
   return_internals,
   quiet
 ) {
   v_assert_type(outfile, "outfile", "character", nullok = FALSE)
   v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
   v_assert_type(config_options, "config_options", "character", nullok = FALSE)
-  v_assert_type(compression, "compression", "character", nullok = FALSE)
+  v_assert_type(
+    creation_options,
+    "creation_options",
+    "character",
+    nullok = FALSE
+  )
   v_assert_type(return_internals, "return_internals", "logical", nullok = FALSE)
   v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
 
   if (!using_daemons()) {
-    cli::cli_abort(
+    cli::cli_inform(
       c(
-        "x" = "No miriai daemons detected use:",
-        "{cli::code_highlight('mirai::daemons()')}",
-        "i" = "`mdim_reduce` is a compute intesntive function and is
+        "!" = "No miriai daemons detected.",
+        " " = "use {cli::code_highlight('mirai::daemons()')} to start daemons",
+        "i" = "`multiband_reduce` is a compute-intesntive function and is
         designed to be run in parallel"
       )
     )
   }
 }
+
+# #' @title C++ implementation of multiband reduction
+# #' @description Internal C++ function for efficient multiband reduction
+# #' @keywords internal
+# #' @export
+# mdim_reduction_cpp <- function(
+#   x,
+#   mdim_fun,
+#   row_indices,
+#   col_indices,
+#   n_cells,
+#   n_timepoints,
+#   n_bands
+# ) {
+#   .Call(
+#     '_vrtility_mdim_reduction_cpp',
+#     PACKAGE = 'vrtility',
+#     x,
+#     mdim_fun,
+#     row_indices,
+#     col_indices,
+#     n_cells,
+#     n_timepoints,
+#     n_bands
+#   )
+# }

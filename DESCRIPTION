@@ -26,6 +26,7 @@ Imports:
     mirai,
     promises,
     purrr (>= 1.0.4.9000),
+    Rcpp,
     reticulate (>= 1.41.0.1),
     Rfast,
     rlang,
@@ -51,3 +52,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 SystemRequirements: Python (>= 3.6)
 VignetteBuilder: knitr
+LinkingTo: 
+    Rcpp
