@@ -254,7 +254,6 @@ return_impute <- function(impute_na) {
     function(x, xc, i) xc$xc[i, ]
   } else {
     function(x, xc, i) {
-      browser()
       x[i, ]
     }
   }
