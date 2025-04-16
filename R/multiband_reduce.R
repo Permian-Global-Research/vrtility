@@ -242,7 +242,11 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  # mirai::everywhere(library(vrtility))
+  if (using_daemons()) {
+    mirai::everywhere({
+      library(vrtility)
+    })
+  }
 
   # Create mirai map with promises
   jobs <- purrr::pmap(
@@ -349,28 +353,27 @@ multiband_reduce_asserts_init <- function(
   }
 }
 
-# #' @title C++ implementation of multiband reduction
-# #' @description Internal C++ function for efficient multiband reduction
-# #' @keywords internal
-# #' @export
-# mdim_reduction_cpp <- function(
-#   x,
-#   mdim_fun,
-#   row_indices,
-#   col_indices,
-#   n_cells,
-#   n_timepoints,
-#   n_bands
-# ) {
-#   .Call(
-#     '_vrtility_mdim_reduction_cpp',
-#     PACKAGE = 'vrtility',
-#     x,
-#     mdim_fun,
-#     row_indices,
-#     col_indices,
-#     n_cells,
-#     n_timepoints,
-#     n_bands
-#   )
-# }
+#' @title Extract band matrices using C++
+#' @description Internal C++ function wrapped for R
+#' @keywords internal
+#' @noRd
+#' @export
+extract_band_matrices_cpp <- function(
+  x,
+  row_indices,
+  col_indices,
+  n_cells,
+  n_timepoints,
+  n_bands
+) {
+  .Call(
+    '_vrtility_extract_band_matrices_cpp',
+    PACKAGE = 'vrtility',
+    x,
+    row_indices,
+    col_indices,
+    n_cells,
+    n_timepoints,
+    n_bands
+  )
+}
