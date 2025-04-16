@@ -81,7 +81,8 @@ vrt_ram_opts_set <- function() {
   if (any(toset)) options(op_vrtility[toset])
 }
 
-# ## usethis namespace: start
-# #' @useDynLib vrtility, .registration = TRUE
-# ## usethis namespace: end
-# NULL
+## usethis namespace: start
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib vrtility, .registration = TRUE
+## usethis namespace: end
+NULL
