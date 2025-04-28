@@ -8,6 +8,7 @@ vrt_save <- function(x, outfile) {
 
 #' @keywords internal
 #' @noRd
+#' @export
 vrt_save.default <- function(x, ...) {
   cli::cli_abort(
     "The vrt_save method is not implemented for class {class(x)}",

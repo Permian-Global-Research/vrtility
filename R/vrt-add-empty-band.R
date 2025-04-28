@@ -16,6 +16,7 @@ vrt_add_empty_band <- function(x, after, description, save_dir, scale_value) {
 
 #' @noRd
 #' @keywords internal
+#' @export
 vrt_add_empty_band.default <- function(x, ...) {
   cli::cli_abort(
     "The vrt_add_empty_band method is not implemented for class {class(x)}",
