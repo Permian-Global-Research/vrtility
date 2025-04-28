@@ -15,17 +15,14 @@ mdim_reduction_apply <- function(x, mdim_fun) {
   n_rows <- mast_dim[1]
   n_cols <- mast_dim[2]
 
-  # Pre-allocate result list
-  # result <- vector("list", n_cells)
   # Create indices in row-major order (to match GDAL)
   cell_indices <- expand.grid(
     row = seq_len(n_rows),
     col = seq_len(n_cols)
   )
-  # browser()
 
   # Extract all band matrices using C++
-  band_matrices <- extract_band_matrices_cpp(
+  band_matrices <- extract_band_matrices(
     x = x,
     row_indices = cell_indices$row,
     col_indices = cell_indices$col,
@@ -48,45 +45,6 @@ mdim_reduction_apply <- function(x, mdim_fun) {
   return(result)
 }
 
-#' @title Restructure cell values from `geomedian_reduction()`
-#' @param cell_vals A list of lists of vectors, where each inner list represents
-#' a time point - the product of `geomedian_reduction()`.
-#' @return A numeric vector of length `n_bands * n_cells`, where `n_bands` is
-#' the number of bands and `n_cells` is the number of cells.
-#' @rdname geomedian_internal
-#' @export
-#' @keywords internal
-restructure_cells <- function(cell_vals) {
-  # Get dimensions
-  n_bands <- length(cell_vals[[1]])
-  n_cells <- length(cell_vals)
-
-  # Pre-allocate result vector
-  result <- numeric(length = n_bands * n_cells)
-
-  # Calculate start indices for each band
-  band_starts <- seq(1, length(result), by = n_cells)
-  band_ends <- band_starts + n_cells - 1
-  # Fill result vector by band
-  for (band in seq_len(n_bands)) {
-    start_idx <- band_starts[band]
-    end_idx <- band_ends[band]
-    result[start_idx:end_idx] <- vapply(
-      cell_vals,
-      function(m) {
-        tryCatch(
-          m[band],
-          error = function(e) {
-            NA_real_
-          }
-        )
-      },
-      numeric(1)
-    )
-  }
-
-  result
-}
 
 #' @title Read VRT block tiles
 #' @param x a VRT block object
@@ -140,16 +98,27 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
 #' all band values, such as tyhe geometric median or medoid.
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
+#' @param reduce_fun A function to apply to the data. This function should take
+#' a single argument, a matrix where the columns represent the bands of a cell
+#' within a raster stack and the rows represent the time series of that cell.
+#' The function should return a vector of the same length as the number of
+#' bands. See  details.
 #' @param outfile The output file path.
 #' @param cache_dir The directory to save temporary files. (default should be
 #' fine - this is here mainly for explicit privision for mirai daemons)
 #' @param config_options A named character vector of GDAL configuration options.
-#' @param compression The compression method to use for the output file.
+#' @param creation_options A named character vector of GDAL creation options.
 #' @param return_internals Logical indicating whether to return the internals of
 #' the function (e.g., the jobs object) that is produced before promise
 #' evaluation.
 #' @param quiet Logical indicating whether to suppress the progress bar.
+#' @param nsplits The number of splits to use for the tiling. If NULL, the
+#' function will automatically determine the number of splits based on the
+#' dimensions of the input data, available memory and the number of active
+#' mirai daemons. see details
 #' @return A character vector of the output file path.
+#' @details
+#' We have a lot TODO: info on the reduce_fun options and nsplits etc...
 #' @rdname multiband_reduce
 #' @export
 multiband_reduce <- function(
@@ -189,7 +158,7 @@ multiband_reduce.vrt_collection_warped <- function(
   cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
-  quiet = FALSE,
+  quiet = TRUE,
   nsplits = NULL,
   return_internals = FALSE
 ) {
@@ -218,11 +187,16 @@ multiband_reduce.vrt_collection_warped <- function(
   tds$close()
 
   if (is.null(nsplits)) {
-    nsplits <- suggest_n_chunks(ys, xs, nbands)
+    nsplits <- suggest_n_chunks(ys, xs, nbands, x$n_items)
   }
 
-  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2])) |>
-    aggregate_blocks(nsplits)
+  blocks_df <- optimise_tiling(
+    xs,
+    ys,
+    blksize,
+    nsplits
+  )
+  # browser()
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(
@@ -248,7 +222,6 @@ multiband_reduce.vrt_collection_warped <- function(
     })
   }
 
-  # Create mirai map with promises
   jobs <- purrr::pmap(
     blocks_df,
     carrier::crate(
@@ -355,10 +328,18 @@ multiband_reduce_asserts_init <- function(
 
 #' @title Extract band matrices using C++
 #' @description Internal C++ function wrapped for R
+#' @param x A list of lists of matrices, where each inner list represents a
+#' time point - the product of `read_block_arrays()`.
+#' @param row_indices A vector of row indices.
+#' @param col_indices A vector of column indices.
+#' @param n_cells The number of cells.
+#' @param n_timepoints The number of time points.
+#' @param n_bands The number of bands.
+#' @return A list of matrices, where each matrix corresponds to a band.
 #' @keywords internal
-#' @noRd
+#' @rdname vrtility_internal
 #' @export
-extract_band_matrices_cpp <- function(
+extract_band_matrices <- function(
   x,
   row_indices,
   col_indices,
@@ -366,14 +347,28 @@ extract_band_matrices_cpp <- function(
   n_timepoints,
   n_bands
 ) {
-  .Call(
-    '_vrtility_extract_band_matrices_cpp',
-    PACKAGE = 'vrtility',
+  extract_band_matrices_cpp(
     x,
     row_indices,
     col_indices,
     n_cells,
     n_timepoints,
     n_bands
+  )
+}
+
+
+#' @title Restructure cell values from `mdim_reduction_apply()`
+#' @description Internal C++ function wrapped for R
+#' @param cell_vals A list of lists of vectors, where each inner list represents
+#' a time point - the product of `geomedian_reduction()`.
+#' @return A numeric vector of length `n_bands * n_cells`, where `n_bands` is
+#' the number of bands and `n_cells` is the number of cells.
+#' @keywords internal
+#' @rdname vrtility_internal
+#' @export
+restructure_cells <- function(cell_vals) {
+  restructure_cells_cpp(
+    cell_vals
   )
 }
