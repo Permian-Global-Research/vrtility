@@ -22,9 +22,9 @@ Imports:
     grDevices,
     httr,
     lubridate,
+    memuse,
     methods,
     mirai,
-    promises,
     purrr (>= 1.0.4.9000),
     Rcpp,
     reticulate (>= 1.41.0.1),
@@ -42,7 +42,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    WGCNA
 Remotes: 
     tidyverse/purrr
 Config/testthat/edition: 3

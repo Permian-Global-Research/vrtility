@@ -32,7 +32,7 @@ geomedian(
   impute_na = TRUE
 )
 
-geomedian_weizfeld(epsilon = 1e-08, nitermax = 1000, impute_na = TRUE)
+geomedian_weizfeld(epsilon = 1e-08, nitermax = 100, impute_na = TRUE)
 
 medoid(
   distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
@@ -52,9 +52,10 @@ quantoid(
 )
 
 geomedoid(
-  nstart = 50,
-  gamma = 15,
-  alpha = 0.9,
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-08,
   distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
     "bhattacharyya", "hellinger", "kullback_leibler", "jensen_shannon", "canberra",
     "chi_square", "soergel", "sorensen", "cosine", "wave_hedges", "motyka",
@@ -65,6 +66,12 @@ geomedoid(
 \arguments{
 \item{x}{A vrt_collection_warped object.}
 
+\item{reduce_fun}{A function to apply to the data. This function should take
+a single argument, a matrix where the columns represent the bands of a cell
+within a raster stack and the rows represent the time series of that cell.
+The function should return a vector of the same length as the number of
+bands. See  details.}
+
 \item{outfile}{The output file path.}
 
 \item{cache_dir}{The directory to save temporary files. (default should be
@@ -72,7 +79,14 @@ fine - this is here mainly for explicit privision for mirai daemons)}
 
 \item{config_options}{A named character vector of GDAL configuration options.}
 
+\item{creation_options}{A named character vector of GDAL creation options.}
+
 \item{quiet}{Logical indicating whether to suppress the progress bar.}
+
+\item{nsplits}{The number of splits to use for the tiling. If NULL, the
+function will automatically determine the number of splits based on the
+dimensions of the input data, available memory and the number of active
+mirai daemons. see details}
 
 \item{return_internals}{Logical indicating whether to return the internals of
 the function (e.g., the jobs object) that is produced before promise
@@ -88,14 +102,16 @@ satisfy \eqn{1/2< alpha <= 1}.}
 
 \item{epsilon}{Numerical tolerance. By defaut set to 1e-08.}
 
+\item{impute_na}{Logical. If TRUE, missing values are replaced with the
+an appropriate band-level statistic. If FALSE, missing values are not
+replaced. which may result in NA values in the output for all bands.}
+
 \item{nitermax}{Maximum number of iterations.}
 
 \item{distance_type}{The type of distance metric to use. See
 \code{\link[Rfast]{dista}} for a full description of options.}
 
 \item{probability}{The probability of the quantile to use. Default is 0.4.}
-
-\item{compression}{The compression method to use for the output file.}
 }
 \value{
 A character vector of the output file path.
@@ -107,6 +123,8 @@ all band values, such as tyhe geometric median or medoid.
 composite of a warped VRT collection.
 }
 \details{
+We have a lot TODO: info on the reduce_fun options and nsplits etc...
+
 The \code{geomedian} function wraps \code{\link[Gmedian]{Gmedian}}  and
 is identical other than it uses the column medians as the initial
 starting value for the algorithm, rather than the first row of the matrix.

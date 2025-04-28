@@ -2,21 +2,15 @@
 % Please edit documentation in R/multiband_reduce.R
 \name{mdim_reduction_apply}
 \alias{mdim_reduction_apply}
-\alias{restructure_cells}
 \alias{read_block_arrays}
 \title{block-level geomedian calculation}
 \usage{
 mdim_reduction_apply(x, mdim_fun)
 
-restructure_cells(cell_vals)
-
 read_block_arrays(x, nbands, xoff, yoff, xsize, ysize, save_dir)
 }
 \arguments{
 \item{x}{a VRT block object}
-
-\item{cell_vals}{A list of lists of vectors, where each inner list represents
-a time point - the product of \code{geomedian_reduction()}.}
 
 \item{nbands}{number of bands}
 
@@ -33,9 +27,6 @@ a time point - the product of \code{geomedian_reduction()}.}
 \value{
 A list of lists of vectors, where each inner list represents a
 time point.
-
-A numeric vector of length \code{n_bands * n_cells}, where \code{n_bands} is
-the number of bands and \code{n_cells} is the number of cells.
 
 a list of matrices, where each matrix corresponds to a band
 }
