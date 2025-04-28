@@ -24,11 +24,15 @@ call_gdalraster_mirai <- function(
   tds$close()
 
   if (is.null(nsplits)) {
-    nsplits <- suggest_n_chunks(ys, xs, nbands)
+    nsplits <- suggest_n_chunks(ys, xs, nbands, x$n_items)
   }
 
-  blocks_df <- as.data.frame(get_tiles(xs, ys, blksize[1], blksize[2])) |>
-    aggregate_blocks(nsplits) |>
+  blocks_df <- optimise_tiling(
+    xs,
+    ys,
+    blksize,
+    nsplits
+  ) |>
     merge(data.frame(band_n = seq_len(nbands)))
 
   # Initialize output raster
@@ -49,50 +53,47 @@ call_gdalraster_mirai <- function(
     )
   })
 
-  # inital data open in advance of promise eval.
-
-  if (!using_daemons()) {
-    mirai::daemons(1)
-    on.exit(mirai::daemons(0), add = TRUE)
+  if (using_daemons()) {
+    mirai::everywhere({
+      library(vrtility)
+    })
   }
-  mirai::everywhere(library(vrtility))
 
   # Create mirai map with promises
-  jobs <- mirai::mirai_map(
+  jobs <- purrr::pmap(
     blocks_df,
-    function(...) {
-      # Extract block parameters correctly from the 1-row dataframe
-      block_params <- rlang::dots_list(...)
+    carrier::crate(
+      function(...) {
+        # Extract block parameters correctly from the 1-row dataframe
+        block_params <- rlang::dots_list(...)
 
-      inds <- methods::new(gdalraster::GDALRaster, vrt_file)
-      on.exit(inds$close())
-      # Read and combine bands
-      band_data <- compute_with_py_env(
-        inds$read(
-          band = block_params[["band_n"]],
-          xoff = block_params[["nXOff"]],
-          yoff = block_params[["nYOff"]],
-          xsize = block_params[["nXSize"]],
-          ysize = block_params[["nYSize"]],
-          out_xsize = block_params[["nXSize"]],
-          out_ysize = block_params[["nYSize"]]
+        inds <- methods::new(gdalraster::GDALRaster, vrt_file)
+        on.exit(inds$close())
+        # Read and combine bands
+        band_data <- compute_with_py_env(
+          inds$read(
+            band = block_params[["band_n"]],
+            xoff = block_params[["nXOff"]],
+            yoff = block_params[["nYOff"]],
+            xsize = block_params[["nXSize"]],
+            ysize = block_params[["nYSize"]],
+            out_xsize = block_params[["nXSize"]],
+            out_ysize = block_params[["nYSize"]]
+          )
         )
-      )
-      return(list(
-        band_data = band_data,
-        block_params = block_params
-      ))
-    },
-    vrt_file = vrt_template
+        return(list(
+          band_data = band_data,
+          block_params = block_params
+        ))
+      },
+      vrt_file = vrt_template,
+      compute_with_py_env = compute_with_py_env
+    ),
+    .parallel = using_daemons(),
+    .progress = !quiet
   )
 
-  if (!quiet) {
-    result <- mirai::collect_mirai(jobs, c(".stop", ".progress"))
-  } else {
-    result <- mirai::collect_mirai(jobs, c(".stop"))
-  }
-
-  purrr::walk(result, function(j) {
+  purrr::walk(jobs, function(j) {
     ds$write(
       band = j$block_params[["band_n"]],
       xoff = j$block_params[["nXOff"]],
