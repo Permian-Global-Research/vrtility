@@ -26,9 +26,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// restructure_cells_cpp
+NumericVector restructure_cells_cpp(List cell_vals);
+RcppExport SEXP _vrtility_restructure_cells_cpp(SEXP cell_valsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type cell_vals(cell_valsSEXP);
+    rcpp_result_gen = Rcpp::wrap(restructure_cells_cpp(cell_vals));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_vrtility_extract_band_matrices_cpp", (DL_FUNC) &_vrtility_extract_band_matrices_cpp, 6},
+    {"_vrtility_restructure_cells_cpp", (DL_FUNC) &_vrtility_restructure_cells_cpp, 1},
     {NULL, NULL, 0}
 };
 

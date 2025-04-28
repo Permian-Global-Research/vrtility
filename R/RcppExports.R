@@ -5,3 +5,7 @@ extract_band_matrices_cpp <- function(x, row_indices, col_indices, n_cells, n_ti
     .Call(`_vrtility_extract_band_matrices_cpp`, x, row_indices, col_indices, n_cells, n_timepoints, n_bands)
 }
 
+restructure_cells_cpp <- function(cell_vals) {
+    .Call(`_vrtility_restructure_cells_cpp`, cell_vals)
+}
+
