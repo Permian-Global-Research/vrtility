@@ -26,6 +26,7 @@
 #' }
 #' @noRd
 #' @keywords internal
+#' @details borrowed from stars package
 get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
   # make sure input values are integers
   img_rows <- as.integer(img_rows)
@@ -70,105 +71,21 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
   return(mat)
 }
 
-
-#' Aggregate raster blocks
-#'
-#' @param blocks_df A data frame of block definitions with columns nXOff, nYOff, nXSize, nYSize
-#' @param n target number of chunks
-#' @param direction Direction of aggregation ("row" or "both")
-#' @return A data frame of aggregated blocks
-#' @examples
-#' blocks_df <- get_tiles(1000, 1000, 128, 128)
-#' # Aggregate blocks in rows
-#' aggregate_blocks(blocks_df, max_size = 512)
-#' @export
+#' function to optimise the tile reading
+#' @description increases block size until the number of tiles is less than
+#' the number of splits
+#' @noRd
 #' @keywords internal
-aggregate_blocks <- function(x, n) {
-  row_blocks <- aggregate_blocks_internal(
-    x,
-    n_splits = n,
-    direction = "row"
-  )
-  if (nrow(row_blocks) <= n) {
-    return(row_blocks)
+optimise_tiling <- function(xs, ys, blksize, nsplits) {
+  i <- 1
+  tile_matrix <- get_tiles(xs, ys, blksize[1], blksize[2])
+  while (nrow(tile_matrix) > nsplits) {
+    i <- i + 1
+    tile_matrix <- get_tiles(xs, ys, blksize[1] * i, blksize[2] * i)
   }
-  aggregate_blocks_internal(row_blocks, n_splits = n, direction = "col")
+  return(as.data.frame(tile_matrix))
 }
 
-aggregate_blocks_internal <- function(
-  blocks_df,
-  n_splits = 4,
-  direction = "row"
-) {
-  if (n_splits > 2) n_splits <- n_splits - 1
-
-  max_size <- round(
-    prod(
-      max(blocks_df["nXOff"]) + tail(blocks_df["nXSize"], 1),
-      max(blocks_df["nYOff"]) + tail(blocks_df["nYSize"], 1)
-    ) /
-      n_splits
-  )
-
-  # Sort blocks by row (nYOff) then column (nXOff)
-  blocks_df <- blocks_df[order(blocks_df$nYOff, blocks_df$nXOff), ]
-
-  # Split blocks by row (same nYOff)
-  row_groups <- split(blocks_df, blocks_df$nYOff)
-
-  if (all(lapply(row_groups, nrow) == 1)) {
-    row_groups <- list(blocks_df)
-  }
-
-  if (direction == "row") {
-    adj_col <- "nXSize"
-    alt_col <- "nYSize"
-  } else {
-    adj_col <- "nYSize"
-    alt_col <- "nXSize"
-  }
-
-  # Aggregate blocks within each row
-  aggregated_blocks <- purrr::map(row_groups, function(row_blocks) {
-    # Initialize result for this row
-    result_blocks <- data.frame()
-    current_block <- row_blocks[1, ]
-    current_size <- current_block[adj_col]
-    ncell <- current_size * current_block[alt_col]
-
-    if (nrow(row_blocks) > 1) {
-      for (i in 2:nrow(row_blocks)) {
-        next_size <- as.numeric(row_blocks[i, adj_col] * row_blocks[i, alt_col])
-
-        # Add explicit NA check
-        if (is.na(ncell) || is.na(next_size) || is.na(max_size)) {
-          warning("NA values detected in block size calculations")
-          next
-        }
-
-        if (ncell + next_size <= max_size) {
-          # Merge with current block
-          current_block[adj_col] <- as.numeric(current_block[adj_col]) +
-            as.numeric(row_blocks[i, adj_col])
-          current_size <- as.numeric(current_block[adj_col])
-          ncell <- current_size * as.numeric(current_block[alt_col])
-        } else {
-          # Add current block to results and start new block
-          result_blocks <- rbind(result_blocks, current_block)
-          current_block <- row_blocks[i, ]
-          current_size <- as.numeric(current_block[adj_col])
-          ncell <- current_size * as.numeric(current_block[alt_col])
-        }
-      }
-    }
-    # Add final block
-    rbind(result_blocks, current_block)
-  }) |>
-    purrr::list_rbind()
-
-  rownames(aggregated_blocks) <- NULL
-  aggregated_blocks
-}
 
 #' Suggest number of chunks based on available RAM
 #' @param ys Number of rows in the raster
@@ -177,25 +94,30 @@ aggregate_blocks_internal <- function(
 #' @return Suggested number of chunks (numeric)
 #' @noRd
 #' @keywords internal
-suggest_n_chunks <- function(ys, xs, nbands) {
-  free_ram <- memuse::Sys.meminfo()$freeram
+suggest_n_chunks <- function(ys, xs, nbands, nitems, scalar = 5) {
+  ram_info <- memuse::Sys.meminfo()
+  if (using_daemons()) {
+    nprocs <- pmax(n_daemons(), 1)
+    # we assume that if using mirai, the daemons may be hollding ram that might
+    # be released
+    avail_ram <- memuse::Sys.meminfo()$totalram * 0.8
+  } else {
+    nprocs <- 1
+    avail_ram <- memuse::Sys.meminfo()$freeram
+  }
+
   estimated_ram <- memuse::howbig(
     nrow = ys * xs,
     ncol = 1,
     representation = "dense"
   ) *
     nbands *
-    50
+    (nitems * scalar)
 
-  max_av_ram <- getOption("vrt.percent.ram")
+  ram_alloc_perc <- getOption("vrt.percent.ram")
 
-  avail_ram <- free_ram * max_av_ram / 100
+  avail_ram <- avail_ram * ram_alloc_perc / 100
 
-  if (using_daemons()) {
-    nprocs <- pmax(n_daemons(), 1)
-  } else {
-    nprocs <- 1
-  }
-
-  ceiling(1 / ((avail_ram / estimated_ram))) * nprocs
+  ntiles <- ceiling(1 / ((avail_ram / estimated_ram))) * nprocs
+  return(ntiles)
 }
