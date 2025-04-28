@@ -4,6 +4,9 @@
 #' @param alpha Rate of decrease of the descent steps (see details). Should
 #' satisfy \eqn{1/2< alpha <= 1}.
 #' @param epsilon Numerical tolerance. By defaut set to 1e-08.
+#' @param impute_na Logical. If TRUE, missing values are replaced with the
+#' an appropriate band-level statistic. If FALSE, missing values are not
+#' replaced. which may result in NA values in the output for all bands.
 #' @details The `geomedian` function wraps \code{\link[Gmedian]{Gmedian}}  and
 #' is identical other than it uses the column medians as the initial
 #' starting value for the algorithm, rather than the first row of the matrix.
@@ -46,7 +49,7 @@ geomedian <- function(
 #' @export
 geomedian_weizfeld <- function(
   epsilon = 1e-8,
-  nitermax = 1000,
+  nitermax = 100,
   impute_na = TRUE
 ) {
   function(x) {
@@ -102,6 +105,7 @@ medoid <- function(
   ),
   impute_na = TRUE
 ) {
+  # TODO: something isnt right check using the hls example
   distance_type <- rlang::arg_match(distance_type)
   # Pre-select the return function based on impute_na
   return_fn <- return_impute(impute_na)
@@ -161,20 +165,25 @@ quantoid <- function(
   probability = 0.4,
   impute_na = TRUE
 ) {
+  if (!rlang::is_installed("WGCNA")) {
+    cli::cli_abort(
+      c(
+        "The `quantoid` function requires the 'WGCNA' package.",
+        "i" = "Install it with:",
+        " " = "{cli::code_highlight('install.packages(\"WGCNA\")')}"
+      )
+    )
+  }
   distance_type <- rlang::arg_match(distance_type)
   # Pre-select the return function based on impute_na
   return_fn <- return_impute(impute_na)
   handle_na <- handle_impute(
     impute_na,
     function(x) {
-      apply(x, 2, function(x) {
-        stats::quantile(x, probs = probability, na.rm = TRUE)
-      })
+      WGCNA::colQuantileC(x, p = probability)
     },
     function(x) {
-      apply(x, 2, function(x) {
-        stats::quantile(x, probs = probability, na.rm = TRUE)
-      })
+      WGCNA::colQuantileC(x, p = probability)
     }
   )
 
@@ -201,9 +210,10 @@ quantoid <- function(
 #' @export
 #' @rdname multiband_reduce
 geomedoid <- function(
-  nstart = 50,
-  gamma = 15,
-  alpha = 0.9,
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-8,
   distance_type = c(
     "euclidean",
     "manhattan",
@@ -229,6 +239,7 @@ geomedoid <- function(
   ),
   impute_na = TRUE
 ) {
+  #TODO:NA handling not correct
   distance_type <- rlang::arg_match(distance_type)
   function(x) {
     colmeds <- Rfast::colMedians(x, na.rm = TRUE)
@@ -237,7 +248,8 @@ geomedoid <- function(
       init = colmeds,
       nstart = nstart,
       gamma = gamma,
-      alpha = alpha
+      alpha = alpha,
+      epsilon = epsilon
     )
 
     nearest <- Rfast::dista(
