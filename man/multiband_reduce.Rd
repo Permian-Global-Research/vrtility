@@ -3,7 +3,6 @@
 \name{multiband_reduce}
 \alias{multiband_reduce}
 \alias{geomedian}
-\alias{geomedian_weizfeld}
 \alias{medoid}
 \alias{quantoid}
 \alias{geomedoid}
@@ -25,14 +24,14 @@ multiband_reduce(
 )
 
 geomedian(
+  weizfeld = TRUE,
+  nitermax = 100,
   nstart = 5,
   gamma = 10,
   alpha = 0.65,
   epsilon = 1e-08,
   impute_na = TRUE
 )
-
-geomedian_weizfeld(epsilon = 1e-08, nitermax = 100, impute_na = TRUE)
 
 medoid(
   distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
@@ -52,14 +51,16 @@ quantoid(
 )
 
 geomedoid(
-  nstart = 5,
-  gamma = 10,
-  alpha = 0.65,
-  epsilon = 1e-08,
   distance_type = c("euclidean", "manhattan", "minimum", "maximum", "minkowski",
     "bhattacharyya", "hellinger", "kullback_leibler", "jensen_shannon", "canberra",
     "chi_square", "soergel", "sorensen", "cosine", "wave_hedges", "motyka",
     "harmonic_mean", "jeffries_matusita", "gower", "kulczynski", "itakura_saito"),
+  weizfeld = TRUE,
+  nitermax = 100,
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-08,
   impute_na = TRUE
 )
 }
@@ -92,21 +93,30 @@ mirai daemons. see details}
 the function (e.g., the jobs object) that is produced before promise
 evaluation.}
 
-\item{nstart}{Number of times the algorithm is ran over all the data set.}
+\item{weizfeld}{Logical. If TRUE, the Weiszfeld algorithm is used to
+calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
+FALSE, the Gmedian algorithm is used, see \code{\link[Gmedian]{Gmedian}}.}
+
+\item{nitermax}{Maximum number of iterations. By default set to 100. only
+used if \code{weizfeld = TRUE}.}
+
+\item{nstart}{Number of times the algorithm is ran over all the data set.
+only used if \code{weizfeld = FALSE}.}
 
 \item{gamma}{Value (positive) of the constant controling the descent steps
-see details in \code{\link[Gmedian]{Gmedian}}.}
+see details in \code{\link[Gmedian]{Gmedian}}. Only used if
+\code{weizfeld = FALSE}.}
 
 \item{alpha}{Rate of decrease of the descent steps (see details). Should
-satisfy \eqn{1/2< alpha <= 1}.}
+satisfy \eqn{1/2< alpha <= 1}. Only used if \code{weizfeld = FALSE}.}
 
 \item{epsilon}{Numerical tolerance. By defaut set to 1e-08.}
 
 \item{impute_na}{Logical. If TRUE, missing values are replaced with the
-an appropriate band-level statistic. If FALSE, missing values are not
+an appropriate band-level statistic - in the case of geomedian and medoid
+this is the median; for \code{quantoid} this will be the requested quantile
+probabilioty of the column. If FALSE, missing values are not
 replaced. which may result in NA values in the output for all bands.}
-
-\item{nitermax}{Maximum number of iterations.}
 
 \item{distance_type}{The type of distance metric to use. See
 \code{\link[Rfast]{dista}} for a full description of options.}
@@ -125,13 +135,12 @@ composite of a warped VRT collection.
 \details{
 We have a lot TODO: info on the reduce_fun options and nsplits etc...
 
-The \code{geomedian} function wraps \code{\link[Gmedian]{Gmedian}}  and
-is identical other than it uses the column medians as the initial
-starting value for the algorithm, rather than the first row of the matrix.
-
-The \code{geomedian_weizfeld} function wraps
-\code{\link[Gmedian]{Weiszfeld}} and is idential but does not provide support
-for weights.
+The \code{geomedian} enables the use of \code{\link[Gmedian]{Gmedian}}
+and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
+multiband raster. When \code{Weiszfeld} is set to FALSE,
+\code{\link[Gmedian]{Weiszfeld}} is used = the only difference with the
+default parameters is theat the matrix column medians are used as initial
+values rather than the first row of the matrix.
 
 The \code{medoid} function  uses \code{\link[Rfast]{dista}} to compute
 the distance between the band-level medians and the values for each pixel. It

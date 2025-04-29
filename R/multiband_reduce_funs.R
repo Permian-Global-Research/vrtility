@@ -1,18 +1,32 @@
+#' @param weizfeld Logical. If TRUE, the Weiszfeld algorithm is used to
+#' calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
+#' FALSE, the Gmedian algorithm is used, see \code{\link[Gmedian]{Gmedian}}.
+#' @param nitermax Maximum number of iterations. By default set to 100. only
+#' used if `weizfeld = TRUE`.
 #' @param nstart Number of times the algorithm is ran over all the data set.
+#' only used if `weizfeld = FALSE`.
 #' @param gamma Value (positive) of the constant controling the descent steps
-#' see details in \code{\link[Gmedian]{Gmedian}}.
+#' see details in \code{\link[Gmedian]{Gmedian}}. Only used if
+#' `weizfeld = FALSE`.
 #' @param alpha Rate of decrease of the descent steps (see details). Should
-#' satisfy \eqn{1/2< alpha <= 1}.
+#' satisfy \eqn{1/2< alpha <= 1}. Only used if `weizfeld = FALSE`.
 #' @param epsilon Numerical tolerance. By defaut set to 1e-08.
 #' @param impute_na Logical. If TRUE, missing values are replaced with the
-#' an appropriate band-level statistic. If FALSE, missing values are not
+#' an appropriate band-level statistic - in the case of geomedian and medoid
+#' this is the median; for `quantoid` this will be the requested quantile
+#' probabilioty of the column. If FALSE, missing values are not
 #' replaced. which may result in NA values in the output for all bands.
-#' @details The `geomedian` function wraps \code{\link[Gmedian]{Gmedian}}  and
-#' is identical other than it uses the column medians as the initial
-#' starting value for the algorithm, rather than the first row of the matrix.
+#' @details The `geomedian` enables the use of \code{\link[Gmedian]{Gmedian}}
+#' and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
+#' multiband raster. When `Weiszfeld` is set to FALSE,
+#' \code{\link[Gmedian]{Weiszfeld}} is used = the only difference with the
+#' default parameters is theat the matrix column medians are used as initial
+#' values rather than the first row of the matrix.
 #' @rdname multiband_reduce
 #' @export
 geomedian <- function(
+  weizfeld = TRUE,
+  nitermax = 100,
   nstart = 5,
   gamma = 10,
   alpha = 0.65,
@@ -20,55 +34,56 @@ geomedian <- function(
   impute_na = TRUE
 ) {
   function(x) {
-    colstat <- matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1)
-    if (impute_na) {
-      na_indices <- which(is.na(x), arr.ind = TRUE)
-      if (length(na_indices) > 0) {
-        x[na_indices] <- colstat[na_indices[, 2]]
-      }
-    }
+    # Track NA columns and create working copy
+    na_cols <- which(Rfast::colsums(is.na(x)) > 0)
+    non_na_cols <- setdiff(seq_len(ncol(x)), na_cols)
+    xc <- x[, non_na_cols, drop = FALSE]
 
-    as.vector(
-      Gmedian::Gmedian(
-        x,
-        init = colstat,
+    # Get medians for NA-containing columns
+
+    if (weizfeld) {
+      # use weizfeld
+      result <- Gmedian::Weiszfeld(
+        xc,
+        nitermax = nitermax,
+        epsilon = epsilon
+      )$median
+    } else {
+      # use Gmedian
+
+      result <- Gmedian::Gmedian(
+        xc,
+        init = matrix(Rfast::colMedians(xc, na.rm = TRUE), nrow = 1),
         nstart = nstart,
         gamma = gamma,
         alpha = alpha,
         epsilon = epsilon
       )
-    )
+    }
+
+    if (impute_na) {
+      na_col_meds <- Rfast::colMedians(x[, na_cols, drop = FALSE], na.rm = TRUE)
+
+      # Create full result vector with original dimensions
+      full_result <- numeric(length = ncol(x))
+      full_result[non_na_cols] <- result
+      full_result[na_cols] <- na_col_meds
+
+      result <- full_result
+    } else {
+      # This arguably gives an unsatisfactory result, but is (I think) correct.
+      # better to impute the NA value even if this technically violates the
+      # geometric median assumptions- at least all shared bands are comparable.
+      full_result <- numeric(length = ncol(x))
+      full_result[non_na_cols] <- result
+      full_result[na_cols] <- NA
+      result <- full_result
+    }
+
+    return(result)
   }
 }
 
-#' @param nitermax Maximum number of iterations.
-#' @rdname multiband_reduce
-#' @details The `geomedian_weizfeld` function wraps
-#' \code{\link[Gmedian]{Weiszfeld}} and is idential but does not provide support
-#' for weights.
-#' @export
-geomedian_weizfeld <- function(
-  epsilon = 1e-8,
-  nitermax = 100,
-  impute_na = TRUE
-) {
-  function(x) {
-    if (impute_na) {
-      colstat <- matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1)
-      na_indices <- which(is.na(x), arr.ind = TRUE)
-      if (length(na_indices) > 0) {
-        x[na_indices] <- colstat[na_indices[, 2]]
-      }
-    }
-    as.vector(
-      Gmedian::Weiszfeld(
-        x,
-        nitermax = nitermax,
-        epsilon = epsilon
-      )$median
-    )
-  }
-}
 
 #' @param distance_type The type of distance metric to use. See
 #' \code{\link[Rfast]{dista}} for a full description of options.
@@ -105,32 +120,14 @@ medoid <- function(
   ),
   impute_na = TRUE
 ) {
-  # TODO: something isnt right check using the hls example
   distance_type <- rlang::arg_match(distance_type)
-  # Pre-select the return function based on impute_na
-  return_fn <- return_impute(impute_na)
-
-  handle_na <- handle_impute(
-    impute_na,
-    function(x) {
+  xoid_generator(
+    f = function(x) {
       Rfast::colMedians(x, na.rm = TRUE)
     },
-    function(x) {
-      Rfast::colMedians(x, na.rm = FALSE)
-    }
+    distance_type = distance_type,
+    impute_na = impute_na
   )
-
-  function(x) {
-    # create copy
-    xc <- handle_na(x)
-
-    nearest <- Rfast::dista(
-      xc$xc,
-      xc$colstat,
-      type = distance_type
-    )
-    return_fn(x, xc, which.min(nearest))
-  }
 }
 
 #' @param probability The probability of the quantile to use. Default is 0.4.
@@ -174,30 +171,16 @@ quantoid <- function(
       )
     )
   }
+
   distance_type <- rlang::arg_match(distance_type)
-  # Pre-select the return function based on impute_na
-  return_fn <- return_impute(impute_na)
-  handle_na <- handle_impute(
-    impute_na,
-    function(x) {
+
+  xoid_generator(
+    f = function(x) {
       WGCNA::colQuantileC(x, p = probability)
     },
-    function(x) {
-      WGCNA::colQuantileC(x, p = probability)
-    }
+    distance_type = distance_type,
+    impute_na = impute_na
   )
-
-  function(x) {
-    # create copy
-    xc <- handle_na(x)
-
-    nearest <- Rfast::dista(
-      xc$xc,
-      xc$colstat,
-      type = distance_type
-    )
-    return_fn(x, xc, which.min(nearest))
-  }
 }
 
 #' @details The `geomedoid` function combines the `geomedian` and `medoid` - it
@@ -210,10 +193,6 @@ quantoid <- function(
 #' @export
 #' @rdname multiband_reduce
 geomedoid <- function(
-  nstart = 5,
-  gamma = 10,
-  alpha = 0.65,
-  epsilon = 1e-8,
   distance_type = c(
     "euclidean",
     "manhattan",
@@ -237,58 +216,75 @@ geomedoid <- function(
     "kulczynski",
     "itakura_saito"
   ),
+  weizfeld = TRUE,
+  nitermax = 100,
+  nstart = 5,
+  gamma = 10,
+  alpha = 0.65,
+  epsilon = 1e-8,
   impute_na = TRUE
 ) {
-  #TODO:NA handling not correct
   distance_type <- rlang::arg_match(distance_type)
-  function(x) {
-    colmeds <- Rfast::colMedians(x, na.rm = TRUE)
-    gmed <- Gmedian::Gmedian(
-      x,
-      init = colmeds,
-      nstart = nstart,
-      gamma = gamma,
-      alpha = alpha,
-      epsilon = epsilon
-    )
+  gmedf <- if (weizfeld) {
+    function(x) {
+      Gmedian::Weiszfeld(x, epsilon = epsilon, nitermax = nitermax)$median
+    }
+  } else {
+    function(x) {
+      Gmedian::Gmedian(
+        x,
+        init = matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1),
+        nstart = nstart,
+        gamma = gamma,
+        alpha = alpha,
+        epsilon = epsilon
+      )
+    }
+  }
 
+  xoid_generator(
+    f = gmedf,
+    distance_type = distance_type,
+    impute_na = impute_na,
+    impute_f = function(x) {
+      Rfast::colMedians(x, na.rm = TRUE)
+    }
+  )
+}
+
+
+xoid_generator <- function(f, distance_type, impute_na, impute_f = f) {
+  function(x) {
+    # Track NA columns and create working copy
+    na_cols <- which(Rfast::colsums(is.na(x)) > 0)
+    non_na_cols <- setdiff(seq_len(ncol(x)), na_cols)
+    xc <- x[, non_na_cols, drop = FALSE]
+
+    # Get medians for non-NA columns
+    colstat <- matrix(f(xc), nrow = 1)
+
+    # Calculate distances using only non-NA columns
     nearest <- Rfast::dista(
-      x,
-      gmed,
+      xc,
+      colstat,
       type = distance_type
     )
-    x[which.min(nearest), ]
-  }
-}
 
-return_impute <- function(impute_na) {
-  f <- if (impute_na) {
-    function(x, xc, i) xc$xc[i, ]
-  } else {
-    function(x, xc, i) {
-      x[i, ]
+    # Get the best row index
+    best_row <- which.min(nearest)
+
+    # Construct result
+    result <- x[best_row, ]
+
+    # Replace NA columns with their medians
+    if (any(is.na(result)) && impute_na) {
+      result_na_cols <- which(is.na(result))
+      na_stat_impute <- impute_f(
+        x[, result_na_cols, drop = FALSE]
+      )
+      result[result_na_cols] <- na_stat_impute
     }
+
+    return(result)
   }
-  return(f)
-}
-handle_impute <- function(impute_na, stat_t, stat_f) {
-  handle_na <- if (impute_na) {
-    function(xc) {
-      colstat <- matrix(stat_t(xc), nrow = 1)
-      na_indices <- which(is.na(xc), arr.ind = TRUE)
-      if (length(na_indices) > 0) {
-        xc[na_indices] <- colstat[na_indices[, 2]]
-      }
-      return(list(xc = xc, colstat = colstat))
-    }
-  } else {
-    function(xc) {
-      colstat <- matrix(stat_f(xc), nrow = 1)
-      colstat <- colstat[, colSums(is.na(xc)) == 0]
-      # drop columsn with na
-      xc <- xc[, colSums(is.na(xc)) == 0]
-      return(list(xc = xc, colstat = colstat))
-    }
-  }
-  return(handle_na)
 }
