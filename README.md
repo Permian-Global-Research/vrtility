@@ -109,12 +109,12 @@ s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
-  max_cloud_cover = 35,
+  max_cloud_cover = 20,
   assets = c("B02", "B03", "B04", "SCL")
 )
 # number of items:
 length(s2_stac$features)
-#> [1] 14
+#> [1] 3
 ```
 
 ``` r
@@ -134,7 +134,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.522   0.457  48.981
+#>   3.499   0.274  16.198
 ```
 
 ``` r
