@@ -243,13 +243,13 @@ However, we can also create composites using more advanced statistical methods
 that can improve on the filtering of outliers, increase scene consistency and
 ensure that spectral properties are preserved. Several functions are provided
 in the `vrtility` package to do this but the user can also provide their own 
-if desired. Here we will use the `geomedoid` function which is a  somewhat
-experimental function that combines the geometric median and medoid. The 
-geometric median is calculated and used to locate the image cell that has the
-smallest distance to the geometric median. 
+if desired. Here we will use the `geomedian` function which calculates the 
+geometric (aka spatial median). This synthetic statistic ensures consistency 
+across bands. note that where some bands dont exist, the median is used in 
+place of the geometric median.
 
-```{r hls-stack}
-hls_stack <- multiband_reduce(hls_warp, reduce_fun = geomedoid())
+```{r hls-composite}
+hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
 ```
 
 Now let's take a look at the composite - first RGB and then a false colour 
@@ -263,8 +263,8 @@ plot_raster_src(
 
 plot_raster_src(
   hls_composite,
-  bands = c(9, 2, 4),
-  minmax_pct_cut = c(26, 99)
+  bands = c(9, 12, 13),
+  minmax_pct_cut = c(28, 97)
 )
 ```
 

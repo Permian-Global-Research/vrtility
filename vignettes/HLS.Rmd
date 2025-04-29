@@ -335,18 +335,14 @@ However, we can also create composites using more advanced statistical methods
 that can improve on the filtering of outliers, increase scene consistency and
 ensure that spectral properties are preserved. Several functions are provided
 in the `vrtility` package to do this but the user can also provide their own 
-if desired. Here we will use the `geomedoid` function which is a  somewhat
-experimental function that combines the geometric median and medoid. The 
-geometric median is calculated and used to locate the image cell that has the
-smallest distance to the geometric median. 
+if desired. Here we will use the `geomedian` function which calculates the 
+geometric (aka spatial median). This synthetic statistic ensures consistency 
+across bands. note that where some bands dont exist, the median is used in 
+place of the geometric median.
 
 
 ``` r
-hls_stack <- multiband_reduce(hls_warp, reduce_fun = geomedoid())
-#> Error in `purrr::pmap()`:
-#> ℹ In index: 1.
-#> Caused by error in `seq.default()`:
-#> ! wrong sign in 'by' argument
+hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
 ```
 
 Now let's take a look at the composite - first RGB and then a false colour 
@@ -358,18 +354,15 @@ plot_raster_src(
   hls_composite,
   bands = c(4, 3, 2)
 )
-#> Error: object 'hls_composite' not found
-```
-
-``` r
 
 plot_raster_src(
   hls_composite,
-  bands = c(9, 2, 4),
-  minmax_pct_cut = c(26, 99)
+  bands = c(9, 12, 13),
+  minmax_pct_cut = c(28, 97)
 )
-#> Error: object 'hls_composite' not found
 ```
+
+<img src="figure/hls-plot-1.png" width="50%" /><img src="figure/hls-plot-2.png" width="50%" />
 
 And all the other bands too:
 
@@ -385,9 +378,7 @@ purrr::walk(1:15, function(i) {
     axes = FALSE
   )
 })
-#> Error in `map()`:
-#> ℹ In index: 1.
-#> Caused by error in `.f()`:
-#> ! object 'hls_composite' not found
 ```
+
+![](figure/hls-plot-bands-1.png)
 
