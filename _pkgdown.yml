@@ -28,6 +28,15 @@ reference:
       - build_bitmask
       - build_intmask
       - median_numpy
+  - title: multi-band reduction funcions
+    desc: Functions to create composites using multi-band algorithms
+    contents:
+      - multiband_reduce
+      - geomedian
+      - medoid
+      - geomedoid
+      - quantoid
+
   - title: GDAL Configuration
     desc: GDAL configuration and setup functions
     contents:
