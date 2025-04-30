@@ -20,6 +20,10 @@
 #' @examples
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #' vrt_collect(s2files)
+#'
+#' # we can also combine multiple vrt collections
+#' c(vrt_collect(s2files[1:2]), vrt_collect(s2files[3:4]))
+#'
 #' @examplesIf interactive()
 #' s2q <- sentinel2_stac_query(
 #'  bbox = c(-12.386, -37.214, -12.186, -37.014),
@@ -33,7 +37,10 @@
 #'
 vrt_collect <- function(
   x,
-  ...
+  config_opts,
+  bands,
+  band_descriptions,
+  datetimes
 ) {
   UseMethod("vrt_collect")
 }
@@ -57,11 +64,10 @@ vrt_collect.default <- function(x, ...) {
 #' @export
 vrt_collect.character <- function(
   x,
+  config_opts = gdal_config_opts(),
   bands = NULL,
   band_descriptions = NULL,
-  datetimes = rep("", length(x)),
-  config_opts = gdal_config_opts(),
-  ...
+  datetimes = rep("", length(x))
 ) {
   assert_files_exist(x)
   v_assert_type(
@@ -162,7 +168,11 @@ vrt_collect.doc_items <- function(
   orig_config <- set_gdal_config(config_opts)
   on.exit(set_gdal_config(orig_config))
 
-  assets <- stringr::str_sort(rstac::items_assets(x), numeric = TRUE)
+  assets <- rstac::items_assets(x)[order(as.numeric(gsub(
+    "\\D",
+    "",
+    rstac::items_assets(x)
+  )))]
 
   items_uri <- purrr::map(assets, function(a) {
     its_asset <- rstac::assets_select(x, asset_names = a)
@@ -326,7 +336,6 @@ build_vrt_collection <- function(
 #' @param maskfun logical indicating whether to print the mask function.
 #' @param blocks A logical indicating whether to print the blocks instead of
 #' the collection summary.
-#' @param ... Additional arguments not used
 #' @rdname vrt_collect
 print.vrt_collection <- function(
   x,
@@ -376,6 +385,9 @@ print.vrt_collection <- function(
 
 #' @export
 #' @rdname vrt_collect
+#' @param ... In the case of `c`, additional vrt_collection objects to
+#' concatenate to `x`. Otherwise, additional arguments to pass to the method or
+#' unused.
 #' @details
 #' You can use the `c` method to combine multiple vrt_collection objects. All
 #' collections must have the same number of bands.
