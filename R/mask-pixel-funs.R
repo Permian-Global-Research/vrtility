@@ -35,7 +35,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
     mask = np.isin(in_ar[0], mask_vals)
     # breakpoint()
-    out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+    out_ar[:] = np.where(mask, 0, 255)  # Set invalid pixels to 0
 "
   )
 }
@@ -64,7 +64,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) > 0
     
     # Set output: 255 for valid pixels (mask True), 0 for invalid
-    out_ar[:] = np.where(mask, 0, 1)
+    out_ar[:] = np.where(mask, 0, 255)
 "
   )
 }

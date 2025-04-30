@@ -171,7 +171,7 @@
           mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
           mask = np.isin(in_ar[0], mask_vals)
           # breakpoint()
-          out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+          out_ar[:] = np.where(mask, 0, 255)  # Set invalid pixels to 0
     Output
       
       
