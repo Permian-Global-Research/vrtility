@@ -37,7 +37,7 @@ vrt_compute(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -54,7 +54,7 @@ vrt_compute(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -71,7 +71,7 @@ vrt_compute(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 )
@@ -88,7 +88,7 @@ vrt_compute(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = FALSE
 )
@@ -105,7 +105,7 @@ vrt_compute(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = FALSE
 )

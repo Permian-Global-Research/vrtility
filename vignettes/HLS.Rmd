@@ -57,7 +57,7 @@ box.
 library(vrtility)
 
 mirai::daemons(10)
-#> Error in mirai::daemons(10): daemons already set for `default` compute profile
+#> [1] 10
 ```
 
 ``` r
@@ -303,7 +303,7 @@ hls_merge_coll <- c(
 
 Now we need to warp all vrt_blocks in the collection to the same spatial
 reference system, extent and pixel size. This is particularly important in this
-case because of the mutliple SRS in the collection. Also to make use of the
+case because of the multiple SRS in the collection. Also to make use of the
 fastest `vrt_compute` engine, we need to ensure that all blocks are in the same
 SRS with equal dimensions.
 
@@ -318,46 +318,51 @@ hls_warp <- vrt_warp(
 )
 ```
 
-Now we can stack the warped vrt collection - this can be thought of as a virtual 
-raster cube. Then, we can set a pixel function which defines how the mutliple
-images for each band are summarised. Here we use the median_numpy pixel 
-function to compute the cell-level median. 
+Now we want to "reduce" the imagery collection to a single composite image. The
+typical approach would be to use the band-level median which we can achieve 
+easily by first using the following:
 
 
 ``` r
-hls_stack <- vrt_stack(hls_warp) |>
-  vrt_set_pixelfun(pixfun = median_numpy())
+band_level_median <- vrt_stack(hls_warp) |>
+  vrt_set_pixelfun(pixfun = median_numpy()) |>
+  vrt_compute(fs::file_temp(ext = ".tif"),
+    engine = "gdalraster"
+  )
 ```
 
-Finally we compute all of this using vrt_compute. Note that we specify the
-`gdalraster` engine. This is the fastest engine for computing large VRTs As it
-parallises downloads and processing across bands and also across raster rows
-using the nsplits argument. At the start of this workflow we set 10 mirai 
-daemons. Because these are already set, they will be used as "outer" daemons
-processing across bands - each of these daemons will then spawn 2 "inner"
-daemons to process the rows of each band. This means that we will have 20
-parallel processes running at once.
+However, we can also create composites using more advanced statistical methods 
+that can improve on the filtering of outliers, increase scene consistency and
+ensure that spectral properties are preserved. Several functions are provided
+in the `vrtility` package to do this but the user can also provide their own 
+if desired. Here we will use the `geomedian` function which calculates the 
+geometric (aka spatial median). This synthetic statistic ensures consistency 
+across bands. note that where some bands dont exist, the median is used in 
+place of the geometric median.
 
 
 ``` r
-outfile <- tempfile(fileext = ".tif")
-hls_composite <- vrt_compute(hls_stack, outfile, engine = "gdalraster", nsplits = 2)
-#> ! Active mirai daemons have been detected, but fewer than the number of bands.
-#> ℹ No changes were made to this mirai configuartion but this could result in performance issues
+hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
 ```
 
-Now let's take a look at a false-colour composite!
+Now let's take a look at the composite - first RGB and then a false colour 
+composite.
 
 
 ``` r
 plot_raster_src(
   hls_composite,
-  bands = c(9, 3, 2),
-  minmax_pct_cut = c(25, 97)
+  bands = c(4, 3, 2)
+)
+
+plot_raster_src(
+  hls_composite,
+  bands = c(9, 12, 13),
+  minmax_pct_cut = c(28, 97)
 )
 ```
 
-![](figure/hls-plot-1.png)
+<img src="figure/hls-plot-1.png" width="50%" /><img src="figure/hls-plot-2.png" width="50%" />
 
 And all the other bands too:
 
@@ -377,7 +382,3 @@ purrr::walk(1:15, function(i) {
 
 ![](figure/hls-plot-bands-1.png)
 
-#### Note.
-
-This vignette is a work in progress and will be updated as the package matures.
-Principally, the major goal is to use the geometric median for compositing.

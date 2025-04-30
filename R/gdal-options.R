@@ -65,7 +65,7 @@ gdal_creation_options <- function(
   COMPRESS = "LZW",
   PREDICTOR = "2",
   NUM_THREADS = "ALL_CPUS",
-  BIGTIFF = "YES",
+  BIGTIFF = "IF_NEEDED",
   TILED = "YES",
   BLOCKXSIZE = "128", # changed from 256
   BLOCKYSIZE = "128",
@@ -76,7 +76,6 @@ gdal_creation_options <- function(
   keep_names <- setdiff(names(co_args), "output_format")
   co_args <- co_args[keep_names]
   co_args <- paste0(names(co_args), "=", co_args)
-  co_args <- as.vector(rbind("-co", co_args))
 
   if (!is.null(output_format)) {
     c("-of", output_format, co_args)

@@ -86,7 +86,7 @@ vrt_compute.vrt_block <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -125,15 +125,12 @@ vrt_compute.vrt_block <- function(
     )
   } else if (engine == "gdalraster") {
     if (!x$warped) warp_first_error(engine)
-
-    # compute_with_py_env used internally.
     result <- call_gdalraster_mirai(
-      src_files = tmp_vrt,
+      x = x,
       outfile = outfile,
-      resampling = resampling,
-      cl_arg = c(creation_options, add_cl_arg),
-      config_options = config_options,
       nsplits = nsplits,
+      config_options = config_options,
+      creation_options = creation_options,
       quiet = quiet
     )
   } else if (engine == "translate") {
@@ -142,7 +139,7 @@ vrt_compute.vrt_block <- function(
         src_files = tmp_vrt,
         outfile = outfile,
         config_options = config_options,
-        cl_arg = c(creation_options, "-r", resampling),
+        cl_arg = c(as.vector(rbind("-co", creation_options)), "-r", resampling),
         quiet = quiet
       )
     )
@@ -178,7 +175,7 @@ vrt_compute.vrt_stack_warped <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -228,7 +225,7 @@ vrt_compute.vrt_stack <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE
 ) {
@@ -267,7 +264,7 @@ vrt_compute.vrt_collection_warped <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = FALSE
 ) {
@@ -318,7 +315,7 @@ vrt_compute.vrt_collection <- function(
   warp_options = gdalwarp_options(),
   creation_options = gdal_creation_options(),
   config_options = gdal_config_opts(),
-  nsplits = 1L,
+  nsplits = NULL,
   add_cl_arg = NULL,
   quiet = FALSE
 ) {

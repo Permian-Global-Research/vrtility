@@ -4,6 +4,7 @@ v_assert_type <- function(
   type = c(
     "character",
     "numeric",
+    "integer",
     "logical",
     "function",
     "stac_vrt",

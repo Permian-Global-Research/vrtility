@@ -80,7 +80,7 @@ plot_raster_src <- function(
   if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
     mm <- stats::quantile(
       r,
-      probs = c(0, 0.98),
+      probs = c(0.01, 0.98),
       na.rm = TRUE,
       names = FALSE
     )

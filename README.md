@@ -12,6 +12,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
+<img src="man/figures/vrtility_hex.png"  align="right" height="300" style="float:right; height:300px;">
+
 vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
@@ -24,8 +26,10 @@ image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
+<!-- ```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
+``` -->
 
 ## Features
 
@@ -86,8 +90,8 @@ Here is a simple example where we:
 library(vrtility)
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
-#> [1] 6
+mirai::daemons(10)
+#> [1] 10
 ```
 
 ``` r
@@ -105,12 +109,12 @@ s2_stac <- sentinel2_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
-  max_cloud_cover = 35,
+  max_cloud_cover = 20,
   assets = c("B02", "B03", "B04", "SCL")
 )
 # number of items:
 length(s2_stac$features)
-#> [1] 12
+#> [1] 3
 ```
 
 ``` r
@@ -126,12 +130,11 @@ system.time({
     vrt_set_pixelfun() |>
     vrt_compute(
       outfile = fs::file_temp(ext = "tif"),
-      engine = "gdalraster",
-      nsplits = 3L
+      engine = "gdalraster"
     )
 })
 #>    user  system elapsed 
-#>   1.216   0.075  36.184
+#>   3.499   0.274  16.198
 ```
 
 ``` r

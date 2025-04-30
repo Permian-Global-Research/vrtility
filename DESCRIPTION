@@ -18,13 +18,17 @@ Imports:
     fs,
     gdalraster,
     glue,
+    Gmedian,
     grDevices,
     httr,
     lubridate,
+    memuse,
     methods,
     mirai,
     purrr (>= 1.0.4.9000),
+    Rcpp,
     reticulate (>= 1.41.0.1),
+    Rfast,
     rlang,
     rstac,
     scales,
@@ -38,7 +42,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    WGCNA
 Remotes: 
     tidyverse/purrr
 Config/testthat/edition: 3
@@ -48,3 +53,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 SystemRequirements: Python (>= 3.6)
 VignetteBuilder: knitr
+LinkingTo: 
+    Rcpp

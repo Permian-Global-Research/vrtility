@@ -48,6 +48,8 @@ vrt_collect.default <- function(x, ...) {
   )
 }
 
+#' @param bands A numeric vector of band indices to include in the VRT
+#' collection
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
 #' @param config_opts A named character vector of GDAL configuration options.
@@ -55,12 +57,20 @@ vrt_collect.default <- function(x, ...) {
 #' @export
 vrt_collect.character <- function(
   x,
+  bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
   config_opts = gdal_config_opts(),
   ...
 ) {
   assert_files_exist(x)
+  v_assert_type(
+    bands,
+    "bands",
+    c("numeric", "integer"),
+    multiple = TRUE,
+    nullok = TRUE
+  )
   v_assert_type(
     band_descriptions,
     "band_descriptions",
@@ -73,18 +83,26 @@ vrt_collect.character <- function(
   orig_config <- set_gdal_config(config_opts)
   on.exit(set_gdal_config(orig_config))
 
+  if (!is.null(bands)) {
+    band_args <- c(rbind("-b", sort(bands)))
+  } else {
+    band_args <- NULL
+  }
   vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
     tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
     gdalraster::buildVRT(
       tf,
       .x,
-      quiet = TRUE
+      quiet = TRUE,
+      cl_arg = band_args
     )
 
     ds <- methods::new(gdalraster::GDALRaster, .x)
-    on.exit(ds$close())
-    nbands <- ds$getRasterCount()
+    on.exit(ds$close(), add = TRUE)
+    dst <- methods::new(gdalraster::GDALRaster, tf)
+    on.exit(dst$close(), add = TRUE)
+    nbands <- dst$getRasterCount()
     v_assert_length(band_descriptions, "band_descriptions", nbands)
 
     if (is.null(band_descriptions)) {
@@ -92,6 +110,7 @@ vrt_collect.character <- function(
         seq_len(nbands),
         ~ ds$getDescription(.x)
       )
+
       if (any(band_descriptions == "")) {
         cli::cli_warn(
           c(
@@ -102,6 +121,14 @@ vrt_collect.character <- function(
         band_descriptions <- paste0("band_", seq_len(nbands))
       }
     }
+    if (ds$isOpen()) {
+      ds$close()
+    }
+    if (dst$isOpen()) {
+      dst$close()
+    }
+
+    # browser()
 
     tf <- set_vrt_descriptions(
       x = tf,

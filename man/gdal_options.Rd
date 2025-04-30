@@ -30,7 +30,7 @@ gdal_creation_options(
   COMPRESS = "LZW",
   PREDICTOR = "2",
   NUM_THREADS = "ALL_CPUS",
-  BIGTIFF = "YES",
+  BIGTIFF = "IF_NEEDED",
   TILED = "YES",
   BLOCKXSIZE = "128",
   BLOCKYSIZE = "128",

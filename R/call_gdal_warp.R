@@ -14,15 +14,16 @@ call_gdal_warp <- function(
   orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
 
-  gdalraster::warp(
+  # new gdalraster raises warnings here... although I think we can ignore.
+  suppressWarnings(gdalraster::warp(
     src_files,
     outfile,
     t_srs = t_srs,
     cl_arg = cl_arg,
     quiet = quiet
-  )
+  ))
 
-  return(outfile)
+  return(normalizePath(outfile))
 }
 
 
@@ -42,7 +43,7 @@ combine_warp_opts <- function(
   opts_check(warp_opts, "-r")
 
   warp_opts <- c(
-    creation_options,
+    as.vector(rbind("-co", creation_options)),
     "-r",
     resampling,
     warp_opts,
