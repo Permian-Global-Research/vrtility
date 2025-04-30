@@ -1,8 +1,3 @@
-#' @param weizfeld Logical. If TRUE, the Weiszfeld algorithm is used to
-#' calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
-#' FALSE, the Gmedian algorithm is used, see \code{\link[Gmedian]{Gmedian}}.
-#' @param nitermax Maximum number of iterations. By default set to 100. only
-#' used if `weizfeld = TRUE`.
 #' @param nstart Number of times the algorithm is ran over all the data set.
 #' only used if `weizfeld = FALSE`.
 #' @param gamma Value (positive) of the constant controling the descent steps
@@ -11,73 +6,69 @@
 #' @param alpha Rate of decrease of the descent steps (see details). Should
 #' satisfy \eqn{1/2< alpha <= 1}. Only used if `weizfeld = FALSE`.
 #' @param epsilon Numerical tolerance. By defaut set to 1e-08.
+#' @param weizfeld Logical. If TRUE, the Weiszfeld algorithm is used to
+#' calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
+#' FALSE (the default), the Gmedian algorithm is used,
+#' see \code{\link[Gmedian]{Gmedian}}. The Gmedian algorithm is faster and
+#' intrinsically handles missing values.
+#' @param nitermax Maximum number of iterations. By default set to 100. only
+#' used if `weizfeld = TRUE`.
 #' @param impute_na Logical. If TRUE, missing values are replaced with the
-#' an appropriate band-level statistic - in the case of geomedian and medoid
-#' this is the median; for `quantoid` this will be the requested quantile
+#' an appropriate band-level statistic - in the case of geomedian this is only
+#' relevant when `weizfeld = TRUE` - in such a case the Gmedian algorithm is
+#' used to estimate bands with NA values.  For medoid the column/band median
+#' is used; for `quantoid` this will be the requested quantile
 #' probabilioty of the column. If FALSE, missing values are not
-#' replaced. which may result in NA values in the output for all bands.
+#' replaced. which may result in NA values in the output for multiple bands.
 #' @details The `geomedian` enables the use of \code{\link[Gmedian]{Gmedian}}
 #' and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
 #' multiband raster. When `Weiszfeld` is set to FALSE,
-#' \code{\link[Gmedian]{Weiszfeld}} is used = the only difference with the
-#' default parameters is theat the matrix column medians are used as initial
-#' values rather than the first row of the matrix.
+#' \code{\link[Gmedian]{Weiszfeld}} is used. For the Gmedian algorithm,
+#' the matrix column medians are used as initial values rather than the first
+#' row of the matrix.
 #' @rdname multiband_reduce
 #' @export
 geomedian <- function(
-  weizfeld = TRUE,
+  weizfeld = FALSE,
   nitermax = 100,
-  nstart = 5,
+  nstart = 10,
   gamma = 10,
   alpha = 0.65,
   epsilon = 1e-8,
   impute_na = TRUE
 ) {
   function(x) {
-    # Track NA columns and create working copy
-    na_cols <- which(Rfast::colsums(is.na(x)) > 0)
-    non_na_cols <- setdiff(seq_len(ncol(x)), na_cols)
-    xc <- x[, non_na_cols, drop = FALSE]
-
-    # Get medians for NA-containing columns
-
-    if (weizfeld) {
-      # use weizfeld
-      result <- Gmedian::Weiszfeld(
-        xc,
-        nitermax = nitermax,
-        epsilon = epsilon
-      )$median
-    } else {
-      # use Gmedian
-
+    if (isFALSE(weizfeld)) {
+      # use gmedian (handles NA automatically)
       result <- Gmedian::Gmedian(
-        xc,
-        init = matrix(Rfast::colMedians(xc, na.rm = TRUE), nrow = 1),
+        x,
+        init = matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1),
         nstart = nstart,
         gamma = gamma,
         alpha = alpha,
         epsilon = epsilon
       )
-    }
-
-    if (impute_na) {
-      na_col_meds <- Rfast::colMedians(x[, na_cols, drop = FALSE], na.rm = TRUE)
-
-      # Create full result vector with original dimensions
-      full_result <- numeric(length = ncol(x))
-      full_result[non_na_cols] <- result
-      full_result[na_cols] <- na_col_meds
-
-      result <- full_result
     } else {
-      # This arguably gives an unsatisfactory result, but is (I think) correct.
-      # better to impute the NA value even if this technically violates the
-      # geometric median assumptions- at least all shared bands are comparable.
-      full_result <- numeric(length = ncol(x))
-      full_result[non_na_cols] <- result
-      full_result[na_cols] <- NA
-      result <- full_result
+      # use weizfeld
+      result <- Gmedian::Weiszfeld(
+        x,
+        nitermax = nitermax,
+        epsilon = epsilon
+      )$median
+
+      if (impute_na) {
+        na_cols <- which(Rfast::colsums(is.na(x)) > 0)
+        na_col_meds <- Gmedian::Gmedian(
+          x,
+          init = matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1),
+          nstart = nstart,
+          gamma = gamma,
+          alpha = alpha,
+          epsilon = epsilon
+        )[, na_cols, drop = FALSE]
+
+        result[na_cols] <- na_col_meds
+      }
     }
 
     return(result)
@@ -216,8 +207,6 @@ geomedoid <- function(
     "kulczynski",
     "itakura_saito"
   ),
-  weizfeld = TRUE,
-  nitermax = 100,
   nstart = 5,
   gamma = 10,
   alpha = 0.65,
@@ -225,12 +214,9 @@ geomedoid <- function(
   impute_na = TRUE
 ) {
   distance_type <- rlang::arg_match(distance_type)
-  gmedf <- if (weizfeld) {
-    function(x) {
-      Gmedian::Weiszfeld(x, epsilon = epsilon, nitermax = nitermax)$median
-    }
-  } else {
-    function(x) {
+
+  xoid_generator(
+    f = function(x) {
       Gmedian::Gmedian(
         x,
         init = matrix(Rfast::colMedians(x, na.rm = TRUE), nrow = 1),
@@ -239,20 +225,16 @@ geomedoid <- function(
         alpha = alpha,
         epsilon = epsilon
       )
-    }
-  }
-
-  xoid_generator(
-    f = gmedf,
+    },
     distance_type = distance_type,
-    impute_na = impute_na,
-    impute_f = function(x) {
-      Rfast::colMedians(x, na.rm = TRUE)
-    }
+    impute_na = impute_na
   )
 }
 
-
+#' Function factory to create xoid family functions
+#' these functions are used for multi-band reduction.
+#' @keywords internal
+#' @noRd
 xoid_generator <- function(f, distance_type, impute_na, impute_f = f) {
   function(x) {
     # Track NA columns and create working copy
