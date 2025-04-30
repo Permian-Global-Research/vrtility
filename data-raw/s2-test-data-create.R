@@ -3,7 +3,7 @@ devtools::load_all()
 s2ddir <- fs::dir_create("inst/s2-data")
 
 bbox <- gdalraster::bbox_from_wkt(
-  wkt = wk::wkt("POINT (-3.51 50.72)"),
+  wkt = "POINT (-3.51 50.72)",
   extend_x = 0.05,
   extend_y = 0.03
 )

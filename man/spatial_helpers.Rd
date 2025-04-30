@@ -66,7 +66,7 @@ for eqdc: \url{https://proj.org/en/9.4/operations/projections/eqdc.html}
 }
 \examples{
 bbox <- gdalraster::bbox_from_wkt(
-  wkt = wk::wkt("POINT (144.3 -7.6)"),
+  wkt = "POINT (144.3 -7.6)",
   extend_x = 0.17,
   extend_y = 0.125
 )

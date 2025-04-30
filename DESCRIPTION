@@ -33,9 +33,7 @@ Imports:
     rstac,
     scales,
     stats,
-    stringr,
     withr,
-    wk,
     xml2
 Suggests: 
     earthdatalogin,

@@ -96,7 +96,7 @@ test_that("vrt_collect works with rstac doc_items", {
   skip_on_cran()
 
   bbox <- gdalraster::bbox_from_wkt(
-    wkt = wk::wkt("POINT (-3.51 50.72)"),
+    wkt = "POINT (-3.51 50.72)",
     extend_x = 0.05,
     extend_y = 0.03
   )
