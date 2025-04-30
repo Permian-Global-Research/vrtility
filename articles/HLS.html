@@ -116,7 +116,7 @@ projection centered around the centroid of the bounding box.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mirai/man/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in mirai::daemons(10): daemons already set for `default` compute profile</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 10</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
@@ -325,7 +325,7 @@ collections.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Now we need to warp all vrt_blocks in the collection to the same
 spatial reference system, extent and pixel size. This is particularly
-important in this case because of the mutliple SRS in the collection.
+important in this case because of the multiple SRS in the collection.
 Also to make use of the fastest <code>vrt_compute</code> engine, we need
 to ensure that all blocks are in the same SRS with equal dimensions.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -336,36 +336,40 @@ to ensure that all blocks are in the same SRS with equal dimensions.</p>
 <span>  tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="st">"bilinear"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Now we can stack the warped vrt collection - this can be thought of
-as a virtual raster cube. Then, we can set a pixel function which
-defines how the mutliple images for each band are summarised. Here we
-use the median_numpy pixel function to compute the cell-level
-median.</p>
+<p>Now we want to “reduce” the imagery collection to a single composite
+image. The typical approach would be to use the band-level median which
+we can achieve easily by first using the following:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_stack</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/median_numpy.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Finally we compute all of this using vrt_compute. Note that we
-specify the <code>gdalraster</code> engine. This is the fastest engine
-for computing large VRTs As it parallises downloads and processing
-across bands and also across raster rows using the nsplits argument. At
-the start of this workflow we set 10 mirai daemons. Because these are
-already set, they will be used as “outer” daemons processing across
-bands - each of these daemons will then spawn 2 “inner” daemons to
-process the rows of each band. This means that we will have 20 parallel
-processes running at once.</p>
+<code class="sourceCode R"><span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/median_numpy.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
+<span>    engine <span class="op">=</span> <span class="st">"gdalraster"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>However, we can also create composites using more advanced
+statistical methods that can improve on the filtering of outliers,
+increase scene consistency and ensure that spectral properties are
+preserved. Several functions are provided in the <code>vrtility</code>
+package to do this but the user can also provide their own if desired.
+Here we will use the <code>geomedian</code> function which calculates
+the geometric (aka spatial median). This synthetic statistic ensures
+consistency across bands. note that where some bands dont exist, the
+median is used in place of the geometric median.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">outfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span></span>
-<span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="va">hls_stack</span>, <span class="va">outfile</span>, engine <span class="op">=</span> <span class="st">"gdalraster"</span>, nsplits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ! Active mirai daemons have been detected, but fewer than the number of bands.</span></span>
-<span><span class="co">#&gt; ℹ No changes were made to this mirai configuartion but this could result in performance issues</span></span></code></pre></div>
-<p>Now let’s take a look at a false-colour composite!</p>
+<code class="sourceCode R"><span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span><span class="va">hls_warp</span>, reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Now let’s take a look at the composite - first RGB and then a false
+colour composite.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>  <span class="va">hls_composite</span>,</span>
-<span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  minmax_pct_cut <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">97</span><span class="op">)</span></span>
+<span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_composite</span>,</span>
+<span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">13</span><span class="op">)</span>,</span>
+<span>  minmax_pct_cut <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">97</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure%2Fhls-plot-1.png"></p>
+<p><img src="figure/hls-plot-1.png" width="50%"><img src="figure/hls-plot-2.png" width="50%"></p>
 <p>And all the other bands too:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
@@ -378,14 +382,7 @@ processes running at once.</p>
 <span>    axes <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure%2Fhls-plot-bands-1.png"></p>
-<div class="section level4">
-<h4 id="note-">Note.<a class="anchor" aria-label="anchor" href="#note-"></a>
-</h4>
-<p>This vignette is a work in progress and will be updated as the
-package matures. Principally, the major goal is to use the geometric
-median for compositing.</p>
-</div>
+<p><img src="figure/hls-plot-bands-1.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -398,7 +395,7 @@ median for compositing.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
