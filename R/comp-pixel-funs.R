@@ -46,7 +46,6 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
     
     # Calculate mean on masked array directly
     out_ar[:] = np.ma.mean(masked_data, axis=0).filled(fill_value=no_data_val)
-}
 "
   )
 }
