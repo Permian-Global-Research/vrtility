@@ -74,6 +74,10 @@ collections must have the same number of bands.
 \examples{
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 vrt_collect(s2files)
+
+# we can also combine multiple vrt collections
+c(vrt_collect(s2files[1:2]), vrt_collect(s2files[3:4]))
+
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 s2q <- sentinel2_stac_query(
  bbox = c(-12.386, -37.214, -12.186, -37.014),

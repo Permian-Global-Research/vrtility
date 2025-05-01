@@ -32,7 +32,63 @@
 #' carried out. In the majority of cases warping is preferred, especically when
 #' we are not processing the entirity of the input dataset (as is usually the
 #' case when working with online data sources).
+#' @examples
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' ex_collect <- vrt_collect(s2files)
 #'
+#' t_block <- ex_collect[[1]][[1]]
+#'
+#' # export each file with mask.
+#' coll_masked <- ex_collect |>
+#'   vrt_set_maskfun(
+#'     mask_band = "SCL",
+#'     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+#'   ) |>
+#'   vrt_warp(
+#'     t_srs = t_block$srs,
+#'     te = t_block$bbox,
+#'     tr = t_block$res
+#'   )
+#'
+#' # save each file with masked values.
+#' masked_files <- vrt_compute(
+#'   coll_masked,
+#'   outfile = fs::file_temp(ext = "tif")
+#' )
+#'
+#' withr::with_par(
+#'   list(mfrow = c(2, 2)),
+#'   purrr::walk(
+#'     masked_files[2:5],
+#'     ~ plot_raster_src(.x, bands = c(3, 2, 1))
+#'   )
+#' )
+#'
+#' basic_mosaic <-
+#'   vrt_stack(coll_masked) |>
+#'   vrt_compute(
+#'     outfile = fs::file_temp(ext = "tif")
+#'   )
+#'
+#' # images laid one on top of the other
+#' plot_raster_src(
+#'   basic_mosaic,
+#'   c(3, 2, 1)
+#' )
+#'
+#' # now median composite with pixelfunction
+#' med_composite <-
+#'   vrt_stack(coll_masked) |>
+#'   vrt_set_pixelfun(pixfun = median_numpy()) |>
+#'   vrt_compute(
+#'     outfile = fs::file_temp(ext = "tif")
+#'   )
+#'
+#' plot_raster_src(
+#'   med_composite,
+#'   c(3, 2, 1)
+#' )
+
 vrt_compute <- function(
   x,
   outfile,

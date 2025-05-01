@@ -34,10 +34,10 @@ multiple images (i.e create a composite image). These main features are made
 possible by the [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html) and 
 [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-<!-- ```{=gfm}
+```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
-``` -->
+``` 
 
 ## Features
 
@@ -55,6 +55,7 @@ or calculating complex time series functions.
 
 - Advanced compositing methods that maintain spectral consistency, such as the
 geometric median and medoid. 
+
 ## Installation
 
 You can install vrtility from GitHub with:

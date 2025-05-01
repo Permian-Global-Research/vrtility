@@ -26,10 +26,8 @@ image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-<!-- ```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
-``` -->
 
 ## Features
 
@@ -47,7 +45,9 @@ and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
   [mirai](https://shikokuchuo.net/mirai/)
 
 - Advanced compositing methods that maintain spectral consistency, such
-  as the geometric median and medoid. \## Installation
+  as the geometric median and medoid.
+
+## Installation
 
 You can install vrtility from GitHub with:
 

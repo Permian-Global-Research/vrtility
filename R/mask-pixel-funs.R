@@ -3,7 +3,7 @@
 #' @details This function is a simple bit mask function that can be used to
 #' mask out pixels based on a bit mask. There is no bitwise transformation
 #' applied to the provided valid_bits.
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 set_mask_numpy <- function() {
   glue::glue(
     "
@@ -24,7 +24,7 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' mask out pixels based on a bit mask. There is no bitwise transformation
 #' applied to the provided valid_bits.
 #' @export
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 build_intmask <- function() {
   glue::glue(
     "
@@ -45,7 +45,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' mask out pixels based on a bit mask. The valid_bits are used to determine
 #' which bits to mask out.
 #' @export
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 build_bitmask <- function() {
   glue::glue(
     "
