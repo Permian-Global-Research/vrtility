@@ -8,15 +8,14 @@
 \alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x, ...)
+vrt_collect(x, config_opts, bands, band_descriptions, datetimes)
 
 \method{vrt_collect}{character}(
   x,
+  config_opts = gdal_config_opts(),
   bands = NULL,
   band_descriptions = NULL,
-  datetimes = rep("", length(x)),
-  config_opts = gdal_config_opts(),
-  ...
+  datetimes = rep("", length(x))
 )
 
 \method{vrt_collect}{doc_items}(x, config_opts = gdal_config_opts(), ...)
@@ -28,7 +27,7 @@ vrt_collect(x, ...)
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
 
-\item{...}{Additional arguments not used}
+\item{config_opts}{A named character vector of GDAL configuration options.}
 
 \item{bands}{A numeric vector of band indices to include in the VRT
 collection}
@@ -37,7 +36,9 @@ collection}
 
 \item{datetimes}{A character vector of datetimes.}
 
-\item{config_opts}{A named character vector of GDAL configuration options.}
+\item{...}{In the case of \code{c}, additional vrt_collection objects to
+concatenate to \code{x}. Otherwise, additional arguments to pass to the method or
+unused.}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 
@@ -73,6 +74,10 @@ collections must have the same number of bands.
 \examples{
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 vrt_collect(s2files)
+
+# we can also combine multiple vrt collections
+c(vrt_collect(s2files[1:2]), vrt_collect(s2files[3:4]))
+
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 s2q <- sentinel2_stac_query(
  bbox = c(-12.386, -37.214, -12.186, -37.014),

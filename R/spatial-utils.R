@@ -7,7 +7,7 @@ validate_bbox <- function(bbox) {
   v_assert_type(bbox, "bbox", "numeric")
   v_assert_length(bbox, "bbox", 4)
 
-  bbox_poly <- bbox_to_wkt(bbox)
+  bbox_poly <- gdalraster::bbox_to_wkt(bbox)
 
   if (!suppressWarnings(gdalraster::g_is_valid(bbox_poly))) {
     rlang::abort(
@@ -36,22 +36,6 @@ validate_bbox <- function(bbox) {
   }
 
   return(c_bbox)
-}
-
-#' Convert a bounding box to a WKT string
-#' @param bbox A numeric vector of length 4 representing a bounding box
-#' @return A WKT string
-#' @noRd
-#' @keywords internal
-bbox_to_wkt <- function(bbox) {
-  wk::wkt(
-    glue::glue(
-      "POLYGON (({bbox[1]} {bbox[2]},
-      {bbox[3]} {bbox[2]}, {bbox[3]} {bbox[4]},
-      {bbox[1]} {bbox[4]}, {bbox[1]} {bbox[2]}))"
-    ),
-    crs = "EPSG:4326"
-  )
 }
 
 
@@ -83,7 +67,7 @@ bbox_to_wkt <- function(bbox) {
 #' for eqdc: \url{https://proj.org/en/9.4/operations/projections/eqdc.html}
 #' @examples
 #' bbox <- gdalraster::bbox_from_wkt(
-#'   wkt = wk::wkt("POINT (144.3 -7.6)"),
+#'   wkt = "POINT (144.3 -7.6)",
 #'   extend_x = 0.17,
 #'   extend_y = 0.125
 #' )
@@ -129,7 +113,7 @@ bbox_to_projected <- function(
     v_assert_type(opts, "opts", "character")
 
     # get centroid in latlong
-    cent_coor <- gdalraster::g_centroid(bbox_to_wkt(x))
+    cent_coor <- gdalraster::g_centroid(gdalraster::bbox_to_wkt(x))
 
     # configure proj args
     n_or_s <- ifelse(

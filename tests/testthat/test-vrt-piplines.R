@@ -96,7 +96,7 @@ test_that("vrt_collect works with rstac doc_items", {
   skip_on_cran()
 
   bbox <- gdalraster::bbox_from_wkt(
-    wkt = wk::wkt("POINT (-3.51 50.72)"),
+    wkt = "POINT (-3.51 50.72)",
     extend_x = 0.05,
     extend_y = 0.03
   )
@@ -154,7 +154,10 @@ test_that("pipeline extras", {
 
   one_srs_collect <- vrt_collect(s2files[1:2])
   one_srs_collect_stack <- vrt_stack(one_srs_collect)
-  one_srs_collect_stack_pf <- vrt_set_pixelfun(one_srs_collect_stack)
+  one_srs_collect_stack_pf <- vrt_set_pixelfun(
+    one_srs_collect_stack,
+    pixfun = median_numpy()
+  )
   expect_false(is.null(one_srs_collect_stack_pf$pixfun))
 
   one_srs_collect_stack_pf_mask <- vrt_set_maskfun(

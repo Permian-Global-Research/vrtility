@@ -14,6 +14,7 @@
 #' files. In general this should be left alone. main purpose is to manage cache
 #' location when running asyncronously with mirai.
 #' @export
+#' @rdname vrt_set_maskfun
 #' @details
 #' The `build_mask_pixfun` function is used to build the mask band. Where the
 #' mask band is a true bitmask and bit-wise operations are required, the

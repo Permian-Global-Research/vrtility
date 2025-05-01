@@ -2,7 +2,7 @@ test_that("hls_stac_query works", {
   skip_if_offline()
   skip_on_cran()
   bbox <- gdalraster::bbox_from_wkt(
-    wkt = wk::wkt("POINT (144.3 -7.6)"),
+    wkt = "POINT (144.3 -7.6)",
     extend_x = 0.17,
     extend_y = 0.125
   )

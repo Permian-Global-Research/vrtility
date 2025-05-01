@@ -26,10 +26,8 @@ image). These main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
-<!-- ```{=gfm}
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
-``` -->
 
 ## Features
 
@@ -37,15 +35,17 @@ and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
   download and processing of only the required data in a single gdalwarp
   (or gdal_translate) call. This reduces disk read/write time.
 
-- modular design: We’re basically creating remote sensing pipelines
+- Modular design: We’re basically creating remote sensing pipelines
   using nested VRTs. This allows for the easy addition of new pixel
   functions and masking functions. but could easily be adapted for
   deriving spectral indices or calculating complex time series
   functions.
 
-- extremely efficient parallel processing using gdalraster and
-  [mirai](https://shikokuchuo.net/mirai/) when using the “gdalraster”
-  compute engine.
+- Efficient parallel processing using gdalraster and
+  [mirai](https://shikokuchuo.net/mirai/)
+
+- Advanced compositing methods that maintain spectral consistency, such
+  as the geometric median and medoid.
 
 ## Installation
 
@@ -97,7 +97,7 @@ mirai::daemons(10)
 ``` r
 
 bbox <- gdalraster::bbox_from_wkt(
-  wkt = wk::wkt("POINT (144.3 -7.6)"),
+  wkt = "POINT (144.3 -7.6)",
   extend_x = 0.17,
   extend_y = 0.125
 )
@@ -119,25 +119,18 @@ length(s2_stac$features)
 
 ``` r
 
-system.time({
-  median_composite <- vrt_collect(s2_stac) |>
-    vrt_set_maskfun(
-      mask_band = "SCL",
-      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
-    ) |>
-    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
-    vrt_stack() |>
-    vrt_set_pixelfun() |>
-    vrt_compute(
-      outfile = fs::file_temp(ext = "tif"),
-      engine = "gdalraster"
-    )
-})
-#>    user  system elapsed 
-#>   3.499   0.274  16.198
-```
-
-``` r
+median_composite <- vrt_collect(s2_stac) |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+  ) |>
+  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
+  vrt_stack() |>
+  vrt_set_pixelfun() |>
+  vrt_compute(
+    outfile = fs::file_temp(ext = "tif"),
+    engine = "gdalraster"
+  )
 
 plot_raster_src(
   median_composite,
@@ -155,14 +148,10 @@ pipeline, we can improve performance, depending on the speed of the
 server holding the data. In some cases this will make little difference
 for example, the Microsoft Planetary Computer STAC API is already pretty
 fast. However, for NASA’s Earthdata STAC API, this can make a huge
-difference. Paralellism is available in three functions at present:
-`vrt_collect`, `vrt_set_maskfun` and `vrt_compute`. In order to use
-asynchronous processing, in the `vrt_compute` function, we need to set
-`engine = "gdalraster"`. The “gdalraster” engine is always parallelised
-across bands by default, then a further nested parallelisation step is
-possible within bands by setting `nsplits` to a value greater than 1. If
-you want to reduce the number of processes used, explicitly set
-`mirai::daemons(1)` or just use the “warp” engine.
+difference. Paralellism is available in four functions at present:
+`vrt_collect`, `vrt_set_maskfun`, `vrt_compute` and `multiband_reduce`.
+In order to use asynchronous processing, in the `vrt_compute` function,
+we need to set `engine = "gdalraster"`.
 
 ## Using on-disk rasters
 

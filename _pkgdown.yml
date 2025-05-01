@@ -22,12 +22,6 @@ reference:
       - vrt_add_empty_band
       - vrt_move_band
       - vrt_schema
-  - title: VRT pixel functions
-    desc: Functions to modify VRT properties
-    contents:
-      - build_bitmask
-      - build_intmask
-      - median_numpy
   - title: multi-band reduction funcions
     desc: Functions to create composites using multi-band algorithms
     contents:

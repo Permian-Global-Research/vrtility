@@ -6,10 +6,7 @@
 \alias{medoid}
 \alias{quantoid}
 \alias{geomedoid}
-\title{Run composite reductions that require all bands.
-\code{multiband_reduce} can be used to create composite reductions that require
-all band values, such as tyhe geometric median or medoid.
-composite of a warped VRT collection.}
+\title{Image composite reductions that require all bands.}
 \usage{
 multiband_reduce(
   x,
@@ -129,9 +126,8 @@ replaced. which may result in NA values in the output for multiple bands.}
 A character vector of the output file path.
 }
 \description{
-Run composite reductions that require all bands.
-\code{multiband_reduce} can be used to create composite reductions that require
-all band values, such as tyhe geometric median or medoid.
+\code{multiband_reduce} can be used to create composite reductions
+that require all band values, such as tyhe geometric median or medoid.
 composite of a warped VRT collection.
 }
 \details{
@@ -160,4 +156,54 @@ geometric median has greater resilience to outliers than the band-level
 median, this function may selct a medoid value that is less likely to contian
 clouds or other outliers. The returned band pixel values are spectrally
 consistent.
+}
+\examples{
+mirai::daemons(3)
+s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+
+ex_collect <- vrt_collect(s2files)
+
+t_block <- ex_collect[[1]][[1]]
+
+# export each file with mask.
+coll_masked <- ex_collect |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+  ) |>
+  vrt_warp(
+    t_srs = t_block$srs,
+    te = t_block$bbox,
+    tr = t_block$res
+  )
+
+# create plots of each of the methods to compare.
+purrr::walk2(
+    list(
+      geomedian(),
+      medoid(),
+      geomedoid(distance_type = "manhattan"),
+      quantoid(probability = 0.2)
+    ),
+    list(
+      "geomedian",
+      "medoid",
+      "geomedoid",
+      "quantoid"
+    ),
+    \(.x, .y) {
+      geomed <- multiband_reduce(
+        coll_masked,
+        reduce_fun = .x
+      )
+
+      plot_raster_src(
+        geomed,
+        c(3, 2, 1),
+        axes = FALSE,
+         main = .y
+      )
+    }
+  )
+
 }

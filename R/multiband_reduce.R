@@ -1,101 +1,6 @@
-#' @title block-level geomedian calculation
-#' @description internal functions used by `multiband_reduce` but exported to
-#' enable mirai daemon access.
-#' @param x A list of lists of matrices, where each inner list represents a
-#' time point - the product of `read_block_arrays()`.
-#' @return  A list of lists of vectors, where each inner list represents a
-#' time point.
-#' @export
-#' @rdname geomedian_internal
-#' @keywords internal
-mdim_reduction_apply <- function(x, mdim_fun) {
-  # Get dimensions from first list element
-  mast_dim <- dim(x[[1]][[1]])
-  n_cells <- prod(mast_dim)
-  n_rows <- mast_dim[1]
-  n_cols <- mast_dim[2]
-
-  # Create indices in row-major order (to match GDAL)
-  cell_indices <- expand.grid(
-    row = seq_len(n_rows),
-    col = seq_len(n_cols)
-  )
-
-  # Extract all band matrices using C++
-  band_matrices <- extract_band_matrices(
-    x = x,
-    row_indices = cell_indices$row,
-    col_indices = cell_indices$col,
-    n_cells = n_cells,
-    n_timepoints = length(x),
-    n_bands = length(x[[1]])
-  )
-
-  # Process matrices using lapply
-  result <- purrr::map(band_matrices, function(bandmatrix) {
-    if (nrow(bandmatrix) > 1) {
-      mdim_fun(bandmatrix)
-    } else if (nrow(bandmatrix) == 1) {
-      as.vector(bandmatrix[1, ])
-    } else {
-      rep(NA_real_, ncol(bandmatrix))
-    }
-  })
-
-  return(result)
-}
-
-
-#' @title Read VRT block tiles
-#' @param x a VRT block object
-#' @param nbands number of bands
-#' @param xoff x offset
-#' @param yoff y offset
-#' @param xsize x size
-#' @param ysize y size
-#' @param save_dir directory to save temporary files
-#' @return a list of matrices, where each matrix corresponds to a band
-#' @export
-#' @rdname geomedian_internal
-#' @keywords internal
-read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
-  purrr::map(
-    x[[1]],
-    function(.x) {
-      tvrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
-      vrt_xml <- xml2::read_xml(.x$vrt)
-      xml2::write_xml(vrt_xml, tvrt)
-      ds <- methods::new(gdalraster::GDALRaster, tvrt)
-      on.exit(ds$close())
-      # Read and combine bands
-      band_data <- compute_with_py_env(
-        purrr::map(
-          seq_len(nbands),
-          function(b) {
-            ds$read(
-              band = b,
-              xoff = xoff,
-              yoff = yoff,
-              xsize = xsize,
-              ysize = ysize,
-              out_xsize = xsize,
-              out_ysize = ysize
-            )
-          }
-        )
-      )
-
-      purrr::map(seq_len(nbands), function(b) {
-        matrix(band_data[[b]], nrow = ysize, ncol = xsize)
-      })
-    }
-  )
-}
-
-
-#' Run composite reductions that require all bands.
-#' `multiband_reduce` can be used to create composite reductions that require
-#' all band values, such as tyhe geometric median or medoid.
+#' @title Image composite reductions that require all bands.
+#' @description `multiband_reduce` can be used to create composite reductions
+#' that require all band values, such as tyhe geometric median or medoid.
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
 #' @param reduce_fun A function to apply to the data. This function should take
@@ -120,6 +25,55 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
 #' @details
 #' We have a lot TODO: info on the reduce_fun options and nsplits etc...
 #' @rdname multiband_reduce
+#' @examples
+#' mirai::daemons(3)
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#'
+#' ex_collect <- vrt_collect(s2files)
+#'
+#' t_block <- ex_collect[[1]][[1]]
+#'
+#' # export each file with mask.
+#' coll_masked <- ex_collect |>
+#'   vrt_set_maskfun(
+#'     mask_band = "SCL",
+#'     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+#'   ) |>
+#'   vrt_warp(
+#'     t_srs = t_block$srs,
+#'     te = t_block$bbox,
+#'     tr = t_block$res
+#'   )
+#'
+#' # create plots of each of the methods to compare.
+#' purrr::walk2(
+#'     list(
+#'       geomedian(),
+#'       medoid(),
+#'       geomedoid(distance_type = "manhattan"),
+#'       quantoid(probability = 0.2)
+#'     ),
+#'     list(
+#'       "geomedian",
+#'       "medoid",
+#'       "geomedoid",
+#'       "quantoid"
+#'     ),
+#'     \(.x, .y) {
+#'       geomed <- multiband_reduce(
+#'         coll_masked,
+#'         reduce_fun = .x
+#'       )
+#'
+#'       plot_raster_src(
+#'         geomed,
+#'         c(3, 2, 1),
+#'         axes = FALSE,
+#'          main = .y
+#'       )
+#'     }
+#'   )
+#'
 #' @export
 multiband_reduce <- function(
   x,
@@ -172,7 +126,7 @@ multiband_reduce.vrt_collection_warped <- function(
     quiet
   )
 
-  #set gdal config options
+  # set gdal config options
   orig_config <- set_gdal_config(c(config_options))
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
@@ -196,7 +150,6 @@ multiband_reduce.vrt_collection_warped <- function(
     blksize,
     nsplits
   )
-  # browser()
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(
@@ -291,6 +244,100 @@ multiband_reduce.vrt_collection_warped <- function(
   }
 
   return(outfile)
+}
+
+#' @title block-level geomedian calculation
+#' @description internal functions used by `multiband_reduce` but exported to
+#' enable mirai daemon access.
+#' @param x A list of lists of matrices, where each inner list represents a
+#' time point - the product of `read_block_arrays()`.
+#' @return  A list of lists of vectors, where each inner list represents a
+#' time point.
+#' @export
+#' @rdname geomedian_internal
+#' @keywords internal
+mdim_reduction_apply <- function(x, mdim_fun) {
+  # Get dimensions from first list element
+  mast_dim <- dim(x[[1]][[1]])
+  n_cells <- prod(mast_dim)
+  n_rows <- mast_dim[1]
+  n_cols <- mast_dim[2]
+
+  # Create indices in row-major order (to match GDAL)
+  cell_indices <- expand.grid(
+    row = seq_len(n_rows),
+    col = seq_len(n_cols)
+  )
+
+  # Extract all band matrices using C++
+  band_matrices <- extract_band_matrices(
+    x = x,
+    row_indices = cell_indices$row,
+    col_indices = cell_indices$col,
+    n_cells = n_cells,
+    n_timepoints = length(x),
+    n_bands = length(x[[1]])
+  )
+
+  # Process matrices using lapply
+  result <- purrr::map(band_matrices, function(bandmatrix) {
+    if (nrow(bandmatrix) > 1) {
+      mdim_fun(bandmatrix)
+    } else if (nrow(bandmatrix) == 1) {
+      as.vector(bandmatrix[1, ])
+    } else {
+      rep(NA_real_, ncol(bandmatrix))
+    }
+  })
+
+  return(result)
+}
+
+
+#' @title Read VRT block tiles
+#' @param x a VRT block object
+#' @param nbands number of bands
+#' @param xoff x offset
+#' @param yoff y offset
+#' @param xsize x size
+#' @param ysize y size
+#' @param save_dir directory to save temporary files
+#' @return a list of matrices, where each matrix corresponds to a band
+#' @export
+#' @rdname geomedian_internal
+#' @keywords internal
+read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
+  purrr::map(
+    x[[1]],
+    function(.x) {
+      tvrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+      vrt_xml <- xml2::read_xml(.x$vrt)
+      xml2::write_xml(vrt_xml, tvrt)
+      ds <- methods::new(gdalraster::GDALRaster, tvrt)
+      on.exit(ds$close())
+      # Read and combine bands
+      band_data <- compute_with_py_env(
+        purrr::map(
+          seq_len(nbands),
+          function(b) {
+            ds$read(
+              band = b,
+              xoff = xoff,
+              yoff = yoff,
+              xsize = xsize,
+              ysize = ysize,
+              out_xsize = xsize,
+              out_ysize = ysize
+            )
+          }
+        )
+      )
+
+      purrr::map(seq_len(nbands), function(b) {
+        matrix(band_data[[b]], nrow = ysize, ncol = xsize)
+      })
+    }
+  )
 }
 
 

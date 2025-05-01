@@ -3,7 +3,7 @@
 #' @details This function is a simple bit mask function that can be used to
 #' mask out pixels based on a bit mask. There is no bitwise transformation
 #' applied to the provided valid_bits.
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 set_mask_numpy <- function() {
   glue::glue(
     "
@@ -24,7 +24,7 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' mask out pixels based on a bit mask. There is no bitwise transformation
 #' applied to the provided valid_bits.
 #' @export
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 build_intmask <- function() {
   glue::glue(
     "
@@ -35,7 +35,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
     mask = np.isin(in_ar[0], mask_vals)
     # breakpoint()
-    out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+    out_ar[:] = np.where(mask, 0, 255)  # Set invalid pixels to 0
 "
   )
 }
@@ -45,7 +45,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' mask out pixels based on a bit mask. The valid_bits are used to determine
 #' which bits to mask out.
 #' @export
-#' @rdname vrt_maskfuns
+#' @rdname vrt_set_maskfun
 build_bitmask <- function() {
   glue::glue(
     "
@@ -64,7 +64,7 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) > 0
     
     # Set output: 255 for valid pixels (mask True), 0 for invalid
-    out_ar[:] = np.where(mask, 0, 1)
+    out_ar[:] = np.where(mask, 0, 255)
 "
   )
 }
