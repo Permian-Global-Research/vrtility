@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,7 +120,7 @@ projection centered around the centroid of the bounding box.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
-<span>  wkt <span class="op">=</span> <span class="fu">wk</span><span class="fu">::</span><span class="fu"><a href="https://paleolimbot.github.io/wk/reference/wkt.html" class="external-link">wkt</a></span><span class="op">(</span><span class="st">"POINT (144.3 -7.6)"</span><span class="op">)</span>,</span>
+<span>  wkt <span class="op">=</span> <span class="st">"POINT (144.3 -7.6)"</span>,</span>
 <span>  extend_x <span class="op">=</span> <span class="fl">0.17</span>,</span>
 <span>  extend_y <span class="op">=</span> <span class="fl">0.125</span></span>
 <span><span class="op">)</span></span>
@@ -240,7 +240,7 @@ across all bands.</p>
 <span>  <span class="va">hls_sl_col</span>,</span>
 <span>  mask_band <span class="op">=</span> <span class="st">"Fmask"</span>,</span>
 <span>  mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_maskfuns.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  drop_mask_band <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -248,7 +248,7 @@ across all bands.</p>
 <span>  <span class="va">hls_ss_col</span>,</span>
 <span>  mask_band <span class="op">=</span> <span class="st">"Fmask"</span>,</span>
 <span>  mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_maskfuns.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  drop_mask_band <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -341,7 +341,7 @@ image. The typical approach would be to use the band-level median which
 we can achieve easily by first using the following:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/median_numpy.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>    engine <span class="op">=</span> <span class="st">"gdalraster"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>

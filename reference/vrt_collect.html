@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,16 +48,15 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_collect</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_collect</span><span class="op">(</span><span class="va">x</span>, <span class="va">config_opts</span>, <span class="va">bands</span>, <span class="va">band_descriptions</span>, <span class="va">datetimes</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'character'</span></span>
 <span><span class="fu">vrt_collect</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
+<span>  config_opts <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_opts</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  bands <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  band_descriptions <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  datetimes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  config_opts <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_opts</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  datetimes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'doc_items'</span></span>
@@ -78,8 +77,8 @@
 <dd><p>An object to be used to create a vrt_x object see details.</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments not used</p></dd>
+<dt id="arg-config-opts">config_opts<a class="anchor" aria-label="anchor" href="#arg-config-opts"></a></dt>
+<dd><p>A named character vector of GDAL configuration options.</p></dd>
 
 
 <dt id="arg-bands">bands<a class="anchor" aria-label="anchor" href="#arg-bands"></a></dt>
@@ -95,8 +94,10 @@ collection</p></dd>
 <dd><p>A character vector of datetimes.</p></dd>
 
 
-<dt id="arg-config-opts">config_opts<a class="anchor" aria-label="anchor" href="#arg-config-opts"></a></dt>
-<dd><p>A named character vector of GDAL configuration options.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>In the case of <code>c</code>, additional vrt_collection objects to
+concatenate to <code>x</code>. Otherwise, additional arguments to pass to the method or
+unused.</p></dd>
 
 
 <dt id="arg-xml">xml<a class="anchor" aria-label="anchor" href="#arg-xml"></a></dt>
@@ -157,6 +158,24 @@ collections must have the same number of bands.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">End Date:</span> NA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Number of Items:</span> 5</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, SCL</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we can also combine multiple vrt collections</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">vrt_collect</span><span class="op">(</span><span class="va">s2files</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, <span class="fu">vrt_collect</span><span class="op">(</span><span class="va">s2files</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Collection&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00; font-weight: bold;"> VRT SRS: </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #FF55FF; font-style: italic;">PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #FF55FF; font-style: italic;">PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> NA</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9923198093722, 19.9923198093722</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Start Date:</span> NA</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">End Date:</span> NA</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Number of Items:</span> 4</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, SCL</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="va">s2q</span> <span class="op">&lt;-</span> <span class="fu"><a href="stac_utilities.html">sentinel2_stac_query</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span> bbox <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">12.386</span>, <span class="op">-</span><span class="fl">37.214</span>, <span class="op">-</span><span class="fl">12.186</span>, <span class="op">-</span><span class="fl">37.014</span><span class="op">)</span>,</span></span>

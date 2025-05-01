@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,10 +59,10 @@
         <dd>Construct the base VRT object for composing VRT pipelines.</dd>
       </dl><dl><dt>
 
-          <code><a href="vrt_set_maskfun.html">vrt_set_maskfun()</a></code>
+          <code><a href="vrt_set_maskfun.html">set_mask_numpy()</a></code> <code><a href="vrt_set_maskfun.html">build_intmask()</a></code> <code><a href="vrt_set_maskfun.html">build_bitmask()</a></code> <code><a href="vrt_set_maskfun.html">vrt_set_maskfun()</a></code>
 
         </dt>
-        <dd>Set mask band of a VRT collection</dd>
+        <dd>Masking functions for pixel-based processing</dd>
       </dl><dl><dt>
 
           <code><a href="vrt_warp.html">vrt_warp()</a></code>
@@ -77,10 +77,10 @@
         <dd>Stack VRT files from a vrt_collection object</dd>
       </dl><dl><dt>
 
-          <code><a href="vrt_set_pixelfun.html">vrt_set_pixelfun()</a></code>
+          <code><a href="vrt_set_pixelfun.html">median_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">mean_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">vrt_set_pixelfun()</a></code>
 
         </dt>
-        <dd>Set the pixel function of a VRT stack object</dd>
+        <dd>python pixel function for the mean using numpy</dd>
       </dl><dl><dt>
 
           <code><a href="vrt_compute.html">vrt_compute()</a></code>
@@ -129,29 +129,6 @@
         </dt>
         <dd>The official GDAL VRT XML schema A copy of the official VRT schema for vritility VRT validation.</dd>
       </dl></div><div class="section level2">
-      <h2 id="vrt-pixel-functions">VRT pixel functions<a class="anchor" aria-label="anchor" href="#vrt-pixel-functions"></a></h2>
-
-      <div class="section-desc"><p>Functions to modify VRT properties</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="vrt_maskfuns.html">set_mask_numpy()</a></code> <code><a href="vrt_maskfuns.html">build_intmask()</a></code> <code><a href="vrt_maskfuns.html">build_bitmask()</a></code>
-
-        </dt>
-        <dd>Masking functions for pixel-based processing</dd>
-      </dl><dl><dt>
-
-          <code><a href="median_numpy.html">median_numpy()</a></code>
-
-        </dt>
-        <dd>python pixel function for the median using numpy</dd>
-      </dl></div><div class="section level2">
       <h2 id="multi-band-reduction-funcions">multi-band reduction funcions<a class="anchor" aria-label="anchor" href="#multi-band-reduction-funcions"></a></h2>
 
       <div class="section-desc"><p>Functions to create composites using multi-band algorithms</p></div>
@@ -167,7 +144,7 @@
           <code><a href="multiband_reduce.html">multiband_reduce()</a></code> <code><a href="multiband_reduce.html">geomedian()</a></code> <code><a href="multiband_reduce.html">medoid()</a></code> <code><a href="multiband_reduce.html">quantoid()</a></code> <code><a href="multiband_reduce.html">geomedoid()</a></code>
 
         </dt>
-        <dd>Run composite reductions that require all bands. <code>multiband_reduce</code> can be used to create composite reductions that require all band values, such as tyhe geometric median or medoid. composite of a warped VRT collection.</dd>
+        <dd>Image composite reductions that require all bands.</dd>
       </dl></div><div class="section level2">
       <h2 id="gdal-configuration">GDAL Configuration<a class="anchor" aria-label="anchor" href="#gdal-configuration"></a></h2>
 

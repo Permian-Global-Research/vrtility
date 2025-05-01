@@ -10,7 +10,6 @@
 <url><loc>https://permian-global-research.github.io/vrtility/reference/gdal_options.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/geomedian_internal.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/index.html</loc></url>
-<url><loc>https://permian-global-research.github.io/vrtility/reference/median_numpy.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/multiband_reduce.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/plot_raster.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/set_vrt_descriptions.html</loc></url>
@@ -21,7 +20,6 @@
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_cache_management.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_collect.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_compute.html</loc></url>
-<url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_maskfuns.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_move_band.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_save.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_set_band_names.html</loc></url>
