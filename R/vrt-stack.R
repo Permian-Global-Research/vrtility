@@ -39,11 +39,11 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
 
   main_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  gdalraster::buildVRT(
+  suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
     quiet = quiet
-  )
+  ))
 
   main_vrt <- set_vrt_descriptions(
     main_vrt,
