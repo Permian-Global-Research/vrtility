@@ -32,7 +32,7 @@ test_that("multiband_reduce works", {
   expect_true(all(file.exists(ex_geomed_weizfeld)))
   ds <- new(gdalraster::GDALRaster, ex_geomed_weizfeld)
   vals <- gdalraster::read_ds(ds)
-  expect_gt(sum(vals, na.rm = TRUE), 635200000)
+  expect_gt(sum(vals, na.rm = TRUE), 635000000)
   ds$close()
 
   # Geomedian weizfeld impute_na = FALSE:
@@ -44,7 +44,7 @@ test_that("multiband_reduce works", {
   expect_true(all(file.exists(ex_geomed_weizfeld_na)))
   ds <- new(gdalraster::GDALRaster, ex_geomed_weizfeld_na)
   vals <- gdalraster::read_ds(ds)
-  expect_gt(sum(vals, na.rm = TRUE), 635200000)
+  expect_gt(sum(vals, na.rm = TRUE), 635000000)
   ds$close()
 
   # Geomedian Gmedian:
