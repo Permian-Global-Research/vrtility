@@ -56,8 +56,8 @@ box.
 ``` r
 library(vrtility)
 
-mirai::daemons(10)
-#> [1] 10
+mirai::daemons(machine_cores())
+#> [1] 20
 ```
 
 ``` r
@@ -142,10 +142,12 @@ for all daemons.
 
 
 ``` r
-mirai::everywhere(earthdatalogin::edl_netrc(
-  username = Sys.getenv("EARTHDATA_USER"),
-  password = Sys.getenv("EARTHDATA_PASSWORD")
-))
+mirai::everywhere(
+  earthdatalogin::edl_netrc(
+    username = Sys.getenv("EARTHDATA_USER"),
+    password = Sys.getenv("EARTHDATA_PASSWORD")
+  )
+)
 ```
 
 Now we can begin forming the VRT pipeline. Here we "collect" all of the assets
@@ -227,17 +229,10 @@ print(hls_sl_col_mask, maskfun = TRUE)
 #> import numpy as np
 #> def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #>                   raster_ysize, buf_radius, gt, **kwargs):
-#>     # Convert comma-separated bit positions to integers
 #>     bit_positions = [int(x) for x in kwargs['mask_values'].decode().split(',')]
-#>     
-#>     # Initialize mask array with zeros
 #>     mask = np.zeros_like(in_ar[0], dtype=bool)
-#>     
-#>     # Combine masks for each bit position using OR
 #>     for bit in bit_positions:
 #>         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) > 0
-#>     
-#>     # Set output: 255 for valid pixels (mask True), 0 for invalid
 #>     out_ar[:] = np.where(mask, 0, 1)
 #> 
 #> 
@@ -337,8 +332,9 @@ ensure that spectral properties are preserved. Several functions are provided
 in the `vrtility` package to do this but the user can also provide their own 
 if desired. Here we will use the `geomedian` function which calculates the 
 geometric (aka spatial median). This synthetic statistic ensures consistency 
-across bands. note that where some bands dont exist, the median is used in 
-place of the geometric median.
+across bands. Note we can also use other functions such as `medoid` or 
+`quantoid`, or `geomedoid` to obtain different types of composite that all 
+preserve the spectral properties of the data.
 
 
 ``` r
@@ -350,16 +346,20 @@ composite.
 
 
 ``` r
-plot_raster_src(
-  hls_composite,
-  bands = c(4, 3, 2)
-)
+withr::with_par(list(mar = c(0, 0, 0, 0)), {
+  plot_raster_src(
+    hls_composite,
+    bands = c(4, 3, 2),
+    axes = FALSE
+  )
 
-plot_raster_src(
-  hls_composite,
-  bands = c(9, 12, 13),
-  minmax_pct_cut = c(28, 97)
-)
+  plot_raster_src(
+    hls_composite,
+    bands = c(9, 12, 13),
+    minmax_pct_cut = c(28, 97),
+    axes = FALSE
+  )
+})
 ```
 
 <img src="figure/hls-plot-1.png" width="50%" /><img src="figure/hls-plot-2.png" width="50%" />
@@ -368,16 +368,18 @@ And all the other bands too:
 
 
 ``` r
-par(mfrow = c(5, 3), mar = c(0, 0, 1, 0))
-purrr::walk(1:15, function(i) {
-  plot_raster_src(
-    hls_composite,
-    bands = i,
-    pal = hcl.colors(256, "Rocket"),
-    legend = FALSE,
-    axes = FALSE
-  )
-})
+withr::with_par(
+  list(mfrow = c(5, 3), mar = c(0, 0, 1, 0)),
+  purrr::walk(1:15, function(i) {
+    plot_raster_src(
+      hls_composite,
+      bands = i,
+      pal = hcl.colors(256, "Rocket"),
+      legend = FALSE,
+      axes = FALSE
+    )
+  })
+)
 ```
 
 ![](figure/hls-plot-bands-1.png)
