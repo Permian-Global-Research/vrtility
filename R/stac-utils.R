@@ -173,6 +173,7 @@ sentinel2_stac_query <- function(
   mpc_sign = TRUE,
   limit = 999
 ) {
+  assets <- rlang::arg_match(assets, multiple = TRUE)
   stac_its <- stac_query(
     bbox = bbox,
     stac_source = stac_source,
@@ -246,6 +247,7 @@ hls_stac_query <- function(
   collection = c("HLSS30_2.0", "HLSL30_2.0"),
   limit = 999
 ) {
+  assets <- rlang::arg_match(assets, multiple = TRUE)
   collection <- rlang::arg_match(collection)
   stac_its <- stac_query(
     bbox = bbox,
@@ -274,4 +276,79 @@ stac_cloud_filter <- function(items, max_cloud_cover) {
     rstac::items_filter(
       filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
     )
+}
+
+#' Filter a STAC item collection by orbit state
+#' @param items A STACItemCollection
+#' @param orbit_state A character string of the orbit state to filter by
+#' @return A STACItemCollection
+#' @noRd
+#' @keywords internal
+stac_orbit_filter <- function(items, orbit_state) {
+  items |>
+    rstac::items_filter(
+      filter_fn = function(x) {
+        x$properties$`sat:orbit_state` %in% orbit_state
+      }
+    )
+}
+
+#' Generate a Sentinel 1 stac collection doc_items object
+#' @param orbit_state A character vector of the orbit state to filter by. Both
+#' arguments are allowed however - consider carefully the implications of
+#' retaining both orbits if you intend to composite the data.
+#' @rdname stac_utilities
+#' @export
+#' @examplesIf interactive()
+#' sentinel1_stac_query(
+#'   bbox = c(-12.386, -37.214, -12.186, -37.014),
+#'   start_date = "2023-01-01",
+#'   end_date = "2023-01-31",
+#'   assets = "vv"
+#' )
+sentinel1_stac_query <- function(
+  bbox,
+  start_date,
+  end_date,
+  assets = c("hh", "hv", "vh", "vv"),
+  orbit_state = c("descending", "ascending"),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = c("sentinel-1-rtc", "sentinel-1-grd"),
+  mpc_sign = TRUE,
+  limit = 999
+) {
+  assets <- rlang::arg_match(assets, multiple = TRUE)
+  orbit_state <- rlang::arg_match(orbit_state, multiple = TRUE)
+  collection <- rlang::arg_match(collection)
+  if (collection == "sentinel-1-rtc") {
+    if (Sys.getenv("MPC_TOKEN") == "") {
+      cli::cli_abort(
+        c(
+          "!" = "No subscription key provided.",
+          "i" = "To access the Sentinel 1 RTC collection, you need a 
+          subscription key. Set your key using the `MPC_TOKEN` environment 
+          variable."
+        )
+      )
+    }
+  }
+
+  stac_its <- stac_query(
+    bbox = bbox,
+    stac_source = stac_source,
+    start_date = start_date,
+    end_date = end_date,
+    collection = collection,
+    limit = limit
+  )
+
+  stac_its <- stac_orbit_filter(stac_its, orbit_state)
+
+  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
+
+  if (mpc_sign) {
+    stac_its <- sign_planetary_computer(stac_its)
+  }
+
+  return(stac_its)
 }
