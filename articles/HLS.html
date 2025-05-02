@@ -115,8 +115,8 @@ projection centered around the centroid of the bounding box.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mirai/man/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 10</span></span></code></pre></div>
+<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mirai/man/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fu"><a href="../reference/mirai-mgmt.html">machine_cores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 20</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
@@ -186,10 +186,12 @@ credentials. The simplest way to do this is with the <a href="https://boettiger-
 package. But, because we are using asynchronous mirai daemons, we need
 to set the credentials for all daemons.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mirai/man/everywhere.html" class="external-link">everywhere</a></span><span class="op">(</span><span class="fu">earthdatalogin</span><span class="fu">::</span><span class="fu"><a href="https://boettiger-lab.github.io/earthdatalogin/reference/edl_netrc.html" class="external-link">edl_netrc</a></span><span class="op">(</span></span>
-<span>  username <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"EARTHDATA_USER"</span><span class="op">)</span>,</span>
-<span>  password <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"EARTHDATA_PASSWORD"</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mirai/man/everywhere.html" class="external-link">everywhere</a></span><span class="op">(</span></span>
+<span>  <span class="fu">earthdatalogin</span><span class="fu">::</span><span class="fu"><a href="https://boettiger-lab.github.io/earthdatalogin/reference/edl_netrc.html" class="external-link">edl_netrc</a></span><span class="op">(</span></span>
+<span>    username <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"EARTHDATA_USER"</span><span class="op">)</span>,</span>
+<span>    password <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"EARTHDATA_PASSWORD"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Now we can begin forming the VRT pipeline. Here we “collect” all of
 the assets from the STAC collections. This is essentially just a list of
 virtual rasters. This can take a little time due to VRT validation -
@@ -259,17 +261,10 @@ across all bands.</p>
 <span><span class="co">#&gt; import numpy as np</span></span>
 <span><span class="co">#&gt; def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,</span></span>
 <span><span class="co">#&gt;                   raster_ysize, buf_radius, gt, **kwargs):</span></span>
-<span><span class="co">#&gt;     # Convert comma-separated bit positions to integers</span></span>
 <span><span class="co">#&gt;     bit_positions = [int(x) for x in kwargs['mask_values'].decode().split(',')]</span></span>
-<span><span class="co">#&gt;     </span></span>
-<span><span class="co">#&gt;     # Initialize mask array with zeros</span></span>
 <span><span class="co">#&gt;     mask = np.zeros_like(in_ar[0], dtype=bool)</span></span>
-<span><span class="co">#&gt;     </span></span>
-<span><span class="co">#&gt;     # Combine masks for each bit position using OR</span></span>
 <span><span class="co">#&gt;     for bit in bit_positions:</span></span>
 <span><span class="co">#&gt;         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) &gt; 0</span></span>
-<span><span class="co">#&gt;     </span></span>
-<span><span class="co">#&gt;     # Set output: 255 for valid pixels (mask True), 0 for invalid</span></span>
 <span><span class="co">#&gt;     out_ar[:] = np.where(mask, 0, 1)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -352,36 +347,44 @@ preserved. Several functions are provided in the <code>vrtility</code>
 package to do this but the user can also provide their own if desired.
 Here we will use the <code>geomedian</code> function which calculates
 the geometric (aka spatial median). This synthetic statistic ensures
-consistency across bands. note that where some bands dont exist, the
-median is used in place of the geometric median.</p>
+consistency across bands. Note we can also use other functions such as
+<code>medoid</code> or <code>quantoid</code>, or <code>geomedoid</code>
+to obtain different types of composite that all preserve the spectral
+properties of the data.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span><span class="va">hls_warp</span>, reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Now let’s take a look at the composite - first RGB and then a false
 colour composite.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_composite</span>,</span>
-<span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_composite</span>,</span>
-<span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">13</span><span class="op">)</span>,</span>
-<span>  minmax_pct_cut <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">97</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/hls-plot-1.png" width="50%"><img src="figure/hls-plot-2.png" width="50%"></p>
-<p>And all the other bands too:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>    <span class="va">hls_composite</span>,</span>
-<span>    bands <span class="op">=</span> <span class="va">i</span>,</span>
-<span>    pal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">256</span>, <span class="st">"Rocket"</span><span class="op">)</span>,</span>
-<span>    legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    axes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
+<span>    <span class="va">hls_composite</span>,</span>
+<span>    bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">13</span><span class="op">)</span>,</span>
+<span>    minmax_pct_cut <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">28</span>, <span class="fl">97</span><span class="op">)</span>,</span>
 <span>    axes <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p><img src="figure/hls-plot-1.png" width="50%"><img src="figure/hls-plot-2.png" width="50%"></p>
+<p>And all the other bands too:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
+<span>      <span class="va">hls_composite</span>,</span>
+<span>      bands <span class="op">=</span> <span class="va">i</span>,</span>
+<span>      pal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">256</span>, <span class="st">"Rocket"</span><span class="op">)</span>,</span>
+<span>      legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>      axes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/hls-plot-bands-1.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -71,14 +71,15 @@ Destroy the VRT cache directory"></head><body>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The default cache location is <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>. This function allows you to set
-the cache location to a different directory. It is mainly useful if you
-intend to work with parallel processing. <code>vrtility</code> depends on saving many
-vrt files to disk and passing these files between processes fails when using a
+the cache location to a different directory. It is mainly useful for
+debugging or if you wish to interrogate intermediate VRT files.
+<code>vrtility</code> depends on saving many vrt files to disk so a lot of files can
+build up in the cache directory.
 temporary directory.</p>
-<p>A helper function that will destroy the VRT cache directory. This is useful
-if you want to clear the cache directory and start fresh. If the cache
-directory is set to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> then the function will warn you that this is
-a bad idea and will not proceed.</p>
+<p><code>vrt_cache_destroy</code> is a helper function that will destroy the VRT cache
+directory. This is useful if you want to clear the cache directory and start
+fresh. If the cache directory is set to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> then the function will
+warn you that this is a bad idea and will not proceed.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

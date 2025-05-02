@@ -59,10 +59,10 @@
         <dd>Construct the base VRT object for composing VRT pipelines.</dd>
       </dl><dl><dt>
 
-          <code><a href="vrt_set_maskfun.html">set_mask_numpy()</a></code> <code><a href="vrt_set_maskfun.html">build_intmask()</a></code> <code><a href="vrt_set_maskfun.html">build_bitmask()</a></code> <code><a href="vrt_set_maskfun.html">vrt_set_maskfun()</a></code>
+          <code><a href="vrt_set_maskfun.html">vrt_set_maskfun()</a></code> <code><a href="vrt_set_maskfun.html">set_mask_numpy()</a></code> <code><a href="vrt_set_maskfun.html">build_intmask()</a></code> <code><a href="vrt_set_maskfun.html">build_bitmask()</a></code>
 
         </dt>
-        <dd>Masking functions for pixel-based processing</dd>
+        <dd>Set mask band of a VRT collection</dd>
       </dl><dl><dt>
 
           <code><a href="vrt_warp.html">vrt_warp()</a></code>
@@ -77,10 +77,10 @@
         <dd>Stack VRT files from a vrt_collection object</dd>
       </dl><dl><dt>
 
-          <code><a href="vrt_set_pixelfun.html">median_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">mean_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">vrt_set_pixelfun()</a></code>
+          <code><a href="vrt_set_pixelfun.html">vrt_set_pixelfun()</a></code> <code><a href="vrt_set_pixelfun.html">median_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">mean_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">geomean_numpy()</a></code> <code><a href="vrt_set_pixelfun.html">mean_db_numpy()</a></code>
 
         </dt>
-        <dd>python pixel function for the mean using numpy</dd>
+        <dd>Set the pixel function of a VRT stack object</dd>
       </dl><dl><dt>
 
           <code><a href="vrt_compute.html">vrt_compute()</a></code>
@@ -192,7 +192,7 @@
 
       <dl><dt>
 
-          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sign_planetary_computer()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code> <code><a href="stac_utilities.html">hls_stac_query()</a></code>
+          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sign_planetary_computer()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code> <code><a href="stac_utilities.html">hls_stac_query()</a></code> <code><a href="stac_utilities.html">sentinel1_stac_query()</a></code>
 
         </dt>
         <dd>Query a STAC source</dd>
@@ -230,6 +230,23 @@
 
         </dt>
         <dd>Set the VRT cache directory</dd>
+      </dl></div><div class="section level2">
+      <h2 id="parallel-processing-helpers">parallel processing helpers<a class="anchor" aria-label="anchor" href="#parallel-processing-helpers"></a></h2>
+
+      <div class="section-desc"><p>Helper functions for parallel processing</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="mirai-mgmt.html">using_daemons()</a></code> <code><a href="mirai-mgmt.html">n_daemons()</a></code> <code><a href="mirai-mgmt.html">machine_cores()</a></code>
+
+        </dt>
+        <dd>Mirai Daemon Management</dd>
       </dl></div><div class="section level2">
       <h2 id="spatial-helper-functions">Spatial helper functions<a class="anchor" aria-label="anchor" href="#spatial-helper-functions"></a></h2>
 

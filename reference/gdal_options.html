@@ -61,17 +61,22 @@ Set the GDAL configuration options"></head><body>
 <span>  VSI_CACHE <span class="op">=</span> <span class="st">"TRUE"</span>,</span>
 <span>  GDAL_CACHEMAX <span class="op">=</span> <span class="st">"50%"</span>,</span>
 <span>  VSI_CACHE_SIZE <span class="op">=</span> <span class="st">"268435456"</span>,</span>
-<span>  GDAL_NUM_THREADS <span class="op">=</span> <span class="st">"ALL_CPUS"</span>,</span>
+<span>  GDAL_NUM_THREADS <span class="op">=</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">machine_cores</a></span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">n_daemons</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  GDAL_DISABLE_READDIR_ON_OPEN <span class="op">=</span> <span class="st">"EMPTY_DIR"</span>,</span>
-<span>  GDAL_MAX_DATASET_POOL_SIZE <span class="op">=</span> <span class="st">"500"</span>,</span>
-<span>  GDAL_INGESTED_BYTES_AT_OPEN <span class="op">=</span> <span class="st">"32000"</span>,</span>
+<span>  GDAL_MAX_DATASET_POOL_SIZE <span class="op">=</span> <span class="st">"1000"</span>,</span>
+<span>  GDAL_INGESTED_BYTES_AT_OPEN <span class="op">=</span> <span class="st">"65536"</span>,</span>
 <span>  CPL_VSIL_CURL_ALLOWED_EXTENSIONS <span class="op">=</span> <span class="st">".tif .TIF"</span>,</span>
 <span>  CPL_VSIL_CURL_USE_HEAD <span class="op">=</span> <span class="st">"NO"</span>,</span>
-<span>  GDAL_HTTP_MAX_RETRY <span class="op">=</span> <span class="st">"5"</span>,</span>
-<span>  GDAL_HTTP_RETRY_DELAY <span class="op">=</span> <span class="st">"3"</span>,</span>
+<span>  CPL_VSIL_CURL_CHUNK_SIZE <span class="op">=</span> <span class="st">"10485760"</span>,</span>
+<span>  CPL_VSIL_CURL_CACHE_SIZE <span class="op">=</span> <span class="st">"1342177280"</span>,</span>
+<span>  GDAL_HTTP_MAX_RETRY <span class="op">=</span> <span class="st">"10"</span>,</span>
+<span>  GDAL_HTTP_RETRY_DELAY <span class="op">=</span> <span class="st">"5"</span>,</span>
 <span>  GDAL_HTTP_MULTIPLEX <span class="op">=</span> <span class="st">"YES"</span>,</span>
 <span>  GDAL_HTTP_VERSION <span class="op">=</span> <span class="st">"2"</span>,</span>
 <span>  GDAL_HTTP_MERGE_CONSECUTIVE_RANGES <span class="op">=</span> <span class="st">"YES"</span>,</span>
+<span>  GDAL_HTTP_COOKIEFILE <span class="op">=</span> <span class="st">"~/.cookies.txt"</span>,</span>
+<span>  GDAL_HTTP_COOKIEJAR <span class="op">=</span> <span class="va">GDAL_HTTP_COOKIEFILE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -98,59 +103,79 @@ Set the GDAL configuration options"></head><body>
 
 
 <dl><dt id="arg-vsi-cache">VSI_CACHE<a class="anchor" aria-label="anchor" href="#arg-vsi-cache"></a></dt>
-<dd><p>cache related</p></dd>
+<dd><p>Should the Virtual File System (VSI) cache be used?</p></dd>
 
 
 <dt id="arg-gdal-cachemax">GDAL_CACHEMAX<a class="anchor" aria-label="anchor" href="#arg-gdal-cachemax"></a></dt>
-<dd><p>cache related</p></dd>
+<dd><p>Maximum size of the gdal cache in MB or percentage of
+the available memory. Default is 50% of the available memory.</p></dd>
 
 
 <dt id="arg-vsi-cache-size">VSI_CACHE_SIZE<a class="anchor" aria-label="anchor" href="#arg-vsi-cache-size"></a></dt>
-<dd><p>cache related</p></dd>
+<dd><p>Size of the VSI cache in bytes.</p></dd>
 
 
 <dt id="arg-gdal-num-threads">GDAL_NUM_THREADS<a class="anchor" aria-label="anchor" href="#arg-gdal-num-threads"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>Number of threads to use for processing.
+Default is the number of available cores divided by the number of daemons.</p></dd>
 
 
 <dt id="arg-gdal-disable-readdir-on-open">GDAL_DISABLE_READDIR_ON_OPEN<a class="anchor" aria-label="anchor" href="#arg-gdal-disable-readdir-on-open"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>Disable directory listing on open?</p></dd>
 
 
 <dt id="arg-gdal-max-dataset-pool-size">GDAL_MAX_DATASET_POOL_SIZE<a class="anchor" aria-label="anchor" href="#arg-gdal-max-dataset-pool-size"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>Maximum size of the dataset pool.</p></dd>
 
 
 <dt id="arg-gdal-ingested-bytes-at-open">GDAL_INGESTED_BYTES_AT_OPEN<a class="anchor" aria-label="anchor" href="#arg-gdal-ingested-bytes-at-open"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>Number of bytes to read at open.</p></dd>
 
 
 <dt id="arg-cpl-vsil-curl-allowed-extensions">CPL_VSIL_CURL_ALLOWED_EXTENSIONS<a class="anchor" aria-label="anchor" href="#arg-cpl-vsil-curl-allowed-extensions"></a></dt>
-<dd><p>Optimize HTTP connections</p></dd>
+<dd><p>Allowed file extensions for HTTP
+requests.</p></dd>
 
 
 <dt id="arg-cpl-vsil-curl-use-head">CPL_VSIL_CURL_USE_HEAD<a class="anchor" aria-label="anchor" href="#arg-cpl-vsil-curl-use-head"></a></dt>
-<dd><p>Optimize HTTP connections</p></dd>
+<dd><p>Use HTTP HEAD requests?</p></dd>
+
+
+<dt id="arg-cpl-vsil-curl-chunk-size">CPL_VSIL_CURL_CHUNK_SIZE<a class="anchor" aria-label="anchor" href="#arg-cpl-vsil-curl-chunk-size"></a></dt>
+<dd><p>Chunk size for HTTP requests.</p></dd>
+
+
+<dt id="arg-cpl-vsil-curl-cache-size">CPL_VSIL_CURL_CACHE_SIZE<a class="anchor" aria-label="anchor" href="#arg-cpl-vsil-curl-cache-size"></a></dt>
+<dd><p>Cache size for HTTP requests.</p></dd>
 
 
 <dt id="arg-gdal-http-max-retry">GDAL_HTTP_MAX_RETRY<a class="anchor" aria-label="anchor" href="#arg-gdal-http-max-retry"></a></dt>
-<dd><p>Optimize HTTP connections</p></dd>
+<dd><p>Maximum number of retries for HTTP requests.</p></dd>
 
 
 <dt id="arg-gdal-http-retry-delay">GDAL_HTTP_RETRY_DELAY<a class="anchor" aria-label="anchor" href="#arg-gdal-http-retry-delay"></a></dt>
-<dd><p>Optimize HTTP connections</p></dd>
+<dd><p>Delay between retries in seconds.</p></dd>
 
 
 <dt id="arg-gdal-http-multiplex">GDAL_HTTP_MULTIPLEX<a class="anchor" aria-label="anchor" href="#arg-gdal-http-multiplex"></a></dt>
-<dd><p>Optimize HTTP connections</p></dd>
+<dd><p>Use HTTP multiplexing?</p></dd>
 
 
 <dt id="arg-gdal-http-version">GDAL_HTTP_VERSION<a class="anchor" aria-label="anchor" href="#arg-gdal-http-version"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>HTTP version to use.</p></dd>
 
 
 <dt id="arg-gdal-http-merge-consecutive-ranges">GDAL_HTTP_MERGE_CONSECUTIVE_RANGES<a class="anchor" aria-label="anchor" href="#arg-gdal-http-merge-consecutive-ranges"></a></dt>
-<dd><p>General options</p></dd>
+<dd><p>Merge consecutive ranges in HTTP
+requests?</p></dd>
+
+
+<dt id="arg-gdal-http-cookiefile">GDAL_HTTP_COOKIEFILE<a class="anchor" aria-label="anchor" href="#arg-gdal-http-cookiefile"></a></dt>
+<dd><p>Path to the cookie file for HTTP requests.</p></dd>
+
+
+<dt id="arg-gdal-http-cookiejar">GDAL_HTTP_COOKIEJAR<a class="anchor" aria-label="anchor" href="#arg-gdal-http-cookiejar"></a></dt>
+<dd><p>Path to the cookie jar for HTTP requests.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -240,17 +265,21 @@ If NULL, then the output format will be inferred from the file extension.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          VSI_CACHE                      GDAL_CACHEMAX </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             "TRUE"                              "50%" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     VSI_CACHE_SIZE                   GDAL_NUM_THREADS </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                        "268435456"                         "ALL_CPUS" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        "268435456"                                "4" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       GDAL_DISABLE_READDIR_ON_OPEN         GDAL_MAX_DATASET_POOL_SIZE </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                        "EMPTY_DIR"                              "500" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        "EMPTY_DIR"                             "1000" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        GDAL_INGESTED_BYTES_AT_OPEN   CPL_VSIL_CURL_ALLOWED_EXTENSIONS </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            "32000"                        ".tif .TIF" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             CPL_VSIL_CURL_USE_HEAD                GDAL_HTTP_MAX_RETRY </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                               "NO"                                "5" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            "65536"                        ".tif .TIF" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             CPL_VSIL_CURL_USE_HEAD           CPL_VSIL_CURL_CHUNK_SIZE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               "NO"                         "10485760" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           CPL_VSIL_CURL_CACHE_SIZE                GDAL_HTTP_MAX_RETRY </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       "1342177280"                               "10" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              GDAL_HTTP_RETRY_DELAY                GDAL_HTTP_MULTIPLEX </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                "3"                              "YES" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                "5"                              "YES" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_VERSION GDAL_HTTP_MERGE_CONSECUTIVE_RANGES </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                "2"                              "YES" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               GDAL_HTTP_COOKIEFILE                GDAL_HTTP_COOKIEJAR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   "~/.cookies.txt"                   "~/.cookies.txt" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_USERPWD </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    "user:password" </span>
 <span class="r-in"><span><span class="fu">gdal_creation_options</span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"JPEG"</span>, JPEG_QUALITY <span class="op">=</span> <span class="st">"90"</span><span class="op">)</span></span></span>

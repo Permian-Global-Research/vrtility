@@ -218,7 +218,7 @@ replaced. which may result in NA values in the output for multiple bands.</p></d
 <p>The <code>geomedian</code> enables the use of <code><a href="https://rdrr.io/pkg/Gmedian/man/Gmedian.html" class="external-link">Gmedian</a></code>
 and <code><a href="https://rdrr.io/pkg/Gmedian/man/Weiszfeld.html" class="external-link">Weiszfeld</a></code> to calculate the geometric median of a
 multiband raster. When <code>Weiszfeld</code> is set to FALSE,
-<code><a href="https://rdrr.io/pkg/Gmedian/man/Weiszfeld.html" class="external-link">Weiszfeld</a></code> is used. For the Gmedian algorithm,
+<code><a href="https://rdrr.io/pkg/Gmedian/man/Gmedian.html" class="external-link">Gmedian</a></code> is used. For the Gmedian algorithm,
 the matrix column medians are used as initial values rather than the first
 row of the matrix.</p>
 <p>The <code>medoid</code> function  uses <code><a href="https://rdrr.io/pkg/Rfast/man/dista.html" class="external-link">dista</a></code> to compute
@@ -260,18 +260,13 @@ consistent.</p>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create plots of each of the methods to compare.</span></span></span>
-<span class="r-in"><span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">iwalk</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>      <span class="fu">geomedian</span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      <span class="fu">medoid</span><span class="op">(</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      <span class="fu">geomedoid</span><span class="op">(</span>distance_type <span class="op">=</span> <span class="st">"manhattan"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>      <span class="fu">quantoid</span><span class="op">(</span>probability <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>      <span class="st">"geomedian"</span>,</span></span>
-<span class="r-in"><span>      <span class="st">"medoid"</span>,</span></span>
-<span class="r-in"><span>      <span class="st">"geomedoid"</span>,</span></span>
-<span class="r-in"><span>      <span class="st">"quantoid"</span></span></span>
+<span class="r-in"><span>      geomedian <span class="op">=</span> <span class="fu">geomedian</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      medoid <span class="op">=</span> <span class="fu">medoid</span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      geomedoid <span class="op">=</span> <span class="fu">geomedoid</span><span class="op">(</span>distance_type <span class="op">=</span> <span class="st">"manhattan"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      quantoid <span class="op">=</span> <span class="fu">quantoid</span><span class="op">(</span>probability <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span>,</span></span>
 <span class="r-in"><span>    \<span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>      <span class="va">geomed</span> <span class="op">&lt;-</span> <span class="fu">multiband_reduce</span><span class="op">(</span></span></span>
