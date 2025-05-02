@@ -23,7 +23,7 @@
 #' @details The `geomedian` enables the use of \code{\link[Gmedian]{Gmedian}}
 #' and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
 #' multiband raster. When `Weiszfeld` is set to FALSE,
-#' \code{\link[Gmedian]{Weiszfeld}} is used. For the Gmedian algorithm,
+#' \code{\link[Gmedian]{Gmedian}} is used. For the Gmedian algorithm,
 #' the matrix column medians are used as initial values rather than the first
 #' row of the matrix.
 #' @rdname multiband_reduce

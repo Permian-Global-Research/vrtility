@@ -46,18 +46,13 @@
 #'   )
 #'
 #' # create plots of each of the methods to compare.
-#' purrr::walk2(
+#' par(mar = c(0, 0, 1, 0))
+#' purrr::iwalk(
 #'     list(
-#'       geomedian(),
-#'       medoid(),
-#'       geomedoid(distance_type = "manhattan"),
-#'       quantoid(probability = 0.2)
-#'     ),
-#'     list(
-#'       "geomedian",
-#'       "medoid",
-#'       "geomedoid",
-#'       "quantoid"
+#'       geomedian = geomedian(),
+#'       medoid = medoid(),
+#'       geomedoid = geomedoid(distance_type = "manhattan"),
+#'       quantoid = quantoid(probability = 0.2)
 #'     ),
 #'     \(.x, .y) {
 #'       geomed <- multiband_reduce(
@@ -127,7 +122,7 @@ multiband_reduce.vrt_collection_warped <- function(
   )
 
   # set gdal config options
-  orig_config <- set_gdal_config(c(config_options))
+  orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
   # get template params
@@ -138,6 +133,14 @@ multiband_reduce.vrt_collection_warped <- function(
   nodataval <- tds$getNoDataValue(1)
   blksize <- tds$getBlockSize(1)
   nbands <- tds$getRasterCount()
+  scale_vals <- purrr::map_vec(
+    seq_len(nbands),
+    ~ tds$getScale(.x)
+  )
+  data_type <- tds$getDataTypeName(1)
+  if (any(!is.na(scale_vals))) {
+    data_type <- "Float32"
+  }
   tds$close()
 
   if (is.null(nsplits)) {
@@ -157,7 +160,8 @@ multiband_reduce.vrt_collection_warped <- function(
     normalizePath(outfile, mustWork = FALSE),
     fmt = "GTiff",
     init = nodataval,
-    options = creation_options
+    options = creation_options,
+    dtName = data_type
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
@@ -179,7 +183,6 @@ multiband_reduce.vrt_collection_warped <- function(
     blocks_df,
     carrier::crate(
       function(...) {
-        # browser()
         # Extract block parameters correctly from the 1-row dataframe
         block_params <- rlang::dots_list(...)
         ras_band_dat <- read_block_arrays(
@@ -222,13 +225,21 @@ multiband_reduce.vrt_collection_warped <- function(
       function(b) {
         start_idx <- band_starts[b]
         end_idx <- band_ends[b]
+
+        bscale <- scale_vals[b]
+        bdata <- if (!is.na(bscale)) {
+          j$data[start_idx:end_idx] * bscale
+        } else {
+          j$data[start_idx:end_idx]
+        }
+
         ds$write(
           band = b,
           xoff = j$block$nXOff,
           yoff = j$block$nYOff,
           xsize = j$block$nXSize,
           ysize = j$block$nYSize,
-          rasterData = j$data[start_idx:end_idx]
+          rasterData = bdata
         )
       }
     )
@@ -315,23 +326,22 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
       xml2::write_xml(vrt_xml, tvrt)
       ds <- methods::new(gdalraster::GDALRaster, tvrt)
       on.exit(ds$close())
-      # Read and combine bands
+      # Read bands
+
       band_data <- compute_with_py_env(
-        purrr::map(
-          seq_len(nbands),
-          function(b) {
-            ds$read(
-              band = b,
-              xoff = xoff,
-              yoff = yoff,
-              xsize = xsize,
-              ysize = ysize,
-              out_xsize = xsize,
-              out_ysize = ysize
-            )
-          }
+        gdalraster::read_ds(
+          ds,
+          bands = seq_len(nbands),
+          xoff = xoff,
+          yoff = yoff,
+          xsize = xsize,
+          ysize = ysize,
+          out_xsize = xsize,
+          out_ysize = ysize,
+          as_list = TRUE
         )
       )
+      # browser()
 
       purrr::map(seq_len(nbands), function(b) {
         matrix(band_data[[b]], nrow = ysize, ncol = xsize)

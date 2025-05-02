@@ -21,6 +21,15 @@ call_gdalraster_mirai <- function(
   nodataval <- tds$getNoDataValue(1)
   blksize <- tds$getBlockSize(1)
   nbands <- tds$getRasterCount()
+  scale_vals <- purrr::map_vec(
+    seq_len(nbands),
+    ~ tds$getScale(.x)
+  )
+  data_type <- tds$getDataTypeName(1)
+  if (any(!is.na(scale_vals))) {
+    data_type <- "Float32"
+  }
+
   tds$close()
 
   if (is.null(nsplits)) {
@@ -41,7 +50,8 @@ call_gdalraster_mirai <- function(
     normalizePath(outfile, mustWork = FALSE),
     fmt = "GTiff",
     init = nodataval,
-    options = creation_options
+    options = creation_options,
+    dtName = data_type
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
@@ -81,6 +91,14 @@ call_gdalraster_mirai <- function(
             out_ysize = block_params[["nYSize"]]
           )
         )
+
+        print(inds$getScale(block_params[["band_n"]]))
+
+        bscale <- inds$getScale(block_params[["band_n"]])
+        if (!is.na(bscale)) {
+          band_data <- band_data * bscale
+        }
+
         return(list(
           band_data = band_data,
           block_params = block_params

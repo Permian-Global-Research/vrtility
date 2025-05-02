@@ -1,42 +1,76 @@
-#' check if there are any running daemons
-#' @noRd
-#' @keywords internal
+#' @title Mirai Daemon Management
+#' @description Just some helpful functions for managing the mirai daemons and
+#' parallel processing.
+#' @details
+#' `using_daemons()` returns `TRUE` if there are any mirai daemons running.
+#' @rdname mirai-mgmt
+#' @export
 using_daemons <- function() {
   mirai::status()$connections > 0
 }
 
-#' check the number of daemons
-#' @return number of daemons
-#' @noRd
-#' @keywords internal
+#' @rdname mirai-mgmt
+#' @details
+#' `n_daemons()` returns the number of mirai daemons running.
+#' @export
 n_daemons <- function() {
   mirai::status()$connections
 }
 
-#' function for managing the setting of the outer mirai daemons responsible for
-#' managing the parallel processing across raster bands.
-#' @param n the number daemons to set
-#' @return invisible
-#' @noRd
-#' @keywords internal
-#' @details This does not deal with internal chunk parallelism which is managed
-#' by the `map_bands_and_chunks` function depending on the number of splits.
-set_outer_daemons <- function(
-  n,
-  msg = c(
-    "!" = "Active mirai daemons have been detected, but fewer than the number of
-      bands.",
-    "i" = "No changes were made to this mirai configuartion but this could
-        result in performance issues"
+
+#' @rdname mirai-mgmt
+#' @param all.tests	Logical: if true apply all known tests.
+#' @param logical Logical: if possible, use the number of physical CPUs/cores
+#' (if FALSE) or logical CPUs (if TRUE). Currently this is honoured only on
+#' macOS, Solaris and Windows.
+#' @details
+#' `machine_cores()` returns the number of cores on the machine. This function
+#' is from \code{\link[parallel]{detectCores}} and is used detect the number of
+#' cores on the machine.
+#' @export
+machine_cores <- function(all.tests = FALSE, logical = TRUE) {
+  systems <- list(
+    linux = "grep \"^processor\" /proc/cpuinfo 2>/dev/null | wc -l",
+    darwin = if (logical) "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null" else
+      "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null",
+    solaris = if (logical)
+      "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l" else
+      "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l",
+    freebsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null",
+    openbsd = "/sbin/sysctl -n hw.ncpuonline 2>/dev/null"
   )
-) {
-  n_cons <- mirai::status()$connections
-  if (n_cons == 0) {
-    mirai::daemons(n)
-  } else if (n_cons < n) {
-    cli::cli_inform(
-      msg
-    )
+  nm <- names(systems)
+  m <- pmatch(nm, R.version$os)
+  m <- nm[!is.na(m)]
+  if (length(m)) {
+    cmd <- systems[[m]]
+    if (
+      !is.null(
+        a <- tryCatch(
+          suppressWarnings(system(cmd, TRUE)),
+          error = function(e) NULL
+        )
+      )
+    ) {
+      a <- gsub("^ +", "", a[1])
+      if (grepl("^[1-9]", a)) return(as.integer(a))
+    }
   }
-  invisible(n_cons)
+  if (all.tests) {
+    for (i in seq(systems))
+      for (cmd in systems[i]) {
+        if (
+          is.null(
+            a <- tryCatch(
+              suppressWarnings(system(cmd, TRUE)),
+              error = function(e) NULL
+            )
+          )
+        )
+          next
+        a <- gsub("^ +", "", a[1])
+        if (grepl("^[1-9]", a)) return(as.integer(a))
+      }
+  }
+  NA_integer_
 }

@@ -1,18 +1,26 @@
 #' Create GDAL configuration options.
-#' @param VSI_CACHE cache related
-#' @param GDAL_CACHEMAX cache related
-#' @param VSI_CACHE_SIZE cache related
-#' @param GDAL_HTTP_MAX_RETRY Optimize HTTP connections
-#' @param GDAL_HTTP_RETRY_DELAY Optimize HTTP connections
-#' @param GDAL_HTTP_MULTIPLEX Optimize HTTP connections
-#' @param CPL_VSIL_CURL_ALLOWED_EXTENSIONS Optimize HTTP connections
-#' @param CPL_VSIL_CURL_USE_HEAD Optimize HTTP connections
-#' @param GDAL_DISABLE_READDIR_ON_OPEN General options
-#' @param GDAL_MAX_DATASET_POOL_SIZE General options
-#' @param GDAL_INGESTED_BYTES_AT_OPEN General options
-#' @param GDAL_HTTP_VERSION General options
-#' @param GDAL_HTTP_MERGE_CONSECUTIVE_RANGES General options
-#' @param GDAL_NUM_THREADS General options
+#' @param VSI_CACHE Should the Virtual File System (VSI) cache be used?
+#' @param GDAL_CACHEMAX Maximum size of the gdal cache in MB or percentage of
+#' the available memory. Default is 50% of the available memory.
+#' @param VSI_CACHE_SIZE Size of the VSI cache in bytes.
+#' @param GDAL_HTTP_MAX_RETRY Maximum number of retries for HTTP requests.
+#' @param GDAL_HTTP_RETRY_DELAY Delay between retries in seconds.
+#' @param GDAL_HTTP_MULTIPLEX Use HTTP multiplexing?
+#' @param CPL_VSIL_CURL_ALLOWED_EXTENSIONS Allowed file extensions for HTTP
+#' requests.
+#' @param CPL_VSIL_CURL_USE_HEAD Use HTTP HEAD requests?
+#' @param CPL_VSIL_CURL_CHUNK_SIZE Chunk size for HTTP requests.
+#' @param CPL_VSIL_CURL_CACHE_SIZE Cache size for HTTP requests.
+#' @param GDAL_HTTP_COOKIEFILE Path to the cookie file for HTTP requests.
+#' @param GDAL_HTTP_COOKIEJAR  Path to the cookie jar for HTTP requests.
+#' @param GDAL_DISABLE_READDIR_ON_OPEN Disable directory listing on open?
+#' @param GDAL_MAX_DATASET_POOL_SIZE Maximum size of the dataset pool.
+#' @param GDAL_INGESTED_BYTES_AT_OPEN Number of bytes to read at open.
+#' @param GDAL_HTTP_VERSION HTTP version to use.
+#' @param GDAL_HTTP_MERGE_CONSECUTIVE_RANGES Merge consecutive ranges in HTTP
+#' requests?
+#' @param GDAL_NUM_THREADS Number of threads to use for processing.
+#' Default is the number of available cores divided by the number of daemons.
 #' @param ... Additional options to set
 #' @rdname gdal_options
 #' @export
@@ -24,17 +32,23 @@ gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
   GDAL_CACHEMAX = "50%",
   VSI_CACHE_SIZE = "268435456",
-  GDAL_NUM_THREADS = "ALL_CPUS",
-  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
-  GDAL_MAX_DATASET_POOL_SIZE = "500",
-  GDAL_INGESTED_BYTES_AT_OPEN = "32000",
+  GDAL_NUM_THREADS = as.character(
+    ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+  ),
+  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR", # "TRUE",
+  GDAL_MAX_DATASET_POOL_SIZE = "1000",
+  GDAL_INGESTED_BYTES_AT_OPEN = "65536",
   CPL_VSIL_CURL_ALLOWED_EXTENSIONS = ".tif .TIF",
   CPL_VSIL_CURL_USE_HEAD = "NO",
-  GDAL_HTTP_MAX_RETRY = "5",
-  GDAL_HTTP_RETRY_DELAY = "3",
+  CPL_VSIL_CURL_CHUNK_SIZE = "10485760",
+  CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
+  GDAL_HTTP_MAX_RETRY = "10",
+  GDAL_HTTP_RETRY_DELAY = "5",
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
+  GDAL_HTTP_COOKIEFILE = "~/.cookies.txt",
+  GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   ...
 ) {
   unlist(c(as.list(rlang::current_env()), rlang::dots_list(...)))

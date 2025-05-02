@@ -136,7 +136,7 @@ We have a lot TODO: info on the reduce_fun options and nsplits etc...
 The \code{geomedian} enables the use of \code{\link[Gmedian]{Gmedian}}
 and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
 multiband raster. When \code{Weiszfeld} is set to FALSE,
-\code{\link[Gmedian]{Weiszfeld}} is used. For the Gmedian algorithm,
+\code{\link[Gmedian]{Gmedian}} is used. For the Gmedian algorithm,
 the matrix column medians are used as initial values rather than the first
 row of the matrix.
 
@@ -178,18 +178,13 @@ coll_masked <- ex_collect |>
   )
 
 # create plots of each of the methods to compare.
-purrr::walk2(
+par(mar = c(0, 0, 1, 0))
+purrr::iwalk(
     list(
-      geomedian(),
-      medoid(),
-      geomedoid(distance_type = "manhattan"),
-      quantoid(probability = 0.2)
-    ),
-    list(
-      "geomedian",
-      "medoid",
-      "geomedoid",
-      "quantoid"
+      geomedian = geomedian(),
+      medoid = medoid(),
+      geomedoid = geomedoid(distance_type = "manhattan"),
+      quantoid = quantoid(probability = 0.2)
     ),
     \(.x, .y) {
       geomed <- multiband_reduce(

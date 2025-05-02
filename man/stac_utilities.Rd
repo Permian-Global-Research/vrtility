@@ -5,6 +5,7 @@
 \alias{sign_planetary_computer}
 \alias{sentinel2_stac_query}
 \alias{hls_stac_query}
+\alias{sentinel1_stac_query}
 \title{Query a STAC source}
 \usage{
 stac_query(bbox, stac_source, collection, start_date, end_date, limit = 999)
@@ -33,6 +34,18 @@ hls_stac_query(
   max_cloud_cover = 10,
   stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
   collection = c("HLSS30_2.0", "HLSL30_2.0"),
+  limit = 999
+)
+
+sentinel1_stac_query(
+  bbox,
+  start_date,
+  end_date,
+  assets = c("hh", "hv", "vh", "vv"),
+  orbit_state = c("descending", "ascending"),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = c("sentinel-1-rtc", "sentinel-1-grd"),
+  mpc_sign = TRUE,
   limit = 999
 )
 }
@@ -64,6 +77,10 @@ variable \code{MPC_TOKEN} is set.}
 \item{mpc_sign}{A logical indicating whether to sign the items using the
 Planetary Computer API's signing method (only required if using the
 Planetary Computer STAC API).}
+
+\item{orbit_state}{A character vector of the orbit state to filter by. Both
+arguments are allowed however - consider carefully the implications of
+retaining both orbits if you intend to composite the data.}
 }
 \value{
 A list of items
@@ -80,6 +97,8 @@ Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 Generate a Sentinel 2 stac collection doc_imes object
 
 Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
+
+Generate a Sentinel 1 stac collection doc_items object
 }
 \details{
 In order to access HLS data you will need a NASA Earthdata account. You can
@@ -126,6 +145,14 @@ hls_query <- hls_stac_query(
 earthdatalogin::edl_netrc(
   username = Sys.getenv("EARTHDATA_USER"),
   password = Sys.getenv("EARTHDATA_PASSWORD")
+)
+\dontshow{\}) # examplesIf}
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+sentinel1_stac_query(
+  bbox = c(-12.386, -37.214, -12.186, -37.014),
+  start_date = "2023-01-01",
+  end_date = "2023-01-31",
+  assets = "vv"
 )
 \dontshow{\}) # examplesIf}
 }

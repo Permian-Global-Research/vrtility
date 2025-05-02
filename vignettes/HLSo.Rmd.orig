@@ -60,7 +60,7 @@ box.
 ```{r setup}
 library(vrtility)
 
-mirai::daemons(10)
+mirai::daemons(machine_cores())
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -112,10 +112,12 @@ for all daemons.
 
 
 ```{r earthdata-creds}
-mirai::everywhere(earthdatalogin::edl_netrc(
-  username = Sys.getenv("EARTHDATA_USER"),
-  password = Sys.getenv("EARTHDATA_PASSWORD")
-))
+mirai::everywhere(
+  earthdatalogin::edl_netrc(
+    username = Sys.getenv("EARTHDATA_USER"),
+    password = Sys.getenv("EARTHDATA_PASSWORD")
+  )
+)
 ```
 
 Now we can begin forming the VRT pipeline. Here we "collect" all of the assets
@@ -245,8 +247,9 @@ ensure that spectral properties are preserved. Several functions are provided
 in the `vrtility` package to do this but the user can also provide their own 
 if desired. Here we will use the `geomedian` function which calculates the 
 geometric (aka spatial median). This synthetic statistic ensures consistency 
-across bands. note that where some bands dont exist, the median is used in 
-place of the geometric median.
+across bands. Note we can also use other functions such as `medoid` or 
+`quantoid`, or `geomedoid` to obtain different types of composite that all 
+preserve the spectral properties of the data.
 
 ```{r hls-composite}
 hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
@@ -256,30 +259,36 @@ Now let's take a look at the composite - first RGB and then a false colour
 composite.
 
 ```{r hls-plot, fig.show="hold", out.width="50%", fig.cap= ""}
-plot_raster_src(
-  hls_composite,
-  bands = c(4, 3, 2)
-)
+withr::with_par(list(mar = c(0, 0, 0, 0)), {
+  plot_raster_src(
+    hls_composite,
+    bands = c(4, 3, 2),
+    axes = FALSE
+  )
 
-plot_raster_src(
-  hls_composite,
-  bands = c(9, 12, 13),
-  minmax_pct_cut = c(28, 97)
-)
+  plot_raster_src(
+    hls_composite,
+    bands = c(9, 12, 13),
+    minmax_pct_cut = c(28, 97),
+    axes = FALSE
+  )
+})
 ```
 
 And all the other bands too:
 
 ```{r hls-plot-bands, fig.width=10, fig.height=8, fig.cap= ""}
-par(mfrow = c(5, 3), mar = c(0, 0, 1, 0))
-purrr::walk(1:15, function(i) {
-  plot_raster_src(
-    hls_composite,
-    bands = i,
-    pal = hcl.colors(256, "Rocket"),
-    legend = FALSE,
-    axes = FALSE
-  )
-})
+withr::with_par(
+  list(mfrow = c(5, 3), mar = c(0, 0, 1, 0)),
+  purrr::walk(1:15, function(i) {
+    plot_raster_src(
+      hls_composite,
+      bands = i,
+      pal = hcl.colors(256, "Rocket"),
+      legend = FALSE,
+      axes = FALSE
+    )
+  })
+)
 ```
 
