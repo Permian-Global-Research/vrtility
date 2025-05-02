@@ -56,17 +56,22 @@ A vrt_collection object.
 Construct the base VRT object for composing VRT pipelines.
 }
 \details{
-For now the main way to create a vrt_collection object, which forms
+The main way to create a vrt_collection object, which forms
 the basis of the vrrt-based pipelines in vrtility is using a doc_items
 object from the \code{rstac} package. For more info on how to create a doc_items
-object see \code{\link[=sentinel2_stac_query]{sentinel2_stac_query()}}. To build a vrt_stack object a
+object see \code{\link[=stac_query]{stac_query()}}. To build a vrt_stack object a
 vrt_collection is required first. The vrt_collection object is essentially a
 list of VRT files. At this stage no alignment is carried out -  and the
-rasters are virtualised as-is. In this state, we can apply masks fro example
+rasters are virtualised as-is. In this state, we can apply masks, for example
 and when summarisation is required we can use vrt_stack - however, in order
-to create a stack the collection must xontain images from a single spatial
+to create a stack the collection must contain images from a single spatial
 reference system (SRS). If there are mutliple SRS values, use \code{vrt_warp()}
-to unify the projection of the collection.
+to unify the projection of the collection (This is almost always a good idea
+anyway).
+
+We can also create a VRT collection from a set of files. This is useful when
+we have the data on disk or as a downstream step after first processing a
+stac collection.
 
 You can use the \code{c} method to combine multiple vrt_collection objects. All
 collections must have the same number of bands.
