@@ -58,6 +58,12 @@ reference:
     contents:
       - vrt_cache_destroy
       - vrt_cache_set
+  - title: parallel processing helpers
+    desc: Helper functions for parallel processing
+    contents:
+      - using_daemons
+      - n_daemons
+      - machine_cores
   - title: Spatial helper functions
     desc: Helper functions for spatial operations
     contents:
