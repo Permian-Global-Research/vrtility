@@ -10,14 +10,15 @@
 \usage{
 multiband_reduce(
   x,
-  reduce_fun = vrtility::medoid(),
-  outfile = fs::file_temp(ext = "tif"),
-  cache_dir = getOption("vrt.cache"),
-  config_options = gdal_config_opts(),
-  creation_options = gdal_creation_options(),
-  quiet = FALSE,
-  nsplits = NULL,
-  return_internals = FALSE
+  reduce_fun,
+  outfile,
+  apply_scale,
+  cache_dir,
+  config_options,
+  creation_options,
+  quiet,
+  nsplits,
+  return_internals
 )
 
 geomedian(
@@ -69,6 +70,9 @@ The function should return a vector of the same length as the number of
 bands. See  details.}
 
 \item{outfile}{The output file path.}
+
+\item{apply_scale}{Logical indicating whether to apply the scale values
+(if they exist) to the data.}
 
 \item{cache_dir}{The directory to save temporary files. (default should be
 fine - this is here mainly for explicit privision for mirai daemons)}
