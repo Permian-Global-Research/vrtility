@@ -9,6 +9,8 @@
 #' The function should return a vector of the same length as the number of
 #' bands. See  details.
 #' @param outfile The output file path.
+#' @param apply_scale Logical indicating whether to apply the scale values
+#' (if they exist) to the data.
 #' @param cache_dir The directory to save temporary files. (default should be
 #' fine - this is here mainly for explicit privision for mirai daemons)
 #' @param config_options A named character vector of GDAL configuration options.
@@ -72,14 +74,15 @@
 #' @export
 multiband_reduce <- function(
   x,
-  reduce_fun = vrtility::medoid(),
-  outfile = fs::file_temp(ext = "tif"),
-  cache_dir = getOption("vrt.cache"),
-  config_options = gdal_config_opts(),
-  creation_options = gdal_creation_options(),
-  quiet = FALSE,
-  nsplits = NULL,
-  return_internals = FALSE
+  reduce_fun,
+  outfile,
+  apply_scale,
+  cache_dir,
+  config_options,
+  creation_options,
+  quiet,
+  nsplits,
+  return_internals
 ) {
   UseMethod("multiband_reduce")
 }
@@ -104,6 +107,7 @@ multiband_reduce.vrt_collection_warped <- function(
   x,
   reduce_fun = vrtility::geomedian(),
   outfile = fs::file_temp(ext = "tif"),
+  apply_scale = FALSE,
   cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
@@ -227,7 +231,7 @@ multiband_reduce.vrt_collection_warped <- function(
         end_idx <- band_ends[b]
 
         bscale <- scale_vals[b]
-        bdata <- if (!is.na(bscale)) {
+        bdata <- if (!is.na(bscale) && apply_scale) {
           j$data[start_idx:end_idx] * bscale
         } else {
           j$data[start_idx:end_idx]
@@ -318,8 +322,7 @@ mdim_reduction_apply <- function(x, mdim_fun) {
 #' @rdname geomedian_internal
 #' @keywords internal
 read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
-  purrr::map(
-    x[[1]],
+  rba_insist <- purrr::insistently(
     function(.x) {
       tvrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
       vrt_xml <- xml2::read_xml(.x$vrt)
@@ -328,7 +331,7 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
       on.exit(ds$close())
       # Read bands
 
-      band_data <- compute_with_py_env(
+      compute_with_py_env(
         gdalraster::read_ds(
           ds,
           bands = seq_len(nbands),
@@ -341,8 +344,14 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
           as_list = TRUE
         )
       )
-      # browser()
+    },
+    rate = purrr::rate_backoff(max_times = 5)
+  )
 
+  purrr::map(
+    x[[1]],
+    function(.x) {
+      band_data <- rba_insist(.x)
       purrr::map(seq_len(nbands), function(b) {
         matrix(band_data[[b]], nrow = ysize, ncol = xsize)
       })
