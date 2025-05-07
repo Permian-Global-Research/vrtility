@@ -109,7 +109,10 @@ multiband_reduce.vrt_collection_warped <- function(
   outfile = fs::file_temp(ext = "tif"),
   apply_scale = FALSE,
   cache_dir = getOption("vrt.cache"),
-  config_options = gdal_config_opts(),
+  config_options = gdal_config_opts(
+    GDAL_HTTP_MAX_RETRY = "3",
+    GDAL_HTTP_RETRY_DELAY = "20"
+  ),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
   nsplits = NULL,
@@ -345,7 +348,11 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
         )
       )
     },
-    rate = purrr::rate_backoff(max_times = 5)
+    rate = purrr::rate_backoff(
+      pause_base = 10,
+      pause_cap = 300,
+      max_times = 5
+    )
   )
 
   purrr::map(
