@@ -33,7 +33,11 @@ call_gdalraster_mirai <- function(
   tds$close()
 
   if (is.null(nsplits)) {
-    nsplits <- suggest_n_chunks(ys, xs, nbands, x$n_items)
+    nits <- x$n_items
+    if (is.null(nits)) {
+      nits <- 1
+    }
+    nsplits <- suggest_n_chunks(ys, xs, nbands, nits)
   }
 
   blocks_df <- optimise_tiling(
