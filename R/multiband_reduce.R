@@ -236,6 +236,16 @@ multiband_reduce.vrt_collection_warped <- function(
         bscale <- scale_vals[b]
         bdata <- if (!is.na(bscale) && apply_scale) {
           j$data[start_idx:end_idx] * bscale
+          # Get the data for this band
+          band_data <- j$data[start_idx:end_idx]
+
+          # Create mask for valid data (not equal to nodata)
+          valid_mask <- band_data != nodataval
+
+          # Apply scale only to valid data
+          band_data[valid_mask] <- band_data[valid_mask] * bscale
+
+          band_data
         } else {
           j$data[start_idx:end_idx]
         }
