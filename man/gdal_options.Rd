@@ -34,7 +34,8 @@ gdal_creation_options(
   output_format = NULL,
   COMPRESS = "LZW",
   PREDICTOR = "2",
-  NUM_THREADS = "ALL_CPUS",
+  NUM_THREADS =
+    as.character(ceiling(vrtility::machine_cores()/pmax(vrtility::n_daemons(), 1))),
   BIGTIFF = "IF_NEEDED",
   TILED = "YES",
   BLOCKXSIZE = "128",
@@ -43,7 +44,13 @@ gdal_creation_options(
   ...
 )
 
-gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = "ALL_CPUS")
+gdalwarp_options(
+  multi = FALSE,
+  warp_memory = "50\%",
+  num_threads =
+    as.character(ceiling(vrtility::machine_cores()/pmax(vrtility::n_daemons(), 1))),
+  unified_src_nodata = c("NO", "YES", "PARTIAL")
+)
 
 set_gdal_config(x, scope = c("gdalraster", "sys"))
 }
