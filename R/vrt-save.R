@@ -57,3 +57,17 @@ vrt_save.vrt_block <- function(
 
   invisible(normalizePath(outfile))
 }
+
+#' Internal function for saving a vrt block overcoming issues around parallel
+#' process temp directories.
+#' @keywords internal
+#' @export
+vrt_block_save_internal <- function(x, temp_vrt_dir, apply_scale = TRUE) {
+  tmp_vrt <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
+  vrt_xml <- xml2::read_xml(x$vrt)
+  if (!apply_scale) {
+    drop_scale(vrt_xml)
+  }
+  xml2::write_xml(vrt_xml, tmp_vrt)
+  return(tmp_vrt)
+}
