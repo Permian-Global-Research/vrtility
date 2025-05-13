@@ -77,13 +77,17 @@ set_vrt_metadata <- function(x, keys, values, as_file = FALSE) {
 drop_nodatavalue <- function(x) {
   purrr::walk(c(".//NoDataValue", ".//NODATA"), function(ndv) {
     no_data_node <- xml2::xml_find_all(x, ndv)
-    purrr::walk(no_data_node, function(.x) {
-      if (!is.na(xml2::xml_text(.x))) {
-        xml2::xml_remove(no_data_node)
-      }
-    })
+    xml2::xml_remove(no_data_node)
   })
 }
+
+#' @keywords internal
+#' @noRd
+drop_scale <- function(x) {
+  scale_nodes <- xml2::xml_find_all(x, ".//Scale")
+  xml2::xml_remove(scale_nodes)
+}
+
 #' @keywords internal
 #' @noRd
 set_nodatavalue <- function(x, value) {
