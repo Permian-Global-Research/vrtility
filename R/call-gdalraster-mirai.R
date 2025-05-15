@@ -14,48 +14,40 @@ call_gdalraster_mirai <- function(
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
   # get template params
-  vrt_template <- vrt_save(x)
-  tds <- new(gdalraster::GDALRaster, vrt_template)
-  xs <- tds$getRasterXSize()
-  ys <- tds$getRasterYSize()
-  nodataval <- tds$getNoDataValue(1)
-  blksize <- tds$getBlockSize(1)
-  nbands <- tds$getRasterCount()
-  scale_vals <- purrr::map_vec(
-    seq_len(nbands),
-    ~ tds$getScale(.x)
-  )
-  data_type <- tds$getDataTypeName(1)
-  if (any(!is.na(scale_vals))) {
-    data_type <- "Float32"
-  }
-
-  tds$close()
+  rt <- raster_template_params(x)
+  vrt_template <- rt$vrt_template
+  rt$xs <- rt$xs
+  rt$ys <- rt$ys
+  rt$nodataval <- rt$nodataval
+  rt$blksize <- rt$blksize
+  rt$nbands <- rt$nbands
+  rt$scale_vals <- rt$scale_vals
+  rt$data_type <- rt$data_type
 
   if (is.null(nsplits)) {
     nits <- x$n_items
     if (is.null(nits)) {
       nits <- 1
     }
-    nsplits <- suggest_n_chunks(ys, xs, nbands, nits)
+    nsplits <- suggest_n_chunks(rt$ys, rt$xs, rt$nbands, nits)
   }
 
   blocks_df <- optimise_tiling(
-    xs,
-    ys,
-    blksize,
+    rt$xs,
+    rt$ys,
+    rt$blksize,
     nsplits
   ) |>
-    merge(data.frame(band_n = seq_len(nbands)))
+    merge(data.frame(band_n = seq_len(rt$nbands)))
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(
     vrt_template,
     normalizePath(outfile, mustWork = FALSE),
     fmt = "GTiff",
-    init = nodataval,
+    init = rt$nodataval,
     options = creation_options,
-    dtName = data_type
+    dtName = rt$data_type
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
