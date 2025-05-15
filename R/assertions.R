@@ -80,6 +80,18 @@ v_assert_res <- function(x) {
   return(x)
 }
 
+v_assert_within_range <- function(x, name, lwr, upr) {
+  if (any(x < lwr) || any(x > upr)) {
+    cli::cli_abort(
+      c(
+        "{name} must be within the range {lwr} to {upr}",
+        "i" = "The value(s) {x} are outside of the range."
+      ),
+      class = "vrtility_range_error"
+    )
+  }
+}
+
 
 assert_srs_len <- function(x) {
   if (length(x$srs) > 1) {
