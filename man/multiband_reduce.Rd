@@ -17,8 +17,7 @@ multiband_reduce(
   config_options,
   creation_options,
   quiet,
-  nsplits,
-  return_internals
+  nsplits
 )
 
 geomedian(
@@ -87,10 +86,6 @@ fine - this is here mainly for explicit privision for mirai daemons)}
 function will automatically determine the number of splits based on the
 dimensions of the input data, available memory and the number of active
 mirai daemons. see details}
-
-\item{return_internals}{Logical indicating whether to return the internals of
-the function (e.g., the jobs object) that is produced before promise
-evaluation.}
 
 \item{weizfeld}{Logical. If TRUE, the Weiszfeld algorithm is used to
 calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If

@@ -4,6 +4,7 @@
 ^scratch.*\.R$
 ^big-test$
 ^kat-test.*\.tif$
+^kat-test.*\.aux.xml$
 ^hls-kat-testing$
 ^hls-kat-testing-masked$
 ^hls-test-data$
