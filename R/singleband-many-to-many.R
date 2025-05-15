@@ -1,6 +1,6 @@
-#' @title Image composite reductions that require all bands.
-#' @description `multiband_reduce` can be used to create composite reductions
-#' that require all band values, such as tyhe geometric median or medoid.
+#' @title Image processing along a time series.
+#' @description `singleband_m2m` can be used to filter raster time series' or
+#' apply smoothing operations. These functions work on a single band at a time.
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
 #' @param m2m_fun A function to apply to the data. This function should take a
@@ -226,8 +226,9 @@ matrix_to_rowlist <- function(x) {
 }
 
 
-#' @description create a function to filter band-level outliers in time-series
-#' using the Hampel filter. to be provided to `singleband_m2m()`
+#' @description `hampel_filter` is used tocreate a function to filter band-level
+#' outliers in time-series using the Hampel filter. to be provided to
+#' `singleband_m2m()`.
 #' @param k The number of neighboring points to consider on each side of the
 #' current point. window length 2*k+1 in indices.
 #' @param t0 threshold, default is 3 (Pearson's rule), see below.

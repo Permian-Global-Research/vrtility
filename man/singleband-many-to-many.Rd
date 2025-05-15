@@ -3,7 +3,7 @@
 \name{singleband_m2m}
 \alias{singleband_m2m}
 \alias{hampel_filter}
-\title{Image composite reductions that require all bands.}
+\title{Image processing along a time series.}
 \usage{
 singleband_m2m(
   x,
@@ -62,12 +62,13 @@ A function to be used with \code{singleband_m2m()} to remove outliers
 from a raster time series.
 }
 \description{
-\code{multiband_reduce} can be used to create composite reductions
-that require all band values, such as tyhe geometric median or medoid.
+\code{singleband_m2m} can be used to filter raster time series' or
+apply smoothing operations. These functions work on a single band at a time.
 composite of a warped VRT collection.
 
-create a function to filter band-level outliers in time-series
-using the Hampel filter. to be provided to \code{singleband_m2m()}
+\code{hampel_filter} is used tocreate a function to filter band-level
+outliers in time-series using the Hampel filter. to be provided to
+\code{singleband_m2m()}.
 }
 \details{
 We have a lot TODO: info on the reduce_fun options and nsplits etc...

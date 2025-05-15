@@ -30,7 +30,11 @@ reference:
       - medoid
       - geomedoid
       - quantoid
-
+  - title: single-band many-to-many functions
+    desc: Functions designed to work with time-series, namely applying outlier filtering.
+    contents:
+      - singleband_m2m
+      - hampel_filter
   - title: GDAL Configuration
     desc: GDAL configuration and setup functions
     contents:
