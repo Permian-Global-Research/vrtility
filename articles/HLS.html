@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -335,7 +335,8 @@ to ensure that all blocks are in the same SRS with equal dimensions.</p>
 image. The typical approach would be to use the band-level median which
 we can achieve easily by first using the following:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="co"># not run</span></span>
+<span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>    engine <span class="op">=</span> <span class="st">"gdalraster"</span></span>
@@ -351,11 +352,31 @@ consistency across bands. Note we can also use other functions such as
 <code>medoid</code> or <code>quantoid</code>, or <code>geomedoid</code>
 to obtain different types of composite that all preserve the spectral
 properties of the data.</p>
+<p>In theory we can also just run:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span><span class="va">hls_warp</span>, reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># not run</span></span>
+<span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span><span class="va">hls_warp</span>, reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>But the NASA Earthdata server seems to object to multiple concurrent
+reads on a single file and so this can be a bit slow. Therefore we can
+download multiple files in parallel by using the “warp” engine in
+<code><a href="../reference/vrt_compute.html">vrt_compute()</a></code>. This downloads all files locally - from here
+we can then build the geomedian composite as above.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="va">hls_warp</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
+<span>    <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
+<span>    engine <span class="op">=</span> <span class="st">"warp"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
+<span>    t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
+<span>    te <span class="op">=</span> <span class="va">te</span>,</span>
+<span>    tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span>reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Now let’s take a look at the composite - first RGB and then a false
 colour composite.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>    <span class="va">hls_composite</span>,</span>
@@ -372,7 +393,7 @@ colour composite.</p>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/hls-plot-1.png" width="50%"><img src="figure/hls-plot-2.png" width="50%"></p>
 <p>And all the other bands too:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
