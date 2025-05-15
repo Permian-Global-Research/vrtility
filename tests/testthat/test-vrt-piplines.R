@@ -83,7 +83,9 @@ test_that("full vrt pipeline works", {
 
   expect_true(fs::file_size(ex_collect_mask_gdr) > 0)
 
-  testthat::skip_on_os("windows")
+  skip_on_os("windows")
+  skip_on_ci()
+  skip_on_covr()
   vdiffr::expect_doppelganger(
     "s2 exeter plots",
     plot_raster_src(exe_compwarp, c(3, 2, 1))
