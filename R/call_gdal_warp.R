@@ -15,13 +15,23 @@ call_gdal_warp <- function(
   on.exit(set_gdal_config(orig_config))
 
   # new gdalraster raises warnings here... although I think we can ignore.
-  gdalraster::warp(
-    src_files,
-    outfile,
-    t_srs = t_srs,
-    cl_arg = cl_arg,
-    quiet = quiet
-  )
+
+  purrr::insistently(
+    function() {
+      gdalraster::warp(
+        src_files,
+        outfile,
+        t_srs = t_srs,
+        cl_arg = cl_arg,
+        quiet = quiet
+      )
+    },
+    rate = purrr::rate_backoff(
+      pause_base = 1,
+      pause_cap = 100,
+      max_times = 5
+    )
+  )()
 
   return(normalizePath(outfile))
 }
