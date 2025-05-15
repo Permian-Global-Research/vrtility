@@ -18,13 +18,16 @@ vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
-Observation in mind. This package’s primary focus is on the use of GDAL
-VRT pixel functions using python. These [numpy](https://numpy.org/)
-based python pixel functions are used to apply cloud masks and summarise
-pixel values (e.g. median) from multiple images (i.e create a composite
-image). These main features are made possible by the
+Observation in mind. This package enables the use of GDAL VRT python
+pixel functions. These [numpy](https://numpy.org/) based python pixel
+functions are used to apply cloud masks and summarise pixel values
+(e.g. median) from multiple images (i.e create a composite image). These
+main features are made possible by the
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
 and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
+Advanced image compositing and time series filtering is also provided
+which makes use of gdalraster alonside the {mirai} package for parallel
+processing.
 
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
@@ -46,6 +49,9 @@ and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
 
 - Advanced compositing methods that maintain spectral consistency, such
   as the geometric median and medoid.
+
+- Time series filtering functions to improve temporal consistency and
+  reduce noise.
 
 ## Installation
 
@@ -134,7 +140,7 @@ system.time(
     )
 )
 #>    user  system elapsed 
-#>   3.367   0.388  17.592
+#>   3.348   0.442  18.862
 ```
 
 ``` r
@@ -155,10 +161,10 @@ pipeline, we can improve performance, depending on the speed of the
 server holding the data. In some cases this will make little difference
 for example, the Microsoft Planetary Computer STAC API is already pretty
 fast. However, for NASA’s Earthdata STAC API, this can make a huge
-difference. Paralellism is available in four functions at present:
-`vrt_collect`, `vrt_set_maskfun`, `vrt_compute` and `multiband_reduce`.
-In order to use asynchronous processing, in the `vrt_compute` function,
-we need to set `engine = "gdalraster"`.
+difference. In order to use asynchronous processing, in the
+`vrt_compute` function, we need to set `engine = "gdalraster"` or we can
+use `engine = "warp"` if we are downloading multiple images invidivually
+(This is a much faster approach on Nasa’s Earthdata server).
 
 ## Using on-disk rasters
 

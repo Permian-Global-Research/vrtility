@@ -6,6 +6,7 @@ benchmark.R
 # files to ignore
 *.tif
 *.vrt
+*.aux.xml
 
 # But track TIF files in inst directory
 !inst/**/*.tif

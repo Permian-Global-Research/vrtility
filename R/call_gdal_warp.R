@@ -15,13 +15,13 @@ call_gdal_warp <- function(
   on.exit(set_gdal_config(orig_config))
 
   # new gdalraster raises warnings here... although I think we can ignore.
-  suppressWarnings(gdalraster::warp(
+  gdalraster::warp(
     src_files,
     outfile,
     t_srs = t_srs,
     cl_arg = cl_arg,
     quiet = quiet
-  ))
+  )
 
   return(normalizePath(outfile))
 }
@@ -36,6 +36,7 @@ combine_warp_opts <- function(
   resampling,
   te,
   res = NULL,
+  dst_nodata = NULL,
   add_args = NULL
 ) {
   opts_check(warp_opts, "-te")
@@ -58,6 +59,10 @@ combine_warp_opts <- function(
       res,
       if ("-tap" %in% warp_opts) NULL else "-tap"
     )
+  }
+
+  if (!is.null(dst_nodata)) {
+    warp_opts <- c(warp_opts, "-dstnodata", dst_nodata)
   }
 
   if (!is.null(add_args)) {

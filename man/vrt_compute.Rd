@@ -22,7 +22,10 @@ vrt_compute(
   config_options,
   nsplits,
   add_cl_arg,
-  quiet
+  quiet,
+  temp_vrt_dir,
+  apply_scale,
+  dst_nodata
 )
 
 \method{vrt_compute}{vrt_block}(
@@ -39,7 +42,10 @@ vrt_compute(
   config_options = gdal_config_opts(),
   nsplits = NULL,
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache"),
+  apply_scale = FALSE,
+  dst_nodata = NULL
 )
 
 \method{vrt_compute}{vrt_stack_warped}(
@@ -56,7 +62,10 @@ vrt_compute(
   config_options = gdal_config_opts(),
   nsplits = NULL,
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache"),
+  apply_scale = FALSE,
+  dst_nodata = NULL
 )
 
 \method{vrt_compute}{vrt_stack}(
@@ -73,7 +82,10 @@ vrt_compute(
   config_options = gdal_config_opts(),
   nsplits = NULL,
   add_cl_arg = NULL,
-  quiet = TRUE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache"),
+  apply_scale = FALSE,
+  dst_nodata = NULL
 )
 
 \method{vrt_compute}{vrt_collection_warped}(
@@ -90,7 +102,10 @@ vrt_compute(
   config_options = gdal_config_opts(),
   nsplits = NULL,
   add_cl_arg = NULL,
-  quiet = FALSE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache"),
+  apply_scale = FALSE,
+  dst_nodata = NULL
 )
 
 \method{vrt_compute}{vrt_collection}(
@@ -107,7 +122,10 @@ vrt_compute(
   config_options = gdal_config_opts(),
   nsplits = NULL,
   add_cl_arg = NULL,
-  quiet = FALSE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache"),
+  apply_scale = FALSE,
+  dst_nodata = NULL
 )
 }
 \arguments{
@@ -144,6 +162,18 @@ that are not captured in \code{gdalwarp_options()} - these are not checked for
 validity.}
 
 \item{quiet}{A logical indicating whether to suppress output}
+
+\item{temp_vrt_dir}{A character string of the directory to use for
+temporary VRT files. Defaults to the \code{vrt.cache} option. shouldnt require
+changing. This is required to ensure relative vrt files are preserved when
+using parallel processing.}
+
+\item{apply_scale}{A logical indicating whether to apply scale values
+existing the in file metadata.}
+
+\item{dst_nodata}{A numeric value of the nodata value to use for the
+output raster. If NULL, gdal will decide. This is usually only required if
+you are retaining a band which contains a different nodata value to others.}
 }
 \value{
 A character string of the path to the output raster

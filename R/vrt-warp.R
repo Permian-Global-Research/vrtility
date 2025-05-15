@@ -9,6 +9,9 @@
 #' each band. The default is "bilinear". "near" sampling will be used for the
 #' mask_band if provided.
 #' @param quiet logical indicating whether to suppress progress bar.
+#' @param temp_vrt_dir character path to the temporary directory to use for
+#' creating the VRT. This should not be modified and is used to ensure mirai
+#' daemons are working in the same directory.
 #' @rdname vrt_warp
 #' @export
 #' @details This function generates warped VRT objects types. This is
@@ -31,7 +34,8 @@ vrt_warp <- function(
   te,
   tr,
   resampling,
-  quiet
+  quiet,
+  temp_vrt_dir
 ) {
   v_assert_type(t_srs, "t_srs", "character")
   v_assert_type(te, "te", "numeric")
@@ -72,7 +76,8 @@ vrt_warp.vrt_block <- function(
     "q3",
     "sum"
   ),
-  quiet = TRUE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache")
 ) {
   tr <- v_assert_res(tr)
   resampling <- rlang::arg_match(resampling)
@@ -101,18 +106,19 @@ vrt_warp.vrt_block <- function(
   }
 
   resamp_methods <- rep(resampling, length(assets))
-  resamp_methods[mas_band_idx] <- "near"
-  tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  vrt_save(x, tf)
+  resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
+
+  tf <- vrt_block_save_internal(x, temp_vrt_dir = temp_vrt_dir)
+  # TODO: the vrt_save stuffs us in parallel lets look into that.
   vrtwl <- purrr::map2_chr(
     seq_along(assets),
     resamp_methods,
     function(.x, .y) {
-      vrt_to_warped_vrt(tf, .x, t_srs, te, tr, .y)
+      vrt_to_warped_vrt(tf, .x, t_srs, te, tr, .y, temp_vrt_dir)
     }
   )
 
-  outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  outtf <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
   # browser()
 
   gdalraster::buildVRT(
@@ -183,14 +189,28 @@ vrt_warp.vrt_collection <- function(
     "q3",
     "sum"
   ),
-  quiet = TRUE
+  quiet = TRUE,
+  temp_vrt_dir = getOption("vrt.cache")
 ) {
   v_assert_length(tr, "tr", 2)
   resampling <- rlang::arg_match(resampling)
 
   warped_blocks <- purrr::map(
     x[[1]],
-    ~ vrt_warp(.x, t_srs, te, tr, resampling, quiet)
+    carrier::crate(
+      function(.x) {
+        vrt_warp(.x, t_srs, te, tr, resampling, quiet, temp_vrt_dir)
+      },
+      vrt_warp = vrt_warp,
+      t_srs = t_srs,
+      te = te,
+      tr = tr,
+      resampling = resampling,
+      quiet = quiet,
+      temp_vrt_dir = temp_vrt_dir
+    ),
+    .parallel = using_daemons(),
+    .progress = !quiet
   )
   # browser()
 
@@ -218,9 +238,10 @@ vrt_to_warped_vrt <- function(
   t_srs,
   te,
   tr = NULL,
-  resampling = "bilinear"
+  resampling = "bilinear",
+  temp_vrt_dir = getOption("vrt.cache")
 ) {
-  tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
 
   call_gdal_warp(
     src,

@@ -78,7 +78,9 @@ gdal_creation_options <- function(
   output_format = NULL,
   COMPRESS = "LZW",
   PREDICTOR = "2",
-  NUM_THREADS = "ALL_CPUS",
+  NUM_THREADS = as.character(
+    ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+  ),
   BIGTIFF = "IF_NEEDED",
   TILED = "YES",
   BLOCKXSIZE = "128", # changed from 256
@@ -107,6 +109,9 @@ gdal_creation_options <- function(
 #' NUM_THREADS on the CLI. "ALL_CPUS" (the default) will use all available CPUs,
 #' alternartively an integer can be supplied - or NULL to use a single threaded
 #' process.
+#' @param unified_src_nodata Unified source nodata option equivalent to -wo
+#' UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
+#' "NO" (as was the deafault for earlier versions of GDAL).
 #' @return Character vector of options
 #' @rdname gdal_options
 #' @export
@@ -115,10 +120,14 @@ gdal_creation_options <- function(
 #' @examples
 #' gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 gdalwarp_options <- function(
-  multi = TRUE,
+  multi = FALSE,
   warp_memory = "50%",
-  num_threads = "ALL_CPUS"
+  num_threads = as.character(
+    ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+  ),
+  unified_src_nodata = c("NO", "YES", "PARTIAL")
 ) {
+  unified_src_nodata <- rlang::arg_match(unified_src_nodata)
   c(
     if (multi) "-multi" else NULL,
     "-wm",
@@ -127,7 +136,9 @@ gdalwarp_options <- function(
       c("-wo", paste0("NUM_THREADS=", num_threads))
     } else {
       NULL
-    }
+    },
+    "-wo",
+    paste0("UNIFIED_SRC_NODATA=", unified_src_nodata)
   )
 }
 

@@ -15,9 +15,6 @@
 #' fine - this is here mainly for explicit privision for mirai daemons)
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
-#' @param return_internals Logical indicating whether to return the internals of
-#' the function (e.g., the jobs object) that is produced before promise
-#' evaluation.
 #' @param quiet Logical indicating whether to suppress the progress bar.
 #' @param nsplits The number of splits to use for the tiling. If NULL, the
 #' function will automatically determine the number of splits based on the
@@ -81,8 +78,7 @@ multiband_reduce <- function(
   config_options,
   creation_options,
   quiet,
-  nsplits,
-  return_internals
+  nsplits
 ) {
   UseMethod("multiband_reduce")
 }
@@ -115,16 +111,14 @@ multiband_reduce.vrt_collection_warped <- function(
   ),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
-  nsplits = NULL,
-  return_internals = FALSE
+  nsplits = NULL
 ) {
   # inital assertions and checks.
-  multiband_reduce_asserts_init(
+  gdalraster_engine_asserts_init(
     outfile,
     cache_dir,
     config_options,
     creation_options,
-    return_internals,
     quiet
   )
 
@@ -133,42 +127,27 @@ multiband_reduce.vrt_collection_warped <- function(
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
   # get template params
-  vrt_template <- vrt_save(x[[1]][[1]])
-  tds <- new(gdalraster::GDALRaster, vrt_template)
-  xs <- tds$getRasterXSize()
-  ys <- tds$getRasterYSize()
-  nodataval <- tds$getNoDataValue(1)
-  blksize <- tds$getBlockSize(1)
-  nbands <- tds$getRasterCount()
-  scale_vals <- purrr::map_vec(
-    seq_len(nbands),
-    ~ tds$getScale(.x)
-  )
-  data_type <- tds$getDataTypeName(1)
-  if (any(!is.na(scale_vals))) {
-    data_type <- "Float32"
-  }
-  tds$close()
+  rt <- raster_template_params(x[[1]][[1]])
 
   if (is.null(nsplits)) {
-    nsplits <- suggest_n_chunks(ys, xs, nbands, x$n_items)
+    nsplits <- suggest_n_chunks(rt$ys, rt$xs, rt$nbands, x$n_items)
   }
 
   blocks_df <- optimise_tiling(
-    xs,
-    ys,
-    blksize,
+    rt$xs,
+    rt$ys,
+    rt$blksize,
     nsplits
   )
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(
-    vrt_template,
+    rt$vrt_template,
     normalizePath(outfile, mustWork = FALSE),
     fmt = "GTiff",
-    init = nodataval,
+    init = rt$nodataval,
     options = creation_options,
-    dtName = data_type
+    dtName = rt$data_type
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
@@ -208,7 +187,7 @@ multiband_reduce.vrt_collection_warped <- function(
         )
       },
       vrt_block = x,
-      nbands = nbands,
+      nbands = rt$nbands,
       cache_dir = cache_dir,
       read_block_arrays = read_block_arrays,
       reduce_fun = reduce_fun,
@@ -222,20 +201,30 @@ multiband_reduce.vrt_collection_warped <- function(
   purrr::walk(jobs, function(j) {
     n_cells <- j$block$nXSize * j$block$nYSize
     # Calculate start and end indices for each band
-    band_starts <- seq(1, n_cells * nbands, by = n_cells)
+    band_starts <- seq(1, n_cells * rt$nbands, by = n_cells)
     band_ends <- band_starts + n_cells - 1
 
-    j$data[is.na(j$data)] <- nodataval
+    j$data[is.na(j$data)] <- rt$nodataval
 
     purrr::walk(
-      seq_len(nbands),
+      seq_len(rt$nbands),
       function(b) {
         start_idx <- band_starts[b]
         end_idx <- band_ends[b]
 
-        bscale <- scale_vals[b]
+        bscale <- rt$scale_vals[b]
         bdata <- if (!is.na(bscale) && apply_scale) {
           j$data[start_idx:end_idx] * bscale
+          # Get the data for this band
+          band_data <- j$data[start_idx:end_idx]
+
+          # Create mask for valid data (not equal to nodata)
+          valid_mask <- band_data != rt$nodataval
+
+          # Apply scale only to valid data
+          band_data[valid_mask] <- band_data[valid_mask] * bscale
+
+          band_data
         } else {
           j$data[start_idx:end_idx]
         }
@@ -251,15 +240,6 @@ multiband_reduce.vrt_collection_warped <- function(
       }
     )
   })
-
-  if (return_internals) {
-    return(
-      list(
-        outfile = outfile,
-        internals = jobs
-      )
-    )
-  }
 
   return(outfile)
 }
@@ -366,38 +346,6 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
   )
 }
 
-
-multiband_reduce_asserts_init <- function(
-  outfile,
-  cache_dir,
-  config_options,
-  creation_options,
-  return_internals,
-  quiet
-) {
-  v_assert_type(outfile, "outfile", "character", nullok = FALSE)
-  v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
-  v_assert_type(config_options, "config_options", "character", nullok = FALSE)
-  v_assert_type(
-    creation_options,
-    "creation_options",
-    "character",
-    nullok = FALSE
-  )
-  v_assert_type(return_internals, "return_internals", "logical", nullok = FALSE)
-  v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
-
-  if (!using_daemons()) {
-    cli::cli_inform(
-      c(
-        "!" = "No miriai daemons detected.",
-        " " = "use {cli::code_highlight('mirai::daemons()')} to start daemons",
-        "i" = "`multiband_reduce` is a compute-intesntive function and is
-        designed to be run in parallel"
-      )
-    )
-  }
-}
 
 #' @title Extract band matrices using C++
 #' @description Internal C++ function wrapped for R

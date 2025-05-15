@@ -10,6 +10,31 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// hampel_filter_matrix_cpp
+NumericMatrix hampel_filter_matrix_cpp(NumericMatrix X, int k, double t0, bool impute_na);
+RcppExport SEXP _vrtility_hampel_filter_matrix_cpp(SEXP XSEXP, SEXP kSEXP, SEXP t0SEXP, SEXP impute_naSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< bool >::type impute_na(impute_naSEXP);
+    rcpp_result_gen = Rcpp::wrap(hampel_filter_matrix_cpp(X, k, t0, impute_na));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matrix_to_rowlist_cpp
+Rcpp::List matrix_to_rowlist_cpp(Rcpp::NumericMatrix mat);
+RcppExport SEXP _vrtility_matrix_to_rowlist_cpp(SEXP matSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(matrix_to_rowlist_cpp(mat));
+    return rcpp_result_gen;
+END_RCPP
+}
 // extract_band_matrices_cpp
 List extract_band_matrices_cpp(List x, IntegerVector row_indices, IntegerVector col_indices, int n_cells, int n_timepoints, int n_bands);
 RcppExport SEXP _vrtility_extract_band_matrices_cpp(SEXP xSEXP, SEXP row_indicesSEXP, SEXP col_indicesSEXP, SEXP n_cellsSEXP, SEXP n_timepointsSEXP, SEXP n_bandsSEXP) {
@@ -39,6 +64,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_vrtility_hampel_filter_matrix_cpp", (DL_FUNC) &_vrtility_hampel_filter_matrix_cpp, 4},
+    {"_vrtility_matrix_to_rowlist_cpp", (DL_FUNC) &_vrtility_matrix_to_rowlist_cpp, 1},
     {"_vrtility_extract_band_matrices_cpp", (DL_FUNC) &_vrtility_extract_band_matrices_cpp, 6},
     {"_vrtility_restructure_cells_cpp", (DL_FUNC) &_vrtility_restructure_cells_cpp, 1},
     {NULL, NULL, 0}
