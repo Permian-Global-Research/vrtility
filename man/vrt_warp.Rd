@@ -46,6 +46,10 @@ each band. The default is "bilinear". "near" sampling will be used for the
 mask_band if provided.}
 
 \item{quiet}{logical indicating whether to suppress progress bar.}
+
+\item{temp_vrt_dir}{character path to the temporary directory to use for
+creating the VRT. This should not be modified and is used to ensure mirai
+daemons are working in the same directory.}
 }
 \description{
 Construct A warped VRT or warped VRT collection.

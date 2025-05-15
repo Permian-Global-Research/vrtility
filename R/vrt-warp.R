@@ -9,6 +9,9 @@
 #' each band. The default is "bilinear". "near" sampling will be used for the
 #' mask_band if provided.
 #' @param quiet logical indicating whether to suppress progress bar.
+#' @param temp_vrt_dir character path to the temporary directory to use for
+#' creating the VRT. This should not be modified and is used to ensure mirai
+#' daemons are working in the same directory.
 #' @rdname vrt_warp
 #' @export
 #' @details This function generates warped VRT objects types. This is
