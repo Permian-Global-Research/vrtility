@@ -319,6 +319,7 @@ easily by first using the following:
 
 
 ``` r
+# not run
 band_level_median <- vrt_stack(hls_warp) |>
   vrt_set_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(fs::file_temp(ext = ".tif"),
@@ -336,9 +337,33 @@ across bands. Note we can also use other functions such as `medoid` or
 `quantoid`, or `geomedoid` to obtain different types of composite that all 
 preserve the spectral properties of the data.
 
+In theory we can also just run:
+
 
 ``` r
+# not run
 hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
+```
+But the  NASA Earthdata server seems to object to multiple concurrent reads on 
+a single file and so this can be a bit slow. Therefore we can download multiple 
+files in parallel by using the "warp" engine in `vrt_compute()`. This downloads 
+all files locally - from here we can then build the geomedian composite as 
+above.
+
+
+``` r
+hls_composite <- hls_warp |>
+  vrt_compute(
+    fs::file_temp(ext = ".tif"),
+    engine = "warp"
+  ) |>
+  vrt_collect() |>
+  vrt_warp(
+    t_srs = trs,
+    te = te,
+    tr = c(30, 30)
+  ) |>
+  multiband_reduce(reduce_fun = geomedian())
 ```
 
 Now let's take a look at the composite - first RGB and then a false colour 
