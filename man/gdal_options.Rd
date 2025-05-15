@@ -125,6 +125,10 @@ NUM_THREADS on the CLI. "ALL_CPUS" (the default) will use all available CPUs,
 alternartively an integer can be supplied - or NULL to use a single threaded
 process.}
 
+\item{unified_src_nodata}{Unified source nodata option equivalent to -wo
+UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
+"NO" (as was the deafault for earlier versions of GDAL).}
+
 \item{x}{A named character vector of the configuration options}
 
 \item{scope}{A character vector of the scope to set the options in. Either

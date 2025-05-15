@@ -109,6 +109,9 @@ gdal_creation_options <- function(
 #' NUM_THREADS on the CLI. "ALL_CPUS" (the default) will use all available CPUs,
 #' alternartively an integer can be supplied - or NULL to use a single threaded
 #' process.
+#' @param unified_src_nodata Unified source nodata option equivalent to -wo
+#' UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
+#' "NO" (as was the deafault for earlier versions of GDAL).
 #' @return Character vector of options
 #' @rdname gdal_options
 #' @export
