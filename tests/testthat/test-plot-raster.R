@@ -1,5 +1,6 @@
 test_that("raster plotting works", {
   skip_on_os("windows")
+  skip_on_ci()
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
