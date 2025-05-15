@@ -15,9 +15,11 @@
 <url><loc>https://permian-global-research.github.io/vrtility/reference/plot_raster.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/set_vrt_descriptions.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/set_vrt_metadata.html</loc></url>
+<url><loc>https://permian-global-research.github.io/vrtility/reference/singleband-many-to-many.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/spatial_helpers.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/stac_utilities.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_add_empty_band.html</loc></url>
+<url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_block_save_internal.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_cache_management.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_collect.html</loc></url>
 <url><loc>https://permian-global-research.github.io/vrtility/reference/vrt_compute.html</loc></url>

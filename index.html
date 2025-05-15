@@ -65,7 +65,7 @@
 <!-- badges: start -->
 
 <p><img src="reference/figures/vrtility_hex.png" align="right" height="300" style="float:right; height:300px;"></p>
-<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation in mind. This package’s primary focus is on the use of GDAL VRT pixel functions using python. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions are used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). These main features are made possible by the <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a> and <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a> packages.</p>
+<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation in mind. This package enables the use of GDAL VRT python pixel functions. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions are used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). These main features are made possible by the <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a> and <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a> packages. Advanced image compositing and time series filtering is also provided which makes use of gdalraster alonside the {mirai} package for parallel processing.</p>
 <blockquote>
 <p>[!CAUTION] This package is under active development and is likely to change. Contributions and suggestions are still very welcome!</p>
 </blockquote>
@@ -77,6 +77,7 @@
 <li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel functions and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions.</p></li>
 <li><p>Efficient parallel processing using gdalraster and <a href="https://shikokuchuo.net/mirai/" class="external-link">mirai</a></p></li>
 <li><p>Advanced compositing methods that maintain spectral consistency, such as the geometric median and medoid.</p></li>
+<li><p>Time series filtering functions to improve temporal consistency and reduce noise.</p></li>
 </ul>
 </div>
 <div class="section level2">
@@ -144,7 +145,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   3.367   0.388  17.592</span></span></code></pre></div>
+<span><span class="co">#&gt;   3.348   0.442  18.862</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
@@ -156,7 +157,7 @@
 <div class="section level2">
 <h2 id="asynchronous-downloadprocessing">Asynchronous download/processing<a class="anchor" aria-label="anchor" href="#asynchronous-downloadprocessing"></a>
 </h2>
-<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallelisation. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can improve performance, depending on the speed of the server holding the data. In some cases this will make little difference for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. Paralellism is available in four functions at present: <code>vrt_collect</code>, <code>vrt_set_maskfun</code>, <code>vrt_compute</code> and <code>multiband_reduce</code>. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code>.</p>
+<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallelisation. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can improve performance, depending on the speed of the server holding the data. In some cases this will make little difference for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images invidivually (This is a much faster approach on Nasa’s Earthdata server).</p>
 </div>
 <div class="section level2">
 <h2 id="using-on-disk-rasters">Using on-disk rasters<a class="anchor" aria-label="anchor" href="#using-on-disk-rasters"></a>

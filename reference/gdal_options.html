@@ -84,7 +84,8 @@ Set the GDAL configuration options"></head><body>
 <span>  output_format <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  COMPRESS <span class="op">=</span> <span class="st">"LZW"</span>,</span>
 <span>  PREDICTOR <span class="op">=</span> <span class="st">"2"</span>,</span>
-<span>  NUM_THREADS <span class="op">=</span> <span class="st">"ALL_CPUS"</span>,</span>
+<span>  NUM_THREADS <span class="op">=</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">machine_cores</a></span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">n_daemons</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  BIGTIFF <span class="op">=</span> <span class="st">"IF_NEEDED"</span>,</span>
 <span>  TILED <span class="op">=</span> <span class="st">"YES"</span>,</span>
 <span>  BLOCKXSIZE <span class="op">=</span> <span class="st">"128"</span>,</span>
@@ -93,7 +94,13 @@ Set the GDAL configuration options"></head><body>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">gdalwarp_options</span><span class="op">(</span>multi <span class="op">=</span> <span class="cn">TRUE</span>, warp_memory <span class="op">=</span> <span class="st">"50%"</span>, num_threads <span class="op">=</span> <span class="st">"ALL_CPUS"</span><span class="op">)</span></span>
+<span><span class="fu">gdalwarp_options</span><span class="op">(</span></span>
+<span>  multi <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warp_memory <span class="op">=</span> <span class="st">"50%"</span>,</span>
+<span>  num_threads <span class="op">=</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">machine_cores</a></span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">n_daemons</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  unified_src_nodata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NO"</span>, <span class="st">"YES"</span>, <span class="st">"PARTIAL"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">set_gdal_config</span><span class="op">(</span><span class="va">x</span>, scope <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gdalraster"</span>, <span class="st">"sys"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -234,6 +241,12 @@ alternartively an integer can be supplied - or NULL to use a single threaded
 process.</p></dd>
 
 
+<dt id="arg-unified-src-nodata">unified_src_nodata<a class="anchor" aria-label="anchor" href="#arg-unified-src-nodata"></a></dt>
+<dd><p>Unified source nodata option equivalent to -wo
+UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
+"NO" (as was the deafault for earlier versions of GDAL).</p></dd>
+
+
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A named character vector of the configuration options</p></dd>
 
@@ -283,12 +296,13 @@ If NULL, then the output format will be inferred from the file extension.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_USERPWD </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    "user:password" </span>
 <span class="r-in"><span><span class="fu">gdal_creation_options</span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"JPEG"</span>, JPEG_QUALITY <span class="op">=</span> <span class="st">"90"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=ALL_CPUS"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=4"         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "BLOCKXSIZE=128"        </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7] "BLOCKYSIZE=128"         "COPY_SRC_OVERVIEWS=YES" "JPEG_QUALITY=90"       </span>
 <span class="r-in"><span><span class="fu">gdalwarp_options</span><span class="op">(</span>multi <span class="op">=</span> <span class="cn">TRUE</span>, warp_memory <span class="op">=</span> <span class="st">"50%"</span>, num_threads <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "-multi"        "-wm"           "50%"           "-wo"          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "NUM_THREADS=4"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "-multi"                "-wm"                   "50%"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "-wo"                   "NUM_THREADS=4"         "-wo"                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "UNIFIED_SRC_NODATA=NO"</span>
 <span class="r-in"><span><span class="fu">set_gdal_config</span><span class="op">(</span><span class="fu">gdal_config_opts</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
