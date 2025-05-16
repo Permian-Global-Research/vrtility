@@ -139,8 +139,6 @@ vrt_collect.character <- function(
       dst$close()
     }
 
-    # browser()
-
     tf <- set_vrt_descriptions(
       x = tf,
       band_descriptions,
@@ -170,6 +168,7 @@ vrt_collect.doc_items <- function(
   config_opts = gdal_config_opts(),
   ...
 ) {
+  daemon_setup(config_opts)
   orig_config <- set_gdal_config(config_opts)
   on.exit(set_gdal_config(orig_config))
 
@@ -195,9 +194,9 @@ vrt_collect.doc_items <- function(
   vrt_items <- purrr::map(
     items_uri,
     carrier::crate(
-      function(x) {
-        srcs <- purrr::map_chr(x, ~ .x$uri)
-        dttm <- unique(purrr::map_chr(x, ~ .x$dttm))
+      function(item) {
+        srcs <- purrr::map_chr(item, ~ .x$uri)
+        dttm <- unique(purrr::map_chr(item, ~ .x$dttm))
 
         if (length(dttm) > 1) {
           cli::cli_warn(
@@ -211,31 +210,43 @@ vrt_collect.doc_items <- function(
         }
 
         tf <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+        purrr::insistently(
+          function() {
+            gdalraster::buildVRT(
+              tf,
+              srcs,
+              cl_arg = c(
+                "-separate"
+              ),
+              quiet = TRUE
+            )
+          },
+          rate = purrr::rate_backoff(
+            pause_base = 10,
+            pause_cap = 100,
+            max_times = 5
+          )
+        )()
 
-        gdalraster::buildVRT(
-          tf,
-          srcs,
-          cl_arg = c(
-            "-separate"
-          ),
-          quiet = TRUE
-        )
-        tf <- vrtility::set_vrt_descriptions(
+        tf <- set_vrt_descriptions(
           x = tf,
-          names(x),
+          names(item),
           as_file = TRUE
         )
 
-        tf <- vrtility::set_vrt_metadata(
+        tf <- set_vrt_metadata(
           tf,
           keys = "datetime",
           values = dttm,
           as_file = TRUE
         )
 
-        vrtility::build_vrt_block(tf)
+        build_vrt_block(tf)
       },
-      save_dir = getOption("vrt.cache")
+      save_dir = getOption("vrt.cache"),
+      set_vrt_descriptions = set_vrt_descriptions,
+      set_vrt_metadata = set_vrt_metadata,
+      build_vrt_block = build_vrt_block
     ),
     .parallel = using_daemons()
   )
