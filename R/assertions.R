@@ -47,7 +47,7 @@ v_assert_valid_schema <- function(x) {
   if (!val_result) {
     error_msgs <- attr(val_result, "errors")
 
-    cli::cli_abort(
+    cli::cli_warn(
       c(
         "!" = "Error when creating VRT block: invalid VRT XML:",
         "x" = error_msgs
