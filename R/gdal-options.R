@@ -89,6 +89,12 @@ gdal_creation_options <- function(
   ...
 ) {
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
+
+  # maybe just a windows thing..
+  if (is.na(co_args$NUM_THREADS)) {
+    co_args$NUM_THREADS <- "1"
+  }
+
   keep_names <- setdiff(names(co_args), "output_format")
   co_args <- co_args[keep_names]
   co_args <- paste0(names(co_args), "=", co_args)
