@@ -3,7 +3,7 @@ pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   HLS: HLS.html
-last_built: 2025-05-15T13:21Z
+last_built: 2025-05-16T10:19Z
 urls:
   reference: https://permian-global-research.github.io/vrtility/reference
   article: https://permian-global-research.github.io/vrtility/articles
