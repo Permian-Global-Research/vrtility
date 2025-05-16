@@ -50,7 +50,7 @@ v_assert_valid_schema <- function(x) {
     cli::cli_abort(
       c(
         "!" = "Error when creating VRT block: invalid VRT XML:",
-        purrr::map_chr(error_msgs, ~ cli::format_bullets_raw(c("x" = .x)))
+        "x" = error_msgs
       )
     )
   }
