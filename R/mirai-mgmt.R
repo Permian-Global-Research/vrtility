@@ -84,7 +84,7 @@ daemon_setup <- function(gdal_config = NULL) {
       library(vrtility)
     })
   }
-  if (!is.null(gdal_config)) {
+  if (!is.null(gdal_config) && using_daemons()) {
     mirai::everywhere(
       {
         set_gdal_config(gdal_config)
