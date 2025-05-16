@@ -6,7 +6,7 @@ test_that("assertions work", {
   xml2::xml_add_child(band1, "SillyBilly", "wolly")
   tvrt <- fs::file_temp(ext = "vrt")
   xml2::write_xml(test_xml, tvrt)
-  expect_error(v_assert_valid_schema(tvrt))
+  expect_warning(v_assert_valid_schema(tvrt))
 
   expect_error(v_assert_true(FALSE, "testy"))
 
