@@ -16,7 +16,7 @@ raster_template_params <- function(
     temp_vrt_dir = temp_vrt_dir,
     apply_scale = apply_scale
   )
-  tds <- new(gdalraster::GDALRaster, vrt_template)
+  tds <- methods::new(gdalraster::GDALRaster, vrt_template)
   on.exit(tds$close(), add = TRUE)
   xs <- tds$getRasterXSize()
   ys <- tds$getRasterYSize()

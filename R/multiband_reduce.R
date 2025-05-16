@@ -159,11 +159,7 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  if (using_daemons()) {
-    mirai::everywhere({
-      library(vrtility)
-    })
-  }
+  daemon_setup(gdal_config = config_options)
 
   jobs <- purrr::pmap(
     blocks_df,

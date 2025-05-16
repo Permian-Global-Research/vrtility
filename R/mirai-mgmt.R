@@ -74,3 +74,26 @@ machine_cores <- function(all.tests = FALSE, logical = TRUE) {
   }
   NA_integer_
 }
+
+#' @noRd
+#' @keywords internal
+#' @description command for setting up mirai daemons
+daemon_setup <- function(gdal_config = NULL) {
+  if (using_daemons()) {
+    mirai::everywhere({
+      library(vrtility)
+    })
+  }
+  if (!is.null(gdal_config)) {
+    mirai::everywhere(
+      {
+        set_gdal_config(gdal_config)
+      },
+      .args = list(
+        gdal_config = gdal_config,
+        set_gdal_config = set_gdal_config
+      )
+    )
+  }
+  invisible()
+}
