@@ -197,6 +197,7 @@ vrt_set_maskfun.vrt_collection <- function(
   cache_dir = getOption("vrt.cache")
 ) {
   check_mask_band(x, mask_band)
+  daemon_setup()
 
   masked_blocks <- purrr::map(
     x$vrt,
