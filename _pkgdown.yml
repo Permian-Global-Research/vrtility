@@ -12,7 +12,7 @@ reference:
       - vrt_set_maskfun
       - vrt_warp
       - vrt_stack
-      - vrt_set_pixelfun
+      - vrt_set_py_pixelfun
       - vrt_compute
   - title: VRT helpers
     desc: Helper functions for VRT objects

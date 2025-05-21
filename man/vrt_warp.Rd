@@ -6,7 +6,7 @@
 \alias{vrt_warp.vrt_collection}
 \title{Construct A warped VRT or warped VRT collection.}
 \usage{
-vrt_warp(x, t_srs, te, tr, resampling, quiet, temp_vrt_dir)
+vrt_warp(x, t_srs, te, tr, resampling, quiet)
 
 \method{vrt_warp}{vrt_block}(
   x,
@@ -15,8 +15,7 @@ vrt_warp(x, t_srs, te, tr, resampling, quiet, temp_vrt_dir)
   tr,
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache")
+  quiet = TRUE
 )
 
 \method{vrt_warp}{vrt_collection}(
@@ -26,8 +25,7 @@ vrt_warp(x, t_srs, te, tr, resampling, quiet, temp_vrt_dir)
   tr,
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache")
+  quiet = TRUE
 )
 }
 \arguments{
@@ -46,10 +44,6 @@ each band. The default is "bilinear". "near" sampling will be used for the
 mask_band if provided.}
 
 \item{quiet}{logical indicating whether to suppress progress bar.}
-
-\item{temp_vrt_dir}{character path to the temporary directory to use for
-creating the VRT. This should not be modified and is used to ensure mirai
-daemons are working in the same directory.}
 }
 \description{
 Construct A warped VRT or warped VRT collection.

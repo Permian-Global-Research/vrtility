@@ -2,7 +2,6 @@
 % Please edit documentation in R/multiband_reduce.R, R/singleband-many-to-many.R
 \name{extract_band_matrices}
 \alias{extract_band_matrices}
-\alias{restructure_cells}
 \alias{matrix_to_rowlist}
 \title{Extract band matrices using C++}
 \usage{
@@ -14,8 +13,6 @@ extract_band_matrices(
   n_timepoints,
   n_bands
 )
-
-restructure_cells(cell_vals)
 
 matrix_to_rowlist(x)
 }
@@ -31,22 +28,14 @@ matrix_to_rowlist(x)
 \item{n_timepoints}{The number of time points.}
 
 \item{n_bands}{The number of bands.}
-
-\item{cell_vals}{A list of lists of vectors, where each inner list represents
-a time point - the product of \code{geomedian_reduction()}.}
 }
 \value{
 A list of matrices, where each matrix corresponds to a band.
-
-A numeric vector of length \code{n_bands * n_cells}, where \code{n_bands} is
-the number of bands and \code{n_cells} is the number of cells.
 
 A list of vectors, where each vector represents a row of the
 matrix.
 }
 \description{
-Internal C++ function wrapped for R
-
 Internal C++ function wrapped for R
 
 Convert a matrix to a list of vectors, where each vector
