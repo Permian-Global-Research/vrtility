@@ -49,14 +49,12 @@ raster_template_params <- function(
 #' @noRd
 gdalraster_engine_asserts_init <- function(
   outfile,
-  cache_dir,
   config_options,
   creation_options,
   quiet,
   fname = "multiband_reduce"
 ) {
   v_assert_type(outfile, "outfile", "character", nullok = FALSE)
-  v_assert_type(cache_dir, "cache_dir", "character", nullok = FALSE)
   v_assert_type(config_options, "config_options", "character", nullok = FALSE)
   v_assert_type(
     creation_options,
