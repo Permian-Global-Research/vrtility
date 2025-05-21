@@ -27,7 +27,7 @@ is_temp_dir <- function(path) {
 #' temporary directory.
 vrt_cache_set <- function(dir) {
   v_assert_type(dir, "dir", "character", nullok = FALSE)
-  orig_cache <- options("vrt.cache")
+  orig_cache <- getOption("vrt.cache")
 
   fs::dir_create(dir)
   options(vrt.cache = dir)
