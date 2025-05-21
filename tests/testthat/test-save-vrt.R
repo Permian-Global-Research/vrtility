@@ -17,7 +17,7 @@ test_that("save_vrt works", {
       tr = t_block$res
     ) |>
     vrt_stack() |>
-    vrt_set_pixelfun()
+    vrt_set_py_pixelfun()
 
   saved_file <- vrt_save(ex_vrt)
   ds1 <- methods::new(gdalraster::GDALRaster, saved_file)

@@ -24,13 +24,13 @@
 #' \item{\code{\link{vrt_collect}}}{Create a vrt_collection object}
 #' \item{\code{\link{vrt_set_maskfun}}}{Set a mask function for a vrt object}
 #' \item{\code{\link{vrt_stack}}}{Create a vrt_stack object}
-#' \item{\code{\link{vrt_set_pixelfun}}}{Set a pixel function for a vrt stack object}
+#' \item{\code{\link{vrt_set_py_pixelfun}}}{Set a pixel function for a vrt stack object}
 #' \item{\code{\link{vrt_warp}}}{Warp a vrt_x object to a warped vrt}
 #' \item{\code{\link{vrt_compute}}}{Compute a vrt pipeline (using GDAL)}
 #' }
 #' @section VRT pixel functions:
 #' \describe{
-#' \item{\code{\link{vrt_set_pixelfun}}}{Set a pixel function for a vrt stack object}
+#' \item{\code{\link{vrt_set_py_pixelfun}}}{Set a pixel function for a vrt stack object}
 #' \item{\code{\link{set_mask_numpy}}}{A pixel function to apply a bitmask}
 #' \item{\code{\link{build_intmask}}}{A pixel function to build a mask from a mask band where the mask values are integers}
 #' \item{\code{\link{build_bitmask}}}{A pixel function to build a mask from a mask band where the mask values are bit positions}
@@ -65,16 +65,19 @@
     "numpy"
   ))
   cache_init_checks()
-  vrt_ram_opts_set()
+  vrt_opts_set()
 }
 
 #' onload max RAM allocation options
 #' @noRd
 #' @keywords internal
-vrt_ram_opts_set <- function() {
+vrt_opts_set <- function() {
   op <- options()
   op_vrtility <- list(
-    vrt.percent.ram = 60
+    vrt.percent.ram = 60,
+    vrt.pause.base = 10,
+    vrt.pause.cap = 100,
+    vrt.max.times = 10
   )
 
   toset <- !(names(op_vrtility) %in% names(op))

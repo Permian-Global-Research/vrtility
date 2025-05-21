@@ -236,7 +236,7 @@ easily by first using the following:
 ```{r simple-composite,  eval=FALSE}
 # not run
 band_level_median <- vrt_stack(hls_warp) |>
-  vrt_set_pixelfun(pixfun = median_numpy()) |>
+  vrt_set_py_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(fs::file_temp(ext = ".tif"),
     engine = "gdalraster"
   )
