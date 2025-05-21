@@ -96,8 +96,8 @@ Here is a simple example where we:
 library(vrtility)
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(10)
-#> [1] 10
+mirai::daemons(6)
+#> [1] 6
 ```
 
 ``` r
@@ -133,14 +133,14 @@ system.time(
     ) |>
     vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
     vrt_stack() |>
-    vrt_set_pixelfun() |>
+    vrt_set_py_pixelfun() |>
     vrt_compute(
       outfile = fs::file_temp(ext = "tif"),
       engine = "gdalraster"
     )
 )
 #>    user  system elapsed 
-#>   3.348   0.442  18.862
+#>   2.297   0.247  72.003
 ```
 
 ``` r
@@ -219,7 +219,7 @@ ex_composite <- vrt_warp(
   tr = c(20, 20)
 ) |>
   vrt_stack() |>
-  vrt_set_pixelfun(pixfun = median_numpy())
+  vrt_set_py_pixelfun(pixfun = median_numpy())
 
 par(mfrow = c(1, 1))
 plot(ex_composite, bands = c(3, 2, 1), quiet = TRUE)
