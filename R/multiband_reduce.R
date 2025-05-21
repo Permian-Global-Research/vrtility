@@ -11,8 +11,6 @@
 #' @param outfile The output file path.
 #' @param apply_scale Logical indicating whether to apply the scale values
 #' (if they exist) to the data.
-#' @param cache_dir The directory to save temporary files. (default should be
-#' fine - this is here mainly for explicit privision for mirai daemons)
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
 #' @param quiet Logical indicating whether to suppress the progress bar.
@@ -74,7 +72,6 @@ multiband_reduce <- function(
   reduce_fun,
   outfile,
   apply_scale,
-  cache_dir,
   config_options,
   creation_options,
   quiet,
@@ -104,19 +101,15 @@ multiband_reduce.vrt_collection_warped <- function(
   reduce_fun = vrtility::geomedian(),
   outfile = fs::file_temp(ext = "tif"),
   apply_scale = FALSE,
-  cache_dir = getOption("vrt.cache"),
-  config_options = gdal_config_opts(
-    GDAL_HTTP_MAX_RETRY = "3",
-    GDAL_HTTP_RETRY_DELAY = "20"
-  ),
+  config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
   nsplits = NULL
 ) {
+  daemon_setup(gdal_config = config_options)
   # inital assertions and checks.
   gdalraster_engine_asserts_init(
     outfile,
-    cache_dir,
     config_options,
     creation_options,
     quiet
@@ -159,8 +152,6 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  daemon_setup(gdal_config = config_options)
-
   jobs <- purrr::pmap(
     blocks_df,
     carrier::crate(
@@ -173,8 +164,7 @@ multiband_reduce.vrt_collection_warped <- function(
           xoff = block_params[["nXOff"]],
           yoff = block_params[["nYOff"]],
           xsize = block_params[["nXSize"]],
-          ysize = block_params[["nYSize"]],
-          save_dir = cache_dir
+          ysize = block_params[["nYSize"]]
         )
         cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
         list(
@@ -184,7 +174,6 @@ multiband_reduce.vrt_collection_warped <- function(
       },
       vrt_block = x,
       nbands = rt$nbands,
-      cache_dir = cache_dir,
       read_block_arrays = read_block_arrays,
       reduce_fun = reduce_fun,
       mdim_reduction_apply = mdim_reduction_apply,
@@ -247,9 +236,8 @@ multiband_reduce.vrt_collection_warped <- function(
 #' time point - the product of `read_block_arrays()`.
 #' @return  A list of lists of vectors, where each inner list represents a
 #' time point.
-#' @export
-#' @rdname geomedian_internal
 #' @keywords internal
+#' @noRd
 mdim_reduction_apply <- function(x, mdim_fun) {
   # Get dimensions from first list element
   mast_dim <- dim(x[[1]][[1]])
@@ -297,13 +285,15 @@ mdim_reduction_apply <- function(x, mdim_fun) {
 #' @param ysize y size
 #' @param save_dir directory to save temporary files
 #' @return a list of matrices, where each matrix corresponds to a band
-#' @export
-#' @rdname geomedian_internal
+#' @noRd
 #' @keywords internal
-read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
+read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize) {
   rba_insist <- purrr::insistently(
     function(.x) {
-      tvrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+      tvrt <- fs::file_temp(
+        tmp_dir = getOption("vrt.cache"),
+        ext = "vrt"
+      )
       vrt_xml <- xml2::read_xml(.x$vrt)
       xml2::write_xml(vrt_xml, tvrt)
       ds <- methods::new(gdalraster::GDALRaster, tvrt)
@@ -325,9 +315,9 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize, save_dir) {
       )
     },
     rate = purrr::rate_backoff(
-      pause_base = 10,
-      pause_cap = 300,
-      max_times = 5
+      pause_base = getOption("vrt.pause.base"),
+      pause_cap = getOption("vrt.pause.cap"),
+      max_times = getOption("vrt.max.times")
     )
   )
 
@@ -382,8 +372,7 @@ extract_band_matrices <- function(
 #' @return A numeric vector of length `n_bands * n_cells`, where `n_bands` is
 #' the number of bands and `n_cells` is the number of cells.
 #' @keywords internal
-#' @rdname vrtility_internal
-#' @export
+#' @noRd
 restructure_cells <- function(cell_vals) {
   restructure_cells_cpp(
     cell_vals
