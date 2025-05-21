@@ -27,9 +27,9 @@ call_gdal_warp <- function(
       )
     },
     rate = purrr::rate_backoff(
-      pause_base = 1,
-      pause_cap = 100,
-      max_times = 5
+      pause_base = getOption("vrt.pause.base"),
+      pause_cap = getOption("vrt.pause.cap"),
+      max_times = getOption("vrt.max.times")
     )
   )()
 

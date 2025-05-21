@@ -1,4 +1,8 @@
 test_that("singleband_m2m works", {
+  if (!vrtility:::using_daemons()) {
+    mirai::daemons(2)
+  }
+
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
