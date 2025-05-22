@@ -2,14 +2,12 @@
 #' @param after numeric indicating the band number to add the empty band after
 #' @param x A VRT_x object
 #' @param description A character string describing the empty band
-#' @param save_dir A character string indicating the directory to save the VRT -
-#' typically not required mainly here for manaing temp file locs in parallel.
 #' @param scale_value A numeric value to set the scale of the new band. If NULL,
 #' the scale of the first band in the VRT will be used. Be careful, Landsat for
-#' example has different scales for different bands.ddoc
+#' example has different scales for different bands.
 #'
 #' @export
-vrt_add_empty_band <- function(x, after, description, save_dir, scale_value) {
+vrt_add_empty_band <- function(x, after, description, scale_value) {
   v_assert_type(after, "after", "numeric", nullok = FALSE)
   UseMethod("vrt_add_empty_band")
 }
@@ -29,9 +27,9 @@ vrt_add_empty_band.vrt_block <- function(
   x,
   after,
   description,
-  save_dir = getOption("vrt.cache"),
   scale_value = NULL
 ) {
+  v_assert_type(scale_value, "scale_value", "numeric", nullok = TRUE)
   if (after < 0 || after > length(x$assets) + 1) {
     cli::cli_abort(
       c(
@@ -41,6 +39,8 @@ vrt_add_empty_band.vrt_block <- function(
       class = "vrtility_after_error"
     )
   }
+
+  save_dir <- getOption("vrt.cache")
 
   tvrt <- vrt_save(x)
 
@@ -92,15 +92,21 @@ vrt_add_empty_band.vrt_block <- function(
   # resolve any scaling values
   if (is.null(scale_value)) {
     scale_vals <- xml2::xml_find_all(vrt_xml, ".//Scale")
-    scale_value <- purrr::map_chr(
-      scale_vals,
-      ~ xml2::xml_text(.x)
-    )
-
-    scale_value <- names(sort(table(scale_value), decreasing = TRUE)[1])
+    # browser()
+    if (length(scale_vals) > 0) {
+      scale_value <- xml2::xml_text(scale_vals[1])
+      scale_value <- names(sort(table(scale_value), decreasing = TRUE)[1])
+    }
   }
-  # apply scale to new band (enables combining with other scaled collections)
-  xml2::xml_add_child(ebband, "Scale", as.character(scale_value))
+
+  if (!is.null(scale_value)) {
+    # apply scale to new band (enables combining with other scaled collections)
+    xml2::xml_add_child(
+      ebband,
+      "Scale",
+      format(scale_value, scientific = FALSE)
+    )
+  }
 
   if (after == 0) {
     xml2::xml_add_sibling(bands[[1]], ebband, .where = "before")
@@ -134,7 +140,6 @@ vrt_add_empty_band.vrt_collection <- function(
   x,
   after,
   description,
-  save_dir = getOption("vrt.cache"),
   scale_value = NULL
 ) {
   block_list <- purrr::map(
@@ -143,7 +148,6 @@ vrt_add_empty_band.vrt_collection <- function(
       .x,
       after = after,
       description = description,
-      save_dir = save_dir,
       scale_value = scale_value
     )
   )
