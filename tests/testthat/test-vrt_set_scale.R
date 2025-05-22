@@ -36,4 +36,17 @@ test_that("vrt_set_scale works", {
       scale_value = c(4, 3, 2)
     )
   )
+
+  sc3 <- vrt_set_scale(ex_sc1, 1000, band_idx = 1:2)
+  sc3xml <- xml2::read_xml(sc3[[1]][[1]]$vrt)
+  scale_vals3 <- xml2::xml_find_all(sc3xml, ".//Scale") |>
+    xml2::xml_text()
+
+  expect_true(all(as.numeric(scale_vals3) == c(1000, 1000, 1e-4, 1e-4)))
+
+  sc4 <- vrt_set_scale(ex_collect, 1000, band_idx = 1:2)
+  sc4xml <- xml2::read_xml(sc4[[1]][[1]]$vrt)
+  scale_vals4 <- xml2::xml_find_all(sc4xml, ".//Scale") |>
+    xml2::xml_text()
+  expect_length(scale_vals4, 2)
 })
