@@ -36,7 +36,13 @@ vrt_set_scale.vrt_block <- function(
   band_idx = NULL
 ) {
   v_assert_type(scale_value, "scale_value", "numeric", nullok = FALSE)
-  v_assert_type(band_idx, "band_idx", "numeric", nullok = TRUE)
+  v_assert_type(
+    band_idx,
+    "band_idx",
+    c("numeric", "integer"),
+    nullok = TRUE,
+    multiple = TRUE
+  )
 
   if (length(scale_value) > 1) {
     v_assert_length(
@@ -58,6 +64,8 @@ vrt_set_scale.vrt_block <- function(
   }
 
   purrr::walk2(bands[band_idx], scale_value, function(band, scale) {
+    # Remove existing Scale elements
+    xml2::xml_remove(xml2::xml_find_all(band, ".//Scale"))
     xml2::xml_add_child(
       band,
       "Scale",
