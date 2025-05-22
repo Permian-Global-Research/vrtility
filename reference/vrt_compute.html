@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,6 @@
 <span>  <span class="va">nsplits</span>,</span>
 <span>  <span class="va">add_cl_arg</span>,</span>
 <span>  <span class="va">quiet</span>,</span>
-<span>  <span class="va">temp_vrt_dir</span>,</span>
 <span>  <span class="va">apply_scale</span>,</span>
 <span>  <span class="va">dst_nodata</span></span>
 <span><span class="op">)</span></span>
@@ -83,7 +82,6 @@
 <span>  nsplits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_cl_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span>,</span>
 <span>  apply_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dst_nodata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -104,7 +102,6 @@
 <span>  nsplits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_cl_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span>,</span>
 <span>  apply_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dst_nodata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -125,7 +122,6 @@
 <span>  nsplits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_cl_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span>,</span>
 <span>  apply_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dst_nodata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -146,7 +142,6 @@
 <span>  nsplits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_cl_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span>,</span>
 <span>  apply_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dst_nodata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
@@ -167,7 +162,6 @@
 <span>  nsplits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  add_cl_arg <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span>,</span>
 <span>  apply_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dst_nodata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -235,13 +229,6 @@ validity.</p></dd>
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p>A logical indicating whether to suppress output</p></dd>
-
-
-<dt id="arg-temp-vrt-dir">temp_vrt_dir<a class="anchor" aria-label="anchor" href="#arg-temp-vrt-dir"></a></dt>
-<dd><p>A character string of the directory to use for
-temporary VRT files. Defaults to the <code>vrt.cache</code> option. shouldnt require
-changing. This is required to ensure relative vrt files are preserved when
-using parallel processing.</p></dd>
 
 
 <dt id="arg-apply-scale">apply_scale<a class="anchor" aria-label="anchor" href="#arg-apply-scale"></a></dt>
@@ -320,7 +307,7 @@ case when working with online data sources).</p>
 <span class="r-in"><span><span class="co"># now median composite with pixelfunction</span></span></span>
 <span class="r-in"><span><span class="va">med_composite</span> <span class="op">&lt;-</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">coll_masked</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="vrt_set_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="vrt_set_py_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">vrt_compute</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    outfile <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">"tif"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_warp</span><span class="op">(</span><span class="va">x</span>, <span class="va">t_srs</span>, <span class="va">te</span>, <span class="va">tr</span>, <span class="va">resampling</span>, <span class="va">quiet</span>, <span class="va">temp_vrt_dir</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_warp</span><span class="op">(</span><span class="va">x</span>, <span class="va">t_srs</span>, <span class="va">te</span>, <span class="va">tr</span>, <span class="va">resampling</span>, <span class="va">quiet</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_block'</span></span>
 <span><span class="fu">vrt_warp</span><span class="op">(</span></span>
@@ -58,8 +58,7 @@
 <span>  <span class="va">tr</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bilinear"</span>, <span class="st">"near"</span>, <span class="st">"cubic"</span>, <span class="st">"cubicspline"</span>, <span class="st">"lanczos"</span>, <span class="st">"average"</span>, <span class="st">"rms"</span>,</span>
 <span>    <span class="st">"mode"</span>, <span class="st">"max"</span>, <span class="st">"min"</span>, <span class="st">"med"</span>, <span class="st">"q1"</span>, <span class="st">"q3"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
-<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span></span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_collection'</span></span>
@@ -70,8 +69,7 @@
 <span>  <span class="va">tr</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bilinear"</span>, <span class="st">"near"</span>, <span class="st">"cubic"</span>, <span class="st">"cubicspline"</span>, <span class="st">"lanczos"</span>, <span class="st">"average"</span>, <span class="st">"rms"</span>,</span>
 <span>    <span class="st">"mode"</span>, <span class="st">"max"</span>, <span class="st">"min"</span>, <span class="st">"med"</span>, <span class="st">"q1"</span>, <span class="st">"q3"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
-<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  temp_vrt_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span></span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,12 +103,6 @@ mask_band if provided.</p></dd>
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p>logical indicating whether to suppress progress bar.</p></dd>
-
-
-<dt id="arg-temp-vrt-dir">temp_vrt_dir<a class="anchor" aria-label="anchor" href="#arg-temp-vrt-dir"></a></dt>
-<dd><p>character path to the temporary directory to use for
-creating the VRT. This should not be modified and is used to ensure mirai
-daemons are working in the same directory.</p></dd>
 
 </dl></div>
     <div class="section level2">

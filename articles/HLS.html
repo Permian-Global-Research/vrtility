@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -232,22 +232,54 @@ the subsequent parts of the workflow.</p>
 overview of the imagery we will download. Our collections contain images
 with two different SRS. We can also see that the number of bands differs
 across the two collections.</p>
+<p>Now we need to align these data so that we can composite all the
+imagery in one go. We can do this by simply adding nodata bands where
+required. In the case of the HLS Landsat collection, we also need to
+move the position of the cirrus band to match that of the HLS Sentinel-2
+collection.</p>
+<p>Similarly, with HLS Sentinel-2, we need to add the thermal bands that
+are absent, but critically, note that we need to specify the scale value
+for these bands. If this isn’t provided then the scale from the first
+band is used (which in this case is 0.0001) or if there is no scale, it
+is ignored. Automating this is tricky but if you miss an appropriate
+scale, you will see warnings when you then use
+<code>vrt_stack</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hls_ls_align</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_band_names.html">vrt_set_band_names</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_sl_col</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"G"</span>, <span class="st">"R"</span>, <span class="st">"N2"</span>, <span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"C"</span>, <span class="st">"T1"</span>, <span class="st">"T2"</span>, <span class="st">"Fmask"</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">4</span>, description <span class="op">=</span> <span class="st">"RE1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">5</span>, description <span class="op">=</span> <span class="st">"RE2"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">6</span>, description <span class="op">=</span> <span class="st">"RE3"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">7</span>, description <span class="op">=</span> <span class="st">"N"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">9</span>, description <span class="op">=</span> <span class="st">"WV"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_move_band.html">vrt_move_band</a></span><span class="op">(</span>band_idx <span class="op">=</span> <span class="fl">13</span>, after <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span></span>
+<span><span class="va">hls_ss_align</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_band_names.html">vrt_set_band_names</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_ss_col</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"G"</span>, <span class="st">"R"</span>, <span class="st">"RE1"</span>, <span class="st">"RE2"</span>, <span class="st">"RE3"</span>, <span class="st">"N"</span>, <span class="st">"N2"</span>, <span class="st">"WV"</span>, <span class="st">"C"</span>, <span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"Fmask"</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">13</span>, description <span class="op">=</span> <span class="st">"T1"</span>, scale_value <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">14</span>, description <span class="op">=</span> <span class="st">"T2"</span>, scale_value <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+<p>Now we can combine the two collections into a single collection using
+the <code>c</code> method. This is a simple concatenation of the two
+collections.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hls_merge_coll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_ls_align</span>,</span>
+<span>  <span class="va">hls_ss_align</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Now we set the mask function required for the HLS data. The “Fmask”
 band is a true bitmask (unlike other datasets which may use ineger
 masks). Therefore we must use the <code>build_bitmask</code> function to
-set the mask and can specify the bits that we wish to set as nodata
+set the mask and can specify the bits that we wish to set as no-data
 across all bands.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_sl_col_mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_sl_col</span>,</span>
-<span>  mask_band <span class="op">=</span> <span class="st">"Fmask"</span>,</span>
-<span>  mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  drop_mask_band <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">hls_ss_col_mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_ss_col</span>,</span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hls_col_mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_merge_coll</span>,</span>
 <span>  mask_band <span class="op">=</span> <span class="st">"Fmask"</span>,</span>
 <span>  mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -255,7 +287,7 @@ across all bands.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># let's check out a vrt and inspect the mask function that we used.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hls_sl_col_mask</span>, maskfun <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hls_col_mask</span>, maskfun <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; → &lt;VRT Collection&gt;</span></span>
 <span><span class="co">#&gt; Mask Function:</span></span>
 <span><span class="co">#&gt; import numpy as np</span></span>
@@ -275,69 +307,27 @@ across all bands.</p>
 <span><span class="co">#&gt; Bounding Box: NA</span></span>
 <span><span class="co">#&gt; Pixel res: 30, 30</span></span>
 <span><span class="co">#&gt; Start Date: 2023-01-17 00:32:26 UTC</span></span>
-<span><span class="co">#&gt; End Date: 2023-12-03 00:32:19 UTC</span></span>
-<span><span class="co">#&gt; Number of Items: 6</span></span>
-<span><span class="co">#&gt; Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11</span></span></code></pre></div>
-<p>Now we need to align these data so that we can composite all the
-imagery in one go. We can do this by simply adding nodata bands where
-required. In the case of the HLS Landsat collection, we also need to
-move the position of the cirrus band to match that of the HLS Sentinel-2
-collection.</p>
-<p>Similarly, with HLS Sentinel-2, we need to add the thermal bands that
-are absent, but critically, note that we need to specify the scale value
-for these bands. If this isn’t provided then the scale from the first
-band is used (which in this case is 0.0001) or if there is no scale, it
-is ignored. Automating this is tricky but if you miss an appropriate
-scale, you will see warnings when you then use
-<code>vrt_stack</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_ls_align</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_band_names.html">vrt_set_band_names</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_sl_col_mask</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"G"</span>, <span class="st">"R"</span>, <span class="st">"N2"</span>, <span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"C"</span>, <span class="st">"T1"</span>, <span class="st">"T2"</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">4</span>, description <span class="op">=</span> <span class="st">"RE1"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">5</span>, description <span class="op">=</span> <span class="st">"RE2"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">6</span>, description <span class="op">=</span> <span class="st">"RE3"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">7</span>, description <span class="op">=</span> <span class="st">"N"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">9</span>, description <span class="op">=</span> <span class="st">"WV"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_move_band.html">vrt_move_band</a></span><span class="op">(</span>band_idx <span class="op">=</span> <span class="fl">13</span>, after <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span></span>
-<span></span>
-<span></span>
-<span><span class="va">hls_ss_align</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_set_band_names.html">vrt_set_band_names</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_ss_col_mask</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"G"</span>, <span class="st">"R"</span>, <span class="st">"RE1"</span>, <span class="st">"RE2"</span>, <span class="st">"RE3"</span>, <span class="st">"N"</span>, <span class="st">"N2"</span>, <span class="st">"WV"</span>, <span class="st">"C"</span>, <span class="st">"S1"</span>, <span class="st">"S2"</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">13</span>, description <span class="op">=</span> <span class="st">"T1"</span>, scale_value <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_add_empty_band.html">vrt_add_empty_band</a></span><span class="op">(</span>after <span class="op">=</span> <span class="fl">14</span>, description <span class="op">=</span> <span class="st">"T2"</span>, scale_value <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>Now we can combine the two collections into a single collection using
-the <code>c</code> method. This is a simple concatenation of the two
-collections.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_merge_coll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_ls_align</span>,</span>
-<span>  <span class="va">hls_ss_align</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Now we need to warp all vrt_blocks in the collection to the same
-spatial reference system, extent and pixel size. This is particularly
-important in this case because of the multiple SRS in the collection.
-Also to make use of the fastest <code>vrt_compute</code> engine, we need
-to ensure that all blocks are in the same SRS with equal dimensions.</p>
+<span><span class="co">#&gt; End Date: 2023-12-30 00:49:10 UTC</span></span>
+<span><span class="co">#&gt; Number of Items: 14</span></span>
+<span><span class="co">#&gt; Assets: A, B, G, R, RE1, RE2, RE3, N, N2, WV, C, S1, S2, T1, T2</span></span></code></pre></div>
+<p>Now we want to “reduce” the imagery collection to a single composite
+image. The typical approach would be to use the band-level median which
+we can achieve easily first creating a virtual warped raster collection
+using <code>vrt_warp</code> and then stacking the warped collection
+using <code>vrt_stack</code>. Here we can now apply the python median
+pixel function using <code>vrt_set_py_pixelfun</code> before computing
+the final composite using <code>vrt_compute</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_warp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
-<span>  <span class="va">hls_merge_coll</span>,</span>
+<code class="sourceCode R"><span><span class="co"># not run</span></span>
+<span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_col_mask</span>,</span>
 <span>  t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
 <span>  te <span class="op">=</span> <span class="va">te</span>,</span>
 <span>  tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="st">"bilinear"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Now we want to “reduce” the imagery collection to a single composite
-image. The typical approach would be to use the band-level median which
-we can achieve easily by first using the following:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># not run</span></span>
-<span><span class="va">band_level_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">hls_warp</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_set_pixelfun.html">vrt_set_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>    engine <span class="op">=</span> <span class="st">"gdalraster"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
@@ -353,20 +343,36 @@ consistency across bands. Note we can also use other functions such as
 to obtain different types of composite that all preserve the spectral
 properties of the data.</p>
 <p>In theory we can also just run:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># not run</span></span>
-<span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span><span class="va">hls_warp</span>, reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
+<span>  <span class="va">hls_col_mask</span>,</span>
+<span>  t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
+<span>  te <span class="op">=</span> <span class="va">te</span>,</span>
+<span>  tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
+<span>  resampling <span class="op">=</span> <span class="st">"bilinear"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span>reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>But the NASA Earthdata server seems to object to multiple concurrent
 reads on a single file and so this can be a bit slow. Therefore we can
 download multiple files in parallel by using the “warp” engine in
 <code><a href="../reference/vrt_compute.html">vrt_compute()</a></code>. This downloads all files locally - from here
-we can then build the geomedian composite as above.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="va">hls_warp</span> <span class="op">|&gt;</span></span>
+we can then build the geomedian composite as above. by warping during
+the <code>vrt_compute</code> step can align all images in the collection
+to the same spatial reference system, extent and pixel size. This is
+particularly important in this case because of the multiple SRS values
+in the collection.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hls_imgs</span> <span class="op">&lt;-</span> <span class="va">hls_col_mask</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
 <span>    <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
+<span>    t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
+<span>    te <span class="op">=</span> <span class="va">te</span>,</span>
+<span>    tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span>,</span>
+<span>    resampling <span class="op">=</span> <span class="st">"bilinear"</span>,</span>
 <span>    engine <span class="op">=</span> <span class="st">"warp"</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">hls_composite</span> <span class="op">&lt;-</span> <span class="va">hls_imgs</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
 <span>    t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
@@ -376,7 +382,7 @@ we can then build the geomedian composite as above.</p>
 <span>  <span class="fu"><a href="../reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span>reduce_fun <span class="op">=</span> <span class="fu"><a href="../reference/multiband_reduce.html">geomedian</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Now let’s take a look at the composite - first RGB and then a false
 colour composite.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>    <span class="va">hls_composite</span>,</span>
@@ -393,7 +399,7 @@ colour composite.</p>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/hls-plot-1.png" width="50%"><img src="figure/hls-plot-2.png" width="50%"></p>
 <p>And all the other bands too:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
