@@ -1,10 +1,12 @@
 #' Set the pixel function of a VRT stack object
 #' @param x A vrt_stack object
 #' @param pixfun A function that returns the Python code for the pixel function
+#' @param band_idx The indices of the bands to set the pixel function for. If
+#' NULL, the pixel function is set for all bands.
 #' @export
 #' @rdname vrt_set_py_pixelfun
 #'
-vrt_set_py_pixelfun <- function(x, pixfun) {
+vrt_set_py_pixelfun <- function(x, pixfun, band_idx) {
   UseMethod("vrt_set_py_pixelfun")
 }
 
@@ -24,9 +26,17 @@ vrt_set_py_pixelfun.default <- function(x, ...) {
 #' @rdname vrt_set_py_pixelfun
 vrt_set_py_pixelfun.vrt_stack <- function(
   x,
-  pixfun = vrtility::median_numpy()
+  pixfun = vrtility::median_numpy(),
+  band_idx = NULL
 ) {
   v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
+  v_assert_type(
+    band_idx,
+    "band_idx",
+    c("numeric", "integer"),
+    nullok = TRUE,
+    multiple = TRUE
+  )
 
   vx <- xml2::read_xml(x$vrt)
   no_data <- xml2::xml_find_first(vx, ".//NoDataValue") |>
@@ -34,7 +44,20 @@ vrt_set_py_pixelfun.vrt_stack <- function(
 
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
 
-  purrr::walk(bands, function(.x) {
+  if (is.null(band_idx)) {
+    band_idx <- seq_along(bands)
+  } else {
+    if (!all(band_idx %in% seq_along(bands))) {
+      cli::cli_abort(
+        c(
+          "x" = "`band_idx` must be a vector of integers
+        between 1 and {length(bands)}"
+        )
+      )
+    }
+  }
+
+  purrr::walk(bands[band_idx], function(.x) {
     xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
     xml2::xml_add_child(.x, "PixelFunctionType", "pixfun")
     xml2::xml_add_child(.x, "PixelFunctionLanguage", "Python")
