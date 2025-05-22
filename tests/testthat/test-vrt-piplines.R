@@ -49,7 +49,9 @@ test_that("full vrt pipeline works", {
   expect_s3_class(ex_collect_mask_warp_stack, "vrt_stack_warped")
   expect_snapshot(print(ex_collect_mask_warp_stack))
 
-  ex_collect_mask_warp_stack_med <- vrt_set_pixelfun(ex_collect_mask_warp_stack)
+  ex_collect_mask_warp_stack_med <- vrt_set_py_pixelfun(
+    ex_collect_mask_warp_stack
+  )
   expect_s3_class(ex_collect_mask_warp_stack_med, "vrt_stack_warped")
   expect_snapshot(print(ex_collect_mask_warp_stack_med))
   expect_snapshot(print(ex_collect_mask_warp_stack_med, pixfun = TRUE))
@@ -152,11 +154,11 @@ test_that("pipeline extras", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
-  expect_error(vrt_set_pixelfun(ex_collect))
+  expect_error(vrt_set_py_pixelfun(ex_collect))
 
   one_srs_collect <- vrt_collect(s2files[1:2])
   one_srs_collect_stack <- vrt_stack(one_srs_collect)
-  one_srs_collect_stack_pf <- vrt_set_pixelfun(
+  one_srs_collect_stack_pf <- vrt_set_py_pixelfun(
     one_srs_collect_stack,
     pixfun = median_numpy()
   )

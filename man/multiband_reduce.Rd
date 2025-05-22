@@ -13,7 +13,6 @@ multiband_reduce(
   reduce_fun,
   outfile,
   apply_scale,
-  cache_dir,
   config_options,
   creation_options,
   quiet,
@@ -72,9 +71,6 @@ bands. See  details.}
 
 \item{apply_scale}{Logical indicating whether to apply the scale values
 (if they exist) to the data.}
-
-\item{cache_dir}{The directory to save temporary files. (default should be
-fine - this is here mainly for explicit privision for mirai daemons)}
 
 \item{config_options}{A named character vector of GDAL configuration options.}
 

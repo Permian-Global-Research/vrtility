@@ -23,7 +23,6 @@ vrt_compute(
   nsplits,
   add_cl_arg,
   quiet,
-  temp_vrt_dir,
   apply_scale,
   dst_nodata
 )
@@ -43,7 +42,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 )
@@ -63,7 +61,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 )
@@ -83,7 +80,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 )
@@ -103,7 +99,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 )
@@ -123,7 +118,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 )
@@ -162,11 +156,6 @@ that are not captured in \code{gdalwarp_options()} - these are not checked for
 validity.}
 
 \item{quiet}{A logical indicating whether to suppress output}
-
-\item{temp_vrt_dir}{A character string of the directory to use for
-temporary VRT files. Defaults to the \code{vrt.cache} option. shouldnt require
-changing. This is required to ensure relative vrt files are preserved when
-using parallel processing.}
 
 \item{apply_scale}{A logical indicating whether to apply scale values
 existing the in file metadata.}
@@ -238,7 +227,7 @@ plot_raster_src(
 # now median composite with pixelfunction
 med_composite <-
   vrt_stack(coll_masked) |>
-  vrt_set_pixelfun(pixfun = median_numpy()) |>
+  vrt_set_py_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(
     outfile = fs::file_temp(ext = "tif")
   )

@@ -12,7 +12,7 @@ reference:
       - vrt_set_maskfun
       - vrt_warp
       - vrt_stack
-      - vrt_set_pixelfun
+      - vrt_set_py_pixelfun
       - vrt_compute
   - title: VRT helpers
     desc: Helper functions for VRT objects
@@ -21,6 +21,7 @@ reference:
       - vrt_save
       - vrt_add_empty_band
       - vrt_move_band
+      - vrt_set_scale
       - vrt_schema
   - title: multi-band reduction funcions
     desc: Functions to create composites using multi-band algorithms

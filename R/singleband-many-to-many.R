@@ -10,8 +10,6 @@
 #' @param outfile The output file path.
 #' @param apply_scale Logical indicating whether to apply the scale values
 #' (if they exist) to the data.
-#' @param cache_dir The directory to save temporary files. (default should be
-#' fine - this is here mainly for explicit privision for mirai daemons)
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
 #' @param quiet Logical indicating whether to suppress the progress bar.
@@ -29,7 +27,6 @@ singleband_m2m <- function(
   m2m_fun,
   outfile,
   apply_scale,
-  cache_dir,
   config_options,
   creation_options,
   quiet,
@@ -59,7 +56,6 @@ singleband_m2m.vrt_collection_warped <- function(
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
   outfile = fs::file_temp(ext = "tif"),
   apply_scale = FALSE,
-  cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(
     GDAL_HTTP_MAX_RETRY = "3",
     GDAL_HTTP_RETRY_DELAY = "20"
@@ -68,10 +64,10 @@ singleband_m2m.vrt_collection_warped <- function(
   quiet = TRUE,
   nsplits = NULL
 ) {
+  daemon_setup(gdal_config = config_options)
   # inital assertions and checks.
   gdalraster_engine_asserts_init(
     outfile,
-    cache_dir,
     config_options,
     creation_options,
     quiet,
@@ -137,8 +133,6 @@ singleband_m2m.vrt_collection_warped <- function(
     add = TRUE
   )
 
-  daemon_setup(gdal_config = config_options)
-
   jobs <- purrr::pmap(
     blocks_df,
     carrier::crate(
@@ -147,25 +141,7 @@ singleband_m2m.vrt_collection_warped <- function(
 
         band_data <- purrr::map(
           vrt_coll[[1]],
-          function(blk) {
-            vrtfile <- vrt_block_save_internal(
-              blk,
-              temp_vrt_dir = cache_dir
-            )
-            inds <- methods::new(gdalraster::GDALRaster, vrtfile)
-            on.exit(inds$close(), add = TRUE)
-            compute_with_py_env(
-              inds$read(
-                band = block_params[["band_n"]],
-                xoff = block_params[["nXOff"]],
-                yoff = block_params[["nYOff"]],
-                xsize = block_params[["nXSize"]],
-                ysize = block_params[["nYSize"]],
-                out_xsize = block_params[["nXSize"]],
-                out_ysize = block_params[["nYSize"]]
-              )
-            )
-          }
+          ~ sb_reader_fun(.x, block_params)
         )
 
         bdm <- do.call(rbind, band_data)
@@ -177,8 +153,8 @@ singleband_m2m.vrt_collection_warped <- function(
         ))
       },
       vrt_coll = x,
+      sb_reader_fun = single_band_reader(),
       vrt_block_save_internal = vrt_block_save_internal,
-      cache_dir = cache_dir,
       compute_with_py_env = compute_with_py_env,
       m2m_fun = m2m_fun,
       matrix_to_rowlist = matrix_to_rowlist
@@ -260,4 +236,40 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
   v_assert_type(impute_na, "impute_na", "logical", nullok = FALSE)
   v_assert_length(impute_na, "impute_na", 1)
   function(x) hampel_filter_matrix_cpp(x, k, t0, impute_na)
+}
+
+#' band reader function factory
+#' @description `single_band_reader` is an internal function exported for use
+#' within singleband_m2m() when used in parallel.
+#' @noRd
+#' @keywords internal
+single_band_reader <- function() {
+  # browser()
+  purrr::insistently(
+    function(blk, block_params) {
+      # cli::cli_abort("THIS IS A TEST FAILURE")
+      vrtfile <- vrt_block_save_internal(
+        blk,
+        temp_vrt_dir = getOption("vrt.cache")
+      )
+      inds <- methods::new(gdalraster::GDALRaster, vrtfile)
+      on.exit(inds$close(), add = TRUE)
+      compute_with_py_env(
+        inds$read(
+          band = block_params[["band_n"]],
+          xoff = block_params[["nXOff"]],
+          yoff = block_params[["nYOff"]],
+          xsize = block_params[["nXSize"]],
+          ysize = block_params[["nYSize"]],
+          out_xsize = block_params[["nXSize"]],
+          out_ysize = block_params[["nYSize"]]
+        )
+      )
+    },
+    rate = purrr::rate_backoff(
+      pause_base = getOption("vrt.pause.base"),
+      pause_cap = getOption("vrt.pause.cap"),
+      max_times = getOption("vrt.max.times")
+    )
+  )
 }

@@ -3,13 +3,13 @@
 call_gdalraster_mirai <- function(
   x,
   outfile = fs::file_temp(ext = "tif"),
-  cache_dir = getOption("vrt.cache"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = FALSE,
   nsplits = NULL,
   return_internals = FALSE
 ) {
+  daemon_setup(gdal_config = config_options)
   orig_config <- set_gdal_config(c(config_options))
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
@@ -87,8 +87,6 @@ call_gdalraster_mirai <- function(
             out_ysize = block_params[["nYSize"]]
           )
         )
-
-        print(inds$getScale(block_params[["band_n"]]))
 
         bscale <- inds$getScale(block_params[["band_n"]])
         if (!is.na(bscale)) {

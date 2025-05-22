@@ -20,10 +20,6 @@
 #' that are not captured in `gdalwarp_options()` - these are not checked for
 #' validity.
 #' @param quiet A logical indicating whether to suppress output
-#' @param temp_vrt_dir A character string of the directory to use for
-#' temporary VRT files. Defaults to the `vrt.cache` option. shouldnt require
-#' changing. This is required to ensure relative vrt files are preserved when
-#' using parallel processing.
 #' @param apply_scale A logical indicating whether to apply scale values
 #' existing the in file metadata.
 #' @param dst_nodata A numeric value of the nodata value to use for the
@@ -88,7 +84,7 @@
 #' # now median composite with pixelfunction
 #' med_composite <-
 #'   vrt_stack(coll_masked) |>
-#'   vrt_set_pixelfun(pixfun = median_numpy()) |>
+#'   vrt_set_py_pixelfun(pixfun = median_numpy()) |>
 #'   vrt_compute(
 #'     outfile = fs::file_temp(ext = "tif")
 #'   )
@@ -112,7 +108,6 @@ vrt_compute <- function(
   nsplits,
   add_cl_arg,
   quiet,
-  temp_vrt_dir,
   apply_scale,
   dst_nodata
 ) {
@@ -157,7 +152,6 @@ vrt_compute.vrt_block <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 ) {
@@ -172,7 +166,7 @@ vrt_compute.vrt_block <- function(
   resampling <- rlang::arg_match(resampling)
   engine <- rlang::arg_match(engine)
 
-  tmp_vrt <- vrt_block_save_internal(x, temp_vrt_dir, apply_scale)
+  tmp_vrt <- vrt_block_save_internal(x, getOption("vrt.cache"), apply_scale)
 
   if (engine == "warp") {
     cl_arg <- combine_warp_opts(
@@ -208,9 +202,9 @@ vrt_compute.vrt_block <- function(
     result <- call_gdalraster_mirai(
       x = x,
       outfile = outfile,
-      nsplits = nsplits,
       config_options = config_options,
       creation_options = creation_options,
+      nsplits = nsplits,
       quiet = quiet
     )
   } else if (engine == "translate") {
@@ -258,7 +252,6 @@ vrt_compute.vrt_stack_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 ) {
@@ -277,7 +270,6 @@ vrt_compute.vrt_stack_warped <- function(
     nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet,
-    temp_vrt_dir = temp_vrt_dir,
     apply_scale = apply_scale,
     dst_nodata = dst_nodata
   )
@@ -314,7 +306,6 @@ vrt_compute.vrt_stack <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 ) {
@@ -356,7 +347,6 @@ vrt_compute.vrt_collection_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 ) {
@@ -375,7 +365,6 @@ vrt_compute.vrt_collection_warped <- function(
     nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet,
-    temp_vrt_dir = temp_vrt_dir,
     apply_scale = apply_scale,
     dst_nodata = dst_nodata
   )
@@ -413,10 +402,10 @@ vrt_compute.vrt_collection <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = FALSE,
   dst_nodata = NULL
 ) {
+  daemon_setup(gdal_config = config_options)
   if (any(missing(t_srs), missing(te), missing(tr))) {
     missing_args_error("vrt_collection")
   }
@@ -448,7 +437,6 @@ vrt_compute.vrt_collection <- function(
           nsplits = nsplits,
           add_cl_arg = add_cl_arg,
           quiet = TRUE,
-          temp_vrt_dir = temp_vrt_dir,
           apply_scale = apply_scale,
           dst_nodata = dst_nodata
         )
@@ -464,7 +452,6 @@ vrt_compute.vrt_collection <- function(
       config_options = config_options,
       nsplits = nsplits,
       add_cl_arg = add_cl_arg,
-      temp_vrt_dir = temp_vrt_dir,
       apply_scale = apply_scale,
       dst_nodata = dst_nodata
     ),

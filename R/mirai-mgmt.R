@@ -79,21 +79,32 @@ machine_cores <- function(all.tests = FALSE, logical = TRUE) {
 #' @keywords internal
 #' @description command for setting up mirai daemons
 daemon_setup <- function(gdal_config = NULL) {
+  main_process_opts <- list(
+    vrt.percent.ram = getOption("vrt.percent.ram"),
+    vrt.pause.base = getOption("vrt.pause.base"),
+    vrt.pause.cap = getOption("vrt.pause.cap"),
+    vrt.max.times = getOption("vrt.max.times"),
+    vrt.cache = getOption("vrt.cache")
+  )
+
+  mopts <- NULL
+
   if (using_daemons()) {
-    mirai::everywhere({
-      library(vrtility)
-    })
-  }
-  if (!is.null(gdal_config) && using_daemons()) {
-    mirai::everywhere(
+    evrywrs <- mirai::everywhere(
       {
-        set_gdal_config(gdal_config)
+        library(vrtility)
+        options(main_process_opts)
+        if (!is.null(gdal_config)) {
+          set_gdal_config(gdal_config)
+        }
+        # get options that where name begins with vrt.
+        options()[grep("^vrt\\.", names(options()), value = TRUE)]
       },
-      .args = list(
-        gdal_config = gdal_config,
-        set_gdal_config = set_gdal_config
-      )
+      main_process_opts = main_process_opts,
+      gdal_config = gdal_config
     )
+    mopts <- mirai::collect_mirai(evrywrs)
+    purrr::walk(mopts, \(x) x, .parallel = TRUE)
   }
-  invisible()
+  invisible(mopts)
 }

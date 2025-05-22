@@ -140,34 +140,6 @@ the imagery we will download. Our collections contain images with two different
 SRS. We can also see that the number of bands differs across the two 
 collections.
 
-
-Now we set the mask function required for the HLS data. The "Fmask" band is a 
-true bitmask (unlike other datasets which may use ineger masks). Therefore
-we must use the `build_bitmask` function to set the mask and can specify the
-bits that we wish to set as nodata across all bands.
-
-```{r hls-mask}
-hls_sl_col_mask <- vrt_set_maskfun(
-  hls_sl_col,
-  mask_band = "Fmask",
-  mask_values = c(0, 1, 2, 3),
-  build_mask_pixfun = build_bitmask(),
-  drop_mask_band = TRUE
-)
-
-hls_ss_col_mask <- vrt_set_maskfun(
-  hls_ss_col,
-  mask_band = "Fmask",
-  mask_values = c(0, 1, 2, 3),
-  build_mask_pixfun = build_bitmask(),
-  drop_mask_band = TRUE
-)
-
-# let's check out a vrt and inspect the mask function that we used.
-print(hls_sl_col_mask, maskfun = TRUE)
-```
-
-
 Now we need to align these data so that we can composite all the imagery in one 
 go. We can do this by simply adding nodata bands where required. In the case 
 of the HLS Landsat collection, we also need to move the position of the cirrus
@@ -183,8 +155,8 @@ when you then use `vrt_stack`.
 
 ```{r band-align-hls}
 hls_ls_align <- vrt_set_band_names(
-  hls_sl_col_mask,
-  c("A", "B", "G", "R", "N2", "S1", "S2", "C", "T1", "T2")
+  hls_sl_col,
+  c("A", "B", "G", "R", "N2", "S1", "S2", "C", "T1", "T2", "Fmask")
 ) |>
   vrt_add_empty_band(after = 4, description = "RE1") |>
   vrt_add_empty_band(after = 5, description = "RE2") |>
@@ -196,8 +168,8 @@ hls_ls_align <- vrt_set_band_names(
 
 
 hls_ss_align <- vrt_set_band_names(
-  hls_ss_col_mask,
-  c("A", "B", "G", "R", "RE1", "RE2", "RE3", "N", "N2", "WV", "C", "S1", "S2")
+  hls_ss_col,
+  c("A", "B", "G", "R", "RE1", "RE2", "RE3", "N", "N2", "WV", "C", "S1", "S2", "Fmask")
 ) |>
   vrt_add_empty_band(after = 13, description = "T1", scale_value = 0.01) |>
   vrt_add_empty_band(after = 14, description = "T2", scale_value = 0.01)
@@ -213,30 +185,43 @@ hls_merge_coll <- c(
 )
 ```
 
-Now we need to warp all vrt_blocks in the collection to the same spatial
-reference system, extent and pixel size. This is particularly important in this
-case because of the multiple SRS in the collection. Also to make use of the
-fastest `vrt_compute` engine, we need to ensure that all blocks are in the same
-SRS with equal dimensions.
 
-```{r hls-warp}
-hls_warp <- vrt_warp(
+Now we set the mask function required for the HLS data. The "Fmask" band is a 
+true bitmask (unlike other datasets which may use ineger masks). Therefore
+we must use the `build_bitmask` function to set the mask and can specify the
+bits that we wish to set as no-data across all bands.
+
+```{r hls-mask}
+hls_col_mask <- vrt_set_maskfun(
   hls_merge_coll,
-  t_srs = trs,
-  te = te,
-  tr = c(30, 30),
-  resampling = "bilinear"
+  mask_band = "Fmask",
+  mask_values = c(0, 1, 2, 3),
+  build_mask_pixfun = build_bitmask(),
+  drop_mask_band = TRUE
 )
+
+# let's check out a vrt and inspect the mask function that we used.
+print(hls_col_mask, maskfun = TRUE)
 ```
 
 Now we want to "reduce" the imagery collection to a single composite image. The
 typical approach would be to use the band-level median which we can achieve 
-easily by first using the following:
+easily first creating a virtual warped raster collection using `vrt_warp` and 
+then stacking the warped collection using `vrt_stack`. Here we can now apply
+the python median pixel function using `vrt_set_py_pixelfun` before computing
+the final composite using `vrt_compute`.
 
 ```{r simple-composite,  eval=FALSE}
 # not run
-band_level_median <- vrt_stack(hls_warp) |>
-  vrt_set_pixelfun(pixfun = median_numpy()) |>
+band_level_median <- vrt_warp(
+  hls_col_mask,
+  t_srs = trs,
+  te = te,
+  tr = c(30, 30),
+  resampling = "bilinear"
+) |>
+  vrt_stack() |>
+  vrt_set_py_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(fs::file_temp(ext = ".tif"),
     engine = "gdalraster"
   )
@@ -254,22 +239,37 @@ preserve the spectral properties of the data.
 
 In theory we can also just run:
 
-```{r simpler-example,  eval=FALSE}
+```{r simpler-geomed-example,  eval=FALSE}
 # not run
-hls_composite <- multiband_reduce(hls_warp, reduce_fun = geomedian())
+hls_composite <- vrt_warp(
+  hls_col_mask,
+  t_srs = trs,
+  te = te,
+  tr = c(30, 30),
+  resampling = "bilinear"
+) |>
+  multiband_reduce(reduce_fun = geomedian())
 ```
 But the  NASA Earthdata server seems to object to multiple concurrent reads on 
 a single file and so this can be a bit slow. Therefore we can download multiple 
 files in parallel by using the "warp" engine in `vrt_compute()`. This downloads 
 all files locally - from here we can then build the geomedian composite as 
-above.
+above. by warping during the `vrt_compute` step can align all images in the 
+collection to the same spatial reference system, extent and pixel size. This is 
+particularly important in this case because of the multiple SRS values in the 
+collection.
 
 ```{r hls-composite}
-hls_composite <- hls_warp |>
+hls_imgs <- hls_col_mask |>
   vrt_compute(
     fs::file_temp(ext = ".tif"),
+    t_srs = trs,
+    te = te,
+    tr = c(30, 30),
+    resampling = "bilinear",
     engine = "warp"
-  ) |>
+  )
+hls_composite <- hls_imgs |>
   vrt_collect() |>
   vrt_warp(
     t_srs = trs,

@@ -40,7 +40,7 @@ test_that("raster plotting works", {
   )
 
   ex_vrt_mask_warp_stack <- vrt_stack(ex_vrt_mask_warp) |>
-    vrt_set_pixelfun()
+    vrt_set_py_pixelfun()
 
   vdiffr::expect_doppelganger(
     "stack plot works",

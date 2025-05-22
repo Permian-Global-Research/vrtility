@@ -2,18 +2,18 @@
 #' @param x A vrt_stack object
 #' @param pixfun A function that returns the Python code for the pixel function
 #' @export
-#' @rdname vrt_set_pixelfun
+#' @rdname vrt_set_py_pixelfun
 #'
-vrt_set_pixelfun <- function(x, pixfun) {
-  UseMethod("vrt_set_pixelfun")
+vrt_set_py_pixelfun <- function(x, pixfun) {
+  UseMethod("vrt_set_py_pixelfun")
 }
 
 #' @noRd
 #' @export
-vrt_set_pixelfun.default <- function(x, ...) {
+vrt_set_py_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
-      "!" = "{cli::code_highlight('vrt_set_pixelfun()')}
+      "!" = "{cli::code_highlight('vrt_set_py_pixelfun()')}
     not implemented for class {class(x)[1]}",
       "i" = "x must be a vrt_stack object."
     )
@@ -21,8 +21,8 @@ vrt_set_pixelfun.default <- function(x, ...) {
 }
 
 #' @export
-#' @rdname vrt_set_pixelfun
-vrt_set_pixelfun.vrt_stack <- function(
+#' @rdname vrt_set_py_pixelfun
+vrt_set_py_pixelfun.vrt_stack <- function(
   x,
   pixfun = vrtility::median_numpy()
 ) {
