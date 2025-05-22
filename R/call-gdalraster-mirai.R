@@ -88,8 +88,6 @@ call_gdalraster_mirai <- function(
           )
         )
 
-        print(inds$getScale(block_params[["band_n"]]))
-
         bscale <- inds$getScale(block_params[["band_n"]])
         if (!is.na(bscale)) {
           band_data <- band_data * bscale
