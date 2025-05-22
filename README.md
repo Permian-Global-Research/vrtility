@@ -125,25 +125,19 @@ length(s2_stac$features)
 
 ``` r
 
-system.time(
-  median_composite <- vrt_collect(s2_stac) |>
-    vrt_set_maskfun(
-      mask_band = "SCL",
-      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
-    ) |>
-    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
-    vrt_stack() |>
-    vrt_set_py_pixelfun() |>
-    vrt_compute(
-      outfile = fs::file_temp(ext = "tif"),
-      engine = "gdalraster"
-    )
-)
-#>    user  system elapsed 
-#>   2.297   0.247  72.003
-```
 
-``` r
+median_composite <- vrt_collect(s2_stac) |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+  ) |>
+  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
+  vrt_stack() |>
+  vrt_set_py_pixelfun() |>
+  vrt_compute(
+    outfile = fs::file_temp(ext = "tif"),
+    engine = "gdalraster"
+  )
 
 plot_raster_src(
   median_composite,
