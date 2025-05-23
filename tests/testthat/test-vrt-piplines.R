@@ -154,7 +154,16 @@ test_that("pipeline extras", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
-  expect_error(vrt_set_py_pixelfun(ex_collect))
+  exc_pypf <- vrt_set_py_pixelfun(ex_collect)
+  expect_true(length(purrr::map(exc_pypf$vrt, ~ .x$pixfun)) == exc_pypf$n_items)
+
+  ex_collect_mask <- ex_collect |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+      drop_mask_band = FALSE
+    )
+  expect_error(vrt_set_py_pixelfun(ex_collect_mask))
 
   one_srs_collect <- vrt_collect(s2files[1:2])
   one_srs_collect_stack <- vrt_stack(one_srs_collect)

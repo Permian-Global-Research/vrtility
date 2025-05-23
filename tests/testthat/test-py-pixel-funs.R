@@ -55,4 +55,18 @@ test_that("py pixel functions work", {
     all(vapply(lst, function(x) identical(x, lst[[1]]), logical(1)))
   }
   expect_true(length(unique(rdatalist)) == length(rdatalist))
+
+  lim_pf <- ex_stack |>
+    vrt_set_py_pixelfun(
+      pixfun = median_numpy(),
+      band_idx = c(1, 2)
+    )
+
+  expect_equal(
+    length(xml2::xml_find_all(
+      xml2::read_xml(lim_pf$vrt),
+      ".//PixelFunctionType"
+    )),
+    2
+  )
 })

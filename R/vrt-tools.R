@@ -100,3 +100,20 @@ set_nodatavalue <- function(x, value) {
     })
   })
 }
+
+#' @noRd
+#' @keywords internal
+#' @description Check if a pixel function is already set at the VRT level
+#' @param x A VRT object - could be a whole vrt xml or a RasterBand.
+check_for_pixel_fun <- function(x) {
+  existing_pf <- xml2::xml_find_all(x, ".//PixelFunctionType")
+  if (length(existing_pf) > 0) {
+    cli::cli_abort(
+      c(
+        "x" = "A Pixel function is already set At this vrt-level.",
+        "i" = "You must save/warp this file before setting another one."
+      )
+    )
+  }
+  invisible()
+}
