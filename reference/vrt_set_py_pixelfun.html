@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Set the pixel function of a VRT stack object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/vrt-set-pixfun.R" class="external-link"><code>R/vrt-set-pixfun.R</code></a>, <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/zvrt-pixel-funs-composite.R" class="external-link"><code>R/zvrt-pixel-funs-composite.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/vrt-set-py-pixfun.R" class="external-link"><code>R/vrt-set-py-pixfun.R</code></a>, <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/zvrt-pixel-funs-composite.R" class="external-link"><code>R/zvrt-pixel-funs-composite.R</code></a></small>
       <div class="d-none name"><code>vrt_set_py_pixelfun.Rd</code></div>
     </div>
 
@@ -48,10 +48,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_py_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_py_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">band_idx</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for class 'vrt_stack'</span></span>
-<span><span class="fu">vrt_set_py_pixelfun</span><span class="op">(</span><span class="va">x</span>, pixfun <span class="op">=</span> <span class="fu">vrtility</span><span class="fu">::</span><span class="fu">median_numpy</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># S3 method for class 'vrt_block'</span></span>
+<span><span class="fu">vrt_set_py_pixelfun</span><span class="op">(</span><span class="va">x</span>, pixfun <span class="op">=</span> <span class="fu">vrtility</span><span class="fu">::</span><span class="fu">median_numpy</span><span class="op">(</span><span class="op">)</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'vrt_collection'</span></span>
+<span><span class="fu">vrt_set_py_pixelfun</span><span class="op">(</span><span class="va">x</span>, pixfun <span class="op">=</span> <span class="fu">vrtility</span><span class="fu">::</span><span class="fu">median_numpy</span><span class="op">(</span><span class="op">)</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">median_numpy</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -74,6 +77,11 @@
 
 <dt id="arg-pixfun">pixfun<a class="anchor" aria-label="anchor" href="#arg-pixfun"></a></dt>
 <dd><p>A function that returns the Python code for the pixel function</p></dd>
+
+
+<dt id="arg-band-idx">band_idx<a class="anchor" aria-label="anchor" href="#arg-band-idx"></a></dt>
+<dd><p>The indices of the bands to set the pixel function for. If
+NULL, the pixel function is set for all bands.</p></dd>
 
 
 <dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
