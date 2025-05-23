@@ -40,12 +40,8 @@ test_that("vrt_set_gdal_pixfun works", {
 
   gpf <- vrt_set_gdal_pixfun(
     exstack_fill,
-    pixfun = "interpolate_linear",
-    t0 = 0,
-    dt = 1,
-    t = 8
+    pixfun = "min"
   )
-  # print(gpf, xml = TRUE)
 
   of <- vrt_compute(
     gpf,
@@ -53,8 +49,47 @@ test_that("vrt_set_gdal_pixfun works", {
     engine = "gdalraster"
   )
 
-  plot_raster_src(
-    of,
-    c(3, 2, 1)
+  singleband <- vrt_collect(of) |>
+    vrt_set_scale(0.001) |>
+    vrt_set_gdal_pixfun(
+      pixfun = "scale"
+    ) |>
+    vrt_compute(
+      outfile = fs::file_temp(ext = "tif"),
+      t_srs = t_block$srs,
+      te = t_block$bbox,
+      tr = t_block$res,
+      engine = "warp",
+      apply_scale = TRUE
+    )
+
+  freader <- function(x) {
+    d <- methods::new(
+      gdalraster::GDALRaster,
+      x
+    )
+    on.exit(d$close(), add = TRUE)
+    gdalraster::read_ds(d)
+  }
+
+  expect_lt(
+    sum(freader(singleband), na.rm = TRUE),
+    sum(freader(of), na.rm = TRUE)
   )
+
+  int_lin <- function(dt) {
+    vrt_set_gdal_pixfun(
+      exstack_fill,
+      pixfun = "interpolate_linear",
+      t0 = 0,
+      dt = dt,
+      t = 7
+    ) |>
+      vrt_compute(
+        outfile = fs::file_temp(ext = "tif"),
+        engine = "gdalraster"
+      )
+  }
+
+  expect_false(identical(freader(int_lin(0.5)), freader(int_lin(2))))
 })
