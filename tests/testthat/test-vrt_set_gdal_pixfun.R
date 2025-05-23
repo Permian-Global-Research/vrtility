@@ -1,4 +1,4 @@
-test_that("vrt_set_gdal_pixfun works", {
+test_that("vrt_set_gdal_pixelfun works", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
@@ -38,7 +38,7 @@ test_that("vrt_set_gdal_pixfun works", {
     ) |>
     vrt_stack()
 
-  gpf <- vrt_set_gdal_pixfun(
+  gpf <- vrt_set_gdal_pixelfun(
     exstack_fill,
     pixfun = "min"
   )
@@ -51,7 +51,7 @@ test_that("vrt_set_gdal_pixfun works", {
 
   singleband <- vrt_collect(of) |>
     vrt_set_scale(0.001) |>
-    vrt_set_gdal_pixfun(
+    vrt_set_gdal_pixelfun(
       pixfun = "scale"
     ) |>
     vrt_compute(
@@ -78,7 +78,7 @@ test_that("vrt_set_gdal_pixfun works", {
   )
 
   int_lin <- function(dt) {
-    vrt_set_gdal_pixfun(
+    vrt_set_gdal_pixelfun(
       exstack_fill,
       pixfun = "interpolate_linear",
       t0 = 0,

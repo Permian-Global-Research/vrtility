@@ -8,19 +8,57 @@
 #' @details
 #' The documentation for the GDAL pixel functions can be found at
 #' \url{https://gdal.org/en/stable/drivers/raster/vrt.html#built-in-pixel-functions}
-#' @export
-#' @rdname vrt_set_gdal_pixfun
 #'
-vrt_set_gdal_pixfun <- function(x, pixfun, ..., band_idx) {
-  UseMethod("vrt_set_gdal_pixfun")
+#' Where a pixel function requires arguments, these can be passed as named
+#' arguments, in line with the specified naming in PixelFunctionArguments of
+#' the table at the above link.
+#' @export
+#' @rdname vrt_set_gdal_pixelfun
+#' @examples
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' ex_collect <- vrt_collect(s2files)
+#'
+#' t_block <- ex_collect[[1]][[1]]
+#' ex_stack <- ex_collect |>
+#'   vrt_set_maskfun(
+#'     mask_band = "SCL",
+#'     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+#'     drop_mask_band = TRUE
+#'   ) |>
+#'   vrt_warp(
+#'     t_srs = t_block$srs,
+#'     te = t_block$bbox,
+#'     tr = t_block$res
+#'   ) |>
+#'   vrt_stack()
+#'
+#' plot(
+#'   vrt_set_gdal_pixelfun(
+#'     ex_stack,
+#'     pixfun = "min",
+#'     propagateNoData = TRUE
+#'   ),
+#'   bands = c(3, 2, 1)
+#' )
+#'
+#' plot(
+#'   vrt_set_gdal_pixelfun(
+#'     ex_stack,
+#'     pixfun = "min"
+#'   ),
+#'   bands = c(3, 2, 1)
+#' )
+#'
+vrt_set_gdal_pixelfun <- function(x, pixfun, ..., band_idx) {
+  UseMethod("vrt_set_gdal_pixelfun")
 }
 
 #' @noRd
 #' @export
-vrt_set_gdal_pixfun.default <- function(x, ...) {
+vrt_set_gdal_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
-      "!" = "{cli::code_highlight('vrt_set_gdal_pixfun()')}
+      "!" = "{cli::code_highlight('vrt_set_gdal_pixelfun()')}
     not implemented for class {class(x)[1]}",
       "i" = "x must be a vrt_stack object."
     )
@@ -28,8 +66,8 @@ vrt_set_gdal_pixfun.default <- function(x, ...) {
 }
 
 #' @export
-#' @rdname vrt_set_gdal_pixfun
-vrt_set_gdal_pixfun.vrt_block <- function(
+#' @rdname vrt_set_gdal_pixelfun
+vrt_set_gdal_pixelfun.vrt_block <- function(
   x,
   pixfun,
   ...,
@@ -103,8 +141,8 @@ vrt_set_gdal_pixfun.vrt_block <- function(
 }
 
 #' @export
-#' @rdname vrt_set_gdal_pixfun
-vrt_set_gdal_pixfun.vrt_collection <- function(
+#' @rdname vrt_set_gdal_pixelfun
+vrt_set_gdal_pixelfun.vrt_collection <- function(
   x,
   pixfun,
   ...,
@@ -113,7 +151,7 @@ vrt_set_gdal_pixfun.vrt_collection <- function(
   blocks_with_gdal_pf <- purrr::map(
     x$vrt,
     \(.x)
-      vrt_set_gdal_pixfun(
+      vrt_set_gdal_pixelfun(
         .x,
         pixfun = pixfun,
         ...,
