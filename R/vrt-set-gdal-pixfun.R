@@ -29,7 +29,7 @@ vrt_set_gdal_pixfun.default <- function(x, ...) {
 
 #' @export
 #' @rdname vrt_set_gdal_pixfun
-vrt_set_gdal_pixfun.vrt_stack <- function(
+vrt_set_gdal_pixfun.vrt_block <- function(
   x,
   pixfun,
   ...,
@@ -74,6 +74,7 @@ vrt_set_gdal_pixfun.vrt_stack <- function(
   }
 
   purrr::walk(bands[band_idx], function(.x) {
+    check_for_pixel_fun(.x)
     xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
     xml2::xml_add_child(.x, "PixelFunctionType", pixfun)
     if (length(pf_arg_vals) > 0) {
@@ -83,6 +84,7 @@ vrt_set_gdal_pixfun.vrt_stack <- function(
       })
     }
   })
+  # browser()
 
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
@@ -93,5 +95,41 @@ vrt_set_gdal_pixfun.vrt_stack <- function(
   } else {
     warped <- FALSE
   }
-  build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
+  if (inherits(x, "vrt_stack")) {
+    build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
+  } else {
+    build_vrt_block(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
+  }
+}
+
+#' @export
+#' @rdname vrt_set_gdal_pixfun
+vrt_set_gdal_pixfun.vrt_collection <- function(
+  x,
+  pixfun,
+  ...,
+  band_idx = NULL
+) {
+  blocks_with_gdal_pf <- purrr::map(
+    x$vrt,
+    \(.x)
+      vrt_set_gdal_pixfun(
+        .x,
+        pixfun = pixfun,
+        ...,
+        band_idx = band_idx
+      )
+  )
+
+  if (inherits(x, "vrt_collection_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+  build_vrt_collection(
+    blocks_with_gdal_pf,
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    warped = warped
+  )
 }
