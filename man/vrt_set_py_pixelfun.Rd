@@ -3,7 +3,8 @@
 %   R/zvrt-pixel-funs-composite.R
 \name{vrt_set_py_pixelfun}
 \alias{vrt_set_py_pixelfun}
-\alias{vrt_set_py_pixelfun.vrt_stack}
+\alias{vrt_set_py_pixelfun.vrt_block}
+\alias{vrt_set_py_pixelfun.vrt_collection}
 \alias{median_numpy}
 \alias{mean_numpy}
 \alias{geomean_numpy}
@@ -13,7 +14,9 @@
 \usage{
 vrt_set_py_pixelfun(x, pixfun, band_idx)
 
-\method{vrt_set_py_pixelfun}{vrt_stack}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
+\method{vrt_set_py_pixelfun}{vrt_block}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
+
+\method{vrt_set_py_pixelfun}{vrt_collection}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
 
 median_numpy()
 

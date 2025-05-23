@@ -2,12 +2,15 @@
 % Please edit documentation in R/vrt-set-gdal-pixfun.R
 \name{vrt_set_gdal_pixfun}
 \alias{vrt_set_gdal_pixfun}
-\alias{vrt_set_gdal_pixfun.vrt_stack}
+\alias{vrt_set_gdal_pixfun.vrt_block}
+\alias{vrt_set_gdal_pixfun.vrt_collection}
 \title{Set built-in GDAL pixel functions of a VRT stack object}
 \usage{
 vrt_set_gdal_pixfun(x, pixfun, ..., band_idx)
 
-\method{vrt_set_gdal_pixfun}{vrt_stack}(x, pixfun, ..., band_idx = NULL)
+\method{vrt_set_gdal_pixfun}{vrt_block}(x, pixfun, ..., band_idx = NULL)
+
+\method{vrt_set_gdal_pixfun}{vrt_collection}(x, pixfun, ..., band_idx = NULL)
 }
 \arguments{
 \item{x}{A vrt_stack object}
