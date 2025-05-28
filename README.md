@@ -76,9 +76,9 @@ Here is a simple example where we:
     the XML of the VRT “blocks”.
 
 4.  Because this set of images have more than one common spatial
-    reference system (SRS) we convert the `vrt_block`s in the
-    `vrt_collection` to warped VRTs, giving us a `vrt_collection_warped`
-    object.
+    reference system (SRS) we warp the `vrt_block`s to a new local
+    `vrt_collection` using `vrt_compute` with the `warp` engine. We
+    “recollect” these files, giving us a `vrt_collection_warped` object.
 
 5.  These images are then “stacked” (combined into a single VRT with
     multiple layers in each VRTRasterBand), giving us a `vrt_stack`
@@ -86,11 +86,9 @@ Here is a simple example where we:
 
 6.  A median pixel function is then added to the `vrt_stack`.
 
-7.  all of this is then executed at the end of the vrt pipeline using
-    `vrt_compute`. Here we are using the `gdalraster` engine to write
-    the output which, in combination with the mirai package downloads
-    and processes the data in parallel across bands and within bands (as
-    determined by the `nsplits` argument).
+7.  Finally, we calculate the median composite using the `gdalraster`
+    engine to write the output which, in combination with the mirai
+    package processes the data in parallel across bands and image tiles.
 
 ``` r
 library(vrtility)
@@ -125,19 +123,29 @@ length(s2_stac$features)
 
 ``` r
 
+system.time({
+  median_composite <- vrt_collect(s2_stac) |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+    ) |>
+    vrt_compute(
+      fs::file_temp(ext = "vrt"),
+      t_srs = trs, te = te, tr = c(10, 10),
+      recollect = TRUE
+    ) |>
+    vrt_stack() |>
+    vrt_set_py_pixelfun(pixfun = median_numpy()) |>
+    vrt_compute(
+      outfile = fs::file_temp(ext = "tif"),
+      engine = "gdalraster"
+    )
+})
+#>    user  system elapsed 
+#>   3.805   0.438  38.475
+```
 
-median_composite <- vrt_collect(s2_stac) |>
-  vrt_set_maskfun(
-    mask_band = "SCL",
-    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
-  ) |>
-  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
-  vrt_stack() |>
-  vrt_set_py_pixelfun() |>
-  vrt_compute(
-    outfile = fs::file_temp(ext = "tif"),
-    engine = "gdalraster"
-  )
+``` r
 
 plot_raster_src(
   median_composite,
@@ -212,24 +220,13 @@ ex_composite <- vrt_warp(
   te = t_block$bbox,
   tr = c(20, 20)
 ) |>
-  vrt_stack() |>
-  vrt_set_py_pixelfun(pixfun = median_numpy())
+  multiband_reduce(reduce_fun = medoid())
 
 par(mfrow = c(1, 1))
-plot(ex_composite, bands = c(3, 2, 1), quiet = TRUE)
+plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />
-
-``` r
-
-# write to disk if we wanted to...
-# vrt_compute(
-#   ex_composite,
-#   outfile = fs::file_temp(ext = "tif"),
-#   engine = "warp"
-# )
-```
 
 ## TO DO:
 
