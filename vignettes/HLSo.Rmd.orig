@@ -257,7 +257,9 @@ all files locally - from here we can then build the geomedian composite as
 above. by warping during the `vrt_compute` step can align all images in the 
 collection to the same spatial reference system, extent and pixel size. This is 
 particularly important in this case because of the multiple SRS values in the 
-collection.
+collection. note that `recollect = TRUE` is set to ensure that the returned 
+object is a `vrt_collection` object, if FALSE then the multiple file paths
+will be returned instead.
 
 ```{r hls-composite}
 hls_imgs <- hls_col_mask |>
@@ -267,14 +269,8 @@ hls_imgs <- hls_col_mask |>
     te = te,
     tr = c(30, 30),
     resampling = "bilinear",
-    engine = "warp"
-  )
-hls_composite <- hls_imgs |>
-  vrt_collect() |>
-  vrt_warp(
-    t_srs = trs,
-    te = te,
-    tr = c(30, 30)
+    engine = "warp",
+    recollect = TRUE
   ) |>
   multiband_reduce(reduce_fun = geomedian())
 ```
