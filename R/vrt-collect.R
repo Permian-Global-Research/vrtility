@@ -74,7 +74,7 @@ vrt_collect.character <- function(
   band_descriptions = NULL,
   datetimes = rep("", length(x))
 ) {
-  assert_files_exist(x)
+  assert_files_exist(x, url_possible = TRUE)
   v_assert_type(
     bands,
     "bands",
