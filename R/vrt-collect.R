@@ -209,7 +209,7 @@ vrt_collect.doc_items <- function(
           dttm <- dttm[1]
         }
 
-        tf <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+        tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
         purrr::insistently(
           function() {
             gdalraster::buildVRT(
@@ -243,7 +243,6 @@ vrt_collect.doc_items <- function(
 
         build_vrt_block(tf)
       },
-      save_dir = getOption("vrt.cache"),
       set_vrt_descriptions = set_vrt_descriptions,
       set_vrt_metadata = set_vrt_metadata,
       build_vrt_block = build_vrt_block
@@ -266,6 +265,10 @@ build_vrt_collection <- function(
   warped = FALSE,
   ...
 ) {
+  if (length(x) == 1) {
+    # return as a vrt_block object if only one item
+    return(x[[1]])
+  }
   uniq_crs <- purrr::map(
     x,
     function(.x) .x$srs
@@ -274,9 +277,11 @@ build_vrt_collection <- function(
     unique()
 
   if (length(uniq_crs) > 1) {
+    bbox_all <- NA
     bbox <- NA
   } else {
-    bbox <- purrr::map(x, function(.x) .x$bbox) |>
+    bbox_all <- purrr::map(x, function(.x) .x$bbox)
+    bbox <- bbox_all |>
       purrr::reduce(
         function(.x, .y) {
           c(
@@ -301,10 +306,12 @@ build_vrt_collection <- function(
     unlist() |>
     unique()
 
-  min_res <- purrr::map(
+  all_res <- purrr::map(
     x,
     function(.x) .x$res
-  ) |>
+  )
+
+  min_res <- all_res |>
     purrr::reduce(
       function(.x, .y) {
         c(
@@ -320,6 +327,22 @@ build_vrt_collection <- function(
   ) |>
     unique()
 
+  # set to a warped class if all items have equal extent, res and crs.
+  if (warped) {
+    warp_class <- "vrt_collection_warped"
+  } else {
+    # browser()
+    if (
+      length(unique(bbox_all)) == 1 &&
+        length(uniq_crs) == 1 &&
+        length(unique(all_res)) == 1
+    ) {
+      warp_class <- "vrt_collection_warped"
+    } else {
+      warp_class <- NULL
+    }
+  }
+
   rvrt <- list(
     vrt = x,
     srs = uniq_crs,
@@ -334,13 +357,7 @@ build_vrt_collection <- function(
     warped = warped
   )
 
-  if (warped) {
-    warped <- "vrt_collection_warped"
-  } else {
-    warped <- NULL
-  }
-
-  class(rvrt) <- c(warped, "vrt_collection", "vrt_block", "list")
+  class(rvrt) <- c(warp_class, "vrt_collection", "vrt_block", "list")
 
   return(rvrt)
 }
