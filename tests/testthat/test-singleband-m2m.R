@@ -43,4 +43,26 @@ test_that("singleband_m2m works", {
     ras_vals(hmpfiles[[2]]),
     ras_vals(s2files[[2]])
   ))
+
+  hmpfilesrecoll <- singleband_m2m(
+    ex_collect_mask_warp,
+    m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE),
+    recollect = TRUE
+  )
+
+  testthat::expect_s3_class(hmpfilesrecoll, "vrt_collection_warped")
+
+  # check apply_scale_works
+  hmpfiles_scaled <- ex_collect_mask_warp |>
+    vrt_set_scale(0.0001) |>
+    singleband_m2m(
+      m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE),
+      apply_scale = TRUE
+    )
+
+  expect_equal(
+    mean(ras_vals(hmpfiles[1]) / ras_vals(hmpfiles_scaled[1]), na.rm = TRUE),
+    10000,
+    tolerance = 0.1
+  )
 })
