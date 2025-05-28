@@ -262,7 +262,7 @@ object is a `vrt_collection` object, if FALSE then the multiple file paths
 will be returned instead.
 
 ```{r hls-composite}
-hls_imgs <- hls_col_mask |>
+hls_composite <- hls_col_mask |>
   vrt_compute(
     fs::file_temp(ext = ".tif"),
     t_srs = trs,

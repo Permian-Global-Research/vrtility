@@ -348,7 +348,7 @@ will be returned instead.
 
 
 ``` r
-hls_imgs <- hls_col_mask |>
+hls_composite <- hls_col_mask |>
   vrt_compute(
     fs::file_temp(ext = ".tif"),
     t_srs = trs,
@@ -380,8 +380,9 @@ withr::with_par(list(mar = c(0, 0, 0, 0)), {
     axes = FALSE
   )
 })
-#> Error: object 'hls_composite' not found
 ```
+
+<img src="figure/hls-plot-1.png" width="50%" /><img src="figure/hls-plot-2.png" width="50%" />
 
 And all the other bands too:
 
@@ -399,9 +400,7 @@ withr::with_par(
     )
   })
 )
-#> Error in `map()`:
-#> ℹ In index: 1.
-#> Caused by error in `.f()`:
-#> ! object 'hls_composite' not found
 ```
+
+![](figure/hls-plot-bands-1.png)
 
