@@ -11,7 +11,7 @@ composite of a warped VRT collection."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,8 @@ composite of a warped VRT collection.</p>
 <span>  <span class="va">config_options</span>,</span>
 <span>  <span class="va">creation_options</span>,</span>
 <span>  <span class="va">quiet</span>,</span>
-<span>  <span class="va">nsplits</span></span>
+<span>  <span class="va">nsplits</span>,</span>
+<span>  <span class="va">recollect</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">geomedian</span><span class="op">(</span></span>
@@ -147,6 +148,12 @@ bands. See  details.</p></dd>
 function will automatically determine the number of splits based on the
 dimensions of the input data, available memory and the number of active
 mirai daemons. see details</p></dd>
+
+
+<dt id="arg-recollect">recollect<a class="anchor" aria-label="anchor" href="#arg-recollect"></a></dt>
+<dd><p>A logical indicating whether to return the output as a
+vrt_block or vrt_collection object. default is FALSE and the output is a
+character string of the output file path.</p></dd>
 
 
 <dt id="arg-weizfeld">weizfeld<a class="anchor" aria-label="anchor" href="#arg-weizfeld"></a></dt>

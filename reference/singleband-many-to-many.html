@@ -17,7 +17,7 @@ singleband_m2m()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,8 @@ outliers in time-series using the Hampel filter. to be provided to
 <span>  <span class="va">config_options</span>,</span>
 <span>  <span class="va">creation_options</span>,</span>
 <span>  <span class="va">quiet</span>,</span>
-<span>  <span class="va">nsplits</span></span>
+<span>  <span class="va">nsplits</span>,</span>
+<span>  <span class="va">recollect</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">hampel_filter</span><span class="op">(</span>k <span class="op">=</span> <span class="fl">1L</span>, t0 <span class="op">=</span> <span class="fl">3</span>, impute_na <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -120,6 +121,12 @@ dimensions of the input data, available memory and the number of active
 mirai daemons. see details</p></dd>
 
 
+<dt id="arg-recollect">recollect<a class="anchor" aria-label="anchor" href="#arg-recollect"></a></dt>
+<dd><p>A logical indicating whether to return the output as a
+vrt_block or vrt_collection object. default is FALSE and the output is a
+character string of the output file path.</p></dd>
+
+
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
 <dd><p>The number of neighboring points to consider on each side of the
 current point. window length 2*k+1 in indices.</p></dd>
@@ -143,7 +150,7 @@ from a raster time series.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>We have a lot TODO: info on the reduce_fun options and nsplits etc...</p>
+    <p>We have a lot TODO: here...</p>
 <p>(details from the <code>hampel</code>) The ‘median absolute deviation’ computation is
 done in the (-k...k) vicinity of each point at least k steps away from the
 end points of the interval. At the lower and upper end the time series values
