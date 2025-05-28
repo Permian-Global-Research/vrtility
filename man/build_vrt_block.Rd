@@ -4,7 +4,7 @@
 \alias{build_vrt_block}
 \title{constructor for vrt_block class}
 \usage{
-build_vrt_block(x, maskfun = NULL, pixfun = NULL, warped = NULL, ...)
+build_vrt_block(x, maskfun = NULL, pixfun = NULL, warped = FALSE, ...)
 }
 \arguments{
 \item{x}{An xml_document object}

@@ -11,22 +11,21 @@ gdal_config_opts(
   VSI_CACHE = "TRUE",
   GDAL_CACHEMAX = "50\%",
   VSI_CACHE_SIZE = "268435456",
-  GDAL_NUM_THREADS =
-    as.character(ceiling(vrtility::machine_cores()/pmax(vrtility::n_daemons(), 1))),
-  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
-  GDAL_MAX_DATASET_POOL_SIZE = "1000",
-  GDAL_INGESTED_BYTES_AT_OPEN = "65536",
-  CPL_VSIL_CURL_ALLOWED_EXTENSIONS = ".tif .TIF",
-  CPL_VSIL_CURL_USE_HEAD = "NO",
-  CPL_VSIL_CURL_CHUNK_SIZE = "10485760",
+  GDAL_NUM_THREADS = "ALL_CPUS",
+  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
-  GDAL_HTTP_MAX_RETRY = "10",
+  GDAL_HTTP_MAX_RETRY = "3",
   GDAL_HTTP_RETRY_DELAY = "5",
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
   GDAL_HTTP_COOKIEFILE = "~/.cookies.txt",
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
+  GDAL_MAX_DATASET_POOL_SIZE = NULL,
+  GDAL_INGESTED_BYTES_AT_OPEN = NULL,
+  CPL_VSIL_CURL_ALLOWED_EXTENSIONS = NULL,
+  CPL_VSIL_CURL_USE_HEAD = NULL,
+  CPL_VSIL_CURL_CHUNK_SIZE = NULL,
   ...
 )
 
@@ -67,17 +66,6 @@ Default is the number of available cores divided by the number of daemons.}
 
 \item{GDAL_DISABLE_READDIR_ON_OPEN}{Disable directory listing on open?}
 
-\item{GDAL_MAX_DATASET_POOL_SIZE}{Maximum size of the dataset pool.}
-
-\item{GDAL_INGESTED_BYTES_AT_OPEN}{Number of bytes to read at open.}
-
-\item{CPL_VSIL_CURL_ALLOWED_EXTENSIONS}{Allowed file extensions for HTTP
-requests.}
-
-\item{CPL_VSIL_CURL_USE_HEAD}{Use HTTP HEAD requests?}
-
-\item{CPL_VSIL_CURL_CHUNK_SIZE}{Chunk size for HTTP requests.}
-
 \item{CPL_VSIL_CURL_CACHE_SIZE}{Cache size for HTTP requests.}
 
 \item{GDAL_HTTP_MAX_RETRY}{Maximum number of retries for HTTP requests.}
@@ -94,6 +82,17 @@ requests?}
 \item{GDAL_HTTP_COOKIEFILE}{Path to the cookie file for HTTP requests.}
 
 \item{GDAL_HTTP_COOKIEJAR}{Path to the cookie jar for HTTP requests.}
+
+\item{GDAL_MAX_DATASET_POOL_SIZE}{Maximum size of the dataset pool.}
+
+\item{GDAL_INGESTED_BYTES_AT_OPEN}{Number of bytes to read at open.}
+
+\item{CPL_VSIL_CURL_ALLOWED_EXTENSIONS}{Allowed file extensions for HTTP
+requests.}
+
+\item{CPL_VSIL_CURL_USE_HEAD}{Use HTTP HEAD requests?}
+
+\item{CPL_VSIL_CURL_CHUNK_SIZE}{Chunk size for HTTP requests.}
 
 \item{...}{Additional -co options to set}
 
@@ -147,6 +146,11 @@ Create GDAL warp options
 Set the GDAL configuration options
 }
 \details{
+Where a named argument is set to \code{NULL}, the default GDAL value will be used.
+These arguments are currently included as NULL because they could in theory
+improve performance but, from our limited testing they either have no or
+a negative impact on performance.
+
 output_format, equaivalent to \code{-of} from the gdaltranslate or gdalwarp CLIs.
 If NULL, then the output format will be inferred from the file extension.
 }
