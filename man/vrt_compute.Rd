@@ -24,7 +24,8 @@ vrt_compute(
   add_cl_arg,
   quiet,
   apply_scale,
-  dst_nodata
+  dst_nodata,
+  recollect
 )
 
 \method{vrt_compute}{vrt_block}(
@@ -43,7 +44,8 @@ vrt_compute(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 )
 
 \method{vrt_compute}{vrt_stack_warped}(
@@ -62,7 +64,8 @@ vrt_compute(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 )
 
 \method{vrt_compute}{vrt_stack}(
@@ -81,7 +84,8 @@ vrt_compute(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 )
 
 \method{vrt_compute}{vrt_collection_warped}(
@@ -100,7 +104,8 @@ vrt_compute(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 )
 
 \method{vrt_compute}{vrt_collection}(
@@ -119,7 +124,8 @@ vrt_compute(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 )
 }
 \arguments{
@@ -163,9 +169,14 @@ existing the in file metadata.}
 \item{dst_nodata}{A numeric value of the nodata value to use for the
 output raster. If NULL, gdal will decide. This is usually only required if
 you are retaining a band which contains a different nodata value to others.}
+
+\item{recollect}{A logical indicating whether to return the output as a
+vrt_block or vrt_collection object. default is FALSE and the output is a
+character string of the output file path.}
 }
 \value{
-A character string of the path to the output raster
+A character string of the path to the output raster or, if recollect
+is TRUE, a vrt_block or vrt_collection object.
 }
 \description{
 Generate a composite raster from (virtual) raster sources.

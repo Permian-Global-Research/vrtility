@@ -265,6 +265,56 @@ hls_stac_query <- function(
   rstac::assets_select(stac_its, asset_names = assets)
 }
 
+
+hls_mpc_stac_query <- function(
+  bbox,
+  start_date,
+  end_date,
+  assets = c(
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B8A",
+    "B09",
+    "B10",
+    "B11",
+    "B12",
+    "Fmask"
+  ),
+  max_cloud_cover = 10,
+  mpc_sign = TRUE,
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = c("hls2-s30", "hls2-l30"),
+  limit = 999
+) {
+  assets <- rlang::arg_match(assets, multiple = TRUE)
+  collection <- rlang::arg_match(collection)
+  stac_its <- stac_query(
+    bbox = bbox,
+    stac_source = stac_source,
+    start_date = start_date,
+    end_date = end_date,
+    collection = collection,
+    limit = limit
+  )
+
+  if (!is.null(max_cloud_cover)) {
+    stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
+  }
+
+  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
+
+  if (mpc_sign) {
+    stac_its <- sign_planetary_computer(stac_its)
+  }
+  return(stac_its)
+}
+
 #' Filter a STAC item collection by cloud cover
 #' @param items A STACItemCollection
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage

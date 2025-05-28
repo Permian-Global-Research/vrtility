@@ -179,7 +179,12 @@ vrt_set_maskfun.vrt_block <- function(
     as_file = TRUE
   )
 
-  build_vrt_block(tf, maskfun = build_mask_pixfun, pixfun = x$pixfun)
+  build_vrt_block(
+    tf,
+    maskfun = build_mask_pixfun,
+    pixfun = x$pixfun,
+    warped = x$warped
+  )
 }
 
 #' @param x A VRT collection

@@ -19,4 +19,14 @@ test_that("assertions work", {
 
   # tests assert_files_exist - vrt_collect should fail with non-existent files
   expect_error(vrt_collect(c("notmyfile.tif", "northisone.tif")))
+
+  expect_error(vrt_collect(c(s2files, "bigbadkenge.tif")))
+
+  expect_length(
+    assert_files_exist(
+      c(s2files, "https://not-a-rea-url.tif"),
+      url_possible = TRUE
+    ),
+    6
+  )
 })

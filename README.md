@@ -76,9 +76,9 @@ Here is a simple example where we:
     the XML of the VRT “blocks”.
 
 4.  Because this set of images have more than one common spatial
-    reference system (SRS) we convert the `vrt_block`s in the
-    `vrt_collection` to warped VRTs, giving us a `vrt_collection_warped`
-    object.
+    reference system (SRS) we warp the `vrt_block`s to a new
+    spatially-aligned `vrt_collection` using `vrt_warp`, giving us a
+    `vrt_collection_warped` object.
 
 5.  These images are then “stacked” (combined into a single VRT with
     multiple layers in each VRTRasterBand), giving us a `vrt_stack`
@@ -86,11 +86,9 @@ Here is a simple example where we:
 
 6.  A median pixel function is then added to the `vrt_stack`.
 
-7.  all of this is then executed at the end of the vrt pipeline using
-    `vrt_compute`. Here we are using the `gdalraster` engine to write
-    the output which, in combination with the mirai package downloads
-    and processes the data in parallel across bands and within bands (as
-    determined by the `nsplits` argument).
+7.  Finally, we calculate the median composite using the `gdalraster`
+    engine to write the output which, in combination with the mirai
+    package processes the data in parallel across bands and image tiles.
 
 ``` r
 library(vrtility)
@@ -125,19 +123,25 @@ length(s2_stac$features)
 
 ``` r
 
+system.time({
+  median_composite <- vrt_collect(s2_stac) |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+    ) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
+    vrt_stack() |>
+    vrt_set_py_pixelfun(pixfun = median_numpy()) |>
+    vrt_compute(
+      outfile = fs::file_temp(ext = "tif"),
+      engine = "gdalraster"
+    )
+})
+#>    user  system elapsed 
+#>   5.205   0.438  20.548
+```
 
-median_composite <- vrt_collect(s2_stac) |>
-  vrt_set_maskfun(
-    mask_band = "SCL",
-    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
-  ) |>
-  vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
-  vrt_stack() |>
-  vrt_set_py_pixelfun() |>
-  vrt_compute(
-    outfile = fs::file_temp(ext = "tif"),
-    engine = "gdalraster"
-  )
+``` r
 
 plot_raster_src(
   median_composite,
@@ -162,15 +166,18 @@ use `engine = "warp"` if we are downloading multiple images invidivually
 
 ## Using on-disk rasters
 
-We can also use on-disk raster files too, as shown here with this
-example dataset - note that the inputs have multiple spatial reference
-systems and therefore we need to warp them (as in the above example)
-before stacking. If your images are all in the same CRS, you might save
-a lot of time by warping only once in `vrt_compute`. We can plot these
-`vrt_{x}` objects using `plot()` but note that for very large rasters,
-where we are computing pixel functions, this can be slow and we are
-better off using `vrt_compute` to write to disk and then plotting the
-output.
+We can also use on-disk raster files (or indeed urls) too, as shown here
+with this example dataset - note that the inputs have multiple spatial
+reference systems and therefore we need to warp them (as in the above
+example) before “stacking”. We can plot these `vrt_{x}` objects using
+`plot()` but note that for very large rasters, where we are computing
+pixel functions, this can be slow and we are better off using
+`vrt_compute` to write to disk and then plotting the output.
+
+In this example, we create a `medoid` composite from the warped
+collection. Using medoid or other multi-band pixel (e.g. `geomedian`)
+functions can be extremely powerful but requires more compute power/time
+than band-wise pixel functions.
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
@@ -212,28 +219,10 @@ ex_composite <- vrt_warp(
   te = t_block$bbox,
   tr = c(20, 20)
 ) |>
-  vrt_stack() |>
-  vrt_set_py_pixelfun(pixfun = median_numpy())
+  multiband_reduce(reduce_fun = medoid())
 
 par(mfrow = c(1, 1))
-plot(ex_composite, bands = c(3, 2, 1), quiet = TRUE)
+plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />
-
-``` r
-
-# write to disk if we wanted to...
-# vrt_compute(
-#   ex_composite,
-#   outfile = fs::file_temp(ext = "tif"),
-#   engine = "warp"
-# )
-```
-
-## TO DO:
-
-- [ ] Add additional pixel functions (geometric median in particular).
-- [ ] Add default C++ pixel functions.
-- [ ] time series functions…
-- [ ] Add custom C++ or expression based pixel functions

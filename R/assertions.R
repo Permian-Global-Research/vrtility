@@ -106,18 +106,43 @@ assert_srs_len <- function(x) {
 }
 
 
-assert_files_exist <- function(x) {
-  chkpths <- fs::file_exists(x)
-  if (!all(chkpths)) {
+assert_files_exist <- function(x, url_possible = FALSE) {
+  check_uri <- function(.x) {
+    if (url_possible) {
+      # handling urls - I don't think we want to validate the url...
+      if (assert_is_url(.x)) {
+        return(TRUE)
+      }
+    }
+    chkpths <- fs::file_exists(.x)
+    if (!all(chkpths)) {
+      return(FALSE)
+    }
+
+    return(TRUE)
+  }
+
+  filechecks <- purrr::map_lgl(
+    x,
+    check_uri
+  ) |>
+    purrr::set_names(x)
+
+  if (!all(filechecks)) {
     cli::cli_abort(
       c(
         "The following paths could not be located:",
         purrr::map_chr(
-          names(which(!chkpths)),
+          names(which(!filechecks)),
           ~ cli::format_bullets_raw(c(">" = .x))
         )
       )
     )
   }
-  invisible(x)
+  invisible(unname(x))
+}
+
+
+assert_is_url <- function(path) {
+  grepl("^(http|https|ftp|ftps|s3|gs)://|^(/vsi[a-z0-9]+/)", path)
 }
