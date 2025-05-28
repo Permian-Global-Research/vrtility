@@ -25,7 +25,11 @@
 #' @param dst_nodata A numeric value of the nodata value to use for the
 #' output raster. If NULL, gdal will decide. This is usually only required if
 #' you are retaining a band which contains a different nodata value to others.
-#' @return A character string of the path to the output raster
+#' @param recollect A logical indicating whether to return the output as a
+#' vrt_block or vrt_collection object. default is FALSE and the output is a
+#' character string of the output file path.
+#' @return A character string of the path to the output raster or, if recollect
+#' is TRUE, a vrt_block or vrt_collection object.
 #' @export
 #' @rdname vrt_compute
 #' @details
@@ -109,7 +113,8 @@ vrt_compute <- function(
   add_cl_arg,
   quiet,
   apply_scale,
-  dst_nodata
+  dst_nodata,
+  recollect
 ) {
   v_assert_type(outfile, "outfile", "character")
   UseMethod("vrt_compute")
@@ -153,7 +158,8 @@ vrt_compute.vrt_block <- function(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 ) {
   v_assert_length(te, "te", 4)
   v_assert_length(tr, "tr", 2)
@@ -218,7 +224,16 @@ vrt_compute.vrt_block <- function(
       )
     )
   }
-  return(result)
+  if (!recollect) {
+    return(result)
+  }
+
+  vrt_collect(
+    result,
+    config_opts = config_options,
+    band_descriptions = x$assets,
+    datetimes = x$date_time
+  )
 }
 
 #' @export
@@ -253,7 +268,8 @@ vrt_compute.vrt_stack_warped <- function(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 ) {
   class(x) <- setdiff(class(x), "vrt_stack_warped")
   vrt_compute(
@@ -271,7 +287,8 @@ vrt_compute.vrt_stack_warped <- function(
     add_cl_arg = add_cl_arg,
     quiet = quiet,
     apply_scale = apply_scale,
-    dst_nodata = dst_nodata
+    dst_nodata = dst_nodata,
+    recollect = recollect
   )
 }
 
@@ -307,7 +324,8 @@ vrt_compute.vrt_stack <- function(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 ) {
   if (any(missing(t_srs), missing(te), missing(tr))) {
     missing_args_error("vrt_stack")
@@ -348,7 +366,8 @@ vrt_compute.vrt_collection_warped <- function(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 ) {
   class(x) <- setdiff(class(x), "vrt_collection_warped")
   vrt_compute(
@@ -366,7 +385,8 @@ vrt_compute.vrt_collection_warped <- function(
     add_cl_arg = add_cl_arg,
     quiet = quiet,
     apply_scale = apply_scale,
-    dst_nodata = dst_nodata
+    dst_nodata = dst_nodata,
+    recollect = recollect
   )
 }
 
@@ -403,7 +423,8 @@ vrt_compute.vrt_collection <- function(
   add_cl_arg = NULL,
   quiet = TRUE,
   apply_scale = FALSE,
-  dst_nodata = NULL
+  dst_nodata = NULL,
+  recollect = FALSE
 ) {
   daemon_setup(gdal_config = config_options)
   if (any(missing(t_srs), missing(te), missing(tr))) {
@@ -419,7 +440,7 @@ vrt_compute.vrt_collection <- function(
   ) |>
     unique_fp(outfile)
 
-  purrr::pmap_chr(
+  result <- purrr::pmap_chr(
     list(.x = x[[1]], .y = uniq_pths),
     carrier::crate(
       function(.x, .y) {
@@ -438,7 +459,8 @@ vrt_compute.vrt_collection <- function(
           add_cl_arg = add_cl_arg,
           quiet = TRUE,
           apply_scale = apply_scale,
-          dst_nodata = dst_nodata
+          dst_nodata = dst_nodata,
+          recollect = FALSE
         )
       },
       vrt_compute = vrt_compute,
@@ -457,6 +479,17 @@ vrt_compute.vrt_collection <- function(
     ),
     .parallel = using_daemons(),
     .progress = !quiet
+  )
+
+  if (!recollect) {
+    return(result)
+  }
+
+  vrt_collect(
+    result,
+    config_opts = config_options,
+    band_descriptions = x$assets,
+    datetimes = x$date_time
   )
 }
 
