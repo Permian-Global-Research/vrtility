@@ -18,6 +18,9 @@
 #' function will automatically determine the number of splits based on the
 #' dimensions of the input data, available memory and the number of active
 #' mirai daemons. see details
+#' @param recollect A logical indicating whether to return the output as a
+#' vrt_block or vrt_collection object. default is FALSE and the output is a
+#' character string of the output file path.
 #' @return A character vector of the output file path.
 #' @details
 #' We have a lot TODO: info on the reduce_fun options and nsplits etc...
@@ -75,7 +78,8 @@ multiband_reduce <- function(
   config_options,
   creation_options,
   quiet,
-  nsplits
+  nsplits,
+  recollect
 ) {
   UseMethod("multiband_reduce")
 }
@@ -104,7 +108,8 @@ multiband_reduce.vrt_collection_warped <- function(
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
-  nsplits = NULL
+  nsplits = NULL,
+  recollect = FALSE
 ) {
   daemon_setup(gdal_config = config_options)
   # inital assertions and checks.
@@ -226,7 +231,15 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  return(outfile)
+  if (!recollect) {
+    return(outfile)
+  }
+
+  vrt_collect(
+    outfile,
+    config_opts = config_options,
+    band_descriptions = x$assets
+  )
 }
 
 #' @title block-level geomedian calculation

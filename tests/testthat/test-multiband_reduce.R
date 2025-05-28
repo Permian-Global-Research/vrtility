@@ -58,6 +58,19 @@ test_that("multiband_reduce works", {
   expect_gt(sum(vals, na.rm = TRUE), 63270000)
   ds$close()
 
+  # test if recollect works:
+  # Geomedian Gmedian:
+  ex_geomed_gmedian_coll <- multiband_reduce(
+    ex_collect_mask_warp,
+    reduce_fun = geomedian(weizfeld = FALSE),
+    recollect = TRUE
+  )
+
+  expect_s3_class(
+    ex_geomed_gmedian_coll,
+    "vrt_block"
+  )
+
   # medoid
   ex_medoid <- multiband_reduce(
     ex_collect_mask_warp,
