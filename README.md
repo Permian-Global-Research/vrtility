@@ -76,9 +76,9 @@ Here is a simple example where we:
     the XML of the VRT “blocks”.
 
 4.  Because this set of images have more than one common spatial
-    reference system (SRS) we warp the `vrt_block`s to a new local
-    `vrt_collection` using `vrt_compute` with the `warp` engine. We
-    “recollect” these files, giving us a `vrt_collection_warped` object.
+    reference system (SRS) we warp the `vrt_block`s to a new
+    spatially-aligned `vrt_collection` using `vrt_warp`, giving us a
+    `vrt_collection_warped` object.
 
 5.  These images are then “stacked” (combined into a single VRT with
     multiple layers in each VRTRasterBand), giving us a `vrt_stack`
@@ -129,11 +129,7 @@ system.time({
       mask_band = "SCL",
       mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
     ) |>
-    vrt_compute(
-      fs::file_temp(ext = "vrt"),
-      t_srs = trs, te = te, tr = c(10, 10),
-      recollect = TRUE
-    ) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
     vrt_stack() |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     vrt_compute(
@@ -142,7 +138,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.805   0.438  38.475
+#>   5.205   0.438  20.548
 ```
 
 ``` r
@@ -170,15 +166,18 @@ use `engine = "warp"` if we are downloading multiple images invidivually
 
 ## Using on-disk rasters
 
-We can also use on-disk raster files too, as shown here with this
-example dataset - note that the inputs have multiple spatial reference
-systems and therefore we need to warp them (as in the above example)
-before stacking. If your images are all in the same CRS, you might save
-a lot of time by warping only once in `vrt_compute`. We can plot these
-`vrt_{x}` objects using `plot()` but note that for very large rasters,
-where we are computing pixel functions, this can be slow and we are
-better off using `vrt_compute` to write to disk and then plotting the
-output.
+We can also use on-disk raster files (or indeed urls) too, as shown here
+with this example dataset - note that the inputs have multiple spatial
+reference systems and therefore we need to warp them (as in the above
+example) before “stacking”. We can plot these `vrt_{x}` objects using
+`plot()` but note that for very large rasters, where we are computing
+pixel functions, this can be slow and we are better off using
+`vrt_compute` to write to disk and then plotting the output.
+
+In this example, we create a `medoid` composite from the warped
+collection. Using medoid or other multi-band pixel (e.g. `geomedian`)
+functions can be extremely powerful but requires more compute power/time
+than band-wise pixel functions.
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
@@ -227,10 +226,3 @@ plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />
-
-## TO DO:
-
-- [ ] Add additional pixel functions (geometric median in particular).
-- [ ] Add default C++ pixel functions.
-- [ ] time series functions…
-- [ ] Add custom C++ or expression based pixel functions
