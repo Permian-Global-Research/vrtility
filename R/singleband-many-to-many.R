@@ -17,9 +17,12 @@
 #' function will automatically determine the number of splits based on the
 #' dimensions of the input data, available memory and the number of active
 #' mirai daemons. see details
+#' @param recollect A logical indicating whether to return the output as a
+#' vrt_block or vrt_collection object. default is FALSE and the output is a
+#' character string of the output file path.
 #' @return A character vector of the output file path.
 #' @details
-#' We have a lot TODO: info on the reduce_fun options and nsplits etc...
+#' We have a lot TODO: here...
 #' @rdname singleband-many-to-many
 #' @export
 singleband_m2m <- function(
@@ -30,7 +33,8 @@ singleband_m2m <- function(
   config_options,
   creation_options,
   quiet,
-  nsplits
+  nsplits,
+  recollect
 ) {
   UseMethod("singleband_m2m")
 }
@@ -62,7 +66,8 @@ singleband_m2m.vrt_collection_warped <- function(
   ),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
-  nsplits = NULL
+  nsplits = NULL,
+  recollect = FALSE
 ) {
   daemon_setup(gdal_config = config_options)
   # inital assertions and checks.
@@ -168,6 +173,10 @@ singleband_m2m.vrt_collection_warped <- function(
     purrr::pwalk(
       list(.ds = ds_list, .data = j$band_data),
       function(.ds, .data) {
+        bscale <- rt$scale_vals[.params$band_n]
+        if (!is.na(bscale) && apply_scale) {
+          .data <- .data * bscale
+        }
         # Write the band data to the output raster
         .ds$write(
           band = .params$band_n,
@@ -181,7 +190,16 @@ singleband_m2m.vrt_collection_warped <- function(
     )
   })
 
-  return(uniq_pths)
+  if (!recollect) {
+    return(uniq_pths)
+  }
+
+  vrt_collect(
+    uniq_pths,
+    config_opts = config_options,
+    band_descriptions = x$assets,
+    datetimes = x$date_time
+  )
 }
 
 #' @title Convert a matrix to a list of vectors
