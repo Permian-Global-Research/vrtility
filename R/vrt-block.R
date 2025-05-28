@@ -10,7 +10,7 @@ build_vrt_block <- function(
   x,
   maskfun = NULL,
   pixfun = NULL,
-  warped = NULL,
+  warped = FALSE,
   ...
 ) {
   # validate the vrt against the schema
