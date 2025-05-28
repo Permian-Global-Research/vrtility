@@ -13,7 +13,8 @@ singleband_m2m(
   config_options,
   creation_options,
   quiet,
-  nsplits
+  nsplits,
+  recollect
 )
 
 hampel_filter(k = 1L, t0 = 3, impute_na = FALSE)
@@ -42,6 +43,10 @@ function will automatically determine the number of splits based on the
 dimensions of the input data, available memory and the number of active
 mirai daemons. see details}
 
+\item{recollect}{A logical indicating whether to return the output as a
+vrt_block or vrt_collection object. default is FALSE and the output is a
+character string of the output file path.}
+
 \item{k}{The number of neighboring points to consider on each side of the
 current point. window length 2*k+1 in indices.}
 
@@ -67,7 +72,7 @@ outliers in time-series using the Hampel filter. to be provided to
 \code{singleband_m2m()}.
 }
 \details{
-We have a lot TODO: info on the reduce_fun options and nsplits etc...
+We have a lot TODO: here...
 
 (details from the \code{\link[pracma]{hampel}}) The ‘median absolute deviation’ computation is
 done in the (-k...k) vicinity of each point at least k steps away from the

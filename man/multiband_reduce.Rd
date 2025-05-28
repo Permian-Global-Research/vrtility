@@ -16,7 +16,8 @@ multiband_reduce(
   config_options,
   creation_options,
   quiet,
-  nsplits
+  nsplits,
+  recollect
 )
 
 geomedian(
@@ -82,6 +83,10 @@ bands. See  details.}
 function will automatically determine the number of splits based on the
 dimensions of the input data, available memory and the number of active
 mirai daemons. see details}
+
+\item{recollect}{A logical indicating whether to return the output as a
+vrt_block or vrt_collection object. default is FALSE and the output is a
+character string of the output file path.}
 
 \item{weizfeld}{Logical. If TRUE, the Weiszfeld algorithm is used to
 calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
