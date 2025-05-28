@@ -6,8 +6,7 @@ call_gdalraster_mirai <- function(
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = FALSE,
-  nsplits = NULL,
-  return_internals = FALSE
+  nsplits = NULL
 ) {
   daemon_setup(gdal_config = config_options)
   orig_config <- set_gdal_config(c(config_options))
@@ -115,15 +114,6 @@ call_gdalraster_mirai <- function(
       rasterData = j$band_data
     )
   })
-
-  if (return_internals) {
-    return(
-      list(
-        outfile = outfile,
-        internals = result
-      )
-    )
-  }
 
   return(outfile)
 }
