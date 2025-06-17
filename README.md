@@ -30,11 +30,11 @@ Observation in mind.
   functions. All powered by
   [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
-- vrtility enables the use of GDAL VRT python pixel functions. These
-  [numpy](https://numpy.org/) based python pixel functions are used to
-  apply cloud masks and summarise pixel values (e.g. median) from
-  multiple images (i.e create a composite image). All python environment
-  and package management is handled by
+- vrtility enables the use of GDAL VRT python and built-in pixel
+  functions. These [numpy](https://numpy.org/) based python pixel
+  functions are used to apply cloud masks and summarise pixel values
+  (e.g. median) from multiple images (i.e create a composite image). All
+  python environment and package management is handled by
   [{reticulate}](https://rstudio.github.io/reticulate/).
 
 - Efficient parallel processing using gdalraster and
@@ -131,7 +131,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.828   0.487  21.318
+#>   5.329   0.389  27.071
 ```
 
 ``` r
