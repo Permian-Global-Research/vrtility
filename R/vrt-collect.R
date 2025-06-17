@@ -193,7 +193,7 @@ vrt_collect.doc_items <- function(
 
   vrt_items <- purrr::map(
     items_uri,
-    carrier::crate(
+    in_parallel_if_daemons(
       function(item) {
         srcs <- purrr::map_chr(item, ~ .x$uri)
         dttm <- unique(purrr::map_chr(item, ~ .x$dttm))
@@ -246,8 +246,7 @@ vrt_collect.doc_items <- function(
       set_vrt_descriptions = set_vrt_descriptions,
       set_vrt_metadata = set_vrt_metadata,
       build_vrt_block = build_vrt_block
-    ),
-    .parallel = using_daemons()
+    )
   )
 
   build_vrt_collection(
@@ -331,7 +330,6 @@ build_vrt_collection <- function(
   if (warped) {
     warp_class <- "vrt_collection_warped"
   } else {
-    # browser()
     if (
       length(unique(bbox_all)) == 1 &&
         length(uniq_crs) == 1 &&

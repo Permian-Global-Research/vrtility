@@ -1,5 +1,5 @@
 test_that("singleband_m2m works", {
-  if (!vrtility:::using_daemons()) {
+  if (!mirai::daemons_set()) {
     mirai::daemons(2)
   }
 

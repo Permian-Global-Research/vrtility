@@ -92,7 +92,7 @@ vrt_add_empty_band.vrt_block <- function(
   # resolve any scaling values
   if (is.null(scale_value)) {
     scale_vals <- xml2::xml_find_all(vrt_xml, ".//Scale")
-    # browser()
+
     if (length(scale_vals) > 0) {
       scale_value <- xml2::xml_text(scale_vals[1])
       scale_value <- names(sort(table(scale_value), decreasing = TRUE)[1])

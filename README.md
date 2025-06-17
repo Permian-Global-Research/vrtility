@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# vrtility
+# vrtility <a href="https://permian-global-research.github.io/vrtility/" alt="vrtility"><img src="man/figures/vrtility_hex.png" alt="vrtility logo" align="right" width="200"/></a>
 
 <!-- badges: start -->
 
@@ -12,40 +12,33 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
 <!-- badges: end -->
 
-<img src="man/figures/vrtility_hex.png"  align="right" height="300" style="float:right; height:300px;">
-
 vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
-Observation in mind. This package enables the use of GDAL VRT python
-pixel functions. These [numpy](https://numpy.org/) based python pixel
-functions are used to apply cloud masks and summarise pixel values
-(e.g. median) from multiple images (i.e create a composite image). These
-main features are made possible by the
-[{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html)
-and [{reticulate}](https://rstudio.github.io/reticulate/) packages.
-Advanced image compositing and time series filtering is also provided
-which makes use of gdalraster alonside the {mirai} package for parallel
-processing.
+Observation in mind.
 
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
 
 ## Features
 
-- No intermediate downloads - the use of nested VRTs enables the
-  download and processing of only the required data in a single gdalwarp
-  (or gdal_translate) call. This reduces disk read/write time.
-
 - Modular design: We’re basically creating remote sensing pipelines
   using nested VRTs. This allows for the easy addition of new pixel
   functions and masking functions. but could easily be adapted for
   deriving spectral indices or calculating complex time series
-  functions.
+  functions. All powered by
+  [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
+
+- vrtility enables the use of GDAL VRT python pixel functions. These
+  [numpy](https://numpy.org/) based python pixel functions are used to
+  apply cloud masks and summarise pixel values (e.g. median) from
+  multiple images (i.e create a composite image). All python environment
+  and package management is handled by
+  [{reticulate}](https://rstudio.github.io/reticulate/).
 
 - Efficient parallel processing using gdalraster and
-  [mirai](https://shikokuchuo.net/mirai/)
+  [{mirai}](https://shikokuchuo.net/mirai/)
 
 - Advanced compositing methods that maintain spectral consistency, such
   as the geometric median and medoid.
@@ -138,7 +131,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.205   0.438  20.548
+#>   5.828   0.487  21.318
 ```
 
 ``` r
@@ -156,12 +149,12 @@ plot_raster_src(
 {vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
 parallelisation. By setting `mirai::daemons(n)` before running the vrt
 pipeline, we can improve performance, depending on the speed of the
-server holding the data. In some cases this will make little difference
+server holding the data. In some cases this will make little difference;
 for example, the Microsoft Planetary Computer STAC API is already pretty
 fast. However, for NASA’s Earthdata STAC API, this can make a huge
 difference. In order to use asynchronous processing, in the
 `vrt_compute` function, we need to set `engine = "gdalraster"` or we can
-use `engine = "warp"` if we are downloading multiple images invidivually
+use `engine = "warp"` if we are downloading multiple images individually
 (This is a much faster approach on Nasa’s Earthdata server).
 
 ## Using on-disk rasters
@@ -170,14 +163,14 @@ We can also use on-disk raster files (or indeed urls) too, as shown here
 with this example dataset - note that the inputs have multiple spatial
 reference systems and therefore we need to warp them (as in the above
 example) before “stacking”. We can plot these `vrt_{x}` objects using
-`plot()` but note that for very large rasters, where we are computing
+`plot()` but note that, for very large rasters, where we are computing
 pixel functions, this can be slow and we are better off using
 `vrt_compute` to write to disk and then plotting the output.
 
 In this example, we create a `medoid` composite from the warped
-collection. Using medoid or other multi-band pixel (e.g. `geomedian`)
-functions can be extremely powerful but requires more compute power/time
-than band-wise pixel functions.
+collection. Using medoid or other multi-band pixel functions
+(e.g. `geomedian`) can be extremely powerful but requires more compute
+power/time than band-wise pixel functions.
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
