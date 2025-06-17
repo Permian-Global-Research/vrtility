@@ -13,7 +13,7 @@ BugReports: https://github.com/Permian-Global-Research/vrtility/issues
 Depends: 
     R (>= 4.2.0)
 Imports: 
-    carrier,
+    carrier (>= 0.1.1.9000),
     cli,
     fs,
     gdalraster,
@@ -43,7 +43,8 @@ Suggests:
     vdiffr,
     WGCNA
 Remotes: 
-    tidyverse/purrr
+    tidyverse/purrr,
+    r-lib/carrier
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
