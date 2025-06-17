@@ -2,7 +2,7 @@ test_that("multiband_reduce works", {
   #NOTE: we use expect_gt rather than matching exact values because windows
   # tests give different values - presumably some floadting point nonsence.
 
-  if (!vrtility:::using_daemons()) {
+  if (!mirai::daemons_set()) {
     mirai::daemons(2)
   }
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
