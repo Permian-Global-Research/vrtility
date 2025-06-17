@@ -75,9 +75,9 @@ vrt_opts_set <- function() {
   op <- options()
   op_vrtility <- list(
     vrt.percent.ram = 60,
-    vrt.pause.base = 10,
-    vrt.pause.cap = 100,
-    vrt.max.times = 10
+    vrt.pause.base = 1,
+    vrt.pause.cap = 10,
+    vrt.max.times = 3
   )
 
   toset <- !(names(op_vrtility) %in% names(op))

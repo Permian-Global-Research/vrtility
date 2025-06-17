@@ -64,7 +64,7 @@ gdalraster_engine_asserts_init <- function(
   )
   v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
 
-  if (!using_daemons()) {
+  if (!mirai::daemons_set()) {
     cli::cli_inform(
       c(
         "!" = "No miriai daemons detected.",

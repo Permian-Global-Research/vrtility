@@ -184,14 +184,6 @@ vrt_compute.vrt_block <- function(
       dst_nodata,
       add_cl_arg
     )
-    # browser()
-
-    # return(list(
-    #   tmp_vrt = tmp_vrt,
-    #   outfile = outfile,
-    #   cl_arg = cl_arg,
-    #   config_options = config_options
-    # ))
 
     result <- compute_with_py_env(
       call_gdal_warp(
@@ -204,7 +196,9 @@ vrt_compute.vrt_block <- function(
       )
     )
   } else if (engine == "gdalraster") {
-    if (!x$warped) warp_first_error(engine)
+    if (!x$warped) {
+      warp_first_error(engine)
+    }
     result <- call_gdalraster_mirai(
       x = x,
       outfile = outfile,
@@ -442,7 +436,7 @@ vrt_compute.vrt_collection <- function(
 
   result <- purrr::pmap_chr(
     list(.x = x[[1]], .y = uniq_pths),
-    carrier::crate(
+    in_parallel_if_daemons(
       function(.x, .y) {
         vrt_compute(
           .x,
@@ -477,7 +471,6 @@ vrt_compute.vrt_collection <- function(
       apply_scale = apply_scale,
       dst_nodata = dst_nodata
     ),
-    .parallel = using_daemons(),
     .progress = !quiet
   )
 

@@ -114,7 +114,6 @@ vrt_warp.vrt_block <- function(
   )
 
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  # browser()
 
   gdalraster::buildVRT(
     outtf,
@@ -193,7 +192,7 @@ vrt_warp.vrt_collection <- function(
 
   warped_blocks <- purrr::map(
     x[[1]],
-    carrier::crate(
+    in_parallel_if_daemons(
       function(.x) {
         vrt_warp(.x, t_srs, te, tr, resampling, quiet)
       },
@@ -204,7 +203,6 @@ vrt_warp.vrt_collection <- function(
       resampling = resampling,
       quiet = quiet
     ),
-    .parallel = using_daemons(),
     .progress = !quiet
   )
 

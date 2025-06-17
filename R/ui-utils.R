@@ -65,7 +65,7 @@ vrt_print_msg <- function() {
 pixel_fun_printer <- function(x, type = c("pf", "mf")) {
   type <- rlang::arg_match(type, c("pf", "mf"))
   type <- switch(type, pf = "Pixel Function", mf = "Mask Function")
-  # browser()
+
   cli::cli_inform(
     paste(cli::style_bold(cli::col_blue("{type}:"))),
   )
