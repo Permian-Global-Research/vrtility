@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# vrtility <a href="https://permian-global-research.github.io/vrtility/" alt="mirai"><img src="man/figures/vrtility_hex.png" alt="vrtility logo" align="right" width="120"/></a>
+# vrtility <a href="https://permian-global-research.github.io/vrtility/" alt="vrtility"><img src="man/figures/vrtility_hex.png" alt="vrtility logo" align="right" width="200"/></a>
 
 <!-- badges: start -->
 
@@ -131,7 +131,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.266   0.366  19.930
+#>   5.828   0.487  21.318
 ```
 
 ``` r
