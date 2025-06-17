@@ -67,3 +67,125 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 # using the RFC 15 approach. I've tried various approaches to get this to work
 # but it seems that the RFC 15 approach is not compatible with a mask containing
 # pixel functions. If anyone has a solution to this please let me know.
+
+# nolint
+
+#
+build_omnicloudmask <- function(
+  r,
+  g,
+  nir,
+  patch_size = 1000,
+  patch_overlap = 300,
+  batch_size = 1,
+  no_data_value = 0,
+  inference_device = NULL
+) {
+  # assert omicloudmask is installed
+  omc <- try(
+    reticulate::import("omnicloudmask", delay_load = TRUE),
+    silent = TRUE
+  )
+
+  if (inherits(omc, "try-error")) {
+    vrtility_py_require("omnicloudmask")
+  }
+
+  # assert args
+  v_assert_type(r, "r", c("numeric", "integer"), multiple = TRUE)
+  v_assert_type(g, "g", c("numeric", "integer"), multiple = TRUE)
+  v_assert_type(nir, "nir", c("numeric", "integer"), multiple = TRUE)
+  v_assert_type(
+    patch_size,
+    "patch_size",
+    c("numeric", "integer"),
+    multiple = TRUE
+  )
+  v_assert_type(
+    patch_overlap,
+    "patch_overlap",
+    c("numeric", "integer"),
+    multiple = TRUE
+  )
+  v_assert_type(
+    batch_size,
+    "batch_size",
+    c("numeric", "integer"),
+    multiple = TRUE
+  )
+  v_assert_type(no_data_value, "no_data_value", c("numeric"))
+
+  if (!is.null(inference_device)) {
+    inference_device <- rlang::arg_match(
+      inference_device,
+      c(
+        "cpu",
+        "cuda",
+        "ipu",
+        "xpu",
+        "mkldnn",
+        "opengl",
+        "opencl",
+        "ideep",
+        "hip",
+        "ve",
+        "fpga",
+        "maia",
+        "xla",
+        "lazy",
+        "vulkan",
+        "mps",
+        "meta",
+        "hpu",
+        "mtia",
+        "privateuseone"
+      )
+    )
+  } else {
+    torch <- reticulate::import("torch")
+    if (torch$cuda$is_available()) {
+      inference_device <- "cuda"
+    } else if (torch$backends$mps$is_available()) {
+      inference_device <- "mps"
+    } else {
+      inference_device <- "cpu"
+    }
+  }
+
+  pyfun <- glue::glue(
+    "
+import numpy as np
+import omnicloudmask as omc
+
+
+
+def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+                  raster_ysize, buf_radius, gt, **kwargs):
+    # breakpoint()
+    mask_vals = [int(x) for x in kwargs['mask_values'].decode().split(',')]
+
+    
+    np_rgn = np.stack([in_ar[0], in_ar[1], in_ar[2]], axis=0)
+
+    
+    pred_mask = omc.predict_from_array(
+      np_rgn,
+      patch_size = {patch_size},
+      patch_overlap = {patch_overlap},
+      batch_size = {batch_size},
+      inference_device = '{inference_device}',
+      no_data_value = {no_data_value}
+    ) 
+
+    # mask = np.isin(pred_mask[0], mask_vals)
+    out_ar[:] = pred_mask[0] # np.where(mask, 0, 1)  # Set invalid pixels to 0
+    
+
+
+"
+  )
+
+  attr(pyfun, "mask_type") <- "omnicloudmask"
+  attr(pyfun, "required_bands") <- c(r, g, nir)
+  return(pyfun)
+}
