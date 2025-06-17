@@ -96,7 +96,7 @@ optimise_tiling <- function(xs, ys, blksize, nsplits) {
 #' @keywords internal
 suggest_n_chunks <- function(ys, xs, nbands, nitems, scalar = 5) {
   ram_info <- memuse::Sys.meminfo()
-  if (using_daemons()) {
+  if (mirai::daemons_set()) {
     nprocs <- pmax(n_daemons(), 1)
     # we assume that if using mirai, the daemons may be hollding ram that might
     # be released
