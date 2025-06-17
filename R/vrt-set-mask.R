@@ -206,24 +206,25 @@ vrt_set_maskfun.vrt_collection <- function(
 
   masked_blocks <- purrr::map(
     x$vrt,
-    carrier::crate(
-      ~ vrtility::vrt_set_maskfun(
-        .x,
-        mask_band = mask_band,
-        mask_values = mask_values,
-        build_mask_pixfun = build_mask_pixfun,
-        set_mask_pixfun = set_mask_pixfun,
-        drop_mask_band = drop_mask_band,
-        cache_dir = cache_dir
-      ),
+    in_parallel_if_daemons(
+      function(.x) {
+        vrtility::vrt_set_maskfun(
+          .x,
+          mask_band = mask_band,
+          mask_values = mask_values,
+          build_mask_pixfun = build_mask_pixfun,
+          set_mask_pixfun = set_mask_pixfun,
+          drop_mask_band = drop_mask_band,
+          cache_dir = cache_dir
+        )
+      },
       mask_band = mask_band,
       mask_values = mask_values,
       build_mask_pixfun = build_mask_pixfun,
       set_mask_pixfun = set_mask_pixfun,
       drop_mask_band = drop_mask_band,
       cache_dir = getOption("vrt.cache")
-    ),
-    .parallel = using_daemons()
+    )
   )
 
   if (inherits(x, "vrt_collection_warped")) {

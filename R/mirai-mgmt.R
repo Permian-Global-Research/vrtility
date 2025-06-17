@@ -1,14 +1,6 @@
 #' @title Mirai Daemon Management
 #' @description Just some helpful functions for managing the mirai daemons and
 #' parallel processing.
-#' @details
-#' `using_daemons()` returns `TRUE` if there are any mirai daemons running.
-#' @rdname mirai-mgmt
-#' @export
-using_daemons <- function() {
-  mirai::status()$connections > 0
-}
-
 #' @rdname mirai-mgmt
 #' @details
 #' `n_daemons()` returns the number of mirai daemons running.
@@ -31,11 +23,16 @@ n_daemons <- function() {
 machine_cores <- function(all.tests = FALSE, logical = TRUE) {
   systems <- list(
     linux = "grep \"^processor\" /proc/cpuinfo 2>/dev/null | wc -l",
-    darwin = if (logical) "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null" else
-      "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null",
-    solaris = if (logical)
-      "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l" else
-      "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l",
+    darwin = if (logical) {
+      "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null"
+    } else {
+      "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null"
+    },
+    solaris = if (logical) {
+      "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l"
+    } else {
+      "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l"
+    },
     freebsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null",
     openbsd = "/sbin/sysctl -n hw.ncpuonline 2>/dev/null"
   )
@@ -57,7 +54,7 @@ machine_cores <- function(all.tests = FALSE, logical = TRUE) {
     }
   }
   if (all.tests) {
-    for (i in seq(systems))
+    for (i in seq(systems)) {
       for (cmd in systems[i]) {
         if (
           is.null(
@@ -66,11 +63,13 @@ machine_cores <- function(all.tests = FALSE, logical = TRUE) {
               error = function(e) NULL
             )
           )
-        )
+        ) {
           next
+        }
         a <- gsub("^ +", "", a[1])
         if (grepl("^[1-9]", a)) return(as.integer(a))
       }
+    }
   }
   NA_integer_
 }
@@ -89,7 +88,7 @@ daemon_setup <- function(gdal_config = NULL) {
 
   mopts <- NULL
 
-  if (using_daemons()) {
+  if (mirai::daemons_set()) {
     evrywrs <- mirai::everywhere(
       {
         library(vrtility)
@@ -104,7 +103,45 @@ daemon_setup <- function(gdal_config = NULL) {
       gdal_config = gdal_config
     )
     mopts <- mirai::collect_mirai(evrywrs)
-    purrr::walk(mopts, \(x) x, .parallel = TRUE)
+    purrr::walk(mopts, \(x) x) # removed .parallel - TODO: was this okay?
   }
   invisible(mopts)
+}
+
+#' daemon-responsive purrr::in_parallel
+#' @param .fun A fresh formula or function. "Fresh" here means that they should
+#' be declared in the call to `in_parallel_if_daemons()`.
+#' @param ... Named arguments to declare in the environment of the function.
+#' @import rlang
+#' @details to deal with the changes to purrr relating to the removal of the
+#' `.parallel` argument, this function will run the function in parallel if
+#' mirai daemons are set, otherwise it will bind the arguments in the caller
+#' environment and return the function.
+#' @return If mirai daemons are set, returns the result of `purrr::in_parallel()`
+#' with the function and arguments. If not, returns the function with the
+#' arguments bound in the caller environment.
+#' @noRd
+in_parallel_if_daemons <- function(.fun, ...) {
+  if (mirai::daemons_set()) {
+    carrier::crate(
+      !!substitute(.fun),
+      !!!list(...),
+      .parent_env = globalenv(),
+      .error_arg = ".fun",
+      .error_call = environment()
+    )
+  } else {
+    dots <- rlang::dots_list(...)
+    if (!rlang::is_named(dots)) {
+      rlang::abort("All arguments must be named")
+    }
+    for (name in names(dots)) {
+      rlang::env_bind(
+        rlang::caller_env(),
+        !!name := dots[[name]]
+      )
+    }
+
+    .fun
+  }
 }

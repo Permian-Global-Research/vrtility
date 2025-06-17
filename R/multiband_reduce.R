@@ -159,7 +159,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   jobs <- purrr::pmap(
     blocks_df,
-    carrier::crate(
+    in_parallel_if_daemons(
       function(...) {
         # Extract block parameters correctly from the 1-row dataframe
         block_params <- rlang::dots_list(...)
@@ -184,7 +184,6 @@ multiband_reduce.vrt_collection_warped <- function(
       mdim_reduction_apply = mdim_reduction_apply,
       restructure_cells = restructure_cells
     ),
-    .parallel = using_daemons(),
     .progress = !quiet
   )
 

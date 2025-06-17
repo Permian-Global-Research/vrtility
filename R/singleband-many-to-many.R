@@ -90,8 +90,6 @@ singleband_m2m.vrt_collection_warped <- function(
     nsplits <- suggest_n_chunks(rt$ys, rt$xs, rt$nbands, x$n_items)
   }
 
-  # browser()
-
   blocks_df <- optimise_tiling(
     rt$xs,
     rt$ys,
@@ -140,7 +138,7 @@ singleband_m2m.vrt_collection_warped <- function(
 
   jobs <- purrr::pmap(
     blocks_df,
-    carrier::crate(
+    in_parallel_if_daemons(
       function(...) {
         block_params <- rlang::dots_list(...)
 
@@ -164,7 +162,6 @@ singleband_m2m.vrt_collection_warped <- function(
       m2m_fun = m2m_fun,
       matrix_to_rowlist = matrix_to_rowlist
     ),
-    .parallel = using_daemons(),
     .progress = !quiet
   )
 
@@ -262,7 +259,6 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' @noRd
 #' @keywords internal
 single_band_reader <- function() {
-  # browser()
   purrr::insistently(
     function(blk, block_params) {
       # cli::cli_abort("THIS IS A TEST FAILURE")

@@ -58,7 +58,7 @@ call_gdalraster_mirai <- function(
     )
   })
 
-  if (using_daemons()) {
+  if (mirai::daemons_set()) {
     mirai::everywhere({
       library(vrtility)
     })
@@ -67,7 +67,7 @@ call_gdalraster_mirai <- function(
   # Create mirai map with promises
   jobs <- purrr::pmap(
     blocks_df,
-    carrier::crate(
+    in_parallel_if_daemons(
       function(...) {
         # Extract block parameters correctly from the 1-row dataframe
         block_params <- rlang::dots_list(...)
@@ -100,7 +100,6 @@ call_gdalraster_mirai <- function(
       vrt_file = vrt_template,
       compute_with_py_env = compute_with_py_env
     ),
-    .parallel = using_daemons(),
     .progress = !quiet
   )
 

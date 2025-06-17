@@ -122,7 +122,6 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
       })
     }
   })
-  # browser()
 
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
@@ -150,13 +149,14 @@ vrt_set_gdal_pixelfun.vrt_collection <- function(
 ) {
   blocks_with_gdal_pf <- purrr::map(
     x$vrt,
-    \(.x)
+    \(.x) {
       vrt_set_gdal_pixelfun(
         .x,
         pixfun = pixfun,
         ...,
         band_idx = band_idx
       )
+    }
   )
 
   if (inherits(x, "vrt_collection_warped")) {
