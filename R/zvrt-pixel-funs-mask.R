@@ -70,10 +70,33 @@ def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
 # nolint
 
-#
+#' @title Construct a cloud mask using the OmniCloudMask python library.
+#' @description This function constructs a cloud mask using the OmniCloudMask
+#' python library. It is designed to be used with the `vrt_set_maskfun()`
+#' function.
+#' @param red The red band index (numeric or integer).
+#' @param green The green band index (numeric or integer).
+#' @param nir The near-infrared band index (numeric or integer).
+#' @param patch_size The size of the patches to use for prediction (numeric or
+#' integer, default: 600).
+#' @param patch_overlap The overlap between patches (numeric or integer,
+#' default: 300).
+#' @param batch_size The batch size to use for prediction (numeric or integer,
+#' default: 1).
+#' @param no_data_value The value to use for no data pixels
+#' (numeric, default: 0).
+#' @param inference_device The device to use for inference. If `NULL`, the
+#' function will automatically select the best available device (character,
+#' default: `NULL`). Options include "cpu", "cuda", "mps", etc. The order of
+#' selection is based on availability: "cuda" > "mps" > "cpu".
+#' @return A Python function that can be used as a pixel function in a VRT
+#' raster. The function will apply the OmniCloudMask model to the specified
+#' bands and create a cloud mask.
+#' @rdname vrt_set_maskfun
+#' @export
 build_omnicloudmask <- function(
-  r,
-  g,
+  red,
+  green,
   nir,
   patch_size = 600,
   patch_overlap = 300,
@@ -92,8 +115,8 @@ build_omnicloudmask <- function(
   }
 
   # assert args
-  v_assert_type(r, "r", c("numeric", "integer"), multiple = TRUE)
-  v_assert_type(g, "g", c("numeric", "integer"), multiple = TRUE)
+  v_assert_type(red, "red", c("numeric", "integer"), multiple = TRUE)
+  v_assert_type(green, "green", c("numeric", "integer"), multiple = TRUE)
   v_assert_type(nir, "nir", c("numeric", "integer"), multiple = TRUE)
   v_assert_type(
     patch_size,
@@ -156,36 +179,41 @@ build_omnicloudmask <- function(
     "
 import numpy as np
 import omnicloudmask as omc
+import torch
 
 
 
 def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                   raster_ysize, buf_radius, gt, **kwargs):
-    # breakpoint()
-    mask_vals = [int(x) for x in kwargs['mask_values'].decode().split(',')]
+    try:
+      mask_vals = [int(x) for x in kwargs['mask_values'].decode().split(',')]
 
-    
-    np_rgn = np.stack([in_ar[0], in_ar[1], in_ar[2]], axis=0)
+      
+      np_rgn = np.stack([in_ar[0], in_ar[1], in_ar[2]], axis=0)
 
-    
-    pred_mask = omc.predict_from_array(
-      np_rgn,
-      patch_size = {patch_size},
-      patch_overlap = {patch_overlap},
-      batch_size = {batch_size},
-      inference_device = '{inference_device}',
-      no_data_value = {no_data_value}
-    ) 
+      
+      pred_mask = omc.predict_from_array(
+        np_rgn,
+        patch_size = {patch_size},
+        patch_overlap = {patch_overlap},
+        batch_size = {batch_size},
+        inference_device = '{inference_device}',
+        no_data_value = {no_data_value}
+      ) 
 
-    mask = np.isin(pred_mask[0], mask_vals)
-    out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
-    
+      mask = np.isin(pred_mask[0], mask_vals)
+      out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+    finally:
+      if '{inference_device}' == 'cuda':
+        torch.cuda.empty_cache()
+      elif '{inference_device}' == 'mps':
+        torch.backends.mps.empty_cache()
 
 
 "
   )
 
   attr(pyfun, "mask_type") <- "omnicloudmask"
-  attr(pyfun, "required_bands") <- c(r, g, nir)
+  attr(pyfun, "required_bands") <- c(red, green, nir)
   return(pyfun)
 }
