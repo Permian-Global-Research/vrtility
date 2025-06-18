@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
 <ul>
 <li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel functions and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
 <li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions are used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>.</p></li>
-<li><p>Efficient parallel processing using gdalraster and <a href="https://shikokuchuo.net/mirai/" class="external-link">{mirai}</a></p></li>
+<li><p>Efficient parallel processing using <a href="https://shikokuchuo.net/mirai/" class="external-link">{mirai}</a></p></li>
 <li><p>Advanced compositing methods that maintain spectral consistency, such as the geometric median and medoid.</p></li>
 <li><p>Time series filtering functions to improve temporal consistency and reduce noise.</p></li>
 </ul>
@@ -145,7 +145,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   5.329   0.389  27.071</span></span></code></pre></div>
+<span><span class="co">#&gt;   5.570   0.445  22.712</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
