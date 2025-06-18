@@ -47,8 +47,7 @@ or calculating complex time series functions. All powered by
   (i.e create a composite image). All python environment and package management
   is handled by [{reticulate}](https://rstudio.github.io/reticulate/).
 
-- Efficient parallel processing using gdalraster and 
-[{mirai}](https://shikokuchuo.net/mirai/)
+- Efficient parallel processing using [{mirai}](https://shikokuchuo.net/mirai/)
 
 - Advanced compositing methods that maintain spectral consistency, such as the
 geometric median and medoid. 

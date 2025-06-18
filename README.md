@@ -37,7 +37,7 @@ Observation in mind.
   python environment and package management is handled by
   [{reticulate}](https://rstudio.github.io/reticulate/).
 
-- Efficient parallel processing using gdalraster and
+- Efficient parallel processing using
   [{mirai}](https://shikokuchuo.net/mirai/)
 
 - Advanced compositing methods that maintain spectral consistency, such
@@ -131,7 +131,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.329   0.389  27.071
+#>   5.570   0.445  22.712
 ```
 
 ``` r

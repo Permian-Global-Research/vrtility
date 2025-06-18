@@ -69,8 +69,18 @@ vrt_set_maskfun.vrt_block <- function(
   drop_mask_band = TRUE,
   cache_dir = getOption("vrt.cache")
 ) {
+  if (rlang::is_missing(mask_band)) {
+    mask_band <- "vrtility.mask.missing.mask"
+  }
+
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
-  v_assert_type(mask_values, "valid_bits", "numeric", nullok = FALSE)
+  v_assert_type(
+    mask_values,
+    "mask_values",
+    c("numeric", "integer"),
+    nullok = FALSE,
+    multiple = TRUE
+  )
   v_assert_type(build_mask_pixfun, "mask_pix_fun", "character", nullok = FALSE)
   v_assert_type(set_mask_pixfun, "set_mask_pixfun", "character", nullok = FALSE)
 
@@ -85,7 +95,17 @@ vrt_set_maskfun.vrt_block <- function(
     ~ xml2::xml_text(xml2::xml_find_first(.x, ".//Description"))
   )
 
-  mask_idx <- which(descs == mask_band)
+  if (mask_band == "vrtility.mask.missing.mask") {
+    mask_idx <- attr(build_mask_pixfun, "required_bands")
+    if (is.null(mask_idx)) {
+      cli::cli_abort(c(
+        "No mask band provided and 'build_mask_pixfun' does not specify the
+        required band(s)."
+      ))
+    }
+  } else {
+    mask_idx <- which(descs == mask_band)
+  }
 
   if (length(mask_idx) == 0) {
     cli::cli_abort(c(
@@ -103,7 +123,7 @@ vrt_set_maskfun.vrt_block <- function(
     gdalraster::buildVRT(
       mskvrt,
       band_files,
-      cl_arg = c("-b", mask_idx),
+      cl_arg = unlist(purrr::map(mask_idx, ~ c("-b", .x))),
       quiet = TRUE
     )
   } else {
@@ -123,15 +143,26 @@ vrt_set_maskfun.vrt_block <- function(
     "mask_values",
     paste(mask_values, collapse = ",")
   )
+
+  # if (is.null(attr(build_mask_pixfun, "required_bands"))) {
+  #   xml2::xml_set_attr(
+  #     pf_args,
+  #     "required_bands",
+  #     paste(attr(build_mask_pixfun, "required_bands"), collapse = ",")
+  #   )
+  # }
+
   cdata_node <- xml2::xml_cdata(build_mask_pixfun)
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
 
   wrp_msk_pf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
+
   wmxmlsrc <- xml2::read_xml(as.character(
     xml2::xml_find_first(
-      bands[[mask_idx]],
+      # we take the first value if mutliple - we just need a copy anyway.
+      bands[[mask_idx[1]]],
       ".//SimpleSource | .//ComplexSource"
     )
   ))
@@ -143,7 +174,13 @@ vrt_set_maskfun.vrt_block <- function(
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
 
   # update all other bands
-  purrr::walk(bands[-mask_idx], function(.x) {
+  data_bands <- if (length(mask_idx) == 1) {
+    bands[-mask_idx]
+  } else {
+    bands
+  }
+
+  purrr::walk(data_bands, function(.x) {
     xml2::xml_add_child(.x, wmxmlsrc)
 
     xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
@@ -162,10 +199,13 @@ vrt_set_maskfun.vrt_block <- function(
     xml2::xml_add_child(pixel_func_code, cdata_node)
   })
 
-  if (drop_mask_band) {
+  if (drop_mask_band && mask_band != "vrtility.mask.missing.mask") {
     xml2::xml_remove(bands[[mask_idx]])
   } else {
-    set_nodatavalue(bands[[mask_idx]], no_data)
+    if (mask_band != "vrtility.mask.missing.mask") {
+      set_nodatavalue(bands[[mask_idx]], no_data)
+    }
+    #TODO: currently no way to add the omnicloudmask which would be nice.
   }
 
   # Write back to block
@@ -201,7 +241,11 @@ vrt_set_maskfun.vrt_collection <- function(
   drop_mask_band = TRUE,
   cache_dir = getOption("vrt.cache")
 ) {
-  check_mask_band(x, mask_band)
+  if (rlang::is_missing(mask_band)) {
+    mask_band <- "vrtility.mask.missing.mask"
+  }
+
+  check_mask_band(x, mask_band, build_mask_pixfun)
   daemon_setup()
 
   masked_blocks <- purrr::map(
@@ -241,7 +285,10 @@ vrt_set_maskfun.vrt_collection <- function(
 }
 
 
-check_mask_band <- function(x, mb) {
+check_mask_band <- function(x, mb, bf) {
+  if (!is.null(attr(bf, "mask_type"))) {
+    return(invisible())
+  }
   if (!mb %in% x$assets) {
     cli::cli_abort(
       c(
