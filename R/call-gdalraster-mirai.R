@@ -64,55 +64,61 @@ call_gdalraster_mirai <- function(
     })
   }
 
-  # Create mirai map with promises
-  jobs <- purrr::pmap(
+  async_gdalreader(
     blocks_df,
-    in_parallel_if_daemons(
-      function(...) {
-        # Extract block parameters correctly from the 1-row dataframe
-        block_params <- rlang::dots_list(...)
-
-        inds <- methods::new(gdalraster::GDALRaster, vrt_file)
-        on.exit(inds$close())
-        # Read and combine bands
-        band_data <- compute_with_py_env(
-          inds$read(
-            band = block_params[["band_n"]],
-            xoff = block_params[["nXOff"]],
-            yoff = block_params[["nYOff"]],
-            xsize = block_params[["nXSize"]],
-            ysize = block_params[["nYSize"]],
-            out_xsize = block_params[["nXSize"]],
-            out_ysize = block_params[["nYSize"]]
-          )
-        )
-
-        bscale <- inds$getScale(block_params[["band_n"]])
-        if (!is.na(bscale)) {
-          band_data <- band_data * bscale
-        }
-
-        return(list(
-          band_data = band_data,
-          block_params = block_params
-        ))
-      },
-      vrt_file = vrt_template,
-      compute_with_py_env = compute_with_py_env
-    ),
-    .progress = !quiet
+    vrt_file = vrt_template,
+    ds = ds
   )
 
-  purrr::walk(jobs, function(j) {
-    ds$write(
-      band = j$block_params[["band_n"]],
-      xoff = j$block_params[["nXOff"]],
-      yoff = j$block_params[["nYOff"]],
-      xsize = j$block_params[["nXSize"]],
-      ysize = j$block_params[["nYSize"]],
-      rasterData = j$band_data
-    )
-  })
+  # # Create mirai map with promises
+  # jobs <- purrr::pmap(
+  #   blocks_df,
+  #   in_parallel_if_daemons(
+  #     function(...) {
+  #       # Extract block parameters correctly from the 1-row dataframe
+  #       block_params <- rlang::dots_list(...)
+
+  #       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
+  #       on.exit(inds$close())
+  #       # Read and combine bands
+  #       band_data <- compute_with_py_env(
+  #         inds$read(
+  #           band = block_params[["band_n"]],
+  #           xoff = block_params[["nXOff"]],
+  #           yoff = block_params[["nYOff"]],
+  #           xsize = block_params[["nXSize"]],
+  #           ysize = block_params[["nYSize"]],
+  #           out_xsize = block_params[["nXSize"]],
+  #           out_ysize = block_params[["nYSize"]]
+  #         )
+  #       )
+
+  #       bscale <- inds$getScale(block_params[["band_n"]])
+  #       if (!is.na(bscale)) {
+  #         band_data <- band_data * bscale
+  #       }
+
+  #       return(list(
+  #         band_data = band_data,
+  #         block_params = block_params
+  #       ))
+  #     },
+  #     vrt_file = vrt_template,
+  #     compute_with_py_env = compute_with_py_env
+  #   ),
+  #   .progress = !quiet
+  # )
+
+  # purrr::walk(jobs, function(j) {
+  #   ds$write(
+  #     band = j$block_params[["band_n"]],
+  #     xoff = j$block_params[["nXOff"]],
+  #     yoff = j$block_params[["nYOff"]],
+  #     xsize = j$block_params[["nXSize"]],
+  #     ysize = j$block_params[["nYSize"]],
+  #     rasterData = j$band_data
+  #   )
+  # })
 
   return(outfile)
 }
