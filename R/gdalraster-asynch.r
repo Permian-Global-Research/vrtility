@@ -7,7 +7,6 @@ async_gdalreader <- function(blocks, vrt_file, ds) {
       block_params <- rlang::dots_list(...)
       mirai::mirai(
         {
-          # Sys.sleep(20)
           inds <- methods::new(gdalraster::GDALRaster, vrt_file)
           on.exit(inds$close())
           # # Read and combine bands
