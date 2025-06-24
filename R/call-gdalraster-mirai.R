@@ -30,7 +30,7 @@ call_gdalraster_mirai <- function(
     }
     nsplits <- suggest_n_chunks(rt$ys, rt$xs, rt$nbands, nits)
   }
-
+  # browser()
   blocks_df <- optimise_tiling(
     rt$xs,
     rt$ys,
@@ -50,6 +50,7 @@ call_gdalraster_mirai <- function(
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
+  # browser()
   on.exit(ds$close(), add = TRUE)
   purrr::iwalk(x$assets, function(asset, band) {
     ds$setDescription(
