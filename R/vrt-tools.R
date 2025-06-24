@@ -90,16 +90,17 @@ drop_scale <- function(x) {
 
 #' @keywords internal
 #' @noRd
-set_nodatavalue <- function(x, value) {
-  purrr::walk(c(".//NoDataValue", ".//NODATA"), function(ndv) {
+set_nodatavalue <- function(
+  x,
+  value,
+  nodata_targets = c(".//NoDataValue", ".//NODATA")
+) {
+  purrr::walk(nodata_targets, function(ndv) {
     no_data_node <- xml2::xml_find_all(x, ndv)
-    purrr::walk(no_data_node, function(.x) {
-      if (!is.na(xml2::xml_text(.x))) {
-        xml2::xml_set_text(.x, as.character(value))
-      }
-    })
+    xml2::xml_set_text(no_data_node, as.character(value))
   })
 }
+
 
 #' @noRd
 #' @keywords internal
