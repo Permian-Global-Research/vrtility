@@ -63,15 +63,4 @@ gdalraster_engine_asserts_init <- function(
     nullok = FALSE
   )
   v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
-
-  if (!mirai::daemons_set()) {
-    cli::cli_inform(
-      c(
-        "!" = "No miriai daemons detected.",
-        " " = "use {cli::code_highlight('mirai::daemons()')} to start daemons",
-        "i" = "`{fname}` is a compute-intesntive function and is
-        designed to be run in parallel"
-      )
-    )
-  }
 }
