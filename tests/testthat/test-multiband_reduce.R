@@ -2,6 +2,12 @@ test_that("multiband_reduce works", {
   #NOTE: we use expect_gt rather than matching exact values because windows
   # tests give different values - presumably some floadting point nonsence.
 
+  close_it <- function(ds) {
+    if (ds$isOpen()) {
+      ds$close()
+    }
+  }
+
   if (!mirai::daemons_set()) {
     mirai::daemons(2)
   }
@@ -33,7 +39,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_geomed_weizfeld)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 635000000)
-  ds$close()
+  close_it(ds)
 
   # Geomedian weizfeld impute_na = FALSE:
   ex_geomed_weizfeld_na <- multiband_reduce(
@@ -45,7 +51,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_geomed_weizfeld_na)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 635000000)
-  ds$close()
+  close_it(ds)
 
   # Geomedian Gmedian:
   ex_geomed_gmedian <- multiband_reduce(
@@ -56,7 +62,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_geomed_gmedian)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 63270000)
-  ds$close()
+  close_it(ds)
 
   # test if recollect works:
   # Geomedian Gmedian:
@@ -81,7 +87,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_medoid)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 624500000)
-  ds$close()
+  close_it(ds)
 
   # medoid impute_na = FALSE:
   ex_medoid_na <- multiband_reduce(
@@ -93,7 +99,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_medoid_na)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 624500000)
-  ds$close()
+  close_it(ds)
 
   # quantoid
   ex_quantoid <- multiband_reduce(
@@ -104,7 +110,7 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_quantoid)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 591700000)
-  ds$close()
+  close_it(ds)
   # quantoid impute_na = FALSE:
   ex_quantoid_na <- multiband_reduce(
     ex_collect_mask_warp,
@@ -114,5 +120,5 @@ test_that("multiband_reduce works", {
   ds <- new(gdalraster::GDALRaster, ex_quantoid_na)
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 591700000)
-  ds$close()
+  close_it(ds)
 })
