@@ -193,7 +193,7 @@ vrt_collect.doc_items <- function(
 
   vrt_items <- purrr::map(
     items_uri,
-    in_parallel_if_daemons(
+    purrr::in_parallel(
       function(item) {
         srcs <- purrr::map_chr(item, ~ .x$uri)
         dttm <- unique(purrr::map_chr(item, ~ .x$dttm))
