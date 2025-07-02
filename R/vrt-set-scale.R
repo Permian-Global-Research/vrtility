@@ -4,6 +4,8 @@
 #' @param x A VRT_x object
 #' @param scale_value a numeric vector of length 1 or equal to the number of
 #' bands in the VRT_x object.
+#' @param offset_value a numeric value to set the Offset XML tag for the VRT_x
+#' object. Default is 0.
 #' @param band_idx  numeric; the target band position(s) to set the scale value
 #' for. If NULL, The scale_value will be set for all bands.
 #' @examples
@@ -15,7 +17,7 @@
 #' )
 #' print(ex_sc1[[1]][[1]], xml = TRUE)
 #' @export
-vrt_set_scale <- function(x, scale_value, band_idx) {
+vrt_set_scale <- function(x, scale_value, offset_value, band_idx) {
   UseMethod("vrt_set_scale")
 }
 
@@ -33,6 +35,7 @@ vrt_set_scale.default <- function(x, ...) {
 vrt_set_scale.vrt_block <- function(
   x,
   scale_value,
+  offset_value = 0.0,
   band_idx = NULL
 ) {
   v_assert_type(scale_value, "scale_value", "numeric", nullok = FALSE)
@@ -71,6 +74,13 @@ vrt_set_scale.vrt_block <- function(
       "Scale",
       format(scale, scientific = FALSE)
     )
+    # Remove existing Offset elements
+    xml2::xml_remove(xml2::xml_find_all(band, ".//Offset"))
+    xml2::xml_add_child(
+      band,
+      "Offset",
+      format(offset_value, scientific = FALSE)
+    )
   })
   out_vrt <- fs::file_temp(
     tmp_dir = getOption("vrt.cache"),
@@ -92,6 +102,7 @@ vrt_set_scale.vrt_block <- function(
 vrt_set_scale.vrt_collection <- function(
   x,
   scale_value,
+  offset_value = 0.0,
   band_idx = NULL
 ) {
   block_list <- purrr::map(
@@ -99,6 +110,7 @@ vrt_set_scale.vrt_collection <- function(
     ~ vrt_set_scale(
       .x,
       scale_value = scale_value,
+      offset_value = offset_value,
       band_idx = band_idx
     )
   )
