@@ -91,24 +91,27 @@ optimise_tiling <- function(xs, ys, blksize, nsplits) {
 #' @param ys Number of rows in the raster
 #' @param xs Number of columns in the raster
 #' @param nbands Number of bands in the raster
+#' @param nitems Number of items to process in each chunk
+#' @param scalar A scalar to adjust the estimated RAM usage
+#' TODO: what is this really and do we need it?
 #' @return Suggested number of chunks (numeric)
 #' @noRd
 #' @keywords internal
-suggest_n_chunks <- function(ys, xs, nbands, nitems, scalar = 5) {
+suggest_n_chunks <- function(ys, xs, nbands, nitems, scalar = 3) {
   ram_info <- memuse::Sys.meminfo()
   if (mirai::daemons_set()) {
     nprocs <- pmax(n_daemons(), 1)
     # we assume that if using mirai, the daemons may be hollding ram that might
     # be released
-    avail_ram <- memuse::Sys.meminfo()$totalram * 0.8
+    avail_ram <- ram_info$totalram * 0.8
   } else {
     nprocs <- 1
-    avail_ram <- memuse::Sys.meminfo()$freeram
+    avail_ram <- ram_info$freeram
   }
 
   estimated_ram <- memuse::howbig(
-    nrow = ys * xs,
-    ncol = 1,
+    nrow = xs,
+    ncol = ys,
     representation = "dense"
   ) *
     nbands *

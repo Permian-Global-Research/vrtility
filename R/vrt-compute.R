@@ -434,9 +434,10 @@ vrt_compute.vrt_collection <- function(
   ) |>
     unique_fp(outfile)
 
-  result <- purrr::pmap_chr(
-    list(.x = x[[1]], .y = uniq_pths),
-    in_parallel_if_daemons(
+  result <- purrr::map2_chr(
+    .x = x[[1]],
+    .y = uniq_pths,
+    purrr::in_parallel(
       function(.x, .y) {
         vrt_compute(
           .x,

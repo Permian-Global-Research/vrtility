@@ -157,78 +157,26 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   })
 
-  jobs <- purrr::pmap(
-    blocks_df,
-    in_parallel_if_daemons(
-      function(...) {
-        # Extract block parameters correctly from the 1-row dataframe
-        block_params <- rlang::dots_list(...)
-        ras_band_dat <- read_block_arrays(
-          vrt_block,
-          nbands = nbands,
-          xoff = block_params[["nXOff"]],
-          yoff = block_params[["nYOff"]],
-          xsize = block_params[["nXSize"]],
-          ysize = block_params[["nYSize"]]
-        )
-        cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
-        list(
-          data = restructure_cells(cell_vals),
-          block = block_params
-        )
-      },
-      vrt_block = x,
-      nbands = rt$nbands,
-      read_block_arrays = read_block_arrays,
-      reduce_fun = reduce_fun,
-      mdim_reduction_apply = mdim_reduction_apply,
-      restructure_cells = restructure_cells
-    ),
-    .progress = !quiet
-  )
-
-  purrr::walk(jobs, function(j) {
-    n_cells <- j$block$nXSize * j$block$nYSize
-    # Calculate start and end indices for each band
-    band_starts <- seq(1, n_cells * rt$nbands, by = n_cells)
-    band_ends <- band_starts + n_cells - 1
-
-    j$data[is.na(j$data)] <- rt$nodataval
-
-    purrr::walk(
-      seq_len(rt$nbands),
-      function(b) {
-        start_idx <- band_starts[b]
-        end_idx <- band_ends[b]
-
-        bscale <- rt$scale_vals[b]
-        bdata <- if (!is.na(bscale) && apply_scale) {
-          j$data[start_idx:end_idx] * bscale
-          # Get the data for this band
-          band_data <- j$data[start_idx:end_idx]
-
-          # Create mask for valid data (not equal to nodata)
-          valid_mask <- band_data != rt$nodataval
-
-          # Apply scale only to valid data
-          band_data[valid_mask] <- band_data[valid_mask] * bscale
-
-          band_data
-        } else {
-          j$data[start_idx:end_idx]
-        }
-
-        ds$write(
-          band = b,
-          xoff = j$block$nXOff,
-          yoff = j$block$nYOff,
-          xsize = j$block$nXSize,
-          ysize = j$block$nYSize,
-          rasterData = bdata
-        )
-      }
+  if (mirai::daemons_set()) {
+    async_gdalreader_multiband_reduce_read_write(
+      blocks_df,
+      x,
+      ds,
+      rt,
+      reduce_fun,
+      apply_scale
     )
-  })
+  } else {
+    sequential_gdalreader_multiband_reduce_read_write(
+      blocks_df,
+      x,
+      ds,
+      rt,
+      reduce_fun,
+      apply_scale,
+      quiet
+    )
+  }
 
   if (!recollect) {
     return(outfile)
@@ -308,8 +256,8 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize) {
       )
       vrt_xml <- xml2::read_xml(.x$vrt)
       xml2::write_xml(vrt_xml, tvrt)
-      ds <- methods::new(gdalraster::GDALRaster, tvrt)
-      on.exit(ds$close())
+      ds <- methods::new(gdalraster::GDALRaster, tvrt, read_only = TRUE)
+      on.exit(ds$close(), add = TRUE)
       # Read bands
 
       compute_with_py_env(

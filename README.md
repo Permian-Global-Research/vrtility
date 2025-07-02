@@ -16,7 +16,10 @@ vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
-Observation in mind.
+Observation in mind. vrtility uses the VRT format to access awesome
+features such as pixel functions but also harnesses the VRT data
+structure to facilitate complex image processing tasks such as
+multi-band compositing and time series filtering.
 
 > [!CAUTION]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
@@ -24,15 +27,14 @@ Observation in mind.
 ## Features
 
 - Modular design: We’re basically creating remote sensing pipelines
-  using nested VRTs. This allows for the easy addition of new pixel
-  functions and masking functions. but could easily be adapted for
-  deriving spectral indices or calculating complex time series
-  functions. All powered by
+  using nested VRTs. This allows for the easy addition of new pixel and
+  masking functions. but could easily be adapted for deriving spectral
+  indices or calculating complex time series functions. All powered by
   [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
 - vrtility enables the use of GDAL VRT python and built-in pixel
   functions. These [numpy](https://numpy.org/) based python pixel
-  functions are used to apply cloud masks and summarise pixel values
+  functions can be used to apply cloud masks and summarise pixel values
   (e.g. median) from multiple images (i.e create a composite image). All
   python environment and package management is handled by
   [{reticulate}](https://rstudio.github.io/reticulate/).
@@ -45,6 +47,10 @@ Observation in mind.
 
 - Time series filtering functions to improve temporal consistency and
   reduce noise.
+
+- on-the-fly cloud mask filtering using pixel functions. Ability to use
+  [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask)
+  cloud/shadow masking, embedded within the vrt pipeline.
 
 ## Installation
 
@@ -131,7 +137,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   5.570   0.445  22.712
+#>  20.373   0.550  20.270
 ```
 
 ``` r
@@ -148,11 +154,11 @@ plot_raster_src(
 
 {vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
 parallelisation. By setting `mirai::daemons(n)` before running the vrt
-pipeline, we can improve performance, depending on the speed of the
-server holding the data. In some cases this will make little difference;
-for example, the Microsoft Planetary Computer STAC API is already pretty
-fast. However, for NASA’s Earthdata STAC API, this can make a huge
-difference. In order to use asynchronous processing, in the
+pipeline, we can sometimes improve performance, depending on the speed
+of the server holding the data. In some cases this will make little
+difference; for example, the Microsoft Planetary Computer STAC API is
+already pretty fast. However, for NASA’s Earthdata STAC API, this can
+make a huge difference. In order to use asynchronous processing, in the
 `vrt_compute` function, we need to set `engine = "gdalraster"` or we can
 use `engine = "warp"` if we are downloading multiple images individually
 (This is a much faster approach on Nasa’s Earthdata server).

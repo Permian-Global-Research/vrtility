@@ -250,7 +250,7 @@ vrt_set_maskfun.vrt_collection <- function(
 
   masked_blocks <- purrr::map(
     x$vrt,
-    in_parallel_if_daemons(
+    purrr::in_parallel(
       function(.x) {
         vrtility::vrt_set_maskfun(
           .x,

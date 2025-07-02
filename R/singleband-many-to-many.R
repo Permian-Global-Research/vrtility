@@ -136,56 +136,26 @@ singleband_m2m.vrt_collection_warped <- function(
     add = TRUE
   )
 
-  jobs <- purrr::pmap(
-    blocks_df,
-    in_parallel_if_daemons(
-      function(...) {
-        block_params <- rlang::dots_list(...)
-
-        band_data <- purrr::map(
-          vrt_coll[[1]],
-          ~ sb_reader_fun(.x, block_params)
-        )
-
-        bdm <- do.call(rbind, band_data)
-        hamp_bdm <- m2m_fun(bdm)
-
-        return(list(
-          band_data = matrix_to_rowlist(hamp_bdm),
-          block_params = block_params
-        ))
-      },
-      vrt_coll = x,
-      sb_reader_fun = single_band_reader(),
-      vrt_block_save_internal = vrt_block_save_internal,
-      compute_with_py_env = compute_with_py_env,
+  if (mirai::daemons_set()) {
+    async_gdalreader_singleband_m2m_read_write(
+      blocks_df,
+      x,
+      ds_list,
       m2m_fun = m2m_fun,
-      matrix_to_rowlist = matrix_to_rowlist
-    ),
-    .progress = !quiet
-  )
-
-  purrr::walk(jobs, function(j) {
-    .params <- j$block_params
-    purrr::pwalk(
-      list(.ds = ds_list, .data = j$band_data),
-      function(.ds, .data) {
-        bscale <- rt$scale_vals[.params$band_n]
-        if (!is.na(bscale) && apply_scale) {
-          .data <- .data * bscale
-        }
-        # Write the band data to the output raster
-        .ds$write(
-          band = .params$band_n,
-          xoff = .params$nXOff,
-          yoff = .params$nYOff,
-          xsize = .params$nXSize,
-          ysize = .params$nYSize,
-          rasterData = .data
-        )
-      }
+      apply_scale = apply_scale,
+      scale_values = rt$scale_vals
     )
-  })
+  } else {
+    sequential_gdalreader_singleband_m2m_read_write(
+      blocks_df,
+      x,
+      ds_list,
+      m2m_fun = m2m_fun,
+      apply_scale = apply_scale,
+      scale_values = rt$scale_vals,
+      quiet = quiet
+    )
+  }
 
   if (!recollect) {
     return(uniq_pths)

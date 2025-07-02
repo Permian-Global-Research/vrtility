@@ -192,7 +192,7 @@ vrt_warp.vrt_collection <- function(
 
   warped_blocks <- purrr::map(
     x[[1]],
-    in_parallel_if_daemons(
+    purrr::in_parallel(
       function(.x) {
         vrt_warp(.x, t_srs, te, tr, resampling, quiet)
       },

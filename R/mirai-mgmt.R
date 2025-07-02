@@ -91,7 +91,6 @@ daemon_setup <- function(gdal_config = NULL) {
   if (mirai::daemons_set()) {
     evrywrs <- mirai::everywhere(
       {
-        library(vrtility)
         options(main_process_opts)
         if (!is.null(gdal_config)) {
           set_gdal_config(gdal_config)
@@ -100,48 +99,11 @@ daemon_setup <- function(gdal_config = NULL) {
         options()[grep("^vrt\\.", names(options()), value = TRUE)]
       },
       main_process_opts = main_process_opts,
+      set_gdal_config = set_gdal_config,
       gdal_config = gdal_config
     )
+    # make sure we wait for options to be set
     mopts <- mirai::collect_mirai(evrywrs)
-    purrr::walk(mopts, \(x) x) # removed .parallel - TODO: was this okay?
   }
   invisible(mopts)
-}
-
-#' daemon-responsive purrr::in_parallel
-#' @param .fun A fresh formula or function. "Fresh" here means that they should
-#' be declared in the call to `in_parallel_if_daemons()`.
-#' @param ... Named arguments to declare in the environment of the function.
-#' @import rlang
-#' @details to deal with the changes to purrr relating to the removal of the
-#' `.parallel` argument, this function will run the function in parallel if
-#' mirai daemons are set, otherwise it will bind the arguments in the caller
-#' environment and return the function.
-#' @return If mirai daemons are set, returns the result of `purrr::in_parallel()`
-#' with the function and arguments. If not, returns the function with the
-#' arguments bound in the caller environment.
-#' @noRd
-in_parallel_if_daemons <- function(.fun, ...) {
-  if (mirai::daemons_set()) {
-    carrier::crate(
-      !!substitute(.fun),
-      !!!list(...),
-      .parent_env = globalenv(),
-      .error_arg = ".fun",
-      .error_call = environment()
-    )
-  } else {
-    dots <- rlang::dots_list(...)
-    if (!rlang::is_named(dots)) {
-      rlang::abort("All arguments must be named")
-    }
-    for (name in names(dots)) {
-      rlang::env_bind(
-        rlang::caller_env(),
-        !!name := dots[[name]]
-      )
-    }
-
-    .fun
-  }
 }
