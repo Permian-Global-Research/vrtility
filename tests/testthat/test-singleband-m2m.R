@@ -1,8 +1,4 @@
-test_that("singleband_m2m works", {
-  if (!mirai::daemons_set()) {
-    mirai::daemons(2)
-  }
-
+sbm2m_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
@@ -65,4 +61,21 @@ test_that("singleband_m2m works", {
     10000,
     tolerance = 0.1
   )
+}
+
+
+test_that("singleband_m2m works async", {
+  if (!mirai::daemons_set()) {
+    mirai::daemons(2)
+  }
+
+  sbm2m_tests()
+})
+
+test_that("singleband_m2m works synchronously", {
+  if (mirai::daemons_set()) {
+    mirai::daemons(0)
+  }
+
+  sbm2m_tests()
 })

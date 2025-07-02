@@ -1,16 +1,10 @@
-test_that("multiband_reduce works", {
-  #NOTE: we use expect_gt rather than matching exact values because windows
-  # tests give different values - presumably some floadting point nonsence.
-
-  close_it <- function(ds) {
-    if (ds$isOpen()) {
-      ds$close()
-    }
+close_it <- function(ds) {
+  if (ds$isOpen()) {
+    ds$close()
   }
+}
 
-  if (!mirai::daemons_set()) {
-    mirai::daemons(2)
-  }
+multiband_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
@@ -121,4 +115,23 @@ test_that("multiband_reduce works", {
   vals <- gdalraster::read_ds(ds)
   expect_gt(sum(vals, na.rm = TRUE), 591700000)
   close_it(ds)
+}
+
+test_that("multiband_reduce works async", {
+  # NOTE: we use expect_gt rather than matching exact values because windows
+  # tests give different values - presumably some floadting point nonsence.
+
+  if (!mirai::daemons_set()) {
+    mirai::daemons(2)
+  }
+
+  multiband_tests()
+})
+
+test_that("multiband_reduce works synchronously", {
+  if (mirai::daemons_set()) {
+    mirai::daemons(0)
+  }
+
+  multiband_tests()
 })

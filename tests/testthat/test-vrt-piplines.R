@@ -1,4 +1,4 @@
-test_that("full vrt pipeline works", {
+pipeline_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)
@@ -92,6 +92,21 @@ test_that("full vrt pipeline works", {
     "s2 exeter plots",
     plot_raster_src(exe_compwarp, c(3, 2, 1))
   )
+}
+
+
+test_that("full vrt pipeline works async", {
+  if (!mirai::daemons_set()) {
+    mirai::daemons(2)
+  }
+  pipeline_tests()
+})
+
+test_that("full vrt pipeline works synchronously", {
+  if (mirai::daemons_set()) {
+    mirai::daemons(0)
+  }
+  pipeline_tests()
 })
 
 
