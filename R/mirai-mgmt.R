@@ -91,7 +91,6 @@ daemon_setup <- function(gdal_config = NULL) {
   if (mirai::daemons_set()) {
     evrywrs <- mirai::everywhere(
       {
-        library(vrtility)
         options(main_process_opts)
         if (!is.null(gdal_config)) {
           set_gdal_config(gdal_config)
@@ -100,10 +99,11 @@ daemon_setup <- function(gdal_config = NULL) {
         options()[grep("^vrt\\.", names(options()), value = TRUE)]
       },
       main_process_opts = main_process_opts,
+      set_gdal_config = set_gdal_config,
       gdal_config = gdal_config
     )
+    # make sure we wait for options to be set
     mopts <- mirai::collect_mirai(evrywrs)
-    purrr::walk(mopts, \(x) x) # removed .parallel - TODO: was this okay?
   }
   invisible(mopts)
 }
