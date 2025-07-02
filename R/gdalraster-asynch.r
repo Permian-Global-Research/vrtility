@@ -238,3 +238,102 @@ multiband_writer <- function(j, ds, raster_template, apply_scale) {
     blockwriter(ds, c(band_n = b, j$block), bdata)
   })
 }
+
+
+async_gdalreader_singleband_m2m_read_write <- function(
+  blocks,
+  vrt_collection,
+  ds_list,
+  m2m_fun,
+  apply_scale,
+  scale_values
+) {
+  jobs <- mirai::mirai_map(
+    blocks,
+    function(...) {
+      block_params <- rlang::dots_list(...)
+
+      band_data <- purrr::map(
+        vrt_collection[[1]],
+        ~ sb_reader_fun(.x, block_params)
+      )
+
+      bdm <- do.call(rbind, band_data)
+      hamp_bdm <- m2m_fun(bdm)
+
+      return(list(
+        band_data = matrix_to_rowlist(hamp_bdm),
+        block_params = block_params
+      ))
+    },
+    vrt_collection = vrt_collection,
+    sb_reader_fun = single_band_reader(),
+    vrt_block_save_internal = vrt_block_save_internal,
+    compute_with_py_env = compute_with_py_env,
+    m2m_fun = m2m_fun,
+    matrix_to_rowlist = matrix_to_rowlist
+  )
+
+  mirai_async_result_handler(
+    jobs,
+    ds = ds_list,
+    blocks = blocks,
+    apply_scale = apply_scale,
+    scale_values = scale_values,
+    expr = rlang::expr(
+      singleband_m2m_writer(ds, j, apply_scale, scale_values) # nolint
+    ),
+    msg = "mirai GDAL single-band many-to-many error"
+  )
+}
+
+sequential_gdalreader_singleband_m2m_read_write <- function(
+  blocks,
+  vrt_collection,
+  ds_list,
+  m2m_fun,
+  apply_scale,
+  scale_values,
+  quiet
+) {
+  sb_reader_fun <- single_band_reader()
+
+  jobs <- purrr::pmap(
+    blocks,
+    function(...) {
+      block_params <- rlang::dots_list(...)
+      band_data <- purrr::map(
+        vrt_collection[[1]],
+        ~ sb_reader_fun(.x, block_params)
+      )
+
+      bdm <- do.call(rbind, band_data)
+      hamp_bdm <- m2m_fun(bdm)
+
+      return(list(
+        band_data = matrix_to_rowlist(hamp_bdm),
+        block_params = block_params
+      ))
+    },
+    .progress = !quiet
+  )
+
+  purrr::walk(jobs, function(j) {
+    singleband_m2m_writer(ds_list, j, apply_scale, scale_values)
+  })
+}
+
+singleband_m2m_writer <- function(ds_list, j, apply_scale, scale_values) {
+  .params <- j$block_params
+  purrr::pwalk(
+    list(.ds = ds_list, .data = j$band_data),
+    function(.ds, .data) {
+      bscale <- scale_values[.params$band_n]
+      if (!is.na(bscale) && apply_scale) {
+        .data <- .data * bscale
+      }
+      # Write the band data to the output raster
+      blockwriter(.ds, .params, .data)
+    }
+  )
+}
