@@ -51,7 +51,7 @@ preserved in derived VRT and GeoTIFF files.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_scale</span><span class="op">(</span><span class="va">x</span>, <span class="va">scale_value</span>, <span class="va">band_idx</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_scale</span><span class="op">(</span><span class="va">x</span>, <span class="va">scale_value</span>, <span class="va">offset_value</span>, <span class="va">band_idx</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,6 +65,11 @@ preserved in derived VRT and GeoTIFF files.</p>
 <dt id="arg-scale-value">scale_value<a class="anchor" aria-label="anchor" href="#arg-scale-value"></a></dt>
 <dd><p>a numeric vector of length 1 or equal to the number of
 bands in the VRT_x object.</p></dd>
+
+
+<dt id="arg-offset-value">offset_value<a class="anchor" aria-label="anchor" href="#arg-offset-value"></a></dt>
+<dd><p>a numeric value to set the Offset XML tag for the VRT_x
+object. Default is 0.</p></dd>
 
 
 <dt id="arg-band-idx">band_idx<a class="anchor" aria-label="anchor" href="#arg-band-idx"></a></dt>
@@ -102,6 +107,7 @@ for. If NULL, The scale_value will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;/ComplexSource&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Description&gt;B02&lt;/Description&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Scale&gt;0.0001&lt;/Scale&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Offset&gt;0&lt;/Offset&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="2"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
@@ -115,6 +121,7 @@ for. If NULL, The scale_value will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;/ComplexSource&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Description&gt;B03&lt;/Description&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Scale&gt;0.0001&lt;/Scale&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Offset&gt;0&lt;/Offset&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="3"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
@@ -128,6 +135,7 @@ for. If NULL, The scale_value will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;/ComplexSource&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Description&gt;B04&lt;/Description&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Scale&gt;0.0001&lt;/Scale&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Offset&gt;0&lt;/Offset&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="4"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
@@ -141,6 +149,7 @@ for. If NULL, The scale_value will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;/ComplexSource&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Description&gt;SCL&lt;/Description&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Scale&gt;0.0001&lt;/Scale&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;Offset&gt;0&lt;/Offset&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;Metadata&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;MDI key="datetime"/&gt;</span></span>

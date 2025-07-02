@@ -65,7 +65,7 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation in mind.</p>
+<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation in mind. vrtility uses the VRT format to access awesome features such as pixel functions but also harnesses the VRT data structure to facilitate complex image processing tasks such as multi-band compositing and time series filtering.</p>
 <blockquote>
 <p>[!CAUTION] This package is under active development and is likely to change. Contributions and suggestions are still very welcome!</p>
 </blockquote>
@@ -73,11 +73,12 @@
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
-<li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel functions and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
-<li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions are used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>.</p></li>
+<li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
+<li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions can be used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>.</p></li>
 <li><p>Efficient parallel processing using <a href="https://shikokuchuo.net/mirai/" class="external-link">{mirai}</a></p></li>
 <li><p>Advanced compositing methods that maintain spectral consistency, such as the geometric median and medoid.</p></li>
 <li><p>Time series filtering functions to improve temporal consistency and reduce noise.</p></li>
+<li><p>on-the-fly cloud mask filtering using pixel functions. Ability to use <a href="https://github.com/DPIRD-DMA/OmniCloudMask" class="external-link">OmniCloudMask</a> cloud/shadow masking, embedded within the vrt pipeline.</p></li>
 </ul>
 </div>
 <div class="section level2">
@@ -145,7 +146,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   5.570   0.445  22.712</span></span></code></pre></div>
+<span><span class="co">#&gt;  20.373   0.550  20.270</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
@@ -157,7 +158,7 @@
 <div class="section level2">
 <h2 id="asynchronous-downloadprocessing">Asynchronous download/processing<a class="anchor" aria-label="anchor" href="#asynchronous-downloadprocessing"></a>
 </h2>
-<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallelisation. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can improve performance, depending on the speed of the server holding the data. In some cases this will make little difference; for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images individually (This is a much faster approach on Nasa’s Earthdata server).</p>
+<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallelisation. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can sometimes improve performance, depending on the speed of the server holding the data. In some cases this will make little difference; for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images individually (This is a much faster approach on Nasa’s Earthdata server).</p>
 </div>
 <div class="section level2">
 <h2 id="using-on-disk-rasters">Using on-disk rasters<a class="anchor" aria-label="anchor" href="#using-on-disk-rasters"></a>

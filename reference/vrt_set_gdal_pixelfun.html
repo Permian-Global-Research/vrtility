@@ -48,13 +48,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, <span class="va">band_idx</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, <span class="va">band_idx</span>, <span class="va">nodata_as_nan</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_block'</span></span>
-<span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span>, nodata_as_nan <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_collection'</span></span>
-<span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">vrt_set_gdal_pixelfun</span><span class="op">(</span><span class="va">x</span>, <span class="va">pixfun</span>, <span class="va">...</span>, band_idx <span class="op">=</span> <span class="cn">NULL</span>, nodata_as_nan <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,6 +77,13 @@ available functions.</p></dd>
 <dt id="arg-band-idx">band_idx<a class="anchor" aria-label="anchor" href="#arg-band-idx"></a></dt>
 <dd><p>The indices of the bands to set the pixel function for. If
 NULL, the pixel function is set for all bands.</p></dd>
+
+
+<dt id="arg-nodata-as-nan">nodata_as_nan<a class="anchor" aria-label="anchor" href="#arg-nodata-as-nan"></a></dt>
+<dd><p>A logical indicating if the NoData value should be set to
+NaN. Defaults to FALSE. Sometimes useful if the pixel functions ignore the
+NoData value. see https://github.com/OSGeo/gdal/issues/4746. If you use this
+you will probably need to specify the '-srcnodata' option on compute.</p></dd>
 
 </dl></div>
     <div class="section level2">
