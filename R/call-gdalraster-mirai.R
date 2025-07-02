@@ -60,12 +60,6 @@ call_gdalraster_mirai <- function(
   })
 
   if (mirai::daemons_set()) {
-    mirai::everywhere({
-      library(vrtility)
-    })
-  }
-
-  if (mirai::daemons_set()) {
     async_gdalreader_band_read_write(
       blocks_df,
       vrt_file = vrt_template,
