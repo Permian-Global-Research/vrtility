@@ -24,7 +24,7 @@ Imports:
     lubridate,
     memuse,
     methods,
-    mirai,
+    mirai (>= 2.4.0),
     purrr (>= 1.0.4.9000),
     Rcpp,
     reticulate (>= 1.41.0.1),
@@ -44,7 +44,8 @@ Suggests:
     WGCNA
 Remotes: 
     tidyverse/purrr,
-    r-lib/carrier
+    r-lib/carrier,
+    r-lib/mirai
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
