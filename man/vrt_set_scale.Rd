@@ -4,13 +4,16 @@
 \alias{vrt_set_scale}
 \title{set the scale values for a VRT_x object}
 \usage{
-vrt_set_scale(x, scale_value, band_idx)
+vrt_set_scale(x, scale_value, offset_value, band_idx)
 }
 \arguments{
 \item{x}{A VRT_x object}
 
 \item{scale_value}{a numeric vector of length 1 or equal to the number of
 bands in the VRT_x object.}
+
+\item{offset_value}{a numeric value to set the Offset XML tag for the VRT_x
+object. Default is 0.}
 
 \item{band_idx}{numeric; the target band position(s) to set the scale value
 for. If NULL, The scale_value will be set for all bands.}

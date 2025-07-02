@@ -6,11 +6,11 @@
 \alias{vrt_set_gdal_pixelfun.vrt_collection}
 \title{Set built-in GDAL pixel functions of a VRT stack object}
 \usage{
-vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx)
+vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx, nodata_as_nan)
 
-\method{vrt_set_gdal_pixelfun}{vrt_block}(x, pixfun, ..., band_idx = NULL)
+\method{vrt_set_gdal_pixelfun}{vrt_block}(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 
-\method{vrt_set_gdal_pixelfun}{vrt_collection}(x, pixfun, ..., band_idx = NULL)
+\method{vrt_set_gdal_pixelfun}{vrt_collection}(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 }
 \arguments{
 \item{x}{A vrt_stack object}
@@ -22,6 +22,11 @@ available functions.}
 
 \item{band_idx}{The indices of the bands to set the pixel function for. If
 NULL, the pixel function is set for all bands.}
+
+\item{nodata_as_nan}{A logical indicating if the NoData value should be set to
+NaN. Defaults to FALSE. Sometimes useful if the pixel functions ignore the
+NoData value. see https://github.com/OSGeo/gdal/issues/4746. If you use this
+you will probably need to specify the '-srcnodata' option on compute.}
 }
 \description{
 Set built-in GDAL pixel functions of a VRT stack object
