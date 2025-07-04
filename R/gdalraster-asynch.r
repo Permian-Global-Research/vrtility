@@ -1,21 +1,35 @@
+#' @title Asynchronous GDAL band read/write
+#' @description Reads and writes GDAL raster bands in blocks asynchronously.
+#' used interally by `vrt_compute()`.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_file The VRT file path.
+#' @param ds The GDALRaster dataset to write to - must be open and with
+#' `readonly=FALSE`.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
   # Create mirai map with promises
+  # browser()
   jobs <- mirai::mirai_map(
     blocks,
     function(...) {
       # Extract block parameters correctly from the 1-row dataframe
-      block_params <- rlang::dots_list(...)
+      block_params <- rlang::list2(...)
       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
       on.exit(inds$close())
       band_data <- blockreader(inds, block_params)
-      band_data <- scale_applicator(inds, band_data, block_params)
+      band_data <- scale_applicator(
+        inds,
+        band_data,
+        unlist(block_params["band_n"])
+      )
       return(band_data)
     },
     vrt_file = vrt_file,
     blockreader = blockreader,
     scale_applicator = scale_applicator
   )
-
   mirai_async_result_handler(
     jobs,
     ds = ds,
@@ -25,28 +39,54 @@ async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
     ),
     msg = "mirai GDAL read/write error"
   )
+  return(invisible())
 }
 
-
+#' @title Sequential GDAL band read/write
+#' @description Reads and writes GDAL raster bands in blocks sequentially.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_file The VRT file path.
+#' @param ds The GDALRaster dataset to write to - must be open and with
+#' `read_only=FALSE`.
+#' @param quiet Logical, if TRUE suppresses progress messages.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
   purrr::pwalk(
     blocks,
     function(...) {
       # Extract block parameters correctly from the 1-row dataframe
-      block_params <- rlang::dots_list(...)
+      block_params <- rlang::list2(...)
       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
       on.exit(inds$close())
       # Read and combine bands
       band_data <- blockreader(inds, block_params)
 
-      j_data <- scale_applicator(inds, band_data, block_params)
+      j_data <- scale_applicator(
+        inds,
+        band_data,
+        unlist(block_params["band_n"])
+      )
 
       blockwriter(ds, block_params, j_data)
     },
     .progress = !quiet
   )
+  return(invisible())
 }
 
+#' @title Mirai asynchronous result handler
+#' @description Handles the results of asynchronous mirai jobs, checking for
+#' unresolved values and evaluating an expression when resolved.
+#' @param jobs A list of mirai jobs.
+#' @param ds The GDALRaster dataset to write to.
+#' @param ... Additional arguments to bind in the current environment.
+#' @param expr The expression to evaluate when a job is resolved.
+#' @param msg The message to display in case of an error.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 mirai_async_result_handler <- function(
   jobs,
   ds,
@@ -70,7 +110,7 @@ mirai_async_result_handler <- function(
 
       j <- mirai::collect_mirai(jobs[[i]])
 
-      if (inherits(j, "character")) {
+      if (inherits(j, "miraiError")) {
         cli::cli_abort(
           "{msg}:  {j}",
           class = "mirai_async_error"
@@ -83,10 +123,18 @@ mirai_async_result_handler <- function(
       unresolved_idx <- which(!resolved)
     }
   }
+  return(invisible())
 }
 
+#' @title Block reader function
+#' @description Reads a block of data from a GDALRaster dataset.
+#' @param inds The GDALRaster dataset object.
+#' @param block_params A list of block parameters including band number and offsets.
+#' @return A matrix of raster data for the specified block.
+#' @keywords internal
+#' @noRd
 blockreader <- function(inds, block_params) {
-  compute_with_py_env(
+  return(compute_with_py_env(
     inds$read(
       band = block_params[["band_n"]],
       xoff = block_params[["nXOff"]],
@@ -96,9 +144,16 @@ blockreader <- function(inds, block_params) {
       out_xsize = block_params[["nXSize"]],
       out_ysize = block_params[["nYSize"]]
     )
-  )
+  ))
 }
-
+#' @title Block writer function
+#' @description Writes a block of data to a GDALRaster dataset.
+#' @param ds The GDALRaster dataset object to write to.
+#' @param bps A list of block parameters including band number and offsets.
+#' @param data A matrix of raster data to write.
+#' @return NULL
+#' @keywords internal
+#' @noRd
 blockwriter <- function(ds, bps, data) {
   ds$write(
     band = bps[["band_n"]],
@@ -109,17 +164,39 @@ blockwriter <- function(ds, bps, data) {
     rasterData = data
   )
   ds$flushCache() # I think we want this to clear  memory as we go...
+  return(invisible())
 }
 
-scale_applicator <- function(inds, band_data, block_params) {
-  bscale <- inds$getScale(block_params[["band_n"]])
+#' @title Scale applicator function
+#' @description Applies scale factors to band data if available.
+#' @param inds The GDALRaster dataset object.
+#' @param band_data A matrix of raster data for the specified block.
+#' @param block_params A list of block parameters including band number.
+#' @return A matrix of scaled raster data.
+#' @keywords internal
+#' @noRd
+scale_applicator <- function(inds, band_data, band_number) {
+  bscale <- inds$getScale(band_number)
   if (!is.na(bscale)) {
     band_data <- band_data * bscale
   }
   return(band_data)
 }
 
-
+#' @title Asynchronous multi-band reduction read/write
+#' @description Reads multi-band data in blocks, applies a reduction function,
+#' and writes the results to a GDALRaster dataset. Used internally by
+#' `gdalraster::multiband_reduce()`.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_file The VRT file path.
+#' @param ds The GDALRaster dataset to write to - must be open and with
+#' `readonly=FALSE`.
+#' @param raster_template A template raster object containing metadata.
+#' @param reduce_fun The reduction function to apply to the multi-band data.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 async_gdalreader_multiband_reduce_read_write <- function(
   blocks,
   vrt_file,
@@ -166,9 +243,24 @@ async_gdalreader_multiband_reduce_read_write <- function(
     ),
     msg = "mirai GDAL multi-band reducer error"
   )
+  return(invisible())
 }
 
-
+#' @title Sequential multi-band reduction read/write
+#' @description Reads multi-band data in blocks, applies a reduction function,
+#' and writes the results to a GDALRaster dataset. Used internally by
+#' `gdalraster::multiband_reduce()`.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_file The VRT file path.
+#' @param ds The GDALRaster dataset to write to - must be open and with
+#' `readonly=FALSE`.
+#' @param raster_template A template raster object containing metadata.
+#' @param reduce_fun The reduction function to apply to the multi-band data.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @param quiet Logical, if TRUE suppresses progress messages.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 sequential_gdalreader_multiband_reduce_read_write <- function(
   blocks,
   vrt_file,
@@ -178,7 +270,7 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
   apply_scale,
   quiet
 ) {
-  jobs <- purrr::pmap(
+  purrr::pwalk(
     blocks,
     function(...) {
       # Extract block parameters correctly from the 1-row dataframe
@@ -192,23 +284,34 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
         ysize = block_params[["nYSize"]]
       )
       cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
-      list(
-        data = restructure_cells(cell_vals),
-        block = block_params
+
+      multiband_writer(
+        list(
+          data = restructure_cells(cell_vals),
+          block = block_params
+        ),
+        ds,
+        raster_template,
+        apply_scale
       )
     },
     .progress = !quiet
   )
-
-  purrr::walk(jobs, function(j) {
-    multiband_writer(j, ds, raster_template, apply_scale)
-  })
+  return(invisible())
 }
 
 
+#' @title Multi-band writer function
+#' @description Writes multi-band data to a GDALRaster dataset.
+#' @param j A list containing the block data and parameters.
+#' @param ds The GDALRaster dataset to write to.
+#' @param raster_template A template raster object containing metadata.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @return NULL
+#' @keywords internal
+#' @noRd
 multiband_writer <- function(j, ds, raster_template, apply_scale) {
   n_cells <- j$block$nXSize * j$block$nYSize
-  # Calculate start and end indices for each band
   band_starts <- seq(1, n_cells * raster_template$nbands, by = n_cells)
   band_ends <- band_starts + n_cells - 1
 
@@ -217,29 +320,32 @@ multiband_writer <- function(j, ds, raster_template, apply_scale) {
   purrr::walk(seq_len(raster_template$nbands), function(b) {
     start_idx <- band_starts[b]
     end_idx <- band_ends[b]
-
     bscale <- raster_template$scale_vals[b]
-    bdata <- if (!is.na(bscale) && apply_scale) {
-      j$data[start_idx:end_idx] * bscale
-      # Get the data for this band
-      band_data <- j$data[start_idx:end_idx]
-
-      # Create mask for valid data (not equal to nodata)
+    band_data <- j$data[start_idx:end_idx]
+    if (!is.na(bscale) && apply_scale) {
       valid_mask <- band_data != raster_template$nodataval
-
-      # Apply scale only to valid data
       band_data[valid_mask] <- band_data[valid_mask] * bscale
-
-      band_data
-    } else {
-      j$data[start_idx:end_idx]
     }
 
-    blockwriter(ds, c(band_n = b, j$block), bdata)
+    blockwriter(ds, c(band_n = b, j$block), band_data)
   })
+  return(invisible())
 }
 
-
+#' @title Asynchronous single-band many-to-many read/write
+#' @description Reads single-band data in blocks, applies a many-to-many function,
+#' and writes the results to a GDALRaster dataset. Used internally by
+#' `gdalraster::singleband_m2m()`.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_collection A list of VRT files for each band.
+#' @param ds_list A list of GDALRaster datasets to write to.
+#' @param m2m_fun The many-to-many function to apply to the single-band
+#' data.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @param scale_values A vector of scale values for each band.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 async_gdalreader_singleband_m2m_read_write <- function(
   blocks,
   vrt_collection,
@@ -285,8 +391,24 @@ async_gdalreader_singleband_m2m_read_write <- function(
     ),
     msg = "mirai GDAL single-band many-to-many error"
   )
+  return(invisible())
 }
 
+#' @title Sequential single-band many-to-many read/write
+#' @description Reads single-band data in blocks, applies a many-to-many function,
+#' and writes the results to a GDALRaster dataset. Used internally by
+#' `gdalraster::singleband_m2m()`.
+#' @param blocks A dataframe with block parameters.
+#' @param vrt_collection A list of VRT files for each band.
+#' @param ds_list A list of GDALRaster datasets to write to.
+#' @param m2m_fun The many-to-many function to apply to the single-band
+#' data.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @param scale_values A vector of scale values for each band.
+#' @param quiet Logical, if TRUE suppresses progress messages.
+#' @return invisible
+#' @keywords internal
+#' @noRd
 sequential_gdalreader_singleband_m2m_read_write <- function(
   blocks,
   vrt_collection,
@@ -296,33 +418,42 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
   scale_values,
   quiet
 ) {
-  sb_reader_fun <- single_band_reader()
-
-  jobs <- purrr::pmap(
+  purrr::pwalk(
     blocks,
     function(...) {
       block_params <- rlang::dots_list(...)
       band_data <- purrr::map(
         vrt_collection[[1]],
-        ~ sb_reader_fun(.x, block_params)
+        ~ single_band_reader()(.x, block_params)
       )
 
       bdm <- do.call(rbind, band_data)
       hamp_bdm <- m2m_fun(bdm)
 
-      return(list(
-        band_data = matrix_to_rowlist(hamp_bdm),
-        block_params = block_params
-      ))
+      singleband_m2m_writer(
+        ds_list = ds_list,
+        j = list(
+          band_data = matrix_to_rowlist(hamp_bdm),
+          block_params = block_params
+        ),
+        apply_scale = apply_scale,
+        scale_values = scale_values
+      )
     },
     .progress = !quiet
   )
-
-  purrr::walk(jobs, function(j) {
-    singleband_m2m_writer(ds_list, j, apply_scale, scale_values)
-  })
+  return(invisible())
 }
 
+#' @title Single-band reader function
+#' @description Writes data to multiple GDALRaster datasets.
+#' @param ds_list A list of GDALRaster datasets to write to.
+#' @param j A list containing the block data and parameters.
+#' @param apply_scale Logical, if TRUE applies scale factors to the data.
+#' @param scale_values A vector of scale values for each band.
+#' @return NULL
+#' @keywords internal
+#' @noRd
 singleband_m2m_writer <- function(ds_list, j, apply_scale, scale_values) {
   .params <- j$block_params
   purrr::pwalk(
@@ -336,4 +467,5 @@ singleband_m2m_writer <- function(ds_list, j, apply_scale, scale_values) {
       blockwriter(.ds, .params, .data)
     }
   )
+  return(invisible())
 }
