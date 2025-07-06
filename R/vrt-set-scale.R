@@ -11,9 +11,10 @@
 #' @details
 #' This sets the Scale and Offset XML tags for the VRT_x object. This is
 #' useful for scaling the pixel values of the VRT_x object. This is however,
-#' a little confusing... If your sources are ComplexSources, then this function
-#' applies the scale and offset to the ComplexSource elements in addition to the
-#' raster bands. If the sources are SimpleSources (which don't support)
+#' a little confusing - the actual values are not altered but the scaling value
+#' is applied when read by most software.
+#'
+#' To unset a scale or offset simply set scale= 1 and offset = 0.
 #' @examples
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #' ex_collect <- vrt_collect(s2files)
@@ -78,16 +79,6 @@ vrt_set_scale.vrt_block <- function(
 
       # Remove existing Offset elements
       reset_element(band, "Offset", offset)
-
-      band_src <- xml2::xml_find_first(
-        band,
-        ".//ComplexSource"
-      )
-      # Remove existing ScaleOffset elements
-      reset_element(band_src, "ScaleOffset", offset)
-      reset_element(band_src, "ScaleRatio", scale)
-
-      xml2::xml_set_attr(band, "dataType", "Float32")
     }
   )
   out_vrt <- fs::file_temp(
