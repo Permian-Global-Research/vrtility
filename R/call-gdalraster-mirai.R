@@ -15,13 +15,6 @@ call_gdalraster_mirai <- function(
   # get template params
   rt <- raster_template_params(x)
   vrt_template <- rt$vrt_template
-  rt$xs <- rt$xs
-  rt$ys <- rt$ys
-  rt$nodataval <- rt$nodataval
-  rt$blksize <- rt$blksize
-  rt$nbands <- rt$nbands
-  rt$scale_vals <- rt$scale_vals
-  rt$data_type <- rt$data_type
 
   if (is.null(nsplits)) {
     nits <- x$n_items
@@ -30,7 +23,7 @@ call_gdalraster_mirai <- function(
     }
     nsplits <- suggest_n_chunks(rt$ys, rt$xs, rt$nbands, nits)
   }
-  # browser()
+
   blocks_df <- optimise_tiling(
     rt$xs,
     rt$ys,
@@ -50,13 +43,19 @@ call_gdalraster_mirai <- function(
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
-  # browser()
   on.exit(ds$close(), add = TRUE)
   purrr::iwalk(x$assets, function(asset, band) {
     ds$setDescription(
       band = band,
       description = asset
     )
+
+    if (!is.na(rt$scale_vals[band])) {
+      ds$setScale(
+        band = band,
+        scale = rt$scale_vals[band]
+      )
+    }
   })
 
   if (mirai::daemons_set()) {
