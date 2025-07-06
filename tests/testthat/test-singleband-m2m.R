@@ -19,10 +19,10 @@ sbm2m_tests <- function() {
       tr = t_block$res
     )
 
-  hmpfiles <- singleband_m2m(
-    ex_collect_mask_warp,
-    m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE)
-  )
+  hmpfiles <- ex_collect_mask_warp |>
+    singleband_m2m(
+      m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE)
+    )
 
   expect_true(all(fs::file_exists(hmpfiles)))
 
@@ -32,7 +32,12 @@ sbm2m_tests <- function() {
       x
     )
     on.exit(d$close(), add = TRUE)
-    gdalraster::read_ds(d)
+    rd <- gdalraster::read_ds(d)
+    scv <- d$getScale(1)
+    if (!is.na(scv)) {
+      rd <- rd * scv
+    }
+    rd
   }
 
   expect_false(identical(
@@ -48,12 +53,11 @@ sbm2m_tests <- function() {
 
   testthat::expect_s3_class(hmpfilesrecoll, "vrt_collection_warped")
 
-  # check apply_scale_works
+  # check vrt_set_scale works
   hmpfiles_scaled <- ex_collect_mask_warp |>
     vrt_set_scale(0.0001) |>
     singleband_m2m(
-      m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE),
-      apply_scale = TRUE
+      m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE)
     )
 
   expect_equal(
