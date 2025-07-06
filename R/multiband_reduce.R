@@ -9,8 +9,6 @@
 #' The function should return a vector of the same length as the number of
 #' bands. See  details.
 #' @param outfile The output file path.
-#' @param apply_scale Logical indicating whether to apply the scale values
-#' (if they exist) to the data.
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
 #' @param quiet Logical indicating whether to suppress the progress bar.
@@ -74,7 +72,6 @@ multiband_reduce <- function(
   x,
   reduce_fun,
   outfile,
-  apply_scale,
   config_options,
   creation_options,
   quiet,
@@ -104,7 +101,6 @@ multiband_reduce.vrt_collection_warped <- function(
   x,
   reduce_fun = vrtility::geomedian(),
   outfile = fs::file_temp(ext = "tif"),
-  apply_scale = FALSE,
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
@@ -139,6 +135,8 @@ multiband_reduce.vrt_collection_warped <- function(
   )
 
   # Initialize output raster
+  # TODO: this raster creation is duplicated here and in singleband-many-to-many
+  # and call-gdalraster-mirai -> refactor at some point.
   nr <- suppressMessages(gdalraster::rasterFromRaster(
     rt$vrt_template,
     normalizePath(outfile, mustWork = FALSE),
@@ -155,6 +153,13 @@ multiband_reduce.vrt_collection_warped <- function(
       band = band,
       description = asset
     )
+
+    if (!is.na(rt$scale_vals[band])) {
+      ds$setScale(
+        band = band,
+        scale = rt$scale_vals[band]
+      )
+    }
   })
 
   if (mirai::daemons_set()) {
@@ -163,8 +168,7 @@ multiband_reduce.vrt_collection_warped <- function(
       x,
       ds,
       rt,
-      reduce_fun,
-      apply_scale
+      reduce_fun
     )
   } else {
     sequential_gdalreader_multiband_reduce_read_write(
@@ -173,7 +177,6 @@ multiband_reduce.vrt_collection_warped <- function(
       ds,
       rt,
       reduce_fun,
-      apply_scale,
       quiet
     )
   }
