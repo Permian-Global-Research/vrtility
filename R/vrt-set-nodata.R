@@ -6,6 +6,8 @@
 #' object.
 #' @param nodata A numeric value to set the NODATA XML tag for the VRT_x
 #' object. defaults to the same as `nodatavalue`.
+#' @param band_idx  numeric; the target band position(s) to set the NoData value
+#' for. If NULL, The nodatavalue will be set for all bands.
 #' @examples
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #' ex_collect <- vrt_collect(s2files)
