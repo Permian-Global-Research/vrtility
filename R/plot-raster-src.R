@@ -24,8 +24,11 @@ plot_raster_src <- function(
   adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
-  col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
-    NULL,
+  col_map_fn = if (nbands == 1) {
+    scales::colour_ramp(pal, alpha = FALSE)
+  } else {
+    NULL
+  },
   xlim = NULL,
   ylim = NULL,
   interpolate = TRUE,
@@ -41,13 +44,15 @@ plot_raster_src <- function(
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
+  par_orig <- par(no.readonly = TRUE)
+  on.exit(par(par_orig), add = TRUE)
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
   target_divisor <- dev_size[1] * 1.5
 
   ds <- methods::new(gdalraster::GDALRaster, x)
-  on.exit(ds$close())
+  on.exit(ds$close(), add = TRUE)
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
