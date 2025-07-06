@@ -8,7 +8,8 @@ v_assert_type <- function(
     "logical",
     "function",
     "stac_vrt",
-    "vrt_collection"
+    "vrt_collection",
+    "doc_items"
   ),
   nullok = TRUE,
   multiple = FALSE
