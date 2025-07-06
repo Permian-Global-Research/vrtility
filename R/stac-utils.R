@@ -319,9 +319,11 @@ hls_mpc_stac_query <- function(
 #' @param items A STACItemCollection
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
 #' @return A STACItemCollection
-#' @noRd
-#' @keywords internal
+#' @rdname stac_utilities
+#' @export
 stac_cloud_filter <- function(items, max_cloud_cover) {
+  v_assert_type(items, "items", "doc_items")
+  v_assert_type(max_cloud_cover, "max_cloud_cover", "numeric")
   items |>
     rstac::items_filter(
       filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
