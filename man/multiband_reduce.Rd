@@ -12,7 +12,6 @@ multiband_reduce(
   x,
   reduce_fun,
   outfile,
-  apply_scale,
   config_options,
   creation_options,
   quiet,
@@ -69,9 +68,6 @@ The function should return a vector of the same length as the number of
 bands. See  details.}
 
 \item{outfile}{The output file path.}
-
-\item{apply_scale}{Logical indicating whether to apply the scale values
-(if they exist) to the data.}
 
 \item{config_options}{A named character vector of GDAL configuration options.}
 

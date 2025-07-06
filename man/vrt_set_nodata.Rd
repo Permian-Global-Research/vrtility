@@ -20,6 +20,9 @@ object.}
 
 \item{nodata}{A numeric value to set the NODATA XML tag for the VRT_x
 object. defaults to the same as \code{nodatavalue}.}
+
+\item{band_idx}{numeric; the target band position(s) to set the NoData value
+for. If NULL, The nodatavalue will be set for all bands.}
 }
 \description{
 Set the NoData value for a VRT_x object. This information is

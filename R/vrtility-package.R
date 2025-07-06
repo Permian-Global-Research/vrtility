@@ -25,6 +25,10 @@
 #' \item{\code{\link{vrt_set_maskfun}}}{Set a mask function for a vrt object}
 #' \item{\code{\link{vrt_stack}}}{Create a vrt_stack object}
 #' \item{\code{\link{vrt_set_py_pixelfun}}}{Set a pixel function for a vrt stack object}
+#' \item{\code{\link{vrt_set_gdal_pixelfun}}}{Set a GDAL pixel function for a vrt stack object}
+#' \item{\code{\link{vrt_set_scale}}}{Set the scale and offset values for a vrt_x object}
+#' \item{\code{\link{vrt_move_band}}}{Move a band in a vrt_x object}
+#' \item{\code{\link{vrt_set_nodata}}}{Set the nodata value for a vrt_x object}
 #' \item{\code{\link{vrt_warp}}}{Warp a vrt_x object to a warped vrt}
 #' \item{\code{\link{vrt_compute}}}{Compute a vrt pipeline (using GDAL)}
 #' }
