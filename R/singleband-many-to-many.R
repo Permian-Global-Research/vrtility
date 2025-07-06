@@ -8,8 +8,6 @@
 #' vectorized over the rows of the matrix, where each row represents a
 #' time and columns represent pixels. calcualtions are done at the band level.
 #' @param outfile The output file path.
-#' @param apply_scale Logical indicating whether to apply the scale values
-#' (if they exist) to the data.
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
 #' @param quiet Logical indicating whether to suppress the progress bar.
@@ -29,7 +27,6 @@ singleband_m2m <- function(
   x,
   m2m_fun,
   outfile,
-  apply_scale,
   config_options,
   creation_options,
   quiet,
@@ -59,7 +56,6 @@ singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
   outfile = fs::file_temp(ext = "tif"),
-  apply_scale = FALSE,
   config_options = gdal_config_opts(
     GDAL_HTTP_MAX_RETRY = "3",
     GDAL_HTTP_RETRY_DELAY = "20"
@@ -124,6 +120,12 @@ singleband_m2m.vrt_collection_warped <- function(
           band = band,
           description = asset
         )
+        if (!is.na(rt$scale_vals[band])) {
+          ds$setScale(
+            band = band,
+            scale = rt$scale_vals[band]
+          )
+        }
       })
       return(ds)
     }
@@ -141,9 +143,7 @@ singleband_m2m.vrt_collection_warped <- function(
       blocks_df,
       x,
       ds_list,
-      m2m_fun = m2m_fun,
-      apply_scale = apply_scale,
-      scale_values = rt$scale_vals
+      m2m_fun = m2m_fun
     )
   } else {
     sequential_gdalreader_singleband_m2m_read_write(
@@ -151,8 +151,6 @@ singleband_m2m.vrt_collection_warped <- function(
       x,
       ds_list,
       m2m_fun = m2m_fun,
-      apply_scale = apply_scale,
-      scale_values = rt$scale_vals,
       quiet = quiet
     )
   }
