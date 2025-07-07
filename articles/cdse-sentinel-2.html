@@ -77,12 +77,12 @@
 <p>The Copernicus Data Space Ecosystem (CDSE) provides access to a large
 range of European Space Agency (ESA) and Copernicus data. They also
 provide a STAC API for querying and accessing the data. However, there
-are som unique aspects to working with the CDSE via gdal - firstly that
+are some unique aspects to working with the CDSE via gdal - firstly that
 authentication is a bit unique and secondly (and most critically), the
 Sentinel-2 data is stored in the Jpeg2000 format, rather than the more
 common Cloud Optimised GeoTIFF (COG) format. This has a couple of
-disadvantages, the main one being that as the files aren’t cloud
-optimised we often have to download more than we need to, there is also
+disadvantages, the main one being that, as the files aren’t cloud
+optimised, we often have to download more than we need to, there is also
 no embedded metadata describing values such as nodata, scale and
 offset.</p>
 <p>But we can still make good use of these data so let’s get to it.
@@ -94,9 +94,9 @@ Firstly here are some handy links:</p>
 <p>CDSE API quota:</p>
 <p><a href="https://documentation.dataspace.copernicus.eu/Quotas.html" class="external-link uri">https://documentation.dataspace.copernicus.eu/Quotas.html</a></p>
 <div class="section level2">
-<h2 id="authentification-">Authentification.<a class="anchor" aria-label="anchor" href="#authentification-"></a>
+<h2 id="authentication-">Authentication.<a class="anchor" aria-label="anchor" href="#authentication-"></a>
 </h2>
-<p>Get the offical authentication documentation <a href="https://documentation.dataspace.copernicus.eu/APIs/S3.html" class="external-link">here</a>.</p>
+<p>Get the official authentication documentation <a href="https://documentation.dataspace.copernicus.eu/APIs/S3.html" class="external-link">here</a>.</p>
 <p>You will need a CDSE account to access the data. Get yourself one
 from <a href="https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/auth?client_id=cdse-public&amp;response_type=code&amp;scope=openid&amp;redirect_uri=https%3A//dataspace.copernicus.eu/account/confirmed/1" class="external-link">here</a>.</p>
 <p>Once, you’re registred, navigate to the <a href="https://eodata-s3keysmanager.dataspace.copernicus.eu/" class="external-link">S3
