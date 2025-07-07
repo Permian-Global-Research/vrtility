@@ -13,7 +13,7 @@ Set the GDAL configuration options"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,8 @@ Set the GDAL configuration options"></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
+    <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -60,7 +61,6 @@ Set the GDAL configuration options"></head><body>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gdal_config_opts</span><span class="op">(</span></span>
 <span>  VSI_CACHE <span class="op">=</span> <span class="st">"TRUE"</span>,</span>
-<span>  GDAL_CACHEMAX <span class="op">=</span> <span class="st">"50%"</span>,</span>
 <span>  VSI_CACHE_SIZE <span class="op">=</span> <span class="st">"268435456"</span>,</span>
 <span>  GDAL_NUM_THREADS <span class="op">=</span> <span class="st">"ALL_CPUS"</span>,</span>
 <span>  GDAL_DISABLE_READDIR_ON_OPEN <span class="op">=</span> <span class="st">"FALSE"</span>,</span>
@@ -111,11 +111,6 @@ Set the GDAL configuration options"></head><body>
 
 <dl><dt id="arg-vsi-cache">VSI_CACHE<a class="anchor" aria-label="anchor" href="#arg-vsi-cache"></a></dt>
 <dd><p>Should the Virtual File System (VSI) cache be used?</p></dd>
-
-
-<dt id="arg-gdal-cachemax">GDAL_CACHEMAX<a class="anchor" aria-label="anchor" href="#arg-gdal-cachemax"></a></dt>
-<dd><p>Maximum size of the gdal cache in MB or percentage of
-the available memory. Default is 50% of the available memory.</p></dd>
 
 
 <dt id="arg-vsi-cache-size">VSI_CACHE_SIZE<a class="anchor" aria-label="anchor" href="#arg-vsi-cache-size"></a></dt>
@@ -279,20 +274,20 @@ If NULL, then the output format will be inferred from the file extension.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">gdal_config_opts</span><span class="op">(</span>GDAL_HTTP_USERPWD <span class="op">=</span> <span class="st">"user:password"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          VSI_CACHE                      GDAL_CACHEMAX </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             "TRUE"                              "50%" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                     VSI_CACHE_SIZE                   GDAL_NUM_THREADS </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                        "268435456"                         "ALL_CPUS" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       GDAL_DISABLE_READDIR_ON_OPEN           CPL_VSIL_CURL_CACHE_SIZE </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                            "FALSE"                       "1342177280" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                GDAL_HTTP_MAX_RETRY              GDAL_HTTP_RETRY_DELAY </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                "3"                                "5" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                GDAL_HTTP_MULTIPLEX                  GDAL_HTTP_VERSION </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                              "YES"                                "2" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> GDAL_HTTP_MERGE_CONSECUTIVE_RANGES               GDAL_HTTP_COOKIEFILE </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                              "YES"                   "~/.cookies.txt" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                GDAL_HTTP_COOKIEJAR                  GDAL_HTTP_USERPWD </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   "~/.cookies.txt"                    "user:password" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                          VSI_CACHE                     VSI_CACHE_SIZE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                             "TRUE"                        "268435456" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   GDAL_NUM_THREADS       GDAL_DISABLE_READDIR_ON_OPEN </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         "ALL_CPUS"                            "FALSE" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           CPL_VSIL_CURL_CACHE_SIZE                GDAL_HTTP_MAX_RETRY </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       "1342177280"                                "3" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              GDAL_HTTP_RETRY_DELAY                GDAL_HTTP_MULTIPLEX </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                "5"                              "YES" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_VERSION GDAL_HTTP_MERGE_CONSECUTIVE_RANGES </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                "2"                              "YES" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               GDAL_HTTP_COOKIEFILE                GDAL_HTTP_COOKIEJAR </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   "~/.cookies.txt"                   "~/.cookies.txt" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_USERPWD </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    "user:password" </span>
 <span class="r-in"><span><span class="fu">gdal_creation_options</span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"JPEG"</span>, JPEG_QUALITY <span class="op">=</span> <span class="st">"90"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=4"         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "BLOCKXSIZE=128"        </span>

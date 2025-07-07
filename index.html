@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+<li><a class="dropdown-item" href="articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
+    <li><a class="dropdown-item" href="articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
     <li><a class="dropdown-item" href="articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
   </ul>
 </li>
@@ -66,7 +67,7 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation in mind. vrtility uses the VRT format to access awesome features such as pixel functions but also harnesses the VRT data structure to facilitate complex image processing tasks such as multi-band compositing and time series filtering.</p>
+<p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation (EO) in mind. vrtility uses the VRT format to access awesome features such as pixel functions but also harnesses the VRT data structure to facilitate complex image processing tasks such as multi-band compositing and time series filtering.</p>
 <blockquote>
 <p>[!CAUTION] This package is under active development and is likely to change. Contributions and suggestions are still very welcome!</p>
 </blockquote>
@@ -75,11 +76,11 @@
 </h2>
 <ul>
 <li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
-<li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. These <a href="https://numpy.org/" class="external-link">numpy</a> based python pixel functions can be used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>.</p></li>
-<li><p>Efficient parallel processing using <a href="https://shikokuchuo.net/mirai/" class="external-link">{mirai}</a></p></li>
+<li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. The python <a href="https://numpy.org/" class="external-link">numpy</a>-based pixel functions can be used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>. Built-In GDAL pixel functions vary depending on the GDAL version, but are highly performant - recent GDAL versions even support <a href="https://mirai.r-lib.org/index.html" class="external-link">expressions</a> for more complex operations.</p></li>
+<li><p>Efficient parallel processing using <a href="https://mirai.r-lib.org/index.html" class="external-link">{mirai}</a></p></li>
 <li><p>Advanced compositing methods that maintain spectral consistency, such as the geometric median and medoid.</p></li>
 <li><p>Time series filtering functions to improve temporal consistency and reduce noise.</p></li>
-<li><p>on-the-fly cloud mask filtering using pixel functions. Ability to use <a href="https://github.com/DPIRD-DMA/OmniCloudMask" class="external-link">OmniCloudMask</a> cloud/shadow masking, embedded within the vrt pipeline.</p></li>
+<li><p>on-the-fly cloud mask filtering using pixel functions. Ability to use <a href="https://github.com/DPIRD-DMA/OmniCloudMask" class="external-link">OmniCloudMask</a> cloud/shadow masking, embedded within the vrt pipeline. (currently experimental)</p></li>
 </ul>
 </div>
 <div class="section level2">
@@ -147,7 +148,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;  20.373   0.550  20.270</span></span></code></pre></div>
+<span><span class="co">#&gt;  15.242   0.514  20.603</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
@@ -202,9 +203,11 @@
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span>reduce_fun <span class="op">=</span> <span class="fu"><a href="reference/multiband_reduce.html">medoid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">ex_composite</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example2-3.png" width="100%"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">ex_composite</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-example2-4.png" width="100%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
