@@ -9,7 +9,6 @@
 \usage{
 gdal_config_opts(
   VSI_CACHE = "TRUE",
-  GDAL_CACHEMAX = "50\%",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = "ALL_CPUS",
   GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
@@ -55,9 +54,6 @@ set_gdal_config(x, scope = c("gdalraster", "sys"))
 }
 \arguments{
 \item{VSI_CACHE}{Should the Virtual File System (VSI) cache be used?}
-
-\item{GDAL_CACHEMAX}{Maximum size of the gdal cache in MB or percentage of
-the available memory. Default is 50\% of the available memory.}
 
 \item{VSI_CACHE_SIZE}{Size of the VSI cache in bytes.}
 

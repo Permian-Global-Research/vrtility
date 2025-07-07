@@ -16,7 +16,7 @@ vrtility is an R package that aims to make the best use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
 [VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
 for efficient processing of large raster datasets - mainly with Earth
-Observation in mind. vrtility uses the VRT format to access awesome
+Observation (EO) in mind. vrtility uses the VRT format to access awesome
 features such as pixel functions but also harnesses the VRT data
 structure to facilitate complex image processing tasks such as
 multi-band compositing and time series filtering.
@@ -33,14 +33,18 @@ multi-band compositing and time series filtering.
   [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
 - vrtility enables the use of GDAL VRT python and built-in pixel
-  functions. These [numpy](https://numpy.org/) based python pixel
+  functions. The python [numpy](https://numpy.org/)-based pixel
   functions can be used to apply cloud masks and summarise pixel values
   (e.g. median) from multiple images (i.e create a composite image). All
   python environment and package management is handled by
-  [{reticulate}](https://rstudio.github.io/reticulate/).
+  [{reticulate}](https://rstudio.github.io/reticulate/). Built-In GDAL
+  pixel functions vary depending on the GDAL version, but are highly
+  performant - recent GDAL versions even support
+  [expressions](https://mirai.r-lib.org/index.html) for more complex
+  operations.
 
 - Efficient parallel processing using
-  [{mirai}](https://shikokuchuo.net/mirai/)
+  [{mirai}](https://mirai.r-lib.org/index.html)
 
 - Advanced compositing methods that maintain spectral consistency, such
   as the geometric median and medoid.
@@ -50,7 +54,8 @@ multi-band compositing and time series filtering.
 
 - on-the-fly cloud mask filtering using pixel functions. Ability to use
   [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask)
-  cloud/shadow masking, embedded within the vrt pipeline.
+  cloud/shadow masking, embedded within the vrt pipeline. (currently
+  experimental)
 
 ## Installation
 
@@ -137,7 +142,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  20.373   0.550  20.270
+#>  15.242   0.514  20.603
 ```
 
 ``` r
@@ -221,7 +226,12 @@ ex_composite <- vrt_warp(
   multiband_reduce(reduce_fun = medoid())
 
 par(mfrow = c(1, 1))
-plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />
+
+``` r
+plot_raster_src(ex_composite, bands = c(3, 2, 1))
+```
+
+<img src="man/figures/README-example2-4.png" width="100%" />

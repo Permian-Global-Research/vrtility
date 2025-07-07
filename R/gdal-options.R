@@ -1,7 +1,5 @@
 #' Create GDAL configuration options.
 #' @param VSI_CACHE Should the Virtual File System (VSI) cache be used?
-#' @param GDAL_CACHEMAX Maximum size of the gdal cache in MB or percentage of
-#' the available memory. Default is 50% of the available memory.
 #' @param VSI_CACHE_SIZE Size of the VSI cache in bytes.
 #' @param GDAL_HTTP_MAX_RETRY Maximum number of retries for HTTP requests.
 #' @param GDAL_HTTP_RETRY_DELAY Delay between retries in seconds.
@@ -35,7 +33,6 @@
 #' gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
-  GDAL_CACHEMAX = "50%",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = "ALL_CPUS",
   # as.character(

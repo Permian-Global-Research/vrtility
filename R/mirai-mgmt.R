@@ -95,12 +95,16 @@ daemon_setup <- function(gdal_config = NULL) {
         if (!is.null(gdal_config)) {
           set_gdal_config(gdal_config)
         }
+
+        gdalraster::set_cache_max(cache_max_val)
+
         # get options that where name begins with vrt.
         options()[grep("^vrt\\.", names(options()), value = TRUE)]
       },
       main_process_opts = main_process_opts,
       set_gdal_config = set_gdal_config,
-      gdal_config = gdal_config
+      gdal_config = gdal_config,
+      cache_max_val = gdalraster::get_cache_max("bytes")
     )
     # make sure we wait for options to be set
     mopts <- mirai::collect_mirai(evrywrs)

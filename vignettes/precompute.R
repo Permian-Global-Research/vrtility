@@ -1,20 +1,13 @@
-mirai::daemons(0)
+prerender_it <- function(filename) {
+  mirai::daemons(0)
+  withr::with_dir("vignettes", {
+    if (fs::file_exists(filename)) {
+      fs::file_delete(filename)
+    }
+    knitr::knit(paste0(filename, ".orig"), filename)
+  })
+}
 
-# Pre-compile vignettes
-withr::with_dir("vignettes", {
-  if (fs::file_exists("HLS.Rmd")) {
-    fs::file_delete("HLS.Rmd")
-  }
-  knitr::knit("HLSo.Rmd.orig", "HLS.Rmd")
-})
-
-# Pre-compile vignettes
-withr::with_dir("vignettes", {
-  if (fs::file_exists("Digital-Earth-Africa-GeoMAD.Rmd")) {
-    fs::file_delete("Digital-Earth-Africa-GeoMAD.Rmd")
-  }
-  knitr::knit(
-    "Digital-Earth-Africa-GeoMAD.Rmd.orig",
-    "Digital-Earth-Africa-GeoMAD.Rmd"
-  )
-})
+prerender_it("HLS.Rmd")
+prerender_it("Digital-Earth-Africa-GeoMAD.Rmd")
+prerender_it("cdse-sentinel-2.Rmd")

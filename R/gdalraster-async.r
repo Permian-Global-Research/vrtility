@@ -150,7 +150,7 @@ blockwriter <- function(ds, bps, data) {
     ysize = bps[["nYSize"]],
     rasterData = data
   )
-  ds$flushCache() # I think we want this to clear  memory as we go...
+  # ds$flushCache() # I think we want this to clear  memory as we go...
   return(invisible())
 }
 
