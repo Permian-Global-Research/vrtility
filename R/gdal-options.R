@@ -35,7 +35,7 @@
 #' gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
-  GDAL_CACHEMAX = "50%",
+  # GDAL_CACHEMAX = "50%",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = "ALL_CPUS",
   # as.character(
