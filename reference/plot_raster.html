@@ -64,7 +64,12 @@ process of plotting a raster file.</p>
 <span>  adj_low <span class="op">=</span> <span class="fl">0.8</span>,</span>
 <span>  minmax_def <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  minmax_pct_cut <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  col_map_fn <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">nbands</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/colour_ramp.html" class="external-link">colour_ramp</a></span><span class="op">(</span><span class="va">pal</span>, alpha <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="kw">else</span> <span class="cn">NULL</span>,</span>
+<span>  col_map_fn <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">nbands</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>     <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/colour_ramp.html" class="external-link">colour_ramp</a></span><span class="op">(</span><span class="va">pal</span>, alpha <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span> <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span></span>
+<span>        <span class="cn">NULL</span></span>
+<span> <span class="op">}</span>,</span>
 <span>  xlim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ylim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  interpolate <span class="op">=</span> <span class="cn">TRUE</span>,</span>

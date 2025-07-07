@@ -3,10 +3,12 @@
 Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 Generate a Sentinel 2 stac collection doc_imes object
 Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
+Filter a STAC item collection by cloud cover
 Generate a Sentinel 1 stac collection doc_items object"><meta property="og:description" content="Query a STAC source
 Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 Generate a Sentinel 2 stac collection doc_imes object
 Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
+Filter a STAC item collection by cloud cover
 Generate a Sentinel 1 stac collection doc_items object"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -56,6 +58,7 @@ Generate a Sentinel 1 stac collection doc_items object"></head><body>
 <p>Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)</p>
 <p>Generate a Sentinel 2 stac collection doc_imes object</p>
 <p>Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object</p>
+<p>Filter a STAC item collection by cloud cover</p>
 <p>Generate a Sentinel 1 stac collection doc_items object</p>
     </div>
 
@@ -89,6 +92,8 @@ Generate a Sentinel 1 stac collection doc_items object"></head><body>
 <span>  collection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HLSS30_2.0"</span>, <span class="st">"HLSL30_2.0"</span><span class="op">)</span>,</span>
 <span>  limit <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stac_cloud_filter</span><span class="op">(</span><span class="va">items</span>, <span class="va">max_cloud_cover</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">sentinel1_stac_query</span><span class="op">(</span></span>
 <span>  <span class="va">bbox</span>,</span>
@@ -132,7 +137,7 @@ Generate a Sentinel 1 stac collection doc_items object"></head><body>
 
 
 <dt id="arg-items">items<a class="anchor" aria-label="anchor" href="#arg-items"></a></dt>
-<dd><p>A STACItemCollection.</p></dd>
+<dd><p>A STACItemCollection</p></dd>
 
 
 <dt id="arg-subscription-key">subscription_key<a class="anchor" aria-label="anchor" href="#arg-subscription-key"></a></dt>
@@ -168,6 +173,7 @@ retaining both orbits if you intend to composite the data.</p></dd>
     <p>A list of items</p>
 <p>A STACItemCollection object with signed assets url.</p>
 <p>A stac_vrt object</p>
+<p>A STACItemCollection</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
