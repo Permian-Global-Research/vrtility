@@ -20,7 +20,12 @@ plot_raster_src(
   adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
-  col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else NULL,
+  col_map_fn = if (nbands == 1) {
+     scales::colour_ramp(pal, alpha = FALSE)
+ } else {
+
+        NULL
+ },
   xlim = NULL,
   ylim = NULL,
   interpolate = TRUE,

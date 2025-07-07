@@ -22,6 +22,14 @@ for. If NULL, The scale_value will be set for all bands.}
 Set the Scale XML tag for a VRT_x object. This information is
 preserved in derived VRT and GeoTIFF files.
 }
+\details{
+This sets the Scale and Offset XML tags for the VRT_x object. This is
+useful for scaling the pixel values of the VRT_x object. This is however,
+a little confusing - the actual values are not altered but the scaling value
+is applied when read by most software.
+
+To unset a scale or offset simply set scale= 1 and offset = 0.
+}
 \examples{
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 ex_collect <- vrt_collect(s2files)

@@ -157,7 +157,7 @@ vrt_compute.vrt_block <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -261,7 +261,7 @@ vrt_compute.vrt_stack_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -317,7 +317,7 @@ vrt_compute.vrt_stack <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -359,7 +359,7 @@ vrt_compute.vrt_collection_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -416,7 +416,7 @@ vrt_compute.vrt_collection <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {

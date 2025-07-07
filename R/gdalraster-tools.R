@@ -28,9 +28,6 @@ raster_template_params <- function(
     ~ tds$getScale(.x)
   )
   data_type <- tds$getDataTypeName(1)
-  if (any(!is.na(scale_vals))) {
-    data_type <- "Float32"
-  }
 
   return(list(
     vrt_template = vrt_template,

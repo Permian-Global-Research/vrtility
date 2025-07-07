@@ -10,7 +10,6 @@
 #' @noRd
 async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
   # Create mirai map with promises
-  # browser()
   jobs <- mirai::mirai_map(
     blocks,
     function(...) {
@@ -19,16 +18,10 @@ async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
       on.exit(inds$close())
       band_data <- blockreader(inds, block_params)
-      band_data <- scale_applicator(
-        inds,
-        band_data,
-        unlist(block_params["band_n"])
-      )
       return(band_data)
     },
     vrt_file = vrt_file,
-    blockreader = blockreader,
-    scale_applicator = scale_applicator
+    blockreader = blockreader
   )
   mirai_async_result_handler(
     jobs,
@@ -63,13 +56,7 @@ sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
       # Read and combine bands
       band_data <- blockreader(inds, block_params)
 
-      j_data <- scale_applicator(
-        inds,
-        band_data,
-        unlist(block_params["band_n"])
-      )
-
-      blockwriter(ds, block_params, j_data)
+      blockwriter(ds, block_params, band_data)
     },
     .progress = !quiet
   )
@@ -167,21 +154,21 @@ blockwriter <- function(ds, bps, data) {
   return(invisible())
 }
 
-#' @title Scale applicator function
-#' @description Applies scale factors to band data if available.
-#' @param inds The GDALRaster dataset object.
-#' @param band_data A matrix of raster data for the specified block.
-#' @param block_params A list of block parameters including band number.
-#' @return A matrix of scaled raster data.
-#' @keywords internal
-#' @noRd
-scale_applicator <- function(inds, band_data, band_number) {
-  bscale <- inds$getScale(band_number)
-  if (!is.na(bscale)) {
-    band_data <- band_data * bscale
-  }
-  return(band_data)
-}
+# #' @title Scale applicator function
+# #' @description Applies scale factors to band data if available.
+# #' @param inds The GDALRaster dataset object.
+# #' @param band_data A matrix of raster data for the specified block.
+# #' @param block_params A list of block parameters including band number.
+# #' @return A matrix of scaled raster data.
+# #' @keywords internal
+# #' @noRd
+# scale_applicator <- function(inds, band_data, band_number) {
+#   bscale <- inds$getScale(band_number)
+#   if (!is.na(bscale)) {
+#     band_data <- band_data * bscale
+#   }
+#   return(band_data)
+# }
 
 #' @title Asynchronous multi-band reduction read/write
 #' @description Reads multi-band data in blocks, applies a reduction function,
@@ -193,7 +180,6 @@ scale_applicator <- function(inds, band_data, band_number) {
 #' `readonly=FALSE`.
 #' @param raster_template A template raster object containing metadata.
 #' @param reduce_fun The reduction function to apply to the multi-band data.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
 #' @return invisible
 #' @keywords internal
 #' @noRd
@@ -202,8 +188,7 @@ async_gdalreader_multiband_reduce_read_write <- function(
   vrt_file,
   ds,
   raster_template,
-  reduce_fun,
-  apply_scale
+  reduce_fun
 ) {
   jobs <- mirai::mirai_map(
     blocks,
@@ -237,9 +222,8 @@ async_gdalreader_multiband_reduce_read_write <- function(
     ds = ds,
     blocks = blocks,
     raster_template = raster_template,
-    apply_scale = apply_scale,
     expr = rlang::expr(
-      multiband_writer(j, ds, raster_template, apply_scale) # nolint
+      multiband_writer(j, ds, raster_template) # nolint
     ),
     msg = "mirai GDAL multi-band reducer error"
   )
@@ -256,7 +240,6 @@ async_gdalreader_multiband_reduce_read_write <- function(
 #' `readonly=FALSE`.
 #' @param raster_template A template raster object containing metadata.
 #' @param reduce_fun The reduction function to apply to the multi-band data.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
 #' @param quiet Logical, if TRUE suppresses progress messages.
 #' @return invisible
 #' @keywords internal
@@ -267,7 +250,6 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
   ds,
   raster_template,
   reduce_fun,
-  apply_scale,
   quiet
 ) {
   purrr::pwalk(
@@ -291,8 +273,7 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
           block = block_params
         ),
         ds,
-        raster_template,
-        apply_scale
+        raster_template
       )
     },
     .progress = !quiet
@@ -306,11 +287,10 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
 #' @param j A list containing the block data and parameters.
 #' @param ds The GDALRaster dataset to write to.
 #' @param raster_template A template raster object containing metadata.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
 #' @return NULL
 #' @keywords internal
 #' @noRd
-multiband_writer <- function(j, ds, raster_template, apply_scale) {
+multiband_writer <- function(j, ds, raster_template) {
   n_cells <- j$block$nXSize * j$block$nYSize
   band_starts <- seq(1, n_cells * raster_template$nbands, by = n_cells)
   band_ends <- band_starts + n_cells - 1
@@ -320,12 +300,7 @@ multiband_writer <- function(j, ds, raster_template, apply_scale) {
   purrr::walk(seq_len(raster_template$nbands), function(b) {
     start_idx <- band_starts[b]
     end_idx <- band_ends[b]
-    bscale <- raster_template$scale_vals[b]
     band_data <- j$data[start_idx:end_idx]
-    if (!is.na(bscale) && apply_scale) {
-      valid_mask <- band_data != raster_template$nodataval
-      band_data[valid_mask] <- band_data[valid_mask] * bscale
-    }
 
     blockwriter(ds, c(band_n = b, j$block), band_data)
   })
@@ -341,7 +316,6 @@ multiband_writer <- function(j, ds, raster_template, apply_scale) {
 #' @param ds_list A list of GDALRaster datasets to write to.
 #' @param m2m_fun The many-to-many function to apply to the single-band
 #' data.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
 #' @param scale_values A vector of scale values for each band.
 #' @return invisible
 #' @keywords internal
@@ -350,9 +324,7 @@ async_gdalreader_singleband_m2m_read_write <- function(
   blocks,
   vrt_collection,
   ds_list,
-  m2m_fun,
-  apply_scale,
-  scale_values
+  m2m_fun
 ) {
   jobs <- mirai::mirai_map(
     blocks,
@@ -384,10 +356,8 @@ async_gdalreader_singleband_m2m_read_write <- function(
     jobs,
     ds = ds_list,
     blocks = blocks,
-    apply_scale = apply_scale,
-    scale_values = scale_values,
     expr = rlang::expr(
-      singleband_m2m_writer(ds, j, apply_scale, scale_values) # nolint
+      singleband_m2m_writer(ds, j) # nolint
     ),
     msg = "mirai GDAL single-band many-to-many error"
   )
@@ -403,7 +373,6 @@ async_gdalreader_singleband_m2m_read_write <- function(
 #' @param ds_list A list of GDALRaster datasets to write to.
 #' @param m2m_fun The many-to-many function to apply to the single-band
 #' data.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
 #' @param scale_values A vector of scale values for each band.
 #' @param quiet Logical, if TRUE suppresses progress messages.
 #' @return invisible
@@ -414,8 +383,6 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
   vrt_collection,
   ds_list,
   m2m_fun,
-  apply_scale,
-  scale_values,
   quiet
 ) {
   purrr::pwalk(
@@ -435,9 +402,7 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
         j = list(
           band_data = matrix_to_rowlist(hamp_bdm),
           block_params = block_params
-        ),
-        apply_scale = apply_scale,
-        scale_values = scale_values
+        )
       )
     },
     .progress = !quiet
@@ -449,20 +414,14 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
 #' @description Writes data to multiple GDALRaster datasets.
 #' @param ds_list A list of GDALRaster datasets to write to.
 #' @param j A list containing the block data and parameters.
-#' @param apply_scale Logical, if TRUE applies scale factors to the data.
-#' @param scale_values A vector of scale values for each band.
 #' @return NULL
 #' @keywords internal
 #' @noRd
-singleband_m2m_writer <- function(ds_list, j, apply_scale, scale_values) {
+singleband_m2m_writer <- function(ds_list, j) {
   .params <- j$block_params
   purrr::pwalk(
     list(.ds = ds_list, .data = j$band_data),
     function(.ds, .data) {
-      bscale <- scale_values[.params$band_n]
-      if (!is.na(bscale) && apply_scale) {
-        .data <- .data * bscale
-      }
       # Write the band data to the output raster
       blockwriter(.ds, .params, .data)
     }

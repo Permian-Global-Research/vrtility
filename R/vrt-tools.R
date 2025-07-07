@@ -84,8 +84,10 @@ drop_nodatavalue <- function(x) {
 #' @keywords internal
 #' @noRd
 drop_scale <- function(x) {
-  scale_nodes <- xml2::xml_find_all(x, ".//Scale")
-  xml2::xml_remove(scale_nodes)
+  purrr::walk(c(".//Scale", ".//Offset"), function(v) {
+    scale_node <- xml2::xml_find_all(x, v)
+    xml2::xml_remove(scale_node)
+  })
 }
 
 #' @keywords internal
@@ -117,4 +119,23 @@ check_for_pixel_fun <- function(x) {
     )
   }
   invisible()
+}
+
+#' Reset an XML element in a parent element
+#' @param element_parent The parent XML element to which the new element will
+#' be added.
+#' @param element_name The name of the element to be reset.
+#' @param value The value to set for the new element.
+#' @noRd
+#' @keywords internal
+reset_element <- function(element_parent, element_name, value) {
+  xml2::xml_remove(xml2::xml_find_all(
+    element_parent,
+    glue::glue(".//{element_name}")
+  ))
+  xml2::xml_add_child(
+    element_parent,
+    element_name,
+    format(value, scientific = FALSE)
+  )
 }

@@ -24,8 +24,11 @@ plot_raster_src <- function(
   adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
-  col_map_fn = if (nbands == 1) scales::colour_ramp(pal, alpha = FALSE) else
-    NULL,
+  col_map_fn = if (nbands == 1) {
+    scales::colour_ramp(pal, alpha = FALSE)
+  } else {
+    NULL
+  },
   xlim = NULL,
   ylim = NULL,
   interpolate = TRUE,
@@ -41,13 +44,15 @@ plot_raster_src <- function(
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
+  par_orig <- par(no.readonly = TRUE)
+  on.exit(par(par_orig), add = TRUE)
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
-  target_divisor <- dev_size[1] * 1.5
+  target_divisor <- dev_size[1] * 2
 
   ds <- methods::new(gdalraster::GDALRaster, x)
-  on.exit(ds$close())
+  on.exit(ds$close(), add = TRUE)
 
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
@@ -58,6 +63,10 @@ plot_raster_src <- function(
     gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", rior_or),
     add = TRUE
   )
+
+  #TODO: make this more robust by getting scale for all bands...
+  scale_val <- ds$getScale(bands[1])
+
   r <- gdalraster::read_ds(
     ds,
     bands = bands,
@@ -76,6 +85,9 @@ plot_raster_src <- function(
       )
     )
   )
+  if (!is.na(scale_val) && scale_val != 1) {
+    r <- r * scale_val
+  }
 
   if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
     mm <- stats::quantile(

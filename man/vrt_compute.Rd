@@ -43,7 +43,7 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -63,7 +63,7 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -83,7 +83,7 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -103,7 +103,7 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -123,7 +123,7 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = FALSE,
+  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )

@@ -5,6 +5,7 @@
 \alias{sign_planetary_computer}
 \alias{sentinel2_stac_query}
 \alias{hls_stac_query}
+\alias{stac_cloud_filter}
 \alias{sentinel1_stac_query}
 \title{Query a STAC source}
 \usage{
@@ -37,6 +38,8 @@ hls_stac_query(
   limit = 999
 )
 
+stac_cloud_filter(items, max_cloud_cover)
+
 sentinel1_stac_query(
   bbox,
   start_date,
@@ -62,7 +65,7 @@ sentinel1_stac_query(
 
 \item{limit}{The number of items to return}
 
-\item{items}{A STACItemCollection.}
+\item{items}{A STACItemCollection}
 
 \item{subscription_key}{Optionally (but strongly recommended), a
 subscription key associated with your MPC account. At the time of writing,
@@ -88,6 +91,8 @@ A list of items
 A STACItemCollection object with signed assets url.
 
 A stac_vrt object
+
+A STACItemCollection
 }
 \description{
 Query a STAC source
@@ -97,6 +102,8 @@ Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 Generate a Sentinel 2 stac collection doc_imes object
 
 Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
+
+Filter a STAC item collection by cloud cover
 
 Generate a Sentinel 1 stac collection doc_items object
 }
