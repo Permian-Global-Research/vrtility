@@ -11,12 +11,12 @@ vignette: >
 
 The Copernicus Data Space Ecosystem (CDSE) provides access to a large range of
 European Space Agency (ESA) and Copernicus data. They also provide a STAC API
-for querying and accessing the data. However, there are som unique aspects to
+for querying and accessing the data. However, there are some unique aspects to
 working with the CDSE via gdal - firstly that authentication is a bit unique and
 secondly (and most critically), the Sentinel-2 data is stored in the Jpeg2000
 format, rather than the more common Cloud Optimised GeoTIFF (COG) format. 
-This has a couple of disadvantages, the main one being that as the files aren't
-cloud optimised we often have to download more than we need to, there is also 
+This has a couple of disadvantages, the main one being that, as the files aren't
+cloud optimised, we often have to download more than we need to, there is also 
 no embedded metadata describing values such as nodata, scale and offset.
 
 But we can still make good use of these data so let's get to it. Firstly here 
@@ -34,8 +34,8 @@ CDSE API quota:
 
 https://documentation.dataspace.copernicus.eu/Quotas.html
 
-## Authentification. 
-Get the offical authentication documentation [here](https://documentation.dataspace.copernicus.eu/APIs/S3.html).
+## Authentication. 
+Get the official authentication documentation [here](https://documentation.dataspace.copernicus.eu/APIs/S3.html).
 
 You will need a CDSE account to access the data. Get yourself one from 
 [here](https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/auth?client_id=cdse-public&response_type=code&scope=openid&redirect_uri=https%3A//dataspace.copernicus.eu/account/confirmed/1).
