@@ -179,11 +179,6 @@ functions.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
 
 ex_collect <- vrt_collect(s2files)
-par(mfrow = c(2, 2))
-purrr::walk(
-  seq_len(ex_collect$n_items),
-  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
-)
 
 ex_collect_mask <- vrt_set_maskfun(
   ex_collect,
@@ -191,9 +186,19 @@ ex_collect_mask <- vrt_set_maskfun(
   mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
-purrr::walk(
-  seq_len(ex_collect_mask$n_items),
-  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+withr::with_par(
+  list(mfrow = c(2, 2)),
+  {
+    purrr::walk(
+      seq_len(ex_collect$n_items),
+      ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
+    )
+
+    purrr::walk(
+      seq_len(ex_collect_mask$n_items),
+      ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+    )
+  }
 )
 
 # extract a block to use as a template for warping
@@ -207,7 +212,7 @@ ex_composite <- vrt_warp(
 ) |>
   multiband_reduce(reduce_fun = medoid())
 
-par(mfrow = c(1, 1))
+
 plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
