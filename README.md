@@ -142,7 +142,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  15.242   0.514  20.603
+#>  15.341   0.380  17.368
 ```
 
 ``` r
@@ -187,16 +187,6 @@ power/time than band-wise pixel functions.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
 
 ex_collect <- vrt_collect(s2files)
-par(mfrow = c(2, 2))
-purrr::walk(
-  seq_len(ex_collect$n_items),
-  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
-)
-```
-
-<img src="man/figures/README-example2-1.png" width="100%" />
-
-``` r
 
 ex_collect_mask <- vrt_set_maskfun(
   ex_collect,
@@ -204,13 +194,23 @@ ex_collect_mask <- vrt_set_maskfun(
   mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
-purrr::walk(
-  seq_len(ex_collect_mask$n_items),
-  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+withr::with_par(
+  list(mfrow = c(2, 2)),
+  {
+    purrr::walk(
+      seq_len(ex_collect$n_items),
+      ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
+    )
+
+    purrr::walk(
+      seq_len(ex_collect_mask$n_items),
+      ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+    )
+  }
 )
 ```
 
-<img src="man/figures/README-example2-2.png" width="100%" />
+<img src="man/figures/README-example2-1.png" width="100%" /><img src="man/figures/README-example2-2.png" width="100%" />
 
 ``` r
 
@@ -225,13 +225,8 @@ ex_composite <- vrt_warp(
 ) |>
   multiband_reduce(reduce_fun = medoid())
 
-par(mfrow = c(1, 1))
-```
 
-<img src="man/figures/README-example2-3.png" width="100%" />
-
-``` r
 plot_raster_src(ex_composite, bands = c(3, 2, 1))
 ```
 
-<img src="man/figures/README-example2-4.png" width="100%" />
+<img src="man/figures/README-example2-3.png" width="100%" />

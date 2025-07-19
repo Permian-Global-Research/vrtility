@@ -44,20 +44,6 @@ plot_raster_src <- function(
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
-  par_orig <- par(no.readonly = TRUE)
-  par_orig <- par_orig[setdiff(names(par_orig), "mfrow")]
-
-  # Check the current grid cell and total grid layout
-  mfrow <- par("mfrow") # Total grid layout (rows, columns)
-  mfg <- par("mfg") # Current grid cell (row, column)
-
-  if (
-    all(mfg == c(mfrow[1], mfrow[2] - 1, mfrow)) ||
-      all(mfg == c(rep(1, 4)))
-  ) {
-    on.exit(par(par_orig), add = TRUE)
-  }
-
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
@@ -75,9 +61,6 @@ plot_raster_src <- function(
     gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", rior_or),
     add = TRUE
   )
-
-  #TODO: make this more robust by getting scale for all bands...
-  scale_val <- ds$getScale(bands[1])
 
   r <- gdalraster::read_ds(
     ds,
@@ -97,6 +80,9 @@ plot_raster_src <- function(
       )
     )
   )
+
+  #TODO: make this more robust by getting scale for all bands...
+  scale_val <- ds$getScale(bands[1])
   if (!is.na(scale_val) && scale_val != 1) {
     r <- r * scale_val
   }
@@ -141,6 +127,21 @@ plot_raster_src <- function(
     na_col = na_col,
     ...
   )
+
+  par_orig <- graphics::par(no.readonly = TRUE)
+  # par_orig <- par_orig[setdiff(names(par_orig), "mfrow")] # messes up plot order
+  mfg <- graphics::par("mfg")
+
+  on.exit(
+    {
+      if (mfg[1] == mfg[3] && mfg[2] == mfg[4]) {
+        graphics::par(par_orig)
+      }
+    },
+    add = TRUE
+  )
+
+  invisible()
 }
 
 
