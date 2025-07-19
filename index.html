@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -148,7 +148,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;  15.242   0.514  20.603</span></span></code></pre></div>
+<span><span class="co">#&gt;  15.341   0.380  17.368</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
@@ -171,26 +171,29 @@
 <code class="sourceCode R"><span><span class="va">s2files</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"s2-data"</span>, package <span class="op">=</span> <span class="st">"vrtility"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">ex_collect</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2files</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">$</span><span class="va">n_items</span><span class="op">)</span>,</span>
-<span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ex_collect</span>, item <span class="op">=</span> <span class="va">.x</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-example2-1.png" width="100%"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="va">ex_collect_mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
 <span>  <span class="va">ex_collect</span>,</span>
 <span>  mask_band <span class="op">=</span> <span class="st">"SCL"</span>,</span>
 <span>  mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">8</span>, <span class="fl">9</span>, <span class="fl">10</span>, <span class="fl">11</span><span class="op">)</span>,</span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ex_collect_mask</span><span class="op">$</span><span class="va">n_items</span><span class="op">)</span>,</span>
-<span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ex_collect_mask</span>, item <span class="op">=</span> <span class="va">.x</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">$</span><span class="va">n_items</span><span class="op">)</span>,</span>
+<span>      <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ex_collect</span>, item <span class="op">=</span> <span class="va">.x</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">ex_collect_mask</span><span class="op">$</span><span class="va">n_items</span><span class="op">)</span>,</span>
+<span>      <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ex_collect_mask</span>, item <span class="op">=</span> <span class="va">.x</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-example2-2.png" width="100%"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><img src="reference/figures/README-example2-1.png" width="100%"><img src="reference/figures/README-example2-2.png" width="100%"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># extract a block to use as a template for warping</span></span>
 <span><span class="va">t_block</span> <span class="op">&lt;-</span> <span class="va">ex_collect</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span></span>
@@ -203,11 +206,9 @@
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/multiband_reduce.html">multiband_reduce</a></span><span class="op">(</span>reduce_fun <span class="op">=</span> <span class="fu"><a href="reference/multiband_reduce.html">medoid</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span></span>
+<span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">ex_composite</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example2-3.png" width="100%"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">ex_composite</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-example2-4.png" width="100%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
