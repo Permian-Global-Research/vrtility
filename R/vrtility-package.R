@@ -71,10 +71,8 @@
   cache_init_checks()
   vrt_opts_set()
 
-  # Set the GDAL cache max value to 10% of the total RAM
-  cache_max_val <- as.numeric(memuse::Sys.meminfo()$totalram * 0.1)
-
-  gdalraster::set_cache_max(cache_max_val)
+  check_gdal_and_warn()
+  set_gdal_cache_max()
 }
 
 #' onload max RAM allocation options
