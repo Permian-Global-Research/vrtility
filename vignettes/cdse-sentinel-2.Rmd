@@ -51,9 +51,6 @@ first we need to load vrtility and then set up parallel processing. You must not
 set more than 4 daemons, as this is the limit for concurrent requests to the 
 CDSE API.
 
-Then we need to setup the GDAL environment variables. For more details on the
-significance of these variables see the GDAL 
-[vsis3 documentation](https://documentation.dataspace.copernicus.eu/APIs/S3.html).
 
 
 ``` r
@@ -62,16 +59,6 @@ library(vrtility)
 # only use 4 daemons!
 mirai::daemons(4)
 #> [1] 4
-```
-
-``` r
-
-Sys.setenv(
-  AWS_VIRTUAL_HOSTING = "FALSE",
-  AWS_ACCESS_KEY_ID = Sys.getenv("CDSE_ACCESS_KEY"),
-  AWS_SECRET_ACCESS_KEY = Sys.getenv("CDSE_SECRET_KEY"),
-  AWS_S3_ENDPOINT = "eodata.dataspace.copernicus.eu"
-)
 ```
 
 ## Query the STAC API
@@ -113,9 +100,12 @@ s2copdse <- stac_query(
 
 ## Download and create a "cloud-free" median composite
 
-Now we have our STAC query, we can create a `vrt_collection` object which encapsulates
-all the image assets as VRT datasets. We then need to add crucial metadata to the
-VRT files including the nodata values, scale and offset values. 
+Now we have our STAC query, we can create a `vrt_collection` object which 
+encapsulates all the image assets as VRT datasets. Note that we need to set some 
+GDAL environment variables. For more details on the significance of these 
+variables see the GDAL [vsis3 documentation](https://gdal.org/en/stable/user/virtual_file_systems.html#vsis3-aws-s3-files).
+We then need to add important metadata to the VRT files including the nodata, 
+scale and offset values. 
 
 Next we apply a mask to the data using the scene classification layer (SCL) to 
 remove cloudy pixels. this isn't a perfect mask but it is a good start (more on 
@@ -136,7 +126,13 @@ process the data in parallel across bands and image tiles.
 
 ``` r
 # Download the data and process
-s2_median <- vrt_collect(s2copdse) |>
+s2_median <- vrt_collect(s2copdse,
+  gdal_config_opts(
+    AWS_VIRTUAL_HOSTING = "FALSE",
+    AWS_ACCESS_KEY_ID = Sys.getenv("CDSE_ACCESS_KEY"),
+    AWS_SECRET_ACCESS_KEY = Sys.getenv("CDSE_SECRET_KEY"),
+    AWS_S3_ENDPOINT = "eodata.dataspace.copernicus.eu"
+  )) |>
   vrt_move_band(1, 5) |>
   vrt_set_nodata(0, band_idx = 1:4) |>
   vrt_set_scale(scale_value = 0.0001, offset_value = -0.1) |>
