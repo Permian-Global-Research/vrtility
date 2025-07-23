@@ -27,12 +27,8 @@ into a single file 😀.
 
 ## Getting started
 
-So let's get into it. First load vrtility, set the number of mirai daemons
-you want to use (R processes that will download the data in parallel) and set 
-some important environment variables that will allow you to access the
-Digital Earth Africa data from the S3 bucket. Whilst, we can provide these 
-config options in various `vrt_x` commands, setting them here means you don't 
-have to repeat yourself.
+So let's get into it. First load vrtility and then set the number of mirai 
+daemons you want to use (R processes that will download the data in parallel).
 
 
 ``` r
@@ -40,15 +36,6 @@ library(vrtility)
 
 mirai::daemons(5)
 #> [1] 5
-```
-
-``` r
-
-# Doing this once saves you having to add it to every vrt_x command.
-Sys.setenv(
-  AWS_NO_SIGN_REQUEST = "YES",
-  AWS_S3_ENDPOINT = "s3.af-south-1.amazonaws.com"
-)
 ```
 
 ## Locating the data
@@ -105,12 +92,18 @@ print(l8l9_query)
 
 So now we can use the core vrtiltiy functions to collect, reproject and align
 (warp) the data before using `vrt_compute()` to create a single raster file
-from the VRT.
+from the VRT. Note that we set set some important environment variables in
+`vrt_collect` that will allow you to access the Digital Earth Africa data from 
+the S3 bucket.
 
 
 ``` r
 l8l9_vrt <- vrt_collect(
-  l8l9_query
+  l8l9_query,
+  gdal_config_opts(
+    AWS_NO_SIGN_REQUEST = "YES",
+    AWS_S3_ENDPOINT = "s3.af-south-1.amazonaws.com"
+  )
 )
 
 print(l8l9_vrt)

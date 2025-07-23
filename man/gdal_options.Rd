@@ -5,7 +5,8 @@
 \alias{gdal_creation_options}
 \alias{gdalwarp_options}
 \alias{set_gdal_config}
-\title{Create GDAL configuration options.}
+\alias{set_gdal_cache_max}
+\title{Create and set GDAL configuration options.}
 \usage{
 gdal_config_opts(
   VSI_CACHE = "TRUE",
@@ -51,6 +52,8 @@ gdalwarp_options(
 )
 
 set_gdal_config(x, scope = c("gdalraster", "sys"))
+
+set_gdal_cache_max(mem_fraction = 0.1)
 }
 \arguments{
 \item{VSI_CACHE}{Should the Virtual File System (VSI) cache be used?}
@@ -128,18 +131,20 @@ UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
 
 \item{scope}{A character vector of the scope to set the options in. Either
 "gdalraster" or "sys".}
+
+\item{mem_fraction}{Fraction of total RAM to use for GDAL cache, default is
+0.1 (10\% of total RAM)}
 }
 \value{
 Character vector of options
+
+set_gdal_cache_max returns (invisibly), a
+\code{\link[memuse]{memuse}} object - the value set for GDAL_CACHEMAX
 }
 \description{
-Create GDAL configuration options.
-
-Create GDAL creation options
-
-Create GDAL warp options
-
-Set the GDAL configuration options
+This function sets GDAL configuration options that can be used to
+control the behavior of GDAL operations. These options can be used to optimize
+performance, control caching, and manage HTTP requests (among other things)
 }
 \details{
 Where a named argument is set to \code{NULL}, the default GDAL value will be used.
@@ -149,12 +154,18 @@ a negative impact on performance.
 
 output_format, equaivalent to \code{-of} from the gdaltranslate or gdalwarp CLIs.
 If NULL, then the output format will be inferred from the file extension.
+
+set_gdal_cache_max is a very thin wrapper around
+\code{\link[gdalraster]{set_cache_max}} that allows you to conveniently
+set the GDAL_CACHEMAX option as a fraction of the total RAM on your system.
 }
 \examples{
 gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 gdal_creation_options(COMPRESS = "JPEG", JPEG_QUALITY = "90")
 gdalwarp_options(multi = TRUE, warp_memory = "50\%", num_threads = 4)
 set_gdal_config(gdal_config_opts())
+gcm <- set_gdal_cache_max(0.05)
+print(gcm)
 }
 \seealso{
 \href{https://gdal.org/en/stable/user/configoptions.html}{GDAL Configuration Options}

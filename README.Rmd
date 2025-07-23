@@ -150,7 +150,7 @@ plot_raster_src(
 ## Asynchronous download/processing
 
 {vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
-parallelisation. By setting `mirai::daemons(n)` before running the vrt
+parallel processing. By setting `mirai::daemons(n)` before running the vrt
 pipeline, we can sometimes improve performance, depending on the speed of the
 server holding the data. In some cases this will make little difference;
 for example, the Microsoft Planetary Computer STAC API is already pretty

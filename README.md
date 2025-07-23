@@ -96,6 +96,12 @@ Here is a simple example where we:
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.11.3
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
+#>   vrtility::set_gdal_cache_max()
+```
+
+``` r
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(6)
@@ -142,7 +148,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  15.341   0.380  17.368
+#>  18.172   0.348  19.377
 ```
 
 ``` r
@@ -158,15 +164,16 @@ plot_raster_src(
 ## Asynchronous download/processing
 
 {vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
-parallelisation. By setting `mirai::daemons(n)` before running the vrt
-pipeline, we can sometimes improve performance, depending on the speed
-of the server holding the data. In some cases this will make little
-difference; for example, the Microsoft Planetary Computer STAC API is
-already pretty fast. However, for NASA’s Earthdata STAC API, this can
-make a huge difference. In order to use asynchronous processing, in the
-`vrt_compute` function, we need to set `engine = "gdalraster"` or we can
-use `engine = "warp"` if we are downloading multiple images individually
-(This is a much faster approach on Nasa’s Earthdata server).
+parallel processing. By setting `mirai::daemons(n)` before running the
+vrt pipeline, we can sometimes improve performance, depending on the
+speed of the server holding the data. In some cases this will make
+little difference; for example, the Microsoft Planetary Computer STAC
+API is already pretty fast. However, for NASA’s Earthdata STAC API, this
+can make a huge difference. In order to use asynchronous processing, in
+the `vrt_compute` function, we need to set `engine = "gdalraster"` or we
+can use `engine = "warp"` if we are downloading multiple images
+individually (This is a much faster approach on Nasa’s Earthdata
+server).
 
 ## Using on-disk rasters
 

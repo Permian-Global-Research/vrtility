@@ -1,4 +1,7 @@
-#' Create GDAL configuration options.
+#' Create and set GDAL configuration options.
+#' @description This function sets GDAL configuration options that can be used to
+#' control the behavior of GDAL operations. These options can be used to optimize
+#' performance, control caching, and manage HTTP requests (among other things)
 #' @param VSI_CACHE Should the Virtual File System (VSI) cache be used?
 #' @param VSI_CACHE_SIZE Size of the VSI cache in bytes.
 #' @param GDAL_HTTP_MAX_RETRY Maximum number of retries for HTTP requests.
@@ -57,7 +60,7 @@ gdal_config_opts <- function(
   unlist(c(as.list(rlang::current_env()), rlang::dots_list(...)))
 }
 
-#' Create GDAL creation options
+
 #' @param output_format Output format equivalent to -of on the CLI. see details
 #' @param COMPRESS Compression method
 #' @param PREDICTOR Prediction method
@@ -110,7 +113,6 @@ gdal_creation_options <- function(
 }
 
 
-#' Create GDAL warp options
 #' @param multi Logical indicating whether to use multi-threading, equivalent
 #' to -multi on the CLI
 #' @param warp_memory Memory to use for warping equivalent to -wm on the CLI
@@ -151,7 +153,7 @@ gdalwarp_options <- function(
   )
 }
 
-#' Set the GDAL configuration options
+
 #' @param x A named character vector of the configuration options
 #' @param scope A character vector of the scope to set the options in. Either
 #' "gdalraster" or "sys".
@@ -183,4 +185,91 @@ set_gdal_config <- function(x, scope = c("gdalraster", "sys")) {
   }
   purrr::iwalk(x, ~ gdalraster::set_config_option(.y, .x))
   invisible(original_values)
+}
+
+#' check GDAL version and warn if it does not meet the minimum requirements
+#' @param maj_v_min Minimum major version required
+#' @param min_v_min Minimum minor version required
+#' @param patch_v_min Minimum patch version required
+#' @return NULL, but will inform the user if the GDAL version is not compliant
+#' @noRd
+#' @keywords internal
+check_gdal_and_warn <- function(maj_v_min = 3, min_v_min = 8, patch_v_min = 0) {
+  gdal_warn <- function() {
+    cli::cli_inform(
+      c(
+        "!" = "You are using GDAL version {version} which is not compliant ",
+        " " = "with the minimum recommended version
+        {maj_v_min}.{min_v_min}.{patch_v_min}.",
+        " " = "Please update GDAL to a newer version to ensure compatibility
+        with vrtility."
+      ),
+      class = "packageStartupMessage"
+    )
+    return(invisible(FALSE))
+  }
+  gdal_inform <- function() {
+    cli::cli_inform(
+      c("v" = "Using GDAL version {version}"),
+      class = "packageStartupMessage"
+    )
+    return(invisible(TRUE))
+  }
+
+  inform_warn_logic <- function(v, target_v) {
+    if (v > target_v) {
+      return(gdal_inform)
+    } else if (v < target_v) {
+      return(gdal_warn)
+    } else {
+      return(TRUE)
+    }
+  }
+
+  version <- gdalraster::gdal_version()[4]
+
+  split_version <- as.numeric(strsplit(version, "\\.")[[1]])
+
+  iwl <- inform_warn_logic(split_version[1], maj_v_min)
+  if (inherits(iwl, "function")) {
+    return(iwl())
+  }
+  iwl <- inform_warn_logic(split_version[2], min_v_min)
+  if (inherits(iwl, "function")) {
+    return(iwl())
+  }
+  iwl <- inform_warn_logic(split_version[3], patch_v_min)
+  if (inherits(iwl, "function")) {
+    return(iwl())
+  }
+  gdal_inform() # if we reach here, installed gdal matches the minimum version.
+  return(invisible(TRUE))
+}
+
+
+#' @param mem_fraction Fraction of total RAM to use for GDAL cache, default is
+#' 0.1 (10% of total RAM)
+#' @rdname gdal_options
+#' @return set_gdal_cache_max returns (invisibly), a
+#' \code{\link[memuse]{memuse}} object - the value set for GDAL_CACHEMAX
+#' @details set_gdal_cache_max is a very thin wrapper around
+#' \code{\link[gdalraster]{set_cache_max}} that allows you to conveniently
+#' set the GDAL_CACHEMAX option as a fraction of the total RAM on your system.
+#' @export
+#' @examples
+#' gcm <- set_gdal_cache_max(0.05)
+#' print(gcm)
+set_gdal_cache_max <- function(mem_fraction = 0.1) {
+  cache_max_val <- memuse::Sys.meminfo()$totalram * mem_fraction
+
+  gdalraster::set_cache_max(as.numeric(cache_max_val))
+  cli::cli_inform(
+    c(
+      "i" = "GDAL_CACHEMAX set to {cache_max_val};
+      to change this use
+      {cli::code_highlight('vrtility::set_gdal_cache_max()')}"
+    ),
+    class = "packageStartupMessage"
+  )
+  return(invisible(cache_max_val))
 }
