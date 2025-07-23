@@ -6,31 +6,31 @@ test_that("check gdal works", {
   minv <- sysgdal_version[2]
   patchv <- sysgdal_version[3]
 
-  testthat::expect_snapshot({
+  expect_false(
     check_gdal_and_warn(maj_v_min = majv + 1, min_v_min = 0, patch_v_min = 0)
-  })
+  )
 
-  testthat::expect_snapshot({
+  expect_false(
     check_gdal_and_warn(maj_v_min = majv, min_v_min = minv + 1, patch_v_min = 0)
-  })
+  )
 
-  testthat::expect_snapshot({
+  expect_false(
     check_gdal_and_warn(
       maj_v_min = majv,
       min_v_min = minv,
       patch_v_min = patchv + 1
     )
-  })
+  )
 
-  testthat::expect_snapshot({
+  expect_true(
     check_gdal_and_warn(
       maj_v_min = majv,
       min_v_min = minv,
       patch_v_min = patchv
     )
-  })
+  )
 
-  testthat::expect_snapshot({
+  expect_true(
     check_gdal_and_warn(maj_v_min = 0, min_v_min = 0, patch_v_min = 1)
-  })
+  )
 })
