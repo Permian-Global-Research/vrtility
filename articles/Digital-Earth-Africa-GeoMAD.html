@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,24 +91,14 @@ multiple tiles into a single file 😀.</p>
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>So let’s get into it. First load vrtility, set the number of mirai
-daemons you want to use (R processes that will download the data in
-parallel) and set some important environment variables that will allow
-you to access the Digital Earth Africa data from the S3 bucket. Whilst,
-we can provide these config options in various <code>vrt_x</code>
-commands, setting them here means you don’t have to repeat yourself.</p>
+<p>So let’s get into it. First load vrtility and then set the number of
+mirai daemons you want to use (R processes that will download the data
+in parallel).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 5</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Doing this once saves you having to add it to every vrt_x command.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
-<span>  AWS_NO_SIGN_REQUEST <span class="op">=</span> <span class="st">"YES"</span>,</span>
-<span>  AWS_S3_ENDPOINT <span class="op">=</span> <span class="st">"s3.af-south-1.amazonaws.com"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="locating-the-data">Locating the data<a class="anchor" aria-label="anchor" href="#locating-the-data"></a>
@@ -119,7 +109,7 @@ project these bounds later. For convenience, we’ll use this handy
 function to create a bounding box from a WKT point and extend it by a
 certain amount in the x and y directions. This location is in North of
 Madagascar.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
 <span>  wkt <span class="op">=</span> <span class="st">"POINT (46.33 -15.9)"</span>,</span>
 <span>  extend_x <span class="op">=</span> <span class="fl">0.22</span>,</span>
@@ -134,7 +124,7 @@ composites for 2024. The <code><a href="../reference/stac_utilities.html">stac_q
 a <code>doc_items</code> object which we can use to build our VRT
 objects. This can be optionally filtered, as shown below, if you don’t
 need all of the assets (bands).</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">l8l9_query</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stac_utilities.html">stac_query</a></span><span class="op">(</span></span>
 <span>  bbox <span class="op">=</span> <span class="va">bbox</span>,</span>
 <span>  stac_source <span class="op">=</span> <span class="st">"https://explorer.digitalearth.africa/stac/"</span>,</span>
@@ -163,10 +153,17 @@ need all of the assets (bands).</p>
 </h2>
 <p>So now we can use the core vrtiltiy functions to collect, reproject
 and align (warp) the data before using <code><a href="../reference/vrt_compute.html">vrt_compute()</a></code> to
-create a single raster file from the VRT.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+create a single raster file from the VRT. Note that we set set some
+important environment variables in <code>vrt_collect</code> that will
+allow you to access the Digital Earth Africa data from the S3
+bucket.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">l8l9_vrt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span></span>
-<span>  <span class="va">l8l9_query</span></span>
+<span>  <span class="va">l8l9_query</span>,</span>
+<span>  <span class="fu"><a href="../reference/gdal_options.html">gdal_config_opts</a></span><span class="op">(</span></span>
+<span>    AWS_NO_SIGN_REQUEST <span class="op">=</span> <span class="st">"YES"</span>,</span>
+<span>    AWS_S3_ENDPOINT <span class="op">=</span> <span class="st">"s3.af-south-1.amazonaws.com"</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">l8l9_vrt</span><span class="op">)</span></span>
@@ -180,7 +177,7 @@ create a single raster file from the VRT.</p>
 <span><span class="co">#&gt; End Date: 2024-01-01 UTC</span></span>
 <span><span class="co">#&gt; Number of Items: 2</span></span>
 <span><span class="co">#&gt; Assets: SR_B2, SR_B3, SR_B4, SR_B5</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># if you just want to look at one of the tiles...</span></span>
 <span><span class="co"># plot(l8l9_vrt[[1]][[2]], c(3, 2, 1))</span></span>
@@ -207,7 +204,7 @@ create a single raster file from the VRT.</p>
 </h2>
 <p>Let’s have a look at the data in both true colour and false
 colour.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>    <span class="va">l8l9file</span>,</span>

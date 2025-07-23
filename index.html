@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,11 +106,15 @@
 </ol>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
-<span></span>
+<span><span class="co">#&gt; ✔ Using GDAL version 3.11.3</span></span>
+<span><span class="co">#&gt; ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use</span></span>
+<span><span class="co">#&gt;   vrtility::set_gdal_cache_max()</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co">#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun</span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
 <span>  wkt <span class="op">=</span> <span class="st">"POINT (144.3 -7.6)"</span>,</span>
@@ -131,7 +135,7 @@
 <span><span class="co"># number of items:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">$</span><span class="va">features</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">median_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -148,8 +152,8 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;  15.341   0.380  17.368</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt;  18.172   0.348  19.377</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>  <span class="va">median_composite</span>,</span>
@@ -160,14 +164,14 @@
 <div class="section level2">
 <h2 id="asynchronous-downloadprocessing">Asynchronous download/processing<a class="anchor" aria-label="anchor" href="#asynchronous-downloadprocessing"></a>
 </h2>
-<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallelisation. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can sometimes improve performance, depending on the speed of the server holding the data. In some cases this will make little difference; for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images individually (This is a much faster approach on Nasa’s Earthdata server).</p>
+<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallel processing. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can sometimes improve performance, depending on the speed of the server holding the data. In some cases this will make little difference; for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images individually (This is a much faster approach on Nasa’s Earthdata server).</p>
 </div>
 <div class="section level2">
 <h2 id="using-on-disk-rasters">Using on-disk rasters<a class="anchor" aria-label="anchor" href="#using-on-disk-rasters"></a>
 </h2>
 <p>We can also use on-disk raster files (or indeed urls) too, as shown here with this example dataset - note that the inputs have multiple spatial reference systems and therefore we need to warp them (as in the above example) before “stacking”. We can plot these <code>vrt_{x}</code> objects using <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> but note that, for very large rasters, where we are computing pixel functions, this can be slow and we are better off using <code>vrt_compute</code> to write to disk and then plotting the output.</p>
 <p>In this example, we create a <code>medoid</code> composite from the warped collection. Using medoid or other multi-band pixel functions (e.g. <code>geomedian</code>) can be extremely powerful but requires more compute power/time than band-wise pixel functions.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s2files</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"s2-data"</span>, package <span class="op">=</span> <span class="st">"vrtility"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">ex_collect</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2files</span><span class="op">)</span></span>
@@ -193,7 +197,7 @@
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example2-1.png" width="100%"><img src="reference/figures/README-example2-2.png" width="100%"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># extract a block to use as a template for warping</span></span>
 <span><span class="va">t_block</span> <span class="op">&lt;-</span> <span class="va">ex_collect</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span></span>

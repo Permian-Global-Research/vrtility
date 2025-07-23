@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,23 +111,12 @@ respectively.</p>
 <p>first we need to load vrtility and then set up parallel processing.
 You must not set more than 4 daemons, as this is the limit for
 concurrent requests to the CDSE API.</p>
-<p>Then we need to setup the GDAL environment variables. For more
-details on the significance of these variables see the GDAL <a href="https://documentation.dataspace.copernicus.eu/APIs/S3.html" class="external-link">vsis3
-documentation</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># only use 4 daemons!</span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
-<span>  AWS_VIRTUAL_HOSTING <span class="op">=</span> <span class="st">"FALSE"</span>,</span>
-<span>  AWS_ACCESS_KEY_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"CDSE_ACCESS_KEY"</span><span class="op">)</span>,</span>
-<span>  AWS_SECRET_ACCESS_KEY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"CDSE_SECRET_KEY"</span><span class="op">)</span>,</span>
-<span>  AWS_S3_ENDPOINT <span class="op">=</span> <span class="st">"eodata.dataspace.copernicus.eu"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="query-the-stac-api">Query the STAC API<a class="anchor" aria-label="anchor" href="#query-the-stac-api"></a>
@@ -143,7 +132,7 @@ projection.</p>
 want to download (here we’re grabbing, blue, green, red, near-infrared
 and the scene classification layer), and finally filter the results to
 only include images with a maximum cloud cover of 30%.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
 <span>  wkt <span class="op">=</span> <span class="st">"POINT (95.415 27.78)"</span>,</span>
 <span>  extend_x <span class="op">=</span> <span class="fl">0.3</span>,</span>
@@ -169,8 +158,11 @@ only include images with a maximum cloud cover of 30%.</p>
 </h2>
 <p>Now we have our STAC query, we can create a
 <code>vrt_collection</code> object which encapsulates all the image
-assets as VRT datasets. We then need to add crucial metadata to the VRT
-files including the nodata values, scale and offset values.</p>
+assets as VRT datasets. Note that we need to set some GDAL environment
+variables. For more details on the significance of these variables see
+the GDAL <a href="https://gdal.org/en/stable/user/virtual_file_systems.html#vsis3-aws-s3-files" class="external-link">vsis3
+documentation</a>. We then need to add important metadata to the VRT
+files including the nodata, scale and offset values.</p>
 <p>Next we apply a mask to the data using the scene classification layer
 (SCL) to remove cloudy pixels. this isn’t a perfect mask but it is a
 good start (more on that to come in the future).</p>
@@ -186,9 +178,15 @@ stack.</p>
 <code>vrt_compute</code> function, which writes the output to a file. We
 use the <code>gdalraster</code> engine to process the data in parallel
 across bands and image tiles.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Download the data and process</span></span>
-<span><span class="va">s2_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2copdse</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">s2_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2copdse</span>,</span>
+<span>  <span class="fu"><a href="../reference/gdal_options.html">gdal_config_opts</a></span><span class="op">(</span></span>
+<span>    AWS_VIRTUAL_HOSTING <span class="op">=</span> <span class="st">"FALSE"</span>,</span>
+<span>    AWS_ACCESS_KEY_ID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"CDSE_ACCESS_KEY"</span><span class="op">)</span>,</span>
+<span>    AWS_SECRET_ACCESS_KEY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"CDSE_SECRET_KEY"</span><span class="op">)</span>,</span>
+<span>    AWS_S3_ENDPOINT <span class="op">=</span> <span class="st">"eodata.dataspace.copernicus.eu"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_move_band.html">vrt_move_band</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_nodata.html">vrt_set_nodata</a></span><span class="op">(</span><span class="fl">0</span>, band_idx <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_scale.html">vrt_set_scale</a></span><span class="op">(</span>scale_value <span class="op">=</span> <span class="fl">0.0001</span>, offset_value <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -214,10 +212,10 @@ across bands and image tiles.</p>
 </h2>
 <p>Finally, let’s plot the NIR band on its own and then the RGB
 composite.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">s2_median</span>, bands <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/s2-plots-1.png"></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">s2_median</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/s2-plots-2.png"></p>
