@@ -7,8 +7,8 @@
 #' to the input bands to create the mask. Currently the only provided function
 #' is \code{\link{create_omnicloudmask}}. This string must also have three key
 #' attributes: `mask_name`, `mask_description`, and `required_bands`.
-#' @param nodata_value A numeric value to be used as the no data value in the
-#' mask. Default is 0.
+#' @param nodata_value The value to set as no data pixels
+#' (numeric, default: 0).
 #' @param cache_dir A character string specifying the directory to use for
 #' caching temporary files. Default is the value of the `vrt.cache` option.
 #' This should rarely need to be changed.
