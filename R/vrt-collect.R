@@ -268,6 +268,12 @@ build_vrt_collection <- function(
     # return as a vrt_block object if only one item
     return(x[[1]])
   }
+
+  dateorder <- purrr::map_vec(x, ~ lubridate::as_datetime(.x$date_time)) |>
+    order()
+
+  x <- x[dateorder]
+
   uniq_crs <- purrr::map(
     x,
     function(.x) .x$srs
@@ -336,6 +342,7 @@ build_vrt_collection <- function(
         length(unique(all_res)) == 1
     ) {
       warp_class <- "vrt_collection_warped"
+      warped <- TRUE
     } else {
       warp_class <- NULL
     }

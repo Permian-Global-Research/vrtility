@@ -166,7 +166,7 @@
       > <VRT Collection>
       Mask Function:
       import numpy as np
-      def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+      def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                         raster_ysize, buf_radius, gt, **kwargs):
           mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
           mask = np.isin(in_ar[0], mask_vals)
@@ -439,7 +439,7 @@
       > <VRT Collection>
       Mask Function:
       import numpy as np
-      def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+      def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                         raster_ysize, buf_radius, gt, **kwargs):
           mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
           mask = np.isin(in_ar[0], mask_vals)
@@ -585,7 +585,7 @@
       Pixel res: 12.5, 12.5
       Assets: B02, B03, B04
       No Data Value(s): 0, 0, 0
-      Date Time: 2024-08-26 11:21:11 UTC
+      Date Time: 2024-06-02 11:21:19 UTC
     Output
       
       [[2]]
@@ -603,7 +603,7 @@
       Pixel res: 12.5, 12.5
       Assets: B02, B03, B04
       No Data Value(s): 0, 0, 0
-      Date Time: 2024-08-16 11:21:11 UTC
+      Date Time: 2024-06-17 11:21:21 UTC
     Output
       
       [[3]]
@@ -639,7 +639,7 @@
       Pixel res: 12.5, 12.5
       Assets: B02, B03, B04
       No Data Value(s): 0, 0, 0
-      Date Time: 2024-06-17 11:21:21 UTC
+      Date Time: 2024-08-16 11:21:11 UTC
     Output
       
       [[5]]
@@ -657,7 +657,7 @@
       Pixel res: 12.5, 12.5
       Assets: B02, B03, B04
       No Data Value(s): 0, 0, 0
-      Date Time: 2024-06-02 11:21:19 UTC
+      Date Time: 2024-08-26 11:21:11 UTC
     Output
       
 
