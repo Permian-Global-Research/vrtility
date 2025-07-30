@@ -7,7 +7,6 @@
 \alias{set_mask_numpy}
 \alias{build_intmask}
 \alias{build_bitmask}
-\alias{build_omnicloudmask}
 \title{Set mask band of a VRT collection}
 \usage{
 vrt_set_maskfun(
@@ -45,17 +44,6 @@ set_mask_numpy()
 build_intmask()
 
 build_bitmask()
-
-build_omnicloudmask(
-  red,
-  green,
-  nir,
-  patch_size = 600,
-  patch_overlap = 300,
-  batch_size = 1,
-  no_data_value = 0,
-  inference_device = NULL
-)
 }
 \arguments{
 \item{x}{A VRT collection}
@@ -78,43 +66,16 @@ the VRT block.}
 \item{cache_dir}{A character string of the directory to use for temporary
 files. In general this should be left alone. main purpose is to manage cache
 location when running asyncronously with mirai.}
-
-\item{red}{The red band index (numeric or integer).}
-
-\item{green}{The green band index (numeric or integer).}
-
-\item{nir}{The near-infrared band index (numeric or integer).}
-
-\item{patch_size}{The size of the patches to use for prediction (numeric or
-integer, default: 600).}
-
-\item{patch_overlap}{The overlap between patches (numeric or integer,
-default: 300).}
-
-\item{batch_size}{The batch size to use for prediction (numeric or integer,
-default: 1).}
-
-\item{no_data_value}{The value to use for no data pixels
-(numeric, default: 0).}
-
-\item{inference_device}{The device to use for inference. If \code{NULL}, the
-function will automatically select the best available device (character,
-default: \code{NULL}). Options include "cpu", "cuda", "mps", etc. The order of
-selection is based on availability: "cuda" > "mps" > "cpu".}
 }
 \value{
 A VRT block with the mask band set.
 
 A VRT collection with the mask band set.
-
-A Python function that can be used as a pixel function in a VRT
-raster. The function will apply the OmniCloudMask model to the specified
-bands and create a cloud mask.
 }
 \description{
-This function constructs a cloud mask using the OmniCloudMask
-python library. It is designed to be used with the \code{vrt_set_maskfun()}
-function.
+Set mask band of a VRT collection
+
+Masking functions VRT pixel functions.
 }
 \details{
 The \code{build_mask_pixfun} function is used to build the mask band. Where the
