@@ -129,7 +129,6 @@ plot_raster_src <- function(
   )
 
   par_orig <- graphics::par(no.readonly = TRUE)
-  # par_orig <- par_orig[setdiff(names(par_orig), "mfrow")] # messes up plot order
   mfg <- graphics::par("mfg")
 
   on.exit(
