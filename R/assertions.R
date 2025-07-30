@@ -147,3 +147,47 @@ assert_files_exist <- function(x, url_possible = FALSE) {
 assert_is_url <- function(path) {
   grepl("^(http|https|ftp|ftps|s3|gs)://|^(/vsi[a-z0-9]+/)", path)
 }
+
+
+v_assert_is_named <- function(x, name) {
+  named <- rlang::is_named2(x)
+  if (!named) {
+    cli::cli_abort(
+      "'{name}' must be a named vector",
+      class = "vrtility_named_error"
+    )
+  }
+}
+
+v_assert_create_mask_fun_attrs <- function(x, name) {
+  check_attr <- function(attr_name) {
+    if (!attr_name %in% names(attributes(x))) {
+      cli::cli_abort(
+        c(
+          "The provided mask function {name} does not have the required 
+          attribute '{attr_name}'.",
+          "i" = "Ensure that the mask function is created with the correct 
+          attributes."
+        ),
+        class = "vrtility_maskcreator_fun_error"
+      )
+    }
+  }
+  check_attr("mask_name")
+  check_attr("required_bands")
+  check_attr("mask_description")
+  return(invisible())
+}
+
+
+v_assert_mask_names_match <- function(inbands, maskfun) {
+  if (!all(names(inbands) %in% attributes(maskfun)$required_bands)) {
+    cli::cli_abort(
+      c(
+        "The following bands are required by the {attributes(maskfun)$mask_name} but are not 
+      provided: {setdiff(attributes(maskfun)$required_bands, names(inbands))}"
+      ),
+      class = "vrtility_maskfun_error"
+    )
+  }
+}
