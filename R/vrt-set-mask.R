@@ -69,10 +69,6 @@ vrt_set_maskfun.vrt_block <- function(
   drop_mask_band = TRUE,
   cache_dir = getOption("vrt.cache")
 ) {
-  if (rlang::is_missing(mask_band)) {
-    mask_band <- "vrtility.mask.missing.mask"
-  }
-
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
   v_assert_type(
     mask_values,
@@ -95,17 +91,7 @@ vrt_set_maskfun.vrt_block <- function(
     ~ xml2::xml_text(xml2::xml_find_first(.x, ".//Description"))
   )
 
-  if (mask_band == "vrtility.mask.missing.mask") {
-    mask_idx <- attr(build_mask_pixfun, "required_bands")
-    if (is.null(mask_idx)) {
-      cli::cli_abort(c(
-        "No mask band provided and 'build_mask_pixfun' does not specify the
-        required band(s)."
-      ))
-    }
-  } else {
-    mask_idx <- which(descs == mask_band)
-  }
+  mask_idx <- which(descs == mask_band)
 
   if (length(mask_idx) == 0) {
     cli::cli_abort(c(
@@ -119,23 +105,13 @@ vrt_set_maskfun.vrt_block <- function(
   band_files <- setdiff(ds$getFileList(), ds$getFilename())
   mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
 
-  if (length(band_files) == 1) {
-    gdalraster::buildVRT(
-      mskvrt,
-      band_files,
-      cl_arg = unlist(purrr::map(mask_idx, ~ c("-b", .x))),
-      quiet = TRUE
-    )
-  } else {
-    msk_file <- band_files[mask_idx]
-    gdalraster::buildVRT(mskvrt, msk_file, quiet = TRUE)
-  }
+  vrt_squish_bands(band_files, mask_idx, mskvrt)
 
   msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
   drop_nodatavalue(msk_band)
   xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
-  xml2::xml_add_child(msk_band, "PixelFunctionType", "build_bitmask")
+  xml2::xml_add_child(msk_band, "PixelFunctionType", "build_mask")
   xml2::xml_add_child(msk_band, "PixelFunctionLanguage", "Python")
   pf_args <- xml2::xml_add_child(msk_band, "PixelFunctionArguments")
   xml2::xml_set_attr(
@@ -143,14 +119,6 @@ vrt_set_maskfun.vrt_block <- function(
     "mask_values",
     paste(mask_values, collapse = ",")
   )
-
-  # if (is.null(attr(build_mask_pixfun, "required_bands"))) {
-  #   xml2::xml_set_attr(
-  #     pf_args,
-  #     "required_bands",
-  #     paste(attr(build_mask_pixfun, "required_bands"), collapse = ",")
-  #   )
-  # }
 
   cdata_node <- xml2::xml_cdata(build_mask_pixfun)
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
@@ -160,11 +128,7 @@ vrt_set_maskfun.vrt_block <- function(
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
 
   wmxmlsrc <- xml2::read_xml(as.character(
-    xml2::xml_find_first(
-      # we take the first value if mutliple - we just need a copy anyway.
-      bands[[mask_idx[1]]],
-      ".//SimpleSource | .//ComplexSource"
-    )
+    vrt_find_first_src(bands[[mask_idx[1]]])
   ))
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
@@ -199,13 +163,15 @@ vrt_set_maskfun.vrt_block <- function(
     xml2::xml_add_child(pixel_func_code, cdata_node)
   })
 
-  if (drop_mask_band && mask_band != "vrtility.mask.missing.mask") {
+  if (drop_mask_band) {
     xml2::xml_remove(bands[[mask_idx]])
+    # this next bit is needed incase the mask is not the last band.
+    regrab_bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
+    purrr::walk(seq_along(regrab_bands), function(i) {
+      xml2::xml_set_attr(regrab_bands[[i]], "band", i)
+    })
   } else {
-    if (mask_band != "vrtility.mask.missing.mask") {
-      set_nodatavalue(bands[[mask_idx]], no_data)
-    }
-    #TODO: currently no way to add the omnicloudmask which would be nice.
+    set_nodatavalue(bands[[mask_idx]], no_data)
   }
 
   # Write back to block
@@ -241,11 +207,7 @@ vrt_set_maskfun.vrt_collection <- function(
   drop_mask_band = TRUE,
   cache_dir = getOption("vrt.cache")
 ) {
-  if (rlang::is_missing(mask_band)) {
-    mask_band <- "vrtility.mask.missing.mask"
-  }
-
-  check_mask_band(x, mask_band, build_mask_pixfun)
+  check_mask_band(x, mask_band)
   daemon_setup()
 
   masked_blocks <- purrr::map(
@@ -285,10 +247,7 @@ vrt_set_maskfun.vrt_collection <- function(
 }
 
 
-check_mask_band <- function(x, mb, bf) {
-  if (!is.null(attr(bf, "mask_type"))) {
-    return(invisible())
-  }
+check_mask_band <- function(x, mb) {
   if (!mb %in% x$assets) {
     cli::cli_abort(
       c(
