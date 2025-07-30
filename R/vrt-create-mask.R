@@ -7,6 +7,12 @@
 #' to the input bands to create the mask. Currently the only provided function
 #' is \code{\link{create_omnicloudmask}}. This string must also have three key
 #' attributes: `mask_name`, `mask_description`, and `required_bands`.
+#' @param nodata_value A numeric value to be used as the no data value in the
+#' mask. Default is 0.
+#' @param cache_dir A character string specifying the directory to use for
+#' caching temporary files. Default is the value of the `vrt.cache` option.
+#' This should rarely need to be changed.
+#' @return A VRT_x object with the the new mask band added.
 #' @export
 #' @rdname vrt_create_mask
 vrt_create_mask <- function(
@@ -114,10 +120,22 @@ vrt_create_mask.vrt_block <- function(
 }
 
 #' @export
-vrt_create_mask.vrt_collection <- function(x, inbands, maskfun) {
+vrt_create_mask.vrt_collection <- function(
+  x,
+  inbands,
+  maskfun,
+  nodata_value = 0,
+  cache_dir = getOption("vrt.cache")
+) {
   blocks_with_mask <- purrr::map(
     x$vrt,
-    ~ vrt_create_mask(.x, inbands, maskfun, cache_dir = getOption("vrt.cache"))
+    ~ vrt_create_mask(
+      .x,
+      inbands,
+      maskfun,
+      nodata_value = nodata_value,
+      cache_dir = cache_dir
+    )
   )
 
   if (inherits(x, "vrt_collection_warped")) {

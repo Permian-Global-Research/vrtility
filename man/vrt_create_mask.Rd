@@ -18,7 +18,7 @@ create_omnicloudmask(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
-  no_data_value = 0,
+  nodata_value = 0,
   inference_device = NULL
 )
 }
@@ -33,21 +33,31 @@ to the input bands to create the mask. Currently the only provided function
 is \code{\link{create_omnicloudmask}}. This string must also have three key
 attributes: \code{mask_name}, \code{mask_description}, and \code{required_bands}.}
 
-\item{patch_overlap}{The overlap between patches (numeric or integer,
-default: 300).}
+\item{nodata_value}{A numeric value to be used as the no data value in the
+mask. Default is 0.}
 
-\item{batch_size}{The batch size to use for prediction (numeric or integer,
-default: 1).}
+\item{cache_dir}{A character string specifying the directory to use for
+caching temporary files. Default is the value of the \code{vrt.cache} option.
+This should rarely need to be changed.}
 
-\item{no_data_value}{The value to use for no data pixels
-(numeric, default: 0).}
+\item{patch_size}{The size/dimension of the patches to use for prediction
+(numeric default: 600).}
+
+\item{patch_overlap}{The overlap between patches (numeric default: 300).}
+
+\item{batch_size}{The batch size to use for prediction (numeric default: 1).}
 
 \item{inference_device}{The device to use for inference. If \code{NULL}, the
 function will automatically select the best available device (character,
 default: \code{NULL}). Options include "cpu", "cuda", "mps", etc. The order of
 selection is based on availability: "cuda" > "mps" > "cpu".}
+
+\item{no_data_value}{The value to use for no data pixels
+(numeric, default: 0).}
 }
 \value{
+A VRT_x object with the the new mask band added.
+
 A Python function that can be used as a pixel function in a VRT
 raster. The function will apply the OmniCloudMask model to the specified
 bands and create a cloud mask.

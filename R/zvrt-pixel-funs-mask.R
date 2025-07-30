@@ -74,10 +74,10 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' @description This function constructs a cloud mask using the OmniCloudMask
 #' python library. It is designed to be used with the `vrt_set_maskfun()`
 #' function.
-#' @param patch_overlap The overlap between patches (numeric or integer,
-#' default: 300).
-#' @param batch_size The batch size to use for prediction (numeric or integer,
-#' default: 1).
+#' @param patch_size The size/dimension of the patches to use for prediction
+#' (numeric default: 600).
+#' @param patch_overlap The overlap between patches (numeric default: 300).
+#' @param batch_size The batch size to use for prediction (numeric default: 1).
 #' @param no_data_value The value to use for no data pixels
 #' (numeric, default: 0).
 #' @param inference_device The device to use for inference. If `NULL`, the
@@ -95,7 +95,7 @@ create_omnicloudmask <- function(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
-  no_data_value = 0,
+  nodata_value = 0,
   inference_device = NULL
 ) {
   # assert omicloudmask is installed
