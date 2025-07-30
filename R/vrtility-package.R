@@ -23,6 +23,7 @@
 #' \describe{
 #' \item{\code{\link{vrt_collect}}}{Create a vrt_collection object}
 #' \item{\code{\link{vrt_set_maskfun}}}{Set a mask function for a vrt object}
+#' \item{\code{\link{vrt_create_mask}}}{Create a mask for a vrt object}
 #' \item{\code{\link{vrt_stack}}}{Create a vrt_stack object}
 #' \item{\code{\link{vrt_set_py_pixelfun}}}{Set a pixel function for a vrt stack object}
 #' \item{\code{\link{vrt_set_gdal_pixelfun}}}{Set a GDAL pixel function for a vrt stack object}
