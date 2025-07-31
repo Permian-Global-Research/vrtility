@@ -31,7 +31,7 @@ gdal_config_opts(
 
 gdal_creation_options(
   output_format = NULL,
-  COMPRESS = "LZW",
+  COMPRESS = "DEFLATE",
   PREDICTOR = "2",
   NUM_THREADS =
     as.character(ceiling(vrtility::machine_cores()/pmax(vrtility::n_daemons(), 1))),
