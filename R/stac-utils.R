@@ -4,7 +4,7 @@
 #' @noRd
 vrtility_usr_agent <- function() {
   httr::user_agent(
-    "vrtility (https://github.com/Permian-Global-Research/vrtility)"
+    "vrtility (https://permian-global-research.github.io/vrtility/)"
   )
 }
 
