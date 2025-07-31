@@ -93,7 +93,8 @@ create_omnicloudmask <- function(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
-  inference_device = NULL
+  inference_device = NULL,
+  nodata_value = 0
 ) {
   # assert omicloudmask is installed
   omc <- try(
@@ -179,7 +180,7 @@ def create_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         patch_overlap = {patch_overlap},
         batch_size = {batch_size},
         inference_device = '{inference_device}',
-        no_data_value = {no_data_value}
+        no_data_value = {nodata_value}
       ) 
 
       out_ar[:] = pred_mask[0]
