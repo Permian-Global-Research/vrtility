@@ -9,25 +9,28 @@ vignette: >
 
 
 
-One of the most powerful features of VRT python pixel functions is the ability 
-to run any python code on a raster dataset, on the fly. The potential value here
-is massive and vrtility only scratches the surface of what is possible here. 
+One of the most powerful features the VRT format is the ability 
+to run any python code on a raster dataset, on the fly, using python pixel 
+functions. The range of possible for this is massive and vrtility only scratches 
+the surface of what is possible here.
 
-In this vignette, we will demonstrate how to use the OmniCloudMask model to create
+In this vignette, we demonstrate how to use the OmniCloudMask model to generate 
 a cloud mask for Sentinel-2 imagery.
-"OmniCloudMask Python library for state-of-the-art cloud and cloud shadow 
-segmentation in high to moderate resolution satellite imagery"; it is an 
-incredible project so please also check out their 
-[GitHub repository](https://github.com/DPIRD-DMA/OmniCloudMask). By providing 
-only the red, green and near-infrared bands, the model can create a cloud mask
-using a pre-trained convolutional neural network (CNN) model. 
 
-vrtility provides a streamlined way to "bake-in" this cloud masking right into a 
-VRT file! The cloud mask is significantly better than most provided masking 
-products included with for example Sentinel L2A and Landsat. 
+[OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask) is a Python library 
+for state-of-the-art cloud and cloud shadow segmentation in high to moderate 
+resolution satellite imagery. By providing only the red, green, and 
+near-infrared bands, the model produces a cloud mask using a pre-trained 
+convolutional neural network (CNN).
 
-Let's work around Zurich and really test the limits of these masks - retaining 
-imagery with up to 80% cloud cover. 
+The `vrtility` package makes it easy to integrate OmniCloudMask cloud masking 
+directly into a VRT file. This approach yields significantly better results 
+than standard masking products included with Sentinel-2 L2A or Landsat imagery.
+
+In this example, we focus on the Zurich area and test the limits of both the 
+OmniCloudMask and the standard Sentinel-2 scene classsification (SCL) band 
+by including imagery with up to 80% cloud cover.
+
 
 ``` r
 library(vrtility)
@@ -53,10 +56,10 @@ length(s2_stac$features)
 #> [1] 9
 ```
 
-Now let's get all of these rasters locally -  this isn't usually needed but 
-we can't run the cloud mask inference in parallel (at least not on my poor 
-laptop). So using `with` we can isolate the application of our mirai daemons 
-like so to download the data:
+Next, let's download all of the rasters locally. This step is not always 
+necessary, but in this case, we need the data on disk because cloud mask 
+inference cannot be run in parallel (at least not on my laptop). We use 
+`with` to isolate the use of mirai daemons.
 
 
 ``` r
@@ -74,17 +77,24 @@ with(mirai::daemons(6), {
 })
 ```
 
-At this point, we can now create a mask using the `vrt_create_mask` function.
-Note that there are two key arguments, `inbands` and `maskfun`. `inbands`
-must be a named numeric vector, with names corresponding to the required bands
-for the pixel mask string passed to `maskfun`. At present, the only available masking
-function is `create_omnicloudmask()`. The `vrt_create_mask` function is
-designed such that it can handle mask functions that may be added in the future.
+Now we are ready to create a cloud mask using the `vrt_create_mask` function. 
+This function requires two main arguments: `inbands` and `maskfun`. 
 
-Once the mask is created, it will be added as a new band to the VRT object. We 
-can then compute the mask with `vrt_compute()`, which will then materialize
-the mask as a new raster file. Note that we use `recollect = TRUE` to return
-a new `vrt_collection` object because we plan to do some further processing.
+- `inbands` should be a named numeric vector, where the names correspond to the 
+required input bands for the masking function. For OmniCloudMask, these are 
+`"red"`, `"green"`, and `"nir"`.
+
+- `maskfun` specifies the masking function to use. Currently, the only available 
+option is `create_omnicloudmask()`, but `vrt_create_mask` is designed to support 
+additional masking functions in the future.
+
+This approach allows you to flexibly apply cloud masking to your VRT 
+collections using state-of-the-art models.
+
+Once the mask is created, it will be added as a new band to the VRT object. 
+We can then compute the mask with `vrt_compute()`, which will then materialise 
+the mask as a new raster file. Note that we use `recollect = TRUE` to return a 
+new `vrt_collection` object because we plan to do some further processing.
 
 
 ``` r
@@ -99,9 +109,9 @@ zurich_vrt_mask <- zurich_vrt |>
   )
 ```
 
-Now, let's take at the OmniCloudMask and the Sentinel-2 SCL bands, alongside
-the RGB image. We can clearly see that the OmniCloudMask is identifying a
-greater area of clouds and shadows.
+Now, let's take a look at the OmniCloudMask and the Sentinel-2 SCL bands, 
+alongside the RGB image. We can clearly see that the OmniCloudMask is 
+identifying a greater area of clouds and shadows.
 
 
 ``` r
@@ -110,7 +120,7 @@ purrr::walk2(
   .y = c("RGB", "SCL", "OmniCloudMask"),
   ~ plot(
     zurich_vrt_mask,
-    item = 2,
+    item = 6,
     .x,
     main = .y,
     legend = FALSE,
@@ -123,13 +133,22 @@ purrr::walk2(
 ![](figure/plot-mask-1.png)![](figure/plot-mask-2.png)![](figure/plot-mask-3.png)
 
 
-Right okay, so what does this mean for the actual masked areas? Let's apply
-the masks and compare an image to see how the performance compares between
-OmniCloudMask and the Sentinel-2 SCL band. Note that when using 
-`vrt_set_maskfun()`, we can specify the mask values to be used for masking. 
-In the case of the OmniCloudMask, the values range from 0 to 3, where
-0 is clear, 1 is thick cloud, 2 is thin cloud, and 3 is cloud shadow. We're 
-going to mask any of these classes.
+Let's examine the impact of masking on the actual image areas. We'll apply both 
+masks and visually compare the results to assess the performance of 
+OmniCloudMask versus the Sentinel-2 SCL band.
+
+When using `vrt_set_maskfun()`, you can specify which mask values to treat as 
+masked (i.e., set to NA). For the OmniCloudMask band, the possible values are:
+
+- 0: clear
+
+- 1: thick cloud
+
+- 2: thin cloud
+
+- 3: cloud shadow
+
+In this example, we mask all non-clear classes (values 1, 2, and 3).
 
 
 ``` r
@@ -150,7 +169,7 @@ purrr::walk2(
   c("SCL RGB", "OmniCloudMask RGB"),
   ~ plot(
     .x,
-    item = 2,
+    item = 6,
     c(3, 2, 1),
     main = .y,
     axes = FALSE,
@@ -162,12 +181,13 @@ purrr::walk2(
 ![](figure/apply-mask-1.png)![](figure/apply-mask-2.png)
 
 
-Clearly, the OmniCloudMask is doing a much better job of capturing more of the
-clouds and shadows - it even seems to remove some false positives that exist 
-in the SCL band. 
+The OmniCloudMask provides a more accurate and comprehensive identification of 
+clouds and shadows compared to the Sentinel-2 SCL band. It also reduces false 
+positives that are present in the SCL mask, resulting in cleaner cloud detection.
 
-Finally, let's compute the median of the RGB bands for both the SCL and 
-OmniCloudMask masked images and plot the results...
+Next, we will compute the median of the RGB bands in the vrt collection for both 
+the SCL-masked and OmniCloudMask-masked images, and plot the results to visually 
+compare their effectiveness.
 
 
 
@@ -195,11 +215,10 @@ purrr::walk2(
 
 ![](figure/compute-median-1.png)![](figure/compute-median-2.png)
 
-We can see a huge difference between the two median images. The OmniCloudMask
-is very clear whereas the SCL-masked image is very "milky", clearly a lot
-of cloud artefacts remain. We could easily improve the SCL composite by being
-discarding more cloudy images but this serves as a great example of how improving
-cloud masking can provide a major benefit! We could also further enhance this
-composite using the multi-dimensional reduction functions available from
-`multiband_reduce()`.
-
+Comparing the two median images, the difference is striking. The 
+OmniCloudMask-masked composite is much clearer, while the SCL-masked image 
+appears "milky" due to residual cloud artefacts. Although the SCL composite 
+could be improved by excluding scenes with higher cloud cover, this example 
+highlights the significant advantage of advanced cloud masking. Additionally, 
+further improvements can be achieved by applying multi-dimensional reduction 
+techniques such as those provided by `multiband_reduce()`.
