@@ -1,6 +1,8 @@
 # creating a test dataset based around Exeter, UK
 devtools::load_all()
 s2ddir <- fs::dir_create("inst/s2-data")
+fs::dir_ls(s2ddir, recurse = TRUE) |>
+  fs::file_delete()
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (-3.51 50.72)",
@@ -16,7 +18,7 @@ s2_stac <- sentinel2_stac_query(
   start_date = "2024-06-01",
   end_date = "2024-08-30",
   max_cloud_cover = 50,
-  assets = c("B02", "B03", "B04", "SCL")
+  assets = c("B02", "B03", "B04", "B08", "SCL")
 )
 # number of items:
 length(s2_stac$features)
