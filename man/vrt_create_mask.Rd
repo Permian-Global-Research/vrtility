@@ -18,7 +18,8 @@ create_omnicloudmask(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
-  inference_device = NULL
+  inference_device = NULL,
+  nodata_value = 0
 )
 }
 \arguments{
@@ -62,6 +63,25 @@ bands and create a cloud mask.
 This function constructs a cloud mask using the OmniCloudMask
 python library. It is designed to be used with the \code{vrt_set_maskfun()}
 function.
+}
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+ s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+ ex_collect <- vrt_collect(s2files[4:5])
+
+ ex_mask <- vrt_create_mask(
+   ex_collect,
+   c(red = 3, green = 2, nir = 4),
+   maskfun = create_omnicloudmask()
+ )
+
+ ex_mask_compute <- vrt_compute(
+   ex_mask,
+   fs::file_temp(ext = ".tif"),
+   recollect = TRUE
+ )
+ plot(ex_mask_compute, item = 2, bands =   6)
+\dontshow{\}) # examplesIf}
 }
 \references{
 OmniCloudMask GitHub repository: \url{https://github.com/DPIRD-DMA/OmniCloudMask}

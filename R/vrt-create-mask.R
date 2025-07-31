@@ -15,6 +15,24 @@
 #' @return A VRT_x object with the the new mask band added.
 #' @export
 #' @rdname vrt_create_mask
+#' @examplesIf interactive()
+#'  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#'  ex_collect <- vrt_collect(s2files[4:5])
+#'
+#'  ex_mask <- vrt_create_mask(
+#'    ex_collect,
+#'    c(red = 3, green = 2, nir = 4),
+#'    maskfun = create_omnicloudmask()
+#'  )
+#'
+#'  ex_mask_compute <- vrt_compute(
+#'    ex_mask,
+#'    fs::file_temp(ext = ".tif"),
+#'    recollect = TRUE
+#'  )
+
+#'  plot(ex_mask_compute, item = 2, bands =   6)
+#'
 vrt_create_mask <- function(
   x,
   inbands,
