@@ -5,7 +5,8 @@ articles:
   cdse-sentinel-2: cdse-sentinel-2.html
   Digital-Earth-Africa-GeoMAD: Digital-Earth-Africa-GeoMAD.html
   HLS: HLS.html
-last_built: 2025-07-23T09:16Z
+  OmniCloudMask: OmniCloudMask.html
+last_built: 2025-07-31T12:39Z
 urls:
   reference: https://permian-global-research.github.io/vrtility/reference
   article: https://permian-global-research.github.io/vrtility/articles
