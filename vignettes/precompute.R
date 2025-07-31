@@ -11,3 +11,4 @@ prerender_it <- function(filename) {
 prerender_it("HLS.Rmd")
 prerender_it("Digital-Earth-Africa-GeoMAD.Rmd")
 prerender_it("cdse-sentinel-2.Rmd")
+prerender_it("OmniCloudMask.Rmd")

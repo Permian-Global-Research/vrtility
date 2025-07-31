@@ -142,11 +142,11 @@ test_that("vrt_collect works with rstac doc_items", {
   expect_equal(
     ex_collect$date_time,
     c(
-      "2024-08-26T11:21:11.024000Z",
-      "2024-08-16T11:21:11.024000Z",
-      "2024-08-01T11:21:19.024000Z",
+      "2024-06-02T11:21:19.024000Z",
       "2024-06-17T11:21:21.024000Z",
-      "2024-06-02T11:21:19.024000Z"
+      "2024-08-01T11:21:19.024000Z",
+      "2024-08-16T11:21:11.024000Z",
+      "2024-08-26T11:21:11.024000Z"
     )
   )
 
@@ -180,7 +180,10 @@ test_that("pipeline extras", {
     )
   expect_error(vrt_set_py_pixelfun(ex_collect_mask))
 
-  one_srs_collect <- vrt_collect(s2files[1:2])
+  one_srs_collect <- vrt_collect(s2files[4:5])
+
+  expect_error(vrt_stack(vrt_collect(s2files[1:3])))
+
   one_srs_collect_stack <- vrt_stack(one_srs_collect)
   one_srs_collect_stack_pf <- vrt_set_py_pixelfun(
     one_srs_collect_stack,

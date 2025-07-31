@@ -18,5 +18,5 @@ test_that("vrt_move_band works", {
     after = 2
   )
 
-  expect_true(all(ex_band_move$assets == c("B03", "B02", "B04")))
+  expect_true(all(ex_band_move$assets == c("B03", "B02", "B04", "B08")))
 })

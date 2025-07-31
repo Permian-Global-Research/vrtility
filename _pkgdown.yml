@@ -9,12 +9,19 @@ reference:
     desc: Core functions for Virtual Raster management
     contents:
       - vrt_collect
-      - vrt_set_maskfun
       - vrt_warp
       - vrt_stack
+      - vrt_compute
+  - title: VRT Pixel Functions
+    desc: Functions for pixel-wise operations on VRT rasters
+    contents:
       - vrt_set_gdal_pixelfun
       - vrt_set_py_pixelfun
-      - vrt_compute
+  - title: Image Masking
+    desc: Functions for creating and applying image masks
+    contents:
+      - vrt_set_maskfun
+      - vrt_create_mask
   - title: VRT helpers
     desc: Helper functions for VRT objects
     contents:

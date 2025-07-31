@@ -139,3 +139,56 @@ reset_element <- function(element_parent, element_name, value) {
     format(value, scientific = FALSE)
   )
 }
+
+
+vrt_find_all_srcs <- function(x) {
+  xml2::xml_find_all(
+    x,
+    ".//SimpleSource | .//ComplexSource"
+  )
+}
+
+vrt_find_first_src <- function(x) {
+  xml2::xml_find_first(
+    x,
+    ".//SimpleSource | .//ComplexSource"
+  )
+}
+
+
+vrt_collapse <- function(vrt) {
+  vrt_xml <- xml2::read_xml(vrt)
+
+  vrt_bands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
+  vrt_srcs <- vrt_find_all_srcs(vrt_xml)
+
+  xml2::xml_remove(vrt_bands[seq_along(vrt_bands)[-1]])
+
+  vrt_b1_srcs <- vrt_find_all_srcs(vrt_xml)
+  xml2::xml_remove(vrt_b1_srcs)
+
+  vrt_b1 <- xml2::xml_find_first(vrt_xml, ".//VRTRasterBand")
+  purrr::walk(vrt_srcs, ~ xml2::xml_add_child(vrt_b1, .x))
+
+  xml2::write_xml(vrt_xml, vrt)
+  return(invisible(vrt))
+}
+
+
+vrt_squish_bands <- function(band_files, inbands, vrt) {
+  if (length(band_files) == 1) {
+    gdalraster::buildVRT(
+      vrt,
+      band_files,
+      cl_arg = c(unlist(purrr::map(inbands, ~ c("-b", .x)))),
+      quiet = TRUE
+    )
+
+    vrt_collapse(vrt)
+  } else {
+    msk_file <- band_files[inbands]
+    gdalraster::buildVRT(vrt, msk_file, quiet = TRUE)
+  }
+
+  return(invisible(vrt))
+}

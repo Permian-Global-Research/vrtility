@@ -7,7 +7,7 @@ test_that("vrt_set_band_names works", {
   t_block <- ex_collect[[1]][[1]]
   ex_c_rename <- vrt_set_band_names(
     ex_collect,
-    c("blue", "green", "red", "mask")
+    c("blue", "green", "red", "nir", "mask")
   )
 
   expect_true(all(ex_c_rename$assets != ex_collect$assets))
@@ -22,7 +22,7 @@ test_that("vrt_set_band_names works", {
 
   ex_stack_rename <- vrt_set_band_names(
     ex_stack,
-    c("bluey", "greeny", "redy", "masky")
+    c("bluey", "greeny", "redy", "niry", "masky")
   )
 
   expect_true(all(ex_stack_rename$assets != ex_stack$assets))

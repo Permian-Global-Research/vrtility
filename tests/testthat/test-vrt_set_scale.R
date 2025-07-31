@@ -19,7 +19,7 @@ test_that("vrt_set_scale works", {
 
   ex_sc2 <- vrt_set_scale(
     ex_collect,
-    scale_value = c(4, 3, 2, 1)
+    scale_value = c(5, 4, 3, 2, 1)
   )
 
   sc2 <- xml2::read_xml(ex_sc2[[1]][[1]]$vrt)
@@ -28,7 +28,7 @@ test_that("vrt_set_scale works", {
     xml2::xml_text()
   expect_true(length(scale_vals2) == length(ex_sc2[[1]][[1]]$assets))
 
-  expect_true(all(as.numeric(scale_vals2) == c(4, 3, 2, 1)))
+  expect_true(all(as.numeric(scale_vals2) == c(5, 4, 3, 2, 1)))
 
   expect_error(
     vrt_set_scale(
@@ -42,7 +42,7 @@ test_that("vrt_set_scale works", {
   scale_vals3 <- xml2::xml_find_all(sc3xml, ".//Scale") |>
     xml2::xml_text()
 
-  expect_true(all(as.numeric(scale_vals3) == c(1000, 1000, 1e-4, 1e-4)))
+  expect_true(all(as.numeric(scale_vals3) == c(1000, 1000, 1e-4, 1e-4, 1e-4)))
 
   sc4 <- vrt_set_scale(ex_collect, 1000, band_idx = 1:2)
   sc4xml <- xml2::read_xml(sc4[[1]][[1]]$vrt)

@@ -36,6 +36,7 @@ Imports:
     withr,
     xml2
 Suggests: 
+    callr,
     earthdatalogin,
     knitr,
     rmarkdown,
