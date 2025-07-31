@@ -54,8 +54,7 @@ multi-band compositing and time series filtering.
 
 - on-the-fly cloud mask filtering using pixel functions. Ability to use
   [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask)
-  cloud/shadow masking, embedded within the vrt pipeline. (currently
-  experimental)
+  cloud/shadow masking, embedded within the vrt pipeline.
 
 ## Installation
 
@@ -124,7 +123,8 @@ s2_stac <- sentinel2_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 20,
-  assets = c("B02", "B03", "B04", "SCL")
+  assets = c("B02", "B03", "B04", "SCL"),
+  limit = 10
 )
 # number of items:
 length(s2_stac$features)
@@ -148,7 +148,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  18.172   0.348  19.377
+#>  15.119   0.356  16.807
 ```
 
 ``` r
@@ -222,7 +222,7 @@ withr::with_par(
 ``` r
 
 # extract a block to use as a template for warping
-t_block <- ex_collect[[1]][[4]]
+t_block <- ex_collect$vrt[[1]]
 
 ex_composite <- vrt_warp(
   ex_collect_mask,
