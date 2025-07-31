@@ -180,7 +180,10 @@ test_that("pipeline extras", {
     )
   expect_error(vrt_set_py_pixelfun(ex_collect_mask))
 
-  one_srs_collect <- vrt_collect(s2files[1:2])
+  one_srs_collect <- vrt_collect(s2files[4:5])
+
+  expect_error(vrt_stack(vrt_collect(s2files[1:3])))
+
   one_srs_collect_stack <- vrt_stack(one_srs_collect)
   one_srs_collect_stack_pf <- vrt_set_py_pixelfun(
     one_srs_collect_stack,
