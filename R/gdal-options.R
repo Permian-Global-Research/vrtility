@@ -82,7 +82,7 @@ gdal_config_opts <- function(
 #' gdal_creation_options(COMPRESS = "JPEG", JPEG_QUALITY = "90")
 gdal_creation_options <- function(
   output_format = NULL,
-  COMPRESS = "LZW",
+  COMPRESS = "DEFLATE",
   PREDICTOR = "2",
   NUM_THREADS = as.character(
     ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
