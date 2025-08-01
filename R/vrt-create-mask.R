@@ -15,6 +15,12 @@
 #' @return A VRT_x object with the the new mask band added.
 #' @export
 #' @rdname vrt_create_mask
+#' @details
+#' If using the `create_omnicloudmask` function to define the mask, it is
+#' strongly recommended that when computing the mask, you use the "warp" engine
+#' when running `vrt_compute()`. Using the "gdalraster" engine does work, but
+#' as the raster is read tile-by-tile, the window available for the CNN
+#' inference is smaller, which can lead to artifacts in the mask.
 #' @examplesIf interactive()
 #'  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #'  ex_collect <- vrt_collect(s2files[4:5])

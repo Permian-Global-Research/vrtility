@@ -64,6 +64,13 @@ This function constructs a cloud mask using the OmniCloudMask
 python library. It is designed to be used with the \code{vrt_set_maskfun()}
 function.
 }
+\details{
+If using the \code{create_omnicloudmask} function to define the mask, it is
+strongly recommended that when computing the mask, you use the "warp" engine
+when running \code{vrt_compute()}. Using the "gdalraster" engine does work, but
+as the raster is read tile-by-tile, the window available for the CNN
+inference is smaller, which can lead to artifacts in the mask.
+}
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
