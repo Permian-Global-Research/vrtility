@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,24 +75,24 @@
 
     
     
-<p>One of the most powerful features of VRT python pixel functions is
-the ability to run any python code on a raster dataset, on the fly. The
-potential value here is massive and vrtility only scratches the surface
-of what is possible here.</p>
-<p>In this vignette, we will demonstrate how to use the OmniCloudMask
-model to create a cloud mask for Sentinel-2 imagery. “OmniCloudMask
+<p>One of the most powerful features the VRT format is the ability to
+run any python code on a raster dataset, on the fly, using python pixel
+functions. The range of possible for this is massive and vrtility only
+scratches the surface of what is possible here.</p>
+<p>In this vignette, we demonstrate how to use the OmniCloudMask model
+to generate a cloud mask for Sentinel-2 imagery.</p>
+<p><a href="https://github.com/DPIRD-DMA/OmniCloudMask" class="external-link">OmniCloudMask</a> is a
 Python library for state-of-the-art cloud and cloud shadow segmentation
-in high to moderate resolution satellite imagery”; it is an incredible
-project so please also check out their <a href="https://github.com/DPIRD-DMA/OmniCloudMask" class="external-link">GitHub repository</a>.
-By providing only the red, green and near-infrared bands, the model can
-create a cloud mask using a pre-trained convolutional neural network
-(CNN) model.</p>
-<p>vrtility provides a streamlined way to “bake-in” this cloud masking
-right into a VRT file! The cloud mask is significantly better than most
-provided masking products included with for example Sentinel L2A and
-Landsat.</p>
-<p>Let’s work around Zurich and really test the limits of these masks -
-retaining imagery with up to 80% cloud cover.</p>
+in high to moderate resolution satellite imagery. By providing only the
+red, green, and near-infrared bands, the model produces a cloud mask
+using a pre-trained convolutional neural network (CNN).</p>
+<p>The <code>vrtility</code> package makes it easy to integrate
+OmniCloudMask cloud masking directly into a VRT file. This approach
+yields significantly better results than standard masking products
+included with Sentinel-2 L2A or Landsat imagery.</p>
+<p>In this example, we focus on the Zurich area and test the limits of
+both the OmniCloudMask and the standard Sentinel-2 scene classsification
+(SCL) band by including imagery with up to 80% cloud cover.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
@@ -115,10 +115,11 @@ retaining imagery with up to 80% cloud cover.</p>
 <span><span class="co"># number of items:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">$</span><span class="va">features</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 9</span></span></code></pre></div>
-<p>Now let’s get all of these rasters locally - this isn’t usually
-needed but we can’t run the cloud mask inference in parallel (at least
-not on my poor laptop). So using <code>with</code> we can isolate the
-application of our mirai daemons like so to download the data:</p>
+<p>Next, let’s download all of the rasters locally. This step is not
+always necessary, but in this case, we need the data on disk because
+cloud mask inference cannot be run in parallel (at least not on my
+laptop). We use <code>with</code> to isolate the use of mirai
+daemons.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="va">zurich_vrt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -132,18 +133,24 @@ application of our mirai daemons like so to download the data:</p>
 <span>      recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>At this point, we can now create a mask using the
-<code>vrt_create_mask</code> function. Note that there are two key
-arguments, <code>inbands</code> and <code>maskfun</code>.
-<code>inbands</code> must be a named numeric vector, with names
-corresponding to the required bands for the pixel mask string passed to
-<code>maskfun</code>. At present, the only available masking function is
-<code><a href="../reference/vrt_create_mask.html">create_omnicloudmask()</a></code>. The <code>vrt_create_mask</code>
-function is designed such that it can handle mask functions that may be
-added in the future.</p>
+<p>Now we are ready to create a cloud mask using the
+<code>vrt_create_mask</code> function. This function requires two main
+arguments: <code>inbands</code> and <code>maskfun</code>.</p>
+<ul>
+<li><p><code>inbands</code> should be a named numeric vector, where the
+names correspond to the required input bands for the masking function.
+For OmniCloudMask, these are <code>"red"</code>, <code>"green"</code>,
+and <code>"nir"</code>.</p></li>
+<li><p><code>maskfun</code> specifies the masking function to use.
+Currently, the only available option is
+<code><a href="../reference/vrt_create_mask.html">create_omnicloudmask()</a></code>, but <code>vrt_create_mask</code> is
+designed to support additional masking functions in the future.</p></li>
+</ul>
+<p>This approach allows you to flexibly apply cloud masking to your VRT
+collections using state-of-the-art models.</p>
 <p>Once the mask is created, it will be added as a new band to the VRT
 object. We can then compute the mask with <code><a href="../reference/vrt_compute.html">vrt_compute()</a></code>,
-which will then materialize the mask as a new raster file. Note that we
+which will then materialise the mask as a new raster file. Note that we
 use <code>recollect = TRUE</code> to return a new
 <code>vrt_collection</code> object because we plan to do some further
 processing.</p>
@@ -157,16 +164,16 @@ processing.</p>
 <span>    <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>    recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>Now, let’s take at the OmniCloudMask and the Sentinel-2 SCL bands,
-alongside the RGB image. We can clearly see that the OmniCloudMask is
-identifying a greater area of clouds and shadows.</p>
+<p>Now, let’s take a look at the OmniCloudMask and the Sentinel-2 SCL
+bands, alongside the RGB image. We can clearly see that the
+OmniCloudMask is identifying a greater area of clouds and shadows.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span></span>
 <span>  .x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  .y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RGB"</span>, <span class="st">"SCL"</span>, <span class="st">"OmniCloudMask"</span><span class="op">)</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">zurich_vrt_mask</span>,</span>
-<span>    item <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    item <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    <span class="va">.x</span>,</span>
 <span>    main <span class="op">=</span> <span class="va">.y</span>,</span>
 <span>    legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -175,13 +182,20 @@ identifying a greater area of clouds and shadows.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/plot-mask-1.png"><img src="figure/plot-mask-2.png"><img src="figure/plot-mask-3.png"></p>
-<p>Right okay, so what does this mean for the actual masked areas? Let’s
-apply the masks and compare an image to see how the performance compares
-between OmniCloudMask and the Sentinel-2 SCL band. Note that when using
-<code><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun()</a></code>, we can specify the mask values to be
-used for masking. In the case of the OmniCloudMask, the values range
-from 0 to 3, where 0 is clear, 1 is thick cloud, 2 is thin cloud, and 3
-is cloud shadow. We’re going to mask any of these classes.</p>
+<p>Let’s examine the impact of masking on the actual image areas. We’ll
+apply both masks and visually compare the results to assess the
+performance of OmniCloudMask versus the Sentinel-2 SCL band.</p>
+<p>When using <code><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun()</a></code>, you can specify which mask
+values to treat as masked (i.e., set to NA). For the OmniCloudMask band,
+the possible values are:</p>
+<ul>
+<li><p>0: clear</p></li>
+<li><p>1: thick cloud</p></li>
+<li><p>2: thin cloud</p></li>
+<li><p>3: cloud shadow</p></li>
+</ul>
+<p>In this example, we mask all non-clear classes (values 1, 2, and
+3).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scl_rgb</span> <span class="op">&lt;-</span> <span class="va">zurich_vrt_mask</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
@@ -200,7 +214,7 @@ is cloud shadow. We’re going to mask any of these classes.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SCL RGB"</span>, <span class="st">"OmniCloudMask RGB"</span><span class="op">)</span>,</span>
 <span>  <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">.x</span>,</span>
-<span>    item <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    item <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    main <span class="op">=</span> <span class="va">.y</span>,</span>
 <span>    axes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -208,11 +222,13 @@ is cloud shadow. We’re going to mask any of these classes.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/apply-mask-1.png"><img src="figure/apply-mask-2.png"></p>
-<p>Clearly, the OmniCloudMask is doing a much better job of capturing
-more of the clouds and shadows - it even seems to remove some false
-positives that exist in the SCL band.</p>
-<p>Finally, let’s compute the median of the RGB bands for both the SCL
-and OmniCloudMask masked images and plot the results…</p>
+<p>The OmniCloudMask provides a more accurate and comprehensive
+identification of clouds and shadows compared to the Sentinel-2 SCL
+band. It also reduces false positives that are present in the SCL mask,
+resulting in cleaner cloud detection.</p>
+<p>Next, we will compute the median of the RGB bands in the vrt
+collection for both the SCL-masked and OmniCloudMask-masked images, and
+plot the results to visually compare their effectiveness.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scl_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">scl_rgb</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">mean_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -234,13 +250,13 @@ and OmniCloudMask masked images and plot the results…</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/compute-median-1.png"><img src="figure/compute-median-2.png"></p>
-<p>We can see a huge difference between the two median images. The
-OmniCloudMask is very clear whereas the SCL-masked image is very
-“milky”, clearly a lot of cloud artefacts remain. We could easily
-improve the SCL composite by being discarding more cloudy images but
-this serves as a great example of how improving cloud masking can
-provide a major benefit! We could also further enhance this composite
-using the multi-dimensional reduction functions available from
+<p>Comparing the two median images, the difference is striking. The
+OmniCloudMask-masked composite is much clearer, while the SCL-masked
+image appears “milky” due to residual cloud artefacts. Although the SCL
+composite could be improved by excluding scenes with higher cloud cover,
+this example highlights the significant advantage of advanced cloud
+masking. Additionally, further improvements can be achieved by applying
+multi-dimensional reduction techniques such as those provided by
 <code><a href="../reference/multiband_reduce.html">multiband_reduce()</a></code>.</p>
   </main>
 </div>
