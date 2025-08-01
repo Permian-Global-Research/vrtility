@@ -363,7 +363,10 @@ vrt_compute.vrt_collection_warped <- function(
   dst_nodata = NULL,
   recollect = FALSE
 ) {
-  class(x) <- setdiff(class(x), "vrt_collection_warped")
+  class(x) <- c(
+    setdiff(class(x), "vrt_collection_warped"),
+    "vrt_collection_warped"
+  )
   vrt_compute(
     x = x,
     outfile = outfile,
@@ -479,12 +482,20 @@ vrt_compute.vrt_collection <- function(
     return(result)
   }
 
-  vrt_collect(
+  vc_out <- vrt_collect(
     result,
     config_opts = config_options,
     band_descriptions = x$assets,
     datetimes = x$date_time
   )
+
+  if (vc_out$warped) {
+    for (i in seq_along(vc_out$vrt)) {
+      vc_out$vrt[[i]]$warped <- TRUE
+    }
+  }
+
+  return(vc_out)
 }
 
 
