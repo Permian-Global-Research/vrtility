@@ -89,41 +89,15 @@ stac_query <- function(
 #' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 #'
 #' @param items A STACItemCollection.
-#' @param subscription_key Optionally (but strongly recommended), a
-#' subscription key associated with your MPC account. At the time of writing,
-#' this is required for downloading Sentinel 1 RTC products, as well as NAIP
-#' imagery. This key willb be automatically used if the environment
-#' variable `MPC_TOKEN` is set.
 #'
 #' @returns A STACItemCollection object with signed assets url.
 #'
 #' @export
 #' @rdname stac_utilities
 sign_planetary_computer <- function(
-  items,
-  subscription_key = Sys.getenv("MPC_TOKEN")
+  items
 ) {
-  if (subscription_key == "") {
-    cli::cli_warn(
-      c(
-        "!" = "No subscription key provided. Using default signing method.",
-        " " = "This may not work for some items or could be slower.",
-        "i" = "Set your key using the `MPC_TOKEN` environment variable."
-      )
-    )
-    rstac::items_sign(
-      items,
-      rstac::sign_planetary_computer(vrtility_usr_agent())
-    )
-  } else {
-    rstac::items_sign(
-      items,
-      rstac::sign_planetary_computer(
-        vrtility_usr_agent(),
-        headers = c("Ocp-Apim-Subscription-Key" = subscription_key)
-      )
-    )
-  }
+  rstac::items_sign_planetary_computer(items)
 }
 
 
@@ -372,18 +346,6 @@ sentinel1_stac_query <- function(
   assets <- rlang::arg_match(assets, multiple = TRUE)
   orbit_state <- rlang::arg_match(orbit_state, multiple = TRUE)
   collection <- rlang::arg_match(collection)
-  if (collection == "sentinel-1-rtc") {
-    if (Sys.getenv("MPC_TOKEN") == "") {
-      cli::cli_abort(
-        c(
-          "!" = "No subscription key provided.",
-          "i" = "To access the Sentinel 1 RTC collection, you need a 
-          subscription key. Set your key using the `MPC_TOKEN` environment 
-          variable."
-        )
-      )
-    }
-  }
 
   stac_its <- stac_query(
     bbox = bbox,
