@@ -103,7 +103,7 @@ sign_planetary_computer <- function(
   items,
   subscription_key = Sys.getenv("MPC_TOKEN")
 ) {
-  if (subscription_key == "") {
+  if (!nzchar(subscription_key)) {
     cli::cli_warn(
       c(
         "!" = "No subscription key provided. Using default signing method.",
