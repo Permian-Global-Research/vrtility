@@ -38,7 +38,7 @@ format_stac_date <- function(x) {
 #'  limit = 10
 #' )
 #'
-#' mpc_singed <- sign_planetary_computer(s2_its)
+#' mpc_signed <- sign_planetary_computer(s2_its)
 #'
 
 stac_query <- function(
