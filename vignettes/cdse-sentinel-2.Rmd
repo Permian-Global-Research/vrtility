@@ -40,7 +40,7 @@ Get the official authentication documentation [here](https://documentation.datas
 You will need a CDSE account to access the data. Get yourself one from 
 [here](https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/auth?client_id=cdse-public&response_type=code&scope=openid&redirect_uri=https%3A//dataspace.copernicus.eu/account/confirmed/1).
 
-Once, you're registred, navigate to the [S3 credentials page](https://eodata-s3keysmanager.dataspace.copernicus.eu/)
+Once, you're registered, navigate to the [S3 credentials page](https://eodata-s3keysmanager.dataspace.copernicus.eu/)
 and create an "access key" and a "secret access key". Then Save these keys in your
 `.Renviron` file as `CDSE_ACCESS_KEY` and `CDSE_SECRET_KEY` respectively.
 
