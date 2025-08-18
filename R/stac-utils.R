@@ -92,7 +92,7 @@ stac_query <- function(
 #' @param subscription_key Optionally (but strongly recommended), a
 #' subscription key associated with your MPC account. At the time of writing,
 #' this is required for downloading Sentinel 1 RTC products, as well as NAIP
-#' imagery. This key willb be automatically used if the environment
+#' imagery. This key will be automatically used if the environment
 #' variable `MPC_TOKEN` is set.
 #'
 #' @returns A STACItemCollection object with signed assets url.
