@@ -70,7 +70,7 @@ sentinel1_stac_query(
 \item{subscription_key}{Optionally (but strongly recommended), a
 subscription key associated with your MPC account. At the time of writing,
 this is required for downloading Sentinel 1 RTC products, as well as NAIP
-imagery. This key willb be automatically used if the environment
+imagery. This key will be automatically used if the environment
 variable \code{MPC_TOKEN} is set.}
 
 \item{assets}{A character vector of the asset names to include}
@@ -124,7 +124,7 @@ s2_its <- stac_query(
  limit = 10
 )
 
-mpc_singed <- sign_planetary_computer(s2_its)
+mpc_signed <- sign_planetary_computer(s2_its)
 \dontshow{\}) # examplesIf}
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 sentinel2_stac_query(
