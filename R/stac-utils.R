@@ -38,7 +38,7 @@ format_stac_date <- function(x) {
 #'  limit = 10
 #' )
 #'
-#' mpc_signed <- sign_planetary_computer(s2_its)
+#' mpc_signed <- rstac::items_sign_planetary_computer(s2_its)
 #'
 
 stac_query <- function(
@@ -83,21 +83,6 @@ stac_query <- function(
   )
 
   items
-}
-
-
-#' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
-#'
-#' @param items A STACItemCollection.
-#'
-#' @returns A STACItemCollection object with signed assets url.
-#'
-#' @export
-#' @rdname stac_utilities
-sign_planetary_computer <- function(
-  items
-) {
-  rstac::items_sign_planetary_computer(items)
 }
 
 
@@ -164,7 +149,7 @@ sentinel2_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- sign_planetary_computer(stac_its)
+    stac_its <- rstac::items_sign_planetary_computer(stac_its)
   }
 
   return(stac_its)
@@ -284,7 +269,7 @@ hls_mpc_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- sign_planetary_computer(stac_its)
+    stac_its <- rstac::items_sign_planetary_computer(stac_its)
   }
   return(stac_its)
 }
@@ -361,7 +346,7 @@ sentinel1_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- sign_planetary_computer(stac_its)
+    stac_its <- rstac::items_sign_planetary_computer(stac_its)
   }
 
   return(stac_its)
