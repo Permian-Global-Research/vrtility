@@ -18,28 +18,45 @@ format_stac_date <- function(x) {
 }
 
 
-#' Query a STAC source
+#' @title Query a STAC source
+#' @description A set of helper functions to query STAC APIs. These are very
+#' thin wrappers around existing \pkg{rstac} functions, but provide some
+#' convenience for common tasks.
 #' @param bbox A numeric vector of length 4 representing a bounding box
 #' @param stac_source The STAC source to query
 #' @param collection The collection to query
 #' @param start_date The start date for the query
 #' @param end_date The end date for the query
 #' @param limit The number of items to return
-#' @return A list of items
+#' @return A \pkg{rstac} doc_items object
 #' @rdname stac_utilities
 #' @export
 #' @examplesIf interactive()
 #' s2_its <- stac_query(
-#'  bbox = c(-12.386, -37.214, -12.186, -37.014),
-#'  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-#'  collection = "sentinel-2-l2a",
-#'  start_date = "2023-01-01",
-#'  end_date = "2023-01-31",
-#'  limit = 10
+#'   bbox = c(-12.386, -37.214, -12.186, -37.014),
+#'   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+#'   collection = "sentinel-2-l2a",
+#'   start_date = "2023-01-01",
+#'   end_date = "2023-01-31",
+#'   limit = 10
 #' )
 #'
+#' # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
+#' # MPC signing method via rstac:
 #' mpc_signed <- rstac::items_sign_planetary_computer(s2_its)
+#' # or use GDAL by setting the following environment variable:
+#' # Sys.setenv("VSICURL_PC_URL_SIGNING" = "YES")
 #'
+#' @details Using these functions to produce a `doc_items` object is optional;
+#' if the user prefers the greater flexibility of using \pkg{rstac} directly,
+#' they are encouraged to do so. These functions are only intended to provide a
+#' convenient way to interact with STAC APIs.
+#'
+#' The Microsoft Planetary Computer (MPC) STAC API is a very convenient, large
+#' and open catalogue of EO data. To access these assets, urls must be signed -
+#' this can be done using \code{\link[rstac]{items_sign_planetary_computer}}`
+#' or with GDAL by setting the environment variable `VSICURL_PC_URL_SIGNING` to
+#' `YES`. see the examples for more details.
 
 stac_query <- function(
   bbox,
@@ -86,7 +103,6 @@ stac_query <- function(
 }
 
 
-#' Generate a Sentinel 2 stac collection doc_imes object
 #' @param bbox A numeric vector of the bounding box (length 4) in lat/long
 #' @param assets A character vector of the asset names to include
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
@@ -95,7 +111,6 @@ stac_query <- function(
 #' @param mpc_sign A logical indicating whether to sign the items using the
 #' Planetary Computer API's signing method (only required if using the
 #' Planetary Computer STAC API).
-#' @return A stac_vrt object
 #' @rdname stac_utilities
 #' @export
 #' @examplesIf interactive()
@@ -106,7 +121,9 @@ stac_query <- function(
 #'   max_cloud_cover = 10,
 #'   assets = c("B02", "B03", "B04", "B08", "SCL")
 #' )
-#'
+#' @details `sentinel2_stac_query` facilitates the querying of the Sentinel-2
+#' level 2A data from the Planetary Computer STAC API. It returns a
+#' catalogue to generate a Sentinel 2 rstac doc_items object.
 sentinel2_stac_query <- function(
   bbox,
   start_date,
@@ -155,7 +172,6 @@ sentinel2_stac_query <- function(
   return(stac_its)
 }
 
-#' Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
 #' @rdname stac_utilities
 #' @examplesIf interactive()
 #' hls_query <- hls_stac_query(
@@ -176,8 +192,10 @@ sentinel2_stac_query <- function(
 #'   password = Sys.getenv("EARTHDATA_PASSWORD")
 #' )
 #' @details
-#' In order to access HLS data you will need a NASA Earthdata account. You can
-#' create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
+#' The `hls_stac_query` function generates a Harmonized Landsat Sentinel (HLS)
+#' stac collection doc_items object. In order to access HLS data you will need a
+#' NASA Earthdata account. You can create one at
+#' \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
 #' an account, you can set your credentials using the `earthdatalogin` package
 #' as shown in the examples.
 #' @export
@@ -275,11 +293,15 @@ hls_mpc_stac_query <- function(
 }
 
 #' Filter a STAC item collection by cloud cover
-#' @param items A STACItemCollection
+#' @param items An \pkg{rstac} doc_items object
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
-#' @return A STACItemCollection
 #' @rdname stac_utilities
 #' @export
+#' @details
+#' The `stac_cloud_filter` function filters a STAC item collection by cloud cover
+#' percentage. It uses the `eo:cloud_cover` property to filter the items.
+#' Items with a cloud cover percentage less than the specified `max_cloud_cover`
+#' are retained.
 stac_cloud_filter <- function(items, max_cloud_cover) {
   v_assert_type(items, "items", "doc_items")
   v_assert_type(max_cloud_cover, "max_cloud_cover", "numeric")
@@ -289,20 +311,6 @@ stac_cloud_filter <- function(items, max_cloud_cover) {
     )
 }
 
-#' Filter a STAC item collection by orbit state
-#' @param items A STACItemCollection
-#' @param orbit_state A character string of the orbit state to filter by
-#' @return A STACItemCollection
-#' @noRd
-#' @keywords internal
-stac_orbit_filter <- function(items, orbit_state) {
-  items |>
-    rstac::items_filter(
-      filter_fn = function(x) {
-        x$properties$`sat:orbit_state` %in% orbit_state
-      }
-    )
-}
 
 #' Generate a Sentinel 1 stac collection doc_items object
 #' @param orbit_state A character vector of the orbit state to filter by. Both
@@ -317,6 +325,11 @@ stac_orbit_filter <- function(items, orbit_state) {
 #'   end_date = "2023-01-31",
 #'   assets = "vv"
 #' )
+#' @details
+#' The `sentinel1_stac_query` function generates a Sentinel 1 stac collection
+#' doc_items object. It allows you to query Sentinel 1 data from the Planetary
+#' Computer STAC API. The function returns a collection of Sentinel 1 items
+#' that can be used to generate a Sentinel 1 rstac doc_items object.
 sentinel1_stac_query <- function(
   bbox,
   start_date,
@@ -350,4 +363,27 @@ sentinel1_stac_query <- function(
   }
 
   return(stac_its)
+}
+
+#' Filter a STAC item collection by orbit state
+#' @param items A \pkg{rstac} doc_items object
+#' @param orbit_state A character string of the orbit state to filter by
+#' @rdname stac_utilities
+#' @export
+#' @details
+#' The `stac_orbit_filter` function filters a STAC item collection by orbit
+#' state. It uses the `sat:orbit_state` property to filter the items.
+#' Items with an orbit state matching the specified `orbit_state` are retained.
+#' It is intended for use with Sentinel-1 data.
+stac_orbit_filter <- function(
+  items,
+  orbit_state = c("descending", "ascending")
+) {
+  rlang::arg_match(orbit_state, multiple = TRUE)
+  items |>
+    rstac::items_filter(
+      filter_fn = function(x) {
+        x$properties$`sat:orbit_state` %in% orbit_state
+      }
+    )
 }
