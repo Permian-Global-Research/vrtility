@@ -63,7 +63,6 @@ reference:
     contents:
       - stac_query
       - sentinel2_stac_query
-      - sign_planetary_computer
   - title: Raster visualisation
     desc: plotting functions for raster files and vrt_x objects
     contents: plot_raster_src
