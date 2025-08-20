@@ -61,3 +61,18 @@ gdalraster_engine_asserts_init <- function(
   )
   v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
 }
+
+#' Build a VSI source string for GDAL raster drivers
+#' @param src character source path
+#' @param vsi character VSI prefix (e.g., "/vsicurl/")
+#' @param drive character GDAL driver prefix (e.g., "EOPFZARR")
+#' @return character VSI source string
+#' @keywords internal
+#' @noRd
+gdal_driver_vsi_src_builder <- function(src, vsi = "", drive = "") {
+  osrc <- paste0(vsi, src)
+  if (nzchar(drive)) {
+    osrc <- paste0(drive, ":", '"', osrc, '"')
+  }
+  return(osrc)
+}
