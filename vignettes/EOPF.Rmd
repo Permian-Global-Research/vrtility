@@ -1,0 +1,68 @@
+---
+title: "EOPF Sentinel-2 Level-2A"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{EOPF Sentinel-2 Level-2A}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(vrtility)
+
+mirai::daemons(6)
+
+bbox <- gdalraster::bbox_from_wkt(
+  wkt = "POINT (-16.25 64.09)",
+  extend_x = 0.4,
+  extend_y = 0.1
+)
+
+bbx_proj <- bbox_to_projected(bbox)
+
+
+
+eopf_s2 <- stac_query(
+  bbox = bbox,
+  stac_source = "https://stac.core.eopf.eodc.eu/",
+  collection = "sentinel-2-l2a",
+  start_date = "2025-05-01",
+  end_date = "2025-07-30"
+)
+
+eopf_filter <- rstac::assets_select(eopf_s2,
+  asset_names = c("B02_10m", "B03_10m", "B04_10m", "B08_10m", "SCL_20m")
+) |>
+  stac_cloud_filter(max_cloud_cover = 30)
+
+
+eopf_s2_col <- vrt_collect(eopf_filter, vsi_prefix = "/vsicurl/", driver = "EOPFZARR")
+
+print(eopf_s2_col[[1]][[1]], xml = TRUE)
+
+eopf_s2_col_reord <- vrt_move_band(eopf_s2_col, 1, 5)
+
+eopf_s2_col_reord_warp <- vrt_warp(eopf_s2_col_reord,
+  t_srs = attr(bbx_proj, "wkt"),
+  te = bbx_proj,
+  tr = c(10, 10)
+)
+
+
+
+eopf_s2_col_reord_warp_stack <- vrt_stack(eopf_s2_col_reord_warp)
+
+eopf_s2_median <- vrt_set_py_pixelfun(
+  eopf_s2_col_reord_warp_stack, median_numpy()
+) |>
+  vrt_compute(outfile = fs::file_temp(ext = ".tif"), engine = "gdalraster")
+
+plot_raster_src(eopf_s2_median, c(3, 2, 1), adj_low = 0.3, axes = FALSE)
+```
