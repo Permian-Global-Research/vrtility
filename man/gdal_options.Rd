@@ -6,6 +6,7 @@
 \alias{gdalwarp_options}
 \alias{set_gdal_config}
 \alias{set_gdal_cache_max}
+\alias{gdal_raster_drivers}
 \title{Create and set GDAL configuration options.}
 \usage{
 gdal_config_opts(
@@ -54,6 +55,8 @@ gdalwarp_options(
 set_gdal_config(x, scope = c("gdalraster", "sys"))
 
 set_gdal_cache_max(mem_fraction = 0.1)
+
+gdal_raster_drivers(shortname = FALSE)
 }
 \arguments{
 \item{VSI_CACHE}{Should the Virtual File System (VSI) cache be used?}
@@ -134,12 +137,19 @@ UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
 
 \item{mem_fraction}{Fraction of total RAM to use for GDAL cache, default is
 0.1 (10\% of total RAM)}
+
+\item{shortname}{Logical indicating whether to return the short names of the
+drivers (default is FALSE)}
 }
 \value{
 Character vector of options
 
 set_gdal_cache_max returns (invisibly), a
 \code{\link[memuse]{memuse}} object - the value set for GDAL_CACHEMAX
+
+A character vector of GDAL raster driver shortnames if
+\code{shortname = TRUE}, otherwise a data frame with the full driver
+information.
 }
 \description{
 This function sets GDAL configuration options that can be used to
