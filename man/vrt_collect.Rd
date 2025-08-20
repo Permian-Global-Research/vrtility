@@ -8,17 +8,33 @@
 \alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x, config_opts, bands, band_descriptions, datetimes)
+vrt_collect(
+  x,
+  config_opts,
+  bands,
+  band_descriptions,
+  datetimes,
+  vsi_prefix,
+  driver
+)
 
 \method{vrt_collect}{character}(
   x,
   config_opts = gdal_config_opts(),
   bands = NULL,
   band_descriptions = NULL,
-  datetimes = rep("", length(x))
+  datetimes = rep("", length(x)),
+  vsi_prefix = "",
+  driver = ""
 )
 
-\method{vrt_collect}{doc_items}(x, config_opts = gdal_config_opts(), ...)
+\method{vrt_collect}{doc_items}(
+  x,
+  vsi_prefix = "/vsicurl/",
+  driver = "",
+  config_opts = gdal_config_opts(),
+  ...
+)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
 
@@ -35,6 +51,14 @@ collection}
 \item{band_descriptions}{A character vector of band descriptions.}
 
 \item{datetimes}{A character vector of datetimes.}
+
+\item{vsi_prefix}{A character string indicating the VSI prefix to use for
+the VRT sources. Defaults to \code{"/vsicurl/"}.
+See \code{\link[gdalraster]{vsi_get_fs_prefixes()}} for available options.}
+
+\item{driver}{A character string indicating the GDAL driver to use for the
+input source(s). if "" is provided, the driver will be automatically determined by GDAL.
+for available drivers use \code{\link{gdal_raster_drivers}}.}
 
 \item{...}{In the case of \code{c}, additional vrt_collection objects to
 concatenate to \code{x}. Otherwise, additional arguments to pass to the method or
