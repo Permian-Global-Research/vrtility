@@ -286,5 +286,9 @@ set_gdal_cache_max <- function(mem_fraction = 0.1) {
 gdal_raster_drivers <- function(shortname = FALSE) {
   gdf <- gdalraster::gdal_formats()
   rgdf <- gdf[gdf$raster, ]
-  ifelse(shortname, rgdf$short_name, rgdf)
+
+  if (shortname) {
+    return(rgdf[["short_name"]])
+  }
+  return(rgdf)
 }
