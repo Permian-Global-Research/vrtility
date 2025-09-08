@@ -146,17 +146,9 @@ assert_files_exist <- function(x, url_possible = FALSE) {
 
 assert_is_url <- function(path) {
   # Original pattern for standard URLs and VSI paths
-  standard_pattern <- "^(http|https|ftp|ftps|s3|gs)://)"
-  vsi_pattern <- "^(/vsi[a-z0-9]+/)"
-
-  # Combined pattern
-  combined_pattern <- paste(
-    standard_pattern,
-    vsi_pattern,
-    sep = "|"
-  )
-
-  grepl(combined_pattern, path)
+  standard_pattern <- "^(http|https|ftp|ftps|s3|gs)://"
+  # This will throw an error if the URL is invalid
+  grepl(standard_pattern, path)
 }
 
 
