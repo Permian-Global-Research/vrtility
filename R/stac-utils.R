@@ -1,13 +1,3 @@
-#' User agent for vrtility
-#' @return A user agent string
-#' @keywords internal
-#' @noRd
-vrtility_usr_agent <- function() {
-  httr::user_agent(
-    "vrtility (https://permian-global-research.github.io/vrtility/)"
-  )
-}
-
 #' format a date for a STAC query
 #' @param x A character string of a date
 #' @return A character string of the date in the correct format
@@ -74,15 +64,7 @@ stac_query <- function(
     limit = limit
   )
 
-  items <- rstac::items_fetch(
-    rstac::get_request(
-      search,
-      vrtility_usr_agent()
-    ),
-    vrtility_usr_agent()
-  )
-
-  items
+  return(rstac::items_fetch(rstac::get_request(search)))
 }
 
 
@@ -113,13 +95,12 @@ sign_planetary_computer <- function(
     )
     rstac::items_sign(
       items,
-      rstac::sign_planetary_computer(vrtility_usr_agent())
+      rstac::sign_planetary_computer()
     )
   } else {
     rstac::items_sign(
       items,
       rstac::sign_planetary_computer(
-        vrtility_usr_agent(),
         headers = c("Ocp-Apim-Subscription-Key" = subscription_key)
       )
     )
