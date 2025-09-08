@@ -222,6 +222,11 @@ vrt_compute.vrt_block <- function(
     return(result)
   }
 
+  if (length(x$date_time) > 1) {
+    lubdttm <- lubridate::as_datetime(x$date_time)
+    x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+  }
+
   vrt_collect(
     result,
     config_opts = config_options,
