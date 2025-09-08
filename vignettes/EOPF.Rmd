@@ -34,7 +34,7 @@ eopf_s2 <- stac_query(
   stac_source = "https://stac.core.eopf.eodc.eu/",
   collection = "sentinel-2-l2a",
   start_date = "2025-05-01",
-  end_date = "2025-07-30"
+  end_date = "2025-05-14"
 )
 
 eopf_filter <- rstac::assets_select(eopf_s2,
@@ -59,10 +59,42 @@ eopf_s2_col_reord_warp <- vrt_warp(eopf_s2_col_reord,
 
 eopf_s2_col_reord_warp_stack <- vrt_stack(eopf_s2_col_reord_warp)
 
+print(eopf_s2_col_reord_warp_stack, xml = TRUE)
+
+
+
+
 eopf_s2_median <- vrt_set_py_pixelfun(
   eopf_s2_col_reord_warp_stack, median_numpy()
 ) |>
-  vrt_compute(outfile = fs::file_temp(ext = ".tif"), engine = "gdalraster")
+  vrt_compute(
+    outfile = fs::file_temp(ext = ".tif"),
+    engine = "gdalraster", recollect = TRUE
+  )
+
+plot(eopf_s2_median, c(4, 2, 1), adj_low = 0.3)
+
+print(eopf_s2_median, xml = TRUE)
+
+eopf_add_b <- vrt_add_empty_band(eopf_s2_median, 6, "NDVI") |>
+  vrt_set_gdal_pixelfun(
+    pixfun = "expression",
+    expression = "B1*2",
+    band_idx = 5
+  )
+
+x <- vrt_compute(eopf_add_b,
+  outfile = fs::file_temp(ext = ".tif"),
+  engine = "warp", recollect = TRUE
+)
+
+
+plot(x, band = 2)
+
+
+print(eopf_add_b, xml = TRUE)
+
+
 
 plot_raster_src(eopf_s2_median, c(3, 2, 1), adj_low = 0.3, axes = FALSE)
 ```
