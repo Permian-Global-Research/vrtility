@@ -1,13 +1,3 @@
-#' User agent for vrtility
-#' @return A user agent string
-#' @keywords internal
-#' @noRd
-vrtility_usr_agent <- function() {
-  httr::user_agent(
-    "vrtility (https://permian-global-research.github.io/vrtility/)"
-  )
-}
-
 #' format a date for a STAC query
 #' @param x A character string of a date
 #' @return A character string of the date in the correct format
@@ -91,18 +81,51 @@ stac_query <- function(
     limit = limit
   )
 
-  items <- rstac::items_fetch(
-    rstac::get_request(
-      search,
-      vrtility_usr_agent()
-    ),
-    vrtility_usr_agent()
-  )
-
-  items
+  return(rstac::items_fetch(rstac::get_request(search)))
 }
 
 
+#' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
+#'
+#' @param items A STACItemCollection.
+#' @param subscription_key Optionally (but strongly recommended), a
+#' subscription key associated with your MPC account. At the time of writing,
+#' this is required for downloading Sentinel 1 RTC products, as well as NAIP
+#' imagery. This key will be automatically used if the environment
+#' variable `MPC_TOKEN` is set.
+#'
+#' @returns A STACItemCollection object with signed assets url.
+#'
+#' @export
+#' @rdname stac_utilities
+sign_planetary_computer <- function(
+  items,
+  subscription_key = Sys.getenv("MPC_TOKEN")
+) {
+  if (!nzchar(subscription_key)) {
+    cli::cli_warn(
+      c(
+        "!" = "No subscription key provided. Using default signing method.",
+        " " = "This may not work for some items or could be slower.",
+        "i" = "Set your key using the `MPC_TOKEN` environment variable."
+      )
+    )
+    rstac::items_sign(
+      items,
+      rstac::sign_planetary_computer()
+    )
+  } else {
+    rstac::items_sign(
+      items,
+      rstac::sign_planetary_computer(
+        headers = c("Ocp-Apim-Subscription-Key" = subscription_key)
+      )
+    )
+  }
+}
+
+
+#' Generate a Sentinel 2 stac collection doc_imes object
 #' @param bbox A numeric vector of the bounding box (length 4) in lat/long
 #' @param assets A character vector of the asset names to include
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
