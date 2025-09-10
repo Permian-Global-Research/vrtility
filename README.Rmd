@@ -46,7 +46,7 @@ masking functions. but could easily be adapted for deriving spectral indices
 or calculating complex time series functions. All powered by 
 [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
-- vrtility enables the use of GDAL VRT python and built-in pixel functions. The
+- vrtility enables the use of GDAL VRT python and built-in (C++) pixel functions. The
   python [numpy](https://numpy.org/)-based pixel functions can be used to apply
   cloud masks and summarise pixel values (e.g. median) from multiple images
   (i.e create a composite image). All python environment and package management
