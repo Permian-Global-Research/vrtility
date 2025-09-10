@@ -1,11 +1,13 @@
 #' Construct the base VRT object for composing VRT pipelines.
 #' @param x An object to be used to create a vrt_x object see details.
+#' @param bands A numeric vector of band indices to include in the VRT
+#' collection
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
 #' @param config_opts A named character vector of GDAL configuration options.
 #' @param vsi_prefix A character string indicating the VSI prefix to use for
 #' the VRT sources. Defaults to `"/vsicurl/"`.
-#' See \code{\link[gdalraster]{vsi_get_fs_prefixes()}} for available options.
+#' See \code{\link[gdalraster]{vsi_get_fs_prefixes}} for available options.
 #' @param driver A character string indicating the GDAL driver to use for the
 #' input source(s). if "" is provided, the driver will be automatically determined by GDAL.
 #' for available drivers use \code{\link{gdal_raster_drivers}}.
@@ -48,12 +50,7 @@
 #'
 vrt_collect <- function(
   x,
-  config_opts,
-  bands,
-  band_descriptions,
-  datetimes,
-  vsi_prefix,
-  driver
+  ...
 ) {
   UseMethod("vrt_collect")
 }
@@ -68,11 +65,7 @@ vrt_collect.default <- function(x, ...) {
   )
 }
 
-#' @param bands A numeric vector of band indices to include in the VRT
-#' collection
-#' @param band_descriptions A character vector of band descriptions.
-#' @param datetimes A character vector of datetimes.
-#' @param config_opts A named character vector of GDAL configuration options.
+
 #' @rdname vrt_collect
 #' @export
 vrt_collect.character <- function(
@@ -82,7 +75,8 @@ vrt_collect.character <- function(
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
   vsi_prefix = "",
-  driver = ""
+  driver = "",
+  ...
 ) {
   gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
   assert_files_exist(x, url_possible = TRUE)
@@ -172,14 +166,13 @@ vrt_collect.character <- function(
   )
 }
 
-#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(
   x,
+  config_opts = gdal_config_opts(),
   vsi_prefix = "/vsicurl/",
   driver = "",
-  config_opts = gdal_config_opts(),
   ...
 ) {
   gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
