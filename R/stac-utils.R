@@ -32,8 +32,7 @@ format_stac_date <- function(x) {
 #' )
 #'
 #' # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
-#' # MPC signing method via rstac:
-#' mpc_signed <- rstac::items_sign_planetary_computer(s2_its)
+#' # MPC signing `sign_mpc_items()`:
 #' # or use GDAL by setting the following environment variable:
 #' # Sys.setenv("VSICURL_PC_URL_SIGNING" = "YES")
 #'
@@ -44,7 +43,8 @@ format_stac_date <- function(x) {
 #'
 #' The Microsoft Planetary Computer (MPC) STAC API is a very convenient, large
 #' and open catalogue of EO data. To access these assets, urls must be signed -
-#' this can be done using \code{\link[rstac]{items_sign_planetary_computer}}`
+#' this can be done using \code{\link{sign_mpc_items}},
+#' \code{\link[rstac]{items_sign_planetary_computer}}`,
 #' or with GDAL by setting the environment variable `VSICURL_PC_URL_SIGNING` to
 #' `YES`. see the examples for more details.
 
@@ -85,47 +85,7 @@ stac_query <- function(
 }
 
 
-#' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
-#'
-#' @param items A STACItemCollection.
-#' @param subscription_key Optionally (but strongly recommended), a
-#' subscription key associated with your MPC account. At the time of writing,
-#' this is required for downloading Sentinel 1 RTC products, as well as NAIP
-#' imagery. This key will be automatically used if the environment
-#' variable `MPC_TOKEN` is set.
-#'
-#' @returns A STACItemCollection object with signed assets url.
-#'
-#' @export
-#' @rdname stac_utilities
-sign_planetary_computer <- function(
-  items,
-  subscription_key = Sys.getenv("MPC_TOKEN")
-) {
-  if (!nzchar(subscription_key)) {
-    cli::cli_warn(
-      c(
-        "!" = "No subscription key provided. Using default signing method.",
-        " " = "This may not work for some items or could be slower.",
-        "i" = "Set your key using the `MPC_TOKEN` environment variable."
-      )
-    )
-    rstac::items_sign(
-      items,
-      rstac::sign_planetary_computer()
-    )
-  } else {
-    rstac::items_sign(
-      items,
-      rstac::sign_planetary_computer(
-        headers = c("Ocp-Apim-Subscription-Key" = subscription_key)
-      )
-    )
-  }
-}
-
-
-#' Generate a Sentinel 2 stac collection doc_imes object
+#' Generate a Sentinel 2 stac collection doc_items object
 #' @param bbox A numeric vector of the bounding box (length 4) in lat/long
 #' @param assets A character vector of the asset names to include
 #' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
@@ -189,7 +149,7 @@ sentinel2_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- rstac::items_sign_planetary_computer(stac_its)
+    stac_its <- sign_mpc_items(stac_its)
   }
 
   return(stac_its)
@@ -310,7 +270,7 @@ hls_mpc_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- rstac::items_sign_planetary_computer(stac_its)
+    stac_its <- sign_mpc_items(stac_its)
   }
   return(stac_its)
 }
@@ -382,7 +342,7 @@ sentinel1_stac_query <- function(
   stac_its <- rstac::assets_select(stac_its, asset_names = assets)
 
   if (mpc_sign) {
-    stac_its <- rstac::items_sign_planetary_computer(stac_its)
+    stac_its <- sign_mpc_items(stac_its)
   }
 
   return(stac_its)
@@ -409,4 +369,151 @@ stac_orbit_filter <- function(
         x$properties$`sat:orbit_state` %in% orbit_state
       }
     )
+}
+
+
+#' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
+#'
+#' @param items A STACItemCollection.
+#' @param subscription_key A subscription key associated with your MPC account.
+#' This key will be automatically used if the environment variable `MPC_TOKEN`
+#' is set.
+#' @details Microsoft no longer provide the ability to generate your own
+#' subscription keys. This can be requested depending on the application; see
+#' here for further details:
+#' https://github.com/microsoft/PlanetaryComputer/issues/457. A key is not
+#' required for data access and a more reliable way to ensure access is to
+#' collocate the workload on the Azure West Europe region.
+#'
+#' Unlike the `rstac::items_sign_planetary_computer` function, this function
+#' caches collection-level signing tokens for 45 minutes to avoid repeated
+#' requests for the same collection within a short time period. This can avoid
+#' 429 (permission denied) errors when signing many items from the same
+#' collection.
+#'
+#' @returns A STACItemCollection object with signed assets url.
+#'
+#' @export
+#' @rdname stac_utilities
+sign_mpc_items <- function(
+  items,
+  subscription_key = Sys.getenv("MPC_TOKEN", unset = NA)
+) {
+  if (rlang::is_empty(items$features)) {
+    cli::cli_abort("There are no MPC items to sign.")
+  }
+
+  collection <- items$features[[1]]$collection
+
+  token_cache_file <- set_token_cache(collection)
+
+  reuse_token <- is_token_valid(token_cache_file)
+
+  collection_token <- read_token(
+    reuse_token,
+    collection,
+    subscription_key,
+    token_cache_file
+  )
+
+  # update the href for each asset in each item
+  for (i in seq_along(items$features)) {
+    for (j in seq_along(items$features[[i]]$assets)) {
+      items$features[[i]]$assets[[j]]$href <- paste0(
+        items$features[[i]]$assets[[j]]$href,
+        "?",
+        collection_token$token
+      )
+    }
+  }
+  return(items)
+}
+
+#' Create a cache file path for an MPC token
+#' @param collection A character string of the collection name
+#' @return A character string of the cache file path
+#' @noRd
+#' @keywords internal
+set_token_cache <- function(collection) {
+  fs::dir_create(rappdirs::user_cache_dir("vrtility"))
+  fs::path(
+    rappdirs::user_cache_dir("vrtility"),
+    paste0(collection, "_mpc_token.rds")
+  )
+}
+
+#' Check if an MPC token is still valid and if it exists
+#' @param token_cache_file A character string of the cache file path
+#' @return A logical indicating whether the token is valid
+#' @noRd
+#' @keywords internal
+is_token_valid <- function(token_cache_file) {
+  if (fs::file_exists(token_cache_file)) {
+    collection_token <- readRDS(token_cache_file)
+
+    # apparently this is the token lifetime
+    max_dt <- lubridate::make_difftime(minute = 45)
+
+    token_age <- lubridate::ymd_hms(Sys.time(), tz = Sys.timezone()) -
+      lubridate::ymd_hms(collection_token$`msft:expiry`, tz = "UTC")
+
+    if (max_dt > token_age) {
+      # cli::cli_alert_info("Using cached MPC token")
+      return(TRUE)
+    } else {
+      # cli::cli_alert_info("MPC token expired - requesting new token")
+      return(FALSE)
+    }
+  } else {
+    return(FALSE)
+  }
+}
+
+#' Read or request a new MPC token
+#' @param reuse_token A logical indicating whether to reuse the token
+#' @param collection A character string of the collection name
+#' @param subscription_key A subscription key associated with your MPC account
+#' @param token_cache_file A character string of the cache file path
+#' @return A list containing the token and its expiry time
+#' @noRd
+#' @keywords internal
+read_token <- function(
+  reuse_token,
+  collection,
+  subscription_key,
+  token_cache_file
+) {
+  if (!reuse_token) {
+    collection_sign_url <- paste0(
+      "https://planetarycomputer.microsoft.com/api/sas/v1/token/",
+      collection
+    )
+
+    if (is.na(subscription_key)) {
+      header_fun <- function(x) {
+        httr2::req_headers(x, Accept = "application/json")
+      }
+    } else {
+      header_fun <- function(x) {
+        httr2::req_headers(
+          x,
+          Accept = "application/json",
+          "Ocp-Apim-Subscription-Key" = subscription_key
+        )
+      }
+    }
+
+    collection_token <- httr2::request(collection_sign_url) |>
+      header_fun() |>
+      httr2::req_perform() |>
+      httr2::resp_body_json()
+
+    saveRDS(
+      collection_token,
+      file = token_cache_file
+    )
+  } else {
+    collection_token <- readRDS(token_cache_file)
+  }
+  return(collection_token)
 }
