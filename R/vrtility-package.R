@@ -21,6 +21,7 @@
 #' \item{\code{\link{stac_cloud_filter}}}{Filter a STAC collection for cloud cover}
 #' \item{\code{\link{sentinel1_stac_query}}}{Query a STAC catalog for Sentinel-1 data}
 #' \item{\code{\link{stac_orbit_filter}}}{Filter a STAC collection for orbit state}
+#' \item{\code{\link{sign_mpc_items}}}{Sign STAC items from Microsoft Planetary Computer}
 #' }
 #' @section VRT utilities:
 #' \describe{
