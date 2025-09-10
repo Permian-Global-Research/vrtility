@@ -71,8 +71,18 @@ gdalraster_engine_asserts_init <- function(
 #' @noRd
 gdal_driver_vsi_src_builder <- function(src, vsi = "", drive = "") {
   osrc <- paste0(vsi, src)
-  if (nzchar(drive)) {
+  if (drive == "EOPFZARR") {
+    parts <- strsplit(
+      osrc,
+      split = "(?<=\\.zarr)",
+      perl = TRUE
+    )
+    osrc <- sapply(parts, function(x) {
+      paste0(drive, ":", '"', x[1], '":', x[2])
+    })
+  } else if (nzchar(drive)) {
     osrc <- paste0(drive, ":", '"', osrc, '"')
   }
+
   return(osrc)
 }
