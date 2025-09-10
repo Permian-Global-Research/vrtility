@@ -7,6 +7,7 @@
 \alias{stac_cloud_filter}
 \alias{sentinel1_stac_query}
 \alias{stac_orbit_filter}
+\alias{sign_mpc_items}
 \title{Query a STAC source}
 \usage{
 stac_query(bbox, stac_source, collection, start_date, end_date, limit = 999)
@@ -51,6 +52,8 @@ sentinel1_stac_query(
 )
 
 stac_orbit_filter(items, orbit_state = c("descending", "ascending"))
+
+sign_mpc_items(items, subscription_key = Sys.getenv("MPC_TOKEN", unset = NA))
 }
 \arguments{
 \item{bbox}{A numeric vector of the bounding box (length 4) in lat/long}
@@ -73,12 +76,18 @@ stac_orbit_filter(items, orbit_state = c("descending", "ascending"))
 Planetary Computer API's signing method (only required if using the
 Planetary Computer STAC API).}
 
-\item{items}{A \pkg{rstac} doc_items object}
+\item{items}{A STACItemCollection.}
 
 \item{orbit_state}{A character string of the orbit state to filter by}
+
+\item{subscription_key}{A subscription key associated with your MPC account.
+This key will be automatically used if the environment variable \code{MPC_TOKEN}
+is set.}
 }
 \value{
 A \pkg{rstac} doc_items object
+
+A STACItemCollection object with signed assets url.
 }
 \description{
 A set of helper functions to query STAC APIs. These are very
@@ -93,7 +102,8 @@ convenient way to interact with STAC APIs.
 
 The Microsoft Planetary Computer (MPC) STAC API is a very convenient, large
 and open catalogue of EO data. To access these assets, urls must be signed -
-this can be done using \code{\link[rstac]{items_sign_planetary_computer}}\verb{or with GDAL by setting the environment variable}VSICURL_PC_URL_SIGNING\code{to}YES`. see the examples for more details.
+this can be done using \code{\link{sign_mpc_items}},
+\code{\link[rstac]{items_sign_planetary_computer}}\verb{, or with GDAL by setting the environment variable }VSICURL_PC_URL_SIGNING\code{to}YES`. see the examples for more details.
 
 \code{sentinel2_stac_query} facilitates the querying of the Sentinel-2
 level 2A data from the Planetary Computer STAC API. It returns a
@@ -120,9 +130,22 @@ The \code{stac_orbit_filter} function filters a STAC item collection by orbit
 state. It uses the \code{sat:orbit_state} property to filter the items.
 Items with an orbit state matching the specified \code{orbit_state} are retained.
 It is intended for use with Sentinel-1 data.
+
+Microsoft no longer provide the ability to generate your own
+subscription keys. This can be requested depending on the application; see
+here for further details:
+https://github.com/microsoft/PlanetaryComputer/issues/457. A key is not
+required for data access and a more reliable way to ensure access is to
+collocate the workload on the Azure West Europe region.
+
+Unlike the \code{rstac::items_sign_planetary_computer} function, this function
+caches collection-level signing tokens for 45 minutes to avoid repeated
+requests for the same collection within a short time period. This can avoid
+429 (permission denied) errors when signing many items from the same
+collection.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 s2_its <- stac_query(
   bbox = c(-12.386, -37.214, -12.186, -37.014),
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
@@ -133,12 +156,11 @@ s2_its <- stac_query(
 )
 
 # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
-# MPC signing method via rstac:
-mpc_signed <- rstac::items_sign_planetary_computer(s2_its)
+# MPC signing `sign_mpc_items()`:
 # or use GDAL by setting the following environment variable:
 # Sys.setenv("VSICURL_PC_URL_SIGNING" = "YES")
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sentinel2_stac_query(
   bbox = c(-12.386, -37.214, -12.186, -37.014),
   start_date = "2023-01-01",
@@ -147,7 +169,7 @@ sentinel2_stac_query(
   assets = c("B02", "B03", "B04", "B08", "SCL")
 )
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 hls_query <- hls_stac_query(
   c(144.130, -7.725, 144.470, -7.475),
   start_date = "2023-01-01",
@@ -166,7 +188,7 @@ earthdatalogin::edl_netrc(
   password = Sys.getenv("EARTHDATA_PASSWORD")
 )
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sentinel1_stac_query(
   bbox = c(-12.386, -37.214, -12.186, -37.014),
   start_date = "2023-01-01",

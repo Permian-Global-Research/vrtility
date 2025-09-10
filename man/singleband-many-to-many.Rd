@@ -70,7 +70,7 @@ outliers in time-series using the Hampel filter. to be provided to
 \details{
 We have a lot TODO: here...
 
-(details from the \code{\link[pracma]{hampel}}) The ‘median absolute deviation’ computation is
+(details from the \code{pracma::hampel}) The ‘median absolute deviation’ computation is
 done in the (-k...k) vicinity of each point at least k steps away from the
 end points of the interval. At the lower and upper end the time series values
 are preserved.
