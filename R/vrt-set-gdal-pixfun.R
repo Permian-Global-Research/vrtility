@@ -122,17 +122,7 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
     }
   }
 
-  purrr::walk(bands[band_idx], function(.x) {
-    check_for_pixel_fun(.x)
-    xml2::xml_set_attr(.x, "subClass", "VRTDerivedRasterBand")
-    xml2::xml_add_child(.x, "PixelFunctionType", pixfun)
-    if (length(pf_arg_vals) > 0) {
-      pf_args <- xml2::xml_add_child(.x, "PixelFunctionArguments")
-      purrr::iwalk(pf_arg_vals, function(val, name) {
-        xml2::xml_set_attr(pf_args, name, val)
-      })
-    }
-  })
+  purrr::walk(bands[band_idx], ~ set_gdal_pixfun_xml(.x, pixfun, pf_arg_vals))
 
   if (nodata_as_nan) {
     set_nodatavalue(vx, "NaN", nodata_targets = ".//NoDataValue")
@@ -186,4 +176,17 @@ vrt_set_gdal_pixelfun.vrt_collection <- function(
     pixfun = x$pixfun,
     warped = warped
   )
+}
+
+
+set_gdal_pixfun_xml <- function(band_xml, pixfun, pf_arg_vals) {
+  check_for_pixel_fun(band_xml)
+  xml2::xml_set_attr(band_xml, "subClass", "VRTDerivedRasterBand")
+  xml2::xml_add_child(band_xml, "PixelFunctionType", pixfun)
+  if (length(pf_arg_vals) > 0) {
+    pf_args <- xml2::xml_add_child(band_xml, "PixelFunctionArguments")
+    purrr::iwalk(pf_arg_vals, function(val, name) {
+      xml2::xml_set_attr(pf_args, name, val)
+    })
+  }
 }
