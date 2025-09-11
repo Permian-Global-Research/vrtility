@@ -451,13 +451,10 @@ is_token_valid <- function(token_cache_file) {
   if (fs::file_exists(token_cache_file)) {
     collection_token <- readRDS(token_cache_file)
 
-    # apparently this is the token lifetime
-    max_dt <- lubridate::make_difftime(minute = 45)
-
     token_age <- lubridate::ymd_hms(Sys.time(), tz = Sys.timezone()) -
       lubridate::ymd_hms(collection_token$`msft:expiry`, tz = "UTC")
 
-    if (max_dt > token_age) {
+    if (token_age < 0) {
       # cli::cli_alert_info("Using cached MPC token")
       return(TRUE)
     } else {
