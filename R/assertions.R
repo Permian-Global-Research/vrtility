@@ -9,7 +9,8 @@ v_assert_type <- function(
     "function",
     "stac_vrt",
     "vrt_collection",
-    "doc_items"
+    "doc_items",
+    "formula"
   ),
   nullok = TRUE,
   multiple = FALSE
