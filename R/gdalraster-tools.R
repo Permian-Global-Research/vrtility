@@ -27,6 +27,10 @@ raster_template_params <- function(
     seq_len(nbands),
     ~ tds$getScale(.x)
   )
+  offset_vals <- purrr::map_vec(
+    seq_len(nbands),
+    ~ tds$getOffset(.x)
+  )
   data_type <- tds$getDataTypeName(1)
 
   return(list(
@@ -37,7 +41,8 @@ raster_template_params <- function(
     blksize = blksize,
     nbands = nbands,
     scale_vals = scale_vals,
-    data_type = data_type
+    data_type = data_type,
+    offset_vals = offset_vals
   ))
 }
 
