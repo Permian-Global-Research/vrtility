@@ -40,6 +40,18 @@ v_assert_length <- function(x, name, length, nullok = TRUE) {
   }
 }
 
+v_assert_length_gt <- function(x, name, length, nullok = TRUE) {
+  if (nullok && is.null(x)) {
+    return()
+  }
+  if (rlang::is_true(length(x) <= length)) {
+    cli::cli_abort(
+      "{name} must have length greater than {length}",
+      class = "vrtility_length_error"
+    )
+  }
+}
+
 v_assert_valid_schema <- function(x) {
   v_assert_true(
     fs::file_exists(x),
@@ -194,4 +206,27 @@ v_assert_mask_names_match <- function(inbands, maskfun) {
       class = "vrtility_maskfun_error"
     )
   }
+}
+
+
+v_assert_formula_valid <- function(formlist) {
+  lhs_names <- purrr::map_chr(formlist, function(f) {
+    deparse(rlang::f_lhs(f))
+  })
+
+  # assert lengths 1
+  purrr::walk(
+    lhs_names,
+    ~ v_assert_length(.x, "band formula lhs", 1, nullok = FALSE)
+  )
+
+  rhs_form <- purrr::map(formlist, ~ all.vars(rlang::f_rhs(.x)))
+
+  purrr::walk(
+    rhs_form,
+    ~ v_assert_length_gt(.x, "band formula variables", 0, nullok = FALSE)
+  )
+
+  names(formlist) <- lhs_names
+  return(formlist)
 }
