@@ -371,6 +371,42 @@ stac_orbit_filter <- function(
     )
 }
 
+#' Filter a STAC item collection by minimum coverage of a bounding box
+#' @param items A \pkg{rstac} doc_items object
+#' @param bbox A numeric vector of length 4 representing a bounding box
+#' @param min_coverage A numeric value between 0 and 1 representing the minimum
+#' coverage of the bounding box required to retain the item
+#' @rdname stac_utilities
+#' @export
+#' @details
+#' The `stac_coverage_filter` function filters a STAC item collection by
+#' minimum coverage of a bounding box. It calculates the area of intersection
+#' between the bounding box and the item's bounding box, and retains items
+#' where the area of intersection is greater than the specified `min_coverage`
+#' of the bounding box area.
+stac_coverage_filter <- function(items, bbox, min_coverage = 0.5) {
+  v_assert_type(items, "items", "doc_items", nullok = FALSE)
+  v_assert_type(bbox, "bbox", "numeric")
+  v_assert_length(bbox, "bbox", 4)
+  v_assert_type(min_coverage, "min_coverage", "numeric")
+  v_assert_within_range(min_coverage, "min_coverage", 0, 1)
+
+  target_wkt <- gdalraster::bbox_to_wkt(bbox)
+  target_area <- gdalraster::g_geodesic_area(target_wkt, srs = "EPSG:4326")
+  rstac::items_filter(
+    items,
+    filter_fn = function(x) {
+      intersect_area <- gdalraster::g_intersection(
+        target_wkt,
+        gdalraster::bbox_to_wkt(x$bbox)
+      ) |>
+        gdalraster::g_geodesic_area(srs = "EPSG:4326")
+
+      (intersect_area / target_area) > min_coverage
+    }
+  )
+}
+
 
 #' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 #'

@@ -7,6 +7,7 @@
 \alias{stac_cloud_filter}
 \alias{sentinel1_stac_query}
 \alias{stac_orbit_filter}
+\alias{stac_coverage_filter}
 \alias{sign_mpc_items}
 \title{Query a STAC source}
 \usage{
@@ -53,10 +54,12 @@ sentinel1_stac_query(
 
 stac_orbit_filter(items, orbit_state = c("descending", "ascending"))
 
+stac_coverage_filter(items, bbox, min_coverage = 0.5)
+
 sign_mpc_items(items, subscription_key = Sys.getenv("MPC_TOKEN", unset = NA))
 }
 \arguments{
-\item{bbox}{A numeric vector of the bounding box (length 4) in lat/long}
+\item{bbox}{A numeric vector of length 4 representing a bounding box}
 
 \item{stac_source}{A character string of the STAC source}
 
@@ -79,6 +82,9 @@ Planetary Computer STAC API).}
 \item{items}{A STACItemCollection.}
 
 \item{orbit_state}{A character string of the orbit state to filter by}
+
+\item{min_coverage}{A numeric value between 0 and 1 representing the minimum
+coverage of the bounding box required to retain the item}
 
 \item{subscription_key}{A subscription key associated with your MPC account.
 This key will be automatically used if the environment variable \code{MPC_TOKEN}
@@ -130,6 +136,12 @@ The \code{stac_orbit_filter} function filters a STAC item collection by orbit
 state. It uses the \code{sat:orbit_state} property to filter the items.
 Items with an orbit state matching the specified \code{orbit_state} are retained.
 It is intended for use with Sentinel-1 data.
+
+The \code{stac_coverage_filter} function filters a STAC item collection by
+minimum coverage of a bounding box. It calculates the area of intersection
+between the bounding box and the item's bounding box, and retains items
+where the area of intersection is greater than the specified \code{min_coverage}
+of the bounding box area.
 
 Microsoft no longer provide the ability to generate your own
 subscription keys. This can be requested depending on the application; see
