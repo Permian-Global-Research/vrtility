@@ -24,7 +24,7 @@ vrt_collect(x, ...)
 \method{vrt_collect}{doc_items}(
   x,
   config_opts = gdal_config_opts(),
-  vsi_prefix = "/vsicurl/",
+  vsi_prefix = "",
   driver = "",
   ...
 )
