@@ -120,8 +120,6 @@ vrt_collect.character <- function(
     dst <- methods::new(gdalraster::GDALRaster, tf, readonly = FALSE)
     on.exit(dst$close(), add = TRUE)
 
-    # browser()
-
     nbands <- dst$getRasterCount()
 
     purrr::walk(seq_len(nbands), function(b) {
