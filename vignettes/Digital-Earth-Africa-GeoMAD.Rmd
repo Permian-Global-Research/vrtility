@@ -33,9 +33,11 @@ daemons you want to use (R processes that will download the data in parallel).
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.11.3
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 mirai::daemons(5)
-#> [1] 5
+
 ```
 
 ## Locating the data
@@ -117,9 +119,6 @@ print(l8l9_vrt)
 #> End Date: 2024-01-01 UTC
 #> Number of Items: 2
 #> Assets: SR_B2, SR_B3, SR_B4, SR_B5
-```
-
-``` r
 
 # if you just want to look at one of the tiles...
 # plot(l8l9_vrt[[1]][[2]], c(3, 2, 1))
