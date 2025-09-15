@@ -45,31 +45,37 @@ vrt_derived_block.vrt_block <- function(x, ...) {
     )
   )
 
-  muparser_exprs <- purrr::map(
-    new_bands,
-    ~ {
-      gsub("\\s+", " ", paste(deparse(rlang::f_rhs(.x)), collapse = ""))
-    }
-  )
+  new_bands <- v_assert_formula_valid(new_bands)
 
   vx <- xml2::read_xml(x$vrt)
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
 
   dband_reqs <- purrr::map(new_bands, function(b) {
-    rqbn <- all.vars(b)
+    rqbn <- all.vars(rlang::f_rhs(b))
 
     # get bands with descriptions matching req_bands
     band_descs <- xml2::xml_text(xml2::xml_find_first(
       bands,
       ".//Description"
     ))
+
+    if (any(!rqbn %in% band_descs)) {
+      cli::cli_abort(
+        "Band {cli::col_yellow(rqbn[!rqbn %in% band_descs])} not found"
+      )
+    }
+
     req_band_idx <- which(band_descs %in% rqbn)
+
     req_bands <- bands[req_band_idx]
-    assert_matching_scales(req_bands, rqbn)
+
+    formula_scale_adj <- apply_band_formula_scales(req_bands, rqbn, b)
+
     band_srcs <- vrt_find_first_src(req_bands)
     return(list(
       req_band_idx = req_band_idx,
-      band_srcs = band_srcs
+      band_srcs = band_srcs,
+      muparser_exp = formula_scale_adj
     ))
   })
 
@@ -86,6 +92,8 @@ vrt_derived_block.vrt_block <- function(x, ...) {
 
   dbands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
 
+  muparser_exprs <- purrr::map_chr(dband_reqs, "muparser_exp")
+
   purrr::pwalk(
     list(
       band = dbands,
@@ -95,6 +103,7 @@ vrt_derived_block.vrt_block <- function(x, ...) {
     ),
     function(band, band_name, idx, mu_exp) {
       xml2::xml_set_attr(band, "band", idx)
+      xml2::xml_set_attr(band, "dataType", "Float32")
       desc <- xml2::xml_find_first(band, ".//Description")
       if (is.na(desc)) {
         desc <- xml2::xml_add_child(band, "Description")
@@ -105,35 +114,68 @@ vrt_derived_block.vrt_block <- function(x, ...) {
     }
   )
 
+  drop_scale(vx) # scale and offset are now applied at the formula level
+
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
 
+  expr_pf <- purrr::imap_chr(muparser_exprs, function(.x, .y) {
+    paste0(.y, " ~ ", .x)
+  })
+
   build_vrt_block(
     tf,
     maskfun = x$maskfun,
-    pixfun = muparser_exprs,
+    pixfun = expr_pf,
     warped = x$warped
   )
 }
 
 
-assert_matching_scales <- function(req_bands, req_band_names) {
+apply_band_formula_scales <- function(req_bands, req_band_names, form) {
+  orig_exp <- gsub(
+    "\\s+",
+    " ",
+    paste(deparse(rlang::f_rhs(form)), collapse = "")
+  )
+  # browser()
   sc_off <- purrr::map(c(".//Scale", ".//Offset"), function(v) {
     scale_node <- xml2::xml_find_all(req_bands, v)
     # read scale_node as numeric
-    xml2::xml_double(scale_node)
+    format(xml2::xml_double(scale_node), scientific = FALSE)
+  }) |>
+    purrr::set_names(c("scale", "offset")) |>
+    purrr::list_transpose() |>
+    purrr::set_names(req_band_names)
+
+  if (all(is.null(unlist(sc_off)))) {
+    return(orig_exp)
+  }
+
+  remapped_vars <- purrr::imap(sc_off, function(.x, .y) {
+    scale_chr <- if (!is.null(.x[["scale"]])) {
+      paste0(" * ", .x[["scale"]])
+    } else {
+      ""
+    }
+    # browser()
+    offset_chr <- if (!is.null(.x[["offset"]])) {
+      paste0(" + ", .x[["offset"]])
+    } else {
+      ""
+    }
+
+    paste0("(", .y, scale_chr, offset_chr, ")")
   })
 
-  purrr::walk(sc_off, function(v) {
-    if (!all(sapply(v, function(x) isTRUE(all.equal(x, v[1]))))) {
-      cli::cli_abort(
-        c(
-          "x" = "All source bands must have the same scale and offset values.",
-          "i" = "Band{?s}: {req_band_names} have a scale/offset mismatch."
-        )
-      )
-    }
-  })
-  invisible()
+  for (i in seq_along(remapped_vars)) {
+    orig_exp <- gsub(
+      paste0("\\b", names(remapped_vars)[i], "\\b"),
+      remapped_vars[[i]],
+      orig_exp
+    )
+  }
+
+  return(orig_exp)
 }
