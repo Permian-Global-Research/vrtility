@@ -117,11 +117,25 @@ vrt_collect.character <- function(
 
     ds <- methods::new(gdalraster::GDALRaster, .x)
     on.exit(ds$close(), add = TRUE)
-    dst <- methods::new(gdalraster::GDALRaster, tf)
+    dst <- methods::new(gdalraster::GDALRaster, tf, readonly = FALSE)
     on.exit(dst$close(), add = TRUE)
-    nbands <- dst$getRasterCount()
-    v_assert_length(band_descriptions, "band_descriptions", nbands)
 
+    # browser()
+
+    nbands <- dst$getRasterCount()
+
+    purrr::walk(seq_len(nbands), function(b) {
+      src_scale <- ds$getScale(band = b)
+      src_offset <- ds$getOffset(band = b)
+      if (!is.na(src_scale)) {
+        dst$setScale(band = b, scale = src_scale)
+      }
+      if (!is.na(src_offset)) {
+        dst$setOffset(band = b, offset = src_offset)
+      }
+    })
+
+    v_assert_length(band_descriptions, "band_descriptions", nbands)
     if (is.null(band_descriptions)) {
       band_descriptions <- purrr::map_chr(
         seq_len(nbands),
@@ -138,12 +152,15 @@ vrt_collect.character <- function(
         band_descriptions <- paste0("band_", seq_len(nbands))
       }
     }
+
+    # TODO: delete this...
     if (ds$isOpen()) {
       ds$close()
     }
     if (dst$isOpen()) {
       dst$close()
     }
+    ####
 
     tf <- set_vrt_descriptions(
       x = tf,
@@ -171,7 +188,7 @@ vrt_collect.character <- function(
 vrt_collect.doc_items <- function(
   x,
   config_opts = gdal_config_opts(),
-  vsi_prefix = "/vsicurl/",
+  vsi_prefix = "",
   driver = "",
   ...
 ) {
@@ -193,7 +210,7 @@ vrt_collect.doc_items <- function(
 
     suppressWarnings(
       uri <- as.list(gdal_driver_vsi_src_builder(
-        rstac::assets_url(its_asset, append_gdalvsi = FALSE),
+        rstac::assets_url(its_asset, append_gdalvsi = !nzchar(vsi_prefix)),
         vsi = vsi_prefix,
         drive = driver
       ))
