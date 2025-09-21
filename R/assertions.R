@@ -230,3 +230,31 @@ v_assert_formula_valid <- function(formlist) {
   names(formlist) <- lhs_names
   return(formlist)
 }
+
+
+v_assert_blosc <- function(level = c("warn", "abort")) {
+  level <- rlang::arg_match(level)
+  act_fun <- switch(
+    level,
+    warn = cli::cli_warn,
+    abort = cli::cli_abort
+  )
+
+  if (!check_blosc()) {
+    act_fun(c(
+      "!" = "Blosc compression is not available.",
+      "i" = "GDAL built against Blosc is required for reading the EOPF ZARR
+      format."
+    ))
+  }
+}
+
+v_assert_muparser <- function() {
+  if (!check_muparser()) {
+    cli::cli_abort(c(
+      "!" = "muparser is not available.",
+      "i" = "GDAL built with muparser support is required for
+      `vrt_derived_block()`."
+    ))
+  }
+}
