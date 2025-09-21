@@ -489,6 +489,11 @@ gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_opts) {
     multiple = TRUE
   )
   rlang::arg_match(driver, c("", gdal_raster_drivers(TRUE)))
+
+  if (driver == "EOPFZARR") {
+    check_blosc()
+  }
+
   v_assert_is_named(config_opts, "config_opts")
   v_assert_type(config_opts, "config_opts", "character", multiple = TRUE)
 }
