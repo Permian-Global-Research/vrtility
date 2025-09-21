@@ -7,16 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.show = "hold",
-  fig.cap = "",
-  warning = FALSE
-)
-par(mar = c(0, 0, 1, 0))
-```
+
 
 
 This vignette demonstrates a modern workflow for processing Sentinel-2 
@@ -73,8 +64,11 @@ In this example, we're targeting a bounding box around Copenhagen, Denmark,
 and using `stac_coverage_filter()` to ensure we only retrieve images with 
 adequate coverage of our area of interest.
 
-```{r setup }
+
+``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.11.3
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (12.56 55.67)",
@@ -115,7 +109,8 @@ the built-in Zarr driver, which does not fully support the EOPF-Zarr format.
 Since we want to continue processing this image set, we use the `recollect = TRUE` 
 argument to ensure that a new VRT collection is returned rather than file paths.
 
-```{r download-imgs}
+
+``` r
 with(mirai::daemons(10), {
   eopf_s2_chgn <- vrt_collect(
     eopf_filter,
@@ -147,7 +142,8 @@ references the newly created cloud-masked GeoTIFF files, allowing us to continue
 working with the data in a virtualized format for subsequent processing steps.
 
 
-```{r cloud-masking}
+
+``` r
 eopf_s2_mask <- eopf_s2_chgn |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
@@ -169,6 +165,8 @@ purrr::walk(
 )
 ```
 
+![](figure/cloud-masking-1.png)![](figure/cloud-masking-2.png)![](figure/cloud-masking-3.png)![](figure/cloud-masking-4.png)![](figure/cloud-masking-5.png)![](figure/cloud-masking-6.png)
+
 ## Geometric median composite
 
 Here we generate a geometric median composite from the cloud-masked images using 
@@ -182,7 +180,8 @@ significantly improving processing speed for this computationally intensive oper
 
 
 
-```{r geomedian}
+
+``` r
 with(mirai::daemons(10), {
   eopf_s2_median <- multiband_reduce(
     eopf_s2_mask,
@@ -200,6 +199,8 @@ plot(
 )
 ```
 
+![](figure/geomedian-1.png)
+
 
 ## Derived bands
 
@@ -216,7 +217,8 @@ memory-efficient computation without requiring intermediate file storage.
 
 In this example, we'll calculate several useful indices and visualize the results:
 
-```{r derived-bands}
+
+``` r
 exptest <- vrt_derived_block(
   eopf_s2_median,
   ndvi ~ (B08_10m - B04_10m) / (B08_10m + B04_10m),
@@ -226,6 +228,23 @@ exptest <- vrt_derived_block(
 )
 
 print(exptest, pixfun = TRUE)
+#> → <VRT Block>
+#> VRT XML: [hidden]
+#>   run print(x, xml = TRUE) to view
+#> Pixel Function:
+#> ndvi ~ ((B08_10m * 0.0001) - (B04_10m * 0.0001))/((B08_10m * 0.0001) + (B04_10m * 0.0001))                                        
+#> ndti ~ ((B04_10m * 0.0001) - (B03_10m * 0.0001))/((B04_10m * 0.0001) + (B03_10m * 0.0001))                                        
+#> evi ~ 2.5 * ((B08_10m * 0.0001) - (B04_10m * 0.0001))/((B08_10m * 0.0001) + 6 * (B04_10m * 0.0001) - 7.5 * (B02_10m * 0.0001) + 1)
+#> vgnirbi ~ ((B03_10m * 0.0001) - (B08_10m * 0.0001))/((B03_10m * 0.0001) + (B08_10m * 0.0001))
+#> 
+#> 
+#>  VRT SRS: 
+#> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+#> Bounding Box: -18980 -22270 18980 22310
+#> Pixel res: 10, 10
+#> Assets: ndvi, ndti, evi, vgnirbi
+#> No Data Value(s): 0, 0, 0, 0
+#> Date Time: 2025-06-21 22:21:41 UTC
 
 x <- vrt_compute(
   exptest,
@@ -245,4 +264,6 @@ purrr::walk(
   )
 )
 ```
+
+![](figure/derived-bands-1.png)![](figure/derived-bands-2.png)![](figure/derived-bands-3.png)![](figure/derived-bands-4.png)
 
