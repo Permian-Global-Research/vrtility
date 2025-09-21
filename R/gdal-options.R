@@ -292,3 +292,32 @@ gdal_raster_drivers <- function(shortname = FALSE) {
   }
   return(rgdf)
 }
+
+
+#' Check if Blosc compression is available in the GDAL ZARR driver
+#' @return TRUE if Blosc is available, FALSE otherwise
+#' @noRd
+#' @keywords internal
+check_blosc <- function() {
+  zarr_compressors <- strsplit(
+    gdalraster::gdal_get_driver_md("ZARR", "COMPRESSORS"),
+    ","
+  )[[1]]
+  return("blosc" %in% zarr_compressors)
+}
+
+
+#' @return TRUE if muparser is available, FALSE otherwise
+#' @export
+#' @rdname gdal_options
+#' @details
+#' check_muparser can be used to check if the installed gdal version was built
+#' with muparser support; muparser is required for derived bands using
+#' \code{\link{vrt_derived_block}}.
+check_muparser <- function() {
+  vrt_expr_dialects <- strsplit(
+    gdalraster::gdal_get_driver_md("VRT", "ExpressionDialects"),
+    ","
+  )[[1]]
+  return("muparser" %in% vrt_expr_dialects)
+}
