@@ -1,4 +1,5 @@
 #' Create vrt blocks with derived bands.
+#' @param x a `vrt_block` or `vrt_collection` object.
 #' @param ... named R formulas for new bands to create. Formula variable names
 #' must the names of existing bands in the vrt_block object. the argument name
 #' is used to name the new (derived) band.
@@ -6,6 +7,17 @@
 #' @description
 #' Create new vrt blocks containing derived expression bands.
 #' @export
+#' @examplesIf check_muparser()
+#' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#'
+#' ex_collect <- vrt_collect(s2files[1])
+#'
+#' ex_ndvi <- vrt_derived_block(
+#'   ex_collect,
+#'   ndvi ~ (B08 - B04) / (B08 + B04)
+#' )
+#' plot(ex_ndvi)
+#'
 vrt_derived_block <- function(x, ...) {
   UseMethod("vrt_derived_block")
 }
@@ -33,6 +45,7 @@ vrt_derived_block.vrt_stack <- function(x, ...) {
 
 #' @export
 vrt_derived_block.vrt_block <- function(x, ...) {
+  v_assert_muparser()
   new_bands <- rlang::dots_list(...)
 
   purrr::iwalk(
@@ -133,21 +146,40 @@ vrt_derived_block.vrt_block <- function(x, ...) {
 }
 
 
+#' @export
+vrt_derived_block.vrt_collection <- function(x, ...) {
+  dots <- rlang::dots_list(...)
+  block_list <- purrr::map(
+    x[[1]],
+    ~ do.call(vrt_derived_block, c(list(.x), dots))
+  )
+  build_vrt_collection(
+    block_list,
+    pixfun = block_list[[1]]$pixfun,
+    maskfun = x$maskfun,
+    warped = x$warped
+  )
+}
+
+
 apply_band_formula_scales <- function(req_bands, req_band_names, form) {
   orig_exp <- gsub(
     "\\s+",
     " ",
     paste(deparse(rlang::f_rhs(form)), collapse = "")
   )
-  # browser()
+
   sc_off <- purrr::map(c(".//Scale", ".//Offset"), function(v) {
     scale_node <- xml2::xml_find_all(req_bands, v)
     # read scale_node as numeric
     format(xml2::xml_double(scale_node), scientific = FALSE)
   }) |>
     purrr::set_names(c("scale", "offset")) |>
-    purrr::list_transpose() |>
-    purrr::set_names(req_band_names)
+    purrr::list_transpose()
+
+  if (length(sc_off) != 0) {
+    sc_off <- purrr::set_names(sc_off, req_band_names)
+  }
 
   if (all(is.null(unlist(sc_off)))) {
     return(orig_exp)
