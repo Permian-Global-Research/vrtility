@@ -299,11 +299,11 @@ gdal_raster_drivers <- function(shortname = FALSE) {
 #' @noRd
 #' @keywords internal
 check_blosc <- function() {
-  zarr_compressors <- strsplit(
-    gdalraster::gdal_get_driver_md("ZARR", "COMPRESSORS"),
-    ","
-  )[[1]]
-  return("blosc" %in% zarr_compressors)
+  zarr_compressors <- gdalraster::gdal_get_driver_md("ZARR", "COMPRESSORS")
+  if (is.null(zarr_compressors)) {
+    return(FALSE)
+  }
+  return("blosc" %in% strsplit(zarr_compressors, ",")[[1]])
 }
 
 
@@ -315,9 +315,12 @@ check_blosc <- function() {
 #' with muparser support; muparser is required for derived bands using
 #' \code{\link{vrt_derived_block}}.
 check_muparser <- function() {
-  vrt_expr_dialects <- strsplit(
-    gdalraster::gdal_get_driver_md("VRT", "ExpressionDialects"),
-    ","
-  )[[1]]
-  return("muparser" %in% vrt_expr_dialects)
+  vrt_expr_dialects <- gdalraster::gdal_get_driver_md(
+    "VRT",
+    "ExpressionDialects"
+  )
+  if (is.null(vrt_expr_dialects)) {
+    return(FALSE)
+  }
+  return("muparser" %in% strsplit(vrt_expr_dialects, ",")[[1]])
 }
