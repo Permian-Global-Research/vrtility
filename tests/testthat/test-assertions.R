@@ -29,4 +29,19 @@ test_that("assertions work", {
     ),
     6
   )
+
+  expect_error(
+    assert_files_exist(
+      c(s2files, "https://not-a-rea-url.tif"),
+      url_possible = FALSE
+    )
+  )
+
+  expect_error(
+    v_assert_within_range(c(1, 2, 3), "test", 0, 2)
+  )
+
+  expect_error(
+    v_assert_within_range(c(1, 2, 3), "test", 2, 4)
+  )
 })

@@ -17,6 +17,7 @@ reference:
     contents:
       - vrt_set_gdal_pixelfun
       - vrt_set_py_pixelfun
+      - vrt_derived_block
   - title: Image Masking
     desc: Functions for creating and applying image masks
     contents:
@@ -63,7 +64,6 @@ reference:
     contents:
       - stac_query
       - sentinel2_stac_query
-      - sign_planetary_computer
   - title: Raster visualisation
     desc: plotting functions for raster files and vrt_x objects
     contents: plot_raster_src

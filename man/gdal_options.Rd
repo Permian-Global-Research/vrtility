@@ -6,6 +6,8 @@
 \alias{gdalwarp_options}
 \alias{set_gdal_config}
 \alias{set_gdal_cache_max}
+\alias{gdal_raster_drivers}
+\alias{check_muparser}
 \title{Create and set GDAL configuration options.}
 \usage{
 gdal_config_opts(
@@ -54,6 +56,10 @@ gdalwarp_options(
 set_gdal_config(x, scope = c("gdalraster", "sys"))
 
 set_gdal_cache_max(mem_fraction = 0.1)
+
+gdal_raster_drivers(shortname = FALSE)
+
+check_muparser()
 }
 \arguments{
 \item{VSI_CACHE}{Should the Virtual File System (VSI) cache be used?}
@@ -134,12 +140,21 @@ UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
 
 \item{mem_fraction}{Fraction of total RAM to use for GDAL cache, default is
 0.1 (10\% of total RAM)}
+
+\item{shortname}{Logical indicating whether to return the short names of the
+drivers (default is FALSE)}
 }
 \value{
 Character vector of options
 
 set_gdal_cache_max returns (invisibly), a
 \code{\link[memuse]{memuse}} object - the value set for GDAL_CACHEMAX
+
+A character vector of GDAL raster driver shortnames if
+\code{shortname = TRUE}, otherwise a data frame with the full driver
+information.
+
+TRUE if muparser is available, FALSE otherwise
 }
 \description{
 This function sets GDAL configuration options that can be used to
@@ -158,6 +173,10 @@ If NULL, then the output format will be inferred from the file extension.
 set_gdal_cache_max is a very thin wrapper around
 \code{\link[gdalraster]{set_cache_max}} that allows you to conveniently
 set the GDAL_CACHEMAX option as a fraction of the total RAM on your system.
+
+check_muparser can be used to check if the installed gdal version was built
+with muparser support; muparser is required for derived bands using
+\code{\link{vrt_derived_block}}.
 }
 \examples{
 gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")

@@ -160,6 +160,13 @@ multiband_reduce.vrt_collection_warped <- function(
         scale = rt$scale_vals[band]
       )
     }
+
+    if (!is.na(rt$offset_vals[band])) {
+      ds$setOffset(
+        band = band,
+        offset = rt$offset_vals[band]
+      )
+    }
   })
 
   if (mirai::daemons_set()) {
@@ -185,10 +192,16 @@ multiband_reduce.vrt_collection_warped <- function(
     return(outfile)
   }
 
+  if (length(x$date_time) > 1) {
+    lubdttm <- lubridate::as_datetime(x$date_time)
+    x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+  }
+
   vrt_collect(
     outfile,
     config_opts = config_options,
-    band_descriptions = x$assets
+    band_descriptions = x$assets,
+    datetimes = x$date_time
   )
 }
 

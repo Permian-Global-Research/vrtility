@@ -8,17 +8,26 @@
 \alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
-vrt_collect(x, config_opts, bands, band_descriptions, datetimes)
+vrt_collect(x, ...)
 
 \method{vrt_collect}{character}(
   x,
   config_opts = gdal_config_opts(),
   bands = NULL,
   band_descriptions = NULL,
-  datetimes = rep("", length(x))
+  datetimes = rep("", length(x)),
+  vsi_prefix = "",
+  driver = "",
+  ...
 )
 
-\method{vrt_collect}{doc_items}(x, config_opts = gdal_config_opts(), ...)
+\method{vrt_collect}{doc_items}(
+  x,
+  config_opts = gdal_config_opts(),
+  vsi_prefix = "",
+  driver = "",
+  ...
+)
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
 
@@ -26,6 +35,10 @@ vrt_collect(x, config_opts, bands, band_descriptions, datetimes)
 }
 \arguments{
 \item{x}{An object to be used to create a vrt_x object see details.}
+
+\item{...}{In the case of \code{c}, additional vrt_collection objects to
+concatenate to \code{x}. Otherwise, additional arguments to pass to the method or
+unused.}
 
 \item{config_opts}{A named character vector of GDAL configuration options.}
 
@@ -36,9 +49,13 @@ collection}
 
 \item{datetimes}{A character vector of datetimes.}
 
-\item{...}{In the case of \code{c}, additional vrt_collection objects to
-concatenate to \code{x}. Otherwise, additional arguments to pass to the method or
-unused.}
+\item{vsi_prefix}{A character string indicating the VSI prefix to use for
+the VRT sources. Defaults to \code{"/vsicurl/"}.
+See \code{\link[gdalraster]{vsi_get_fs_prefixes}} for available options.}
+
+\item{driver}{A character string indicating the GDAL driver to use for the
+input source(s). if "" is provided, the driver will be automatically determined by GDAL.
+for available drivers use \code{\link{gdal_raster_drivers}}.}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 
@@ -83,7 +100,7 @@ vrt_collect(s2files)
 # we can also combine multiple vrt collections
 c(vrt_collect(s2files[1:2]), vrt_collect(s2files[3:4]))
 
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 s2q <- sentinel2_stac_query(
  bbox = c(-12.386, -37.214, -12.186, -37.014),
  start_date = "2023-01-01",

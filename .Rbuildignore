@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^scratch.*\.R$
+^scratch.*\.sh$
 ^big-test$
 ^kat-test.*\.tif$
 ^kat-test.*\.aux.xml$

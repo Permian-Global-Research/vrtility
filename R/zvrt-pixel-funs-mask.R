@@ -78,10 +78,15 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' (numeric default: 600).
 #' @param patch_overlap The overlap between patches (numeric default: 300).
 #' @param batch_size The batch size to use for prediction (numeric default: 1).
+#' @param inference_dtype The data type to use for inference. Options include
+#' "bfloat16" and "float32" (character, default: "bfloat16"). using "bfloat16"
+#' should be faster if supported by the hardware.
 #' @param inference_device The device to use for inference. If `NULL`, the
 #' function will automatically select the best available device (character,
 #' default: `NULL`). Options include "cpu", "cuda", "mps", etc. The order of
 #' selection is based on availability: "cuda" > "mps" > "cpu".
+#' @param nodata_value The nodata value to use in the output mask (numeric,
+#' default: 0).
 #' @return A Python function that can be used as a pixel function in a VRT
 #' raster. The function will apply the OmniCloudMask model to the specified
 #' bands and create a cloud mask.
@@ -93,6 +98,7 @@ create_omnicloudmask <- function(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
+  inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
   nodata_value = 0
 ) {
@@ -163,6 +169,8 @@ create_omnicloudmask <- function(
     }
   }
 
+  inference_dtype <- rlang::arg_match(inference_dtype)
+
   pyfun <- glue::glue(
     "
 import numpy as np
@@ -180,6 +188,7 @@ def create_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         patch_overlap = {patch_overlap},
         batch_size = {batch_size},
         inference_device = '{inference_device}',
+        inference_dtype = torch.{inference_dtype},
         no_data_value = {nodata_value}
       ) 
 

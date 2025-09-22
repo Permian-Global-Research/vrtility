@@ -19,7 +19,6 @@ vrt_schema <- function(schema = vrtility::vrt_xml_schema) {
 #' @param as_file A logical indicating if the VRT should be saved to a file
 #' @return A character string of the path to the modified VRT
 #' @keywords internal
-#' @export
 set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
   mvrt <- xml2::read_xml(x)
   mvrt_bands <- xml2::xml_find_all(mvrt, "//VRTRasterBand")
@@ -32,6 +31,9 @@ set_vrt_descriptions <- function(x, descriptions, as_file = FALSE) {
         desc <- xml2::xml_add_child(x, "Description", y)
       }
       xml2::xml_set_text(desc, y)
+
+      src <- vrt_find_all_srcs(x)
+      xml2::xml_set_attr(src, "name", y)
     }
   )
 

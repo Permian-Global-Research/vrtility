@@ -2,16 +2,16 @@
 % Please edit documentation in R/stac-utils.R
 \name{stac_query}
 \alias{stac_query}
-\alias{sign_planetary_computer}
 \alias{sentinel2_stac_query}
 \alias{hls_stac_query}
 \alias{stac_cloud_filter}
 \alias{sentinel1_stac_query}
+\alias{stac_orbit_filter}
+\alias{stac_coverage_filter}
+\alias{sign_mpc_items}
 \title{Query a STAC source}
 \usage{
 stac_query(bbox, stac_source, collection, start_date, end_date, limit = 999)
-
-sign_planetary_computer(items, subscription_key = Sys.getenv("MPC_TOKEN"))
 
 sentinel2_stac_query(
   bbox,
@@ -51,9 +51,15 @@ sentinel1_stac_query(
   mpc_sign = TRUE,
   limit = 999
 )
+
+stac_orbit_filter(items, orbit_state = c("descending", "ascending"))
+
+stac_coverage_filter(items, bbox, min_coverage = 0.5)
+
+sign_mpc_items(items, subscription_key = Sys.getenv("MPC_TOKEN", unset = NA))
 }
 \arguments{
-\item{bbox}{A numeric vector of the bounding box (length 4) in lat/long}
+\item{bbox}{A numeric vector of length 4 representing a bounding box}
 
 \item{stac_source}{A character string of the STAC source}
 
@@ -65,14 +71,6 @@ sentinel1_stac_query(
 
 \item{limit}{The number of items to return}
 
-\item{items}{A STACItemCollection}
-
-\item{subscription_key}{Optionally (but strongly recommended), a
-subscription key associated with your MPC account. At the time of writing,
-this is required for downloading Sentinel 1 RTC products, as well as NAIP
-imagery. This key will be automatically used if the environment
-variable \code{MPC_TOKEN} is set.}
-
 \item{assets}{A character vector of the asset names to include}
 
 \item{max_cloud_cover}{A numeric value of the maximum cloud cover percentage}
@@ -81,52 +79,100 @@ variable \code{MPC_TOKEN} is set.}
 Planetary Computer API's signing method (only required if using the
 Planetary Computer STAC API).}
 
-\item{orbit_state}{A character vector of the orbit state to filter by. Both
-arguments are allowed however - consider carefully the implications of
-retaining both orbits if you intend to composite the data.}
+\item{items}{A STACItemCollection.}
+
+\item{orbit_state}{A character string of the orbit state to filter by}
+
+\item{min_coverage}{A numeric value between 0 and 1 representing the minimum
+coverage of the bounding box required to retain the item}
+
+\item{subscription_key}{A subscription key associated with your MPC account.
+This key will be automatically used if the environment variable \code{MPC_TOKEN}
+is set.}
 }
 \value{
-A list of items
+A \pkg{rstac} doc_items object
 
 A STACItemCollection object with signed assets url.
-
-A stac_vrt object
-
-A STACItemCollection
 }
 \description{
-Query a STAC source
-
-Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
-
-Generate a Sentinel 2 stac collection doc_imes object
-
-Generate a Harmonized Landsat Sentinel (HLS) stac collection doc_imes object
-
-Filter a STAC item collection by cloud cover
-
-Generate a Sentinel 1 stac collection doc_items object
+A set of helper functions to query STAC APIs. These are very
+thin wrappers around existing \pkg{rstac} functions, but provide some
+convenience for common tasks.
 }
 \details{
-In order to access HLS data you will need a NASA Earthdata account. You can
-create one at \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
+Using these functions to produce a \code{doc_items} object is optional;
+if the user prefers the greater flexibility of using \pkg{rstac} directly,
+they are encouraged to do so. These functions are only intended to provide a
+convenient way to interact with STAC APIs.
+
+The Microsoft Planetary Computer (MPC) STAC API is a very convenient, large
+and open catalogue of EO data. To access these assets, urls must be signed -
+this can be done using \code{\link{sign_mpc_items}},
+\code{\link[rstac]{items_sign_planetary_computer}}\verb{, or with GDAL by setting the environment variable }VSICURL_PC_URL_SIGNING\code{to}YES`. see the examples for more details.
+
+\code{sentinel2_stac_query} facilitates the querying of the Sentinel-2
+level 2A data from the Planetary Computer STAC API. It returns a
+catalogue to generate a Sentinel 2 rstac doc_items object.
+
+The \code{hls_stac_query} function generates a Harmonized Landsat Sentinel (HLS)
+stac collection doc_items object. In order to access HLS data you will need a
+NASA Earthdata account. You can create one at
+\url{https://urs.earthdata.nasa.gov/users/new}. Once you have
 an account, you can set your credentials using the \code{earthdatalogin} package
 as shown in the examples.
+
+The \code{stac_cloud_filter} function filters a STAC item collection by cloud cover
+percentage. It uses the \code{eo:cloud_cover} property to filter the items.
+Items with a cloud cover percentage less than the specified \code{max_cloud_cover}
+are retained.
+
+The \code{sentinel1_stac_query} function generates a Sentinel 1 stac collection
+doc_items object. It allows you to query Sentinel 1 data from the Planetary
+Computer STAC API. The function returns a collection of Sentinel 1 items
+that can be used to generate a Sentinel 1 rstac doc_items object.
+
+The \code{stac_orbit_filter} function filters a STAC item collection by orbit
+state. It uses the \code{sat:orbit_state} property to filter the items.
+Items with an orbit state matching the specified \code{orbit_state} are retained.
+It is intended for use with Sentinel-1 data.
+
+The \code{stac_coverage_filter} function filters a STAC item collection by
+minimum coverage of a bounding box. It calculates the area of intersection
+between the bounding box and the item's bounding box, and retains items
+where the area of intersection is greater than the specified \code{min_coverage}
+of the bounding box area.
+
+Microsoft no longer provide the ability to generate your own
+subscription keys. This can be requested depending on the application; see
+here for further details:
+https://github.com/microsoft/PlanetaryComputer/issues/457. A key is not
+required for data access and a more reliable way to ensure access is to
+collocate the workload on the Azure West Europe region.
+
+Unlike the \code{rstac::items_sign_planetary_computer} function, this function
+caches collection-level signing tokens for 45 minutes to avoid repeated
+requests for the same collection within a short time period. This can avoid
+429 (permission denied) errors when signing many items from the same
+collection.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 s2_its <- stac_query(
- bbox = c(-12.386, -37.214, -12.186, -37.014),
- stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
- collection = "sentinel-2-l2a",
- start_date = "2023-01-01",
- end_date = "2023-01-31",
- limit = 10
+  bbox = c(-12.386, -37.214, -12.186, -37.014),
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "sentinel-2-l2a",
+  start_date = "2023-01-01",
+  end_date = "2023-01-31",
+  limit = 10
 )
 
-mpc_signed <- sign_planetary_computer(s2_its)
+# For Microsoft Planetary Computer (MPC) assets, sign the the items using the
+# MPC signing `sign_mpc_items()`:
+# or use GDAL by setting the following environment variable:
+# Sys.setenv("VSICURL_PC_URL_SIGNING" = "YES")
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sentinel2_stac_query(
   bbox = c(-12.386, -37.214, -12.186, -37.014),
   start_date = "2023-01-01",
@@ -135,7 +181,7 @@ sentinel2_stac_query(
   assets = c("B02", "B03", "B04", "B08", "SCL")
 )
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 hls_query <- hls_stac_query(
   c(144.130, -7.725, 144.470, -7.475),
   start_date = "2023-01-01",
@@ -154,7 +200,7 @@ earthdatalogin::edl_netrc(
   password = Sys.getenv("EARTHDATA_PASSWORD")
 )
 \dontshow{\}) # examplesIf}
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 sentinel1_stac_query(
   bbox = c(-12.386, -37.214, -12.186, -37.014),
   start_date = "2023-01-01",

@@ -9,7 +9,8 @@ v_assert_type <- function(
     "function",
     "stac_vrt",
     "vrt_collection",
-    "doc_items"
+    "doc_items",
+    "formula"
   ),
   nullok = TRUE,
   multiple = FALSE
@@ -34,6 +35,18 @@ v_assert_length <- function(x, name, length, nullok = TRUE) {
   if (rlang::is_true(length(x) != length)) {
     cli::cli_abort(
       "{name} must have length {length}",
+      class = "vrtility_length_error"
+    )
+  }
+}
+
+v_assert_length_gt <- function(x, name, length, nullok = TRUE) {
+  if (nullok && is.null(x)) {
+    return()
+  }
+  if (rlang::is_true(length(x) <= length)) {
+    cli::cli_abort(
+      "{name} must have length greater than {length}",
       class = "vrtility_length_error"
     )
   }
@@ -145,7 +158,10 @@ assert_files_exist <- function(x, url_possible = FALSE) {
 
 
 assert_is_url <- function(path) {
-  grepl("^(http|https|ftp|ftps|s3|gs)://|^(/vsi[a-z0-9]+/)", path)
+  # Original pattern for standard URLs and VSI paths
+  standard_pattern <- "^(http|https|ftp|ftps|s3|gs)://"
+  # This will throw an error if the URL is invalid
+  grepl(standard_pattern, path)
 }
 
 
@@ -189,5 +205,56 @@ v_assert_mask_names_match <- function(inbands, maskfun) {
       ),
       class = "vrtility_maskfun_error"
     )
+  }
+}
+
+
+v_assert_formula_valid <- function(formlist) {
+  lhs_names <- purrr::map_chr(formlist, function(f) {
+    deparse(rlang::f_lhs(f))
+  })
+
+  # assert lengths 1
+  purrr::walk(
+    lhs_names,
+    ~ v_assert_length(.x, "band formula lhs", 1, nullok = FALSE)
+  )
+
+  rhs_form <- purrr::map(formlist, ~ all.vars(rlang::f_rhs(.x)))
+
+  purrr::walk(
+    rhs_form,
+    ~ v_assert_length_gt(.x, "band formula variables", 0, nullok = FALSE)
+  )
+
+  names(formlist) <- lhs_names
+  return(formlist)
+}
+
+
+v_assert_blosc <- function(level = c("warn", "abort")) {
+  level <- rlang::arg_match(level)
+  act_fun <- switch(
+    level,
+    warn = cli::cli_warn,
+    abort = cli::cli_abort
+  )
+
+  if (!check_blosc()) {
+    act_fun(c(
+      "!" = "Blosc compression is not available.",
+      "i" = "GDAL built against Blosc is required for reading the EOPF ZARR
+      format."
+    ))
+  }
+}
+
+v_assert_muparser <- function() {
+  if (!check_muparser()) {
+    cli::cli_abort(c(
+      "!" = "muparser is not available.",
+      "i" = "GDAL built with muparser support is required for
+      `vrt_derived_block()`."
+    ))
   }
 }

@@ -1,8 +1,16 @@
 #' Construct the base VRT object for composing VRT pipelines.
 #' @param x An object to be used to create a vrt_x object see details.
+#' @param bands A numeric vector of band indices to include in the VRT
+#' collection
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
 #' @param config_opts A named character vector of GDAL configuration options.
+#' @param vsi_prefix A character string indicating the VSI prefix to use for
+#' the VRT sources. Defaults to `"/vsicurl/"`.
+#' See \code{\link[gdalraster]{vsi_get_fs_prefixes}} for available options.
+#' @param driver A character string indicating the GDAL driver to use for the
+#' input source(s). if "" is provided, the driver will be automatically determined by GDAL.
+#' for available drivers use \code{\link{gdal_raster_drivers}}.
 #' @return A vrt_collection object.
 #' @rdname vrt_collect
 #' @export
@@ -42,10 +50,7 @@
 #'
 vrt_collect <- function(
   x,
-  config_opts,
-  bands,
-  band_descriptions,
-  datetimes
+  ...
 ) {
   UseMethod("vrt_collect")
 }
@@ -60,11 +65,7 @@ vrt_collect.default <- function(x, ...) {
   )
 }
 
-#' @param bands A numeric vector of band indices to include in the VRT
-#' collection
-#' @param band_descriptions A character vector of band descriptions.
-#' @param datetimes A character vector of datetimes.
-#' @param config_opts A named character vector of GDAL configuration options.
+
 #' @rdname vrt_collect
 #' @export
 vrt_collect.character <- function(
@@ -72,9 +73,14 @@ vrt_collect.character <- function(
   config_opts = gdal_config_opts(),
   bands = NULL,
   band_descriptions = NULL,
-  datetimes = rep("", length(x))
+  datetimes = rep("", length(x)),
+  vsi_prefix = "",
+  driver = "",
+  ...
 ) {
+  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
   assert_files_exist(x, url_possible = TRUE)
+  x <- gdal_driver_vsi_src_builder(x, vsi_prefix, driver)
   v_assert_type(
     bands,
     "bands",
@@ -111,11 +117,23 @@ vrt_collect.character <- function(
 
     ds <- methods::new(gdalraster::GDALRaster, .x)
     on.exit(ds$close(), add = TRUE)
-    dst <- methods::new(gdalraster::GDALRaster, tf)
+    dst <- methods::new(gdalraster::GDALRaster, tf, readonly = FALSE)
     on.exit(dst$close(), add = TRUE)
-    nbands <- dst$getRasterCount()
-    v_assert_length(band_descriptions, "band_descriptions", nbands)
 
+    nbands <- dst$getRasterCount()
+
+    purrr::walk(seq_len(nbands), function(b) {
+      src_scale <- ds$getScale(band = b)
+      src_offset <- ds$getOffset(band = b)
+      if (!is.na(src_scale)) {
+        dst$setScale(band = b, scale = src_scale)
+      }
+      if (!is.na(src_offset)) {
+        dst$setOffset(band = b, offset = src_offset)
+      }
+    })
+
+    v_assert_length(band_descriptions, "band_descriptions", nbands)
     if (is.null(band_descriptions)) {
       band_descriptions <- purrr::map_chr(
         seq_len(nbands),
@@ -132,12 +150,15 @@ vrt_collect.character <- function(
         band_descriptions <- paste0("band_", seq_len(nbands))
       }
     }
+
+    # TODO: delete this...
     if (ds$isOpen()) {
       ds$close()
     }
     if (dst$isOpen()) {
       dst$close()
     }
+    ####
 
     tf <- set_vrt_descriptions(
       x = tf,
@@ -160,14 +181,16 @@ vrt_collect.character <- function(
   )
 }
 
-#' @param config_opts A named character vector of GDAL configuration options.
 #' @rdname vrt_collect
 #' @export
 vrt_collect.doc_items <- function(
   x,
   config_opts = gdal_config_opts(),
+  vsi_prefix = "",
+  driver = "",
   ...
 ) {
+  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
   daemon_setup(config_opts)
   orig_config <- set_gdal_config(config_opts)
   on.exit(set_gdal_config(orig_config))
@@ -184,7 +207,11 @@ vrt_collect.doc_items <- function(
     dttm <- rstac::items_datetime(its_asset)
 
     suppressWarnings(
-      uri <- as.list(rstac::assets_url(its_asset, append_gdalvsi = TRUE))
+      uri <- as.list(gdal_driver_vsi_src_builder(
+        rstac::assets_url(its_asset, append_gdalvsi = !nzchar(vsi_prefix)),
+        vsi = vsi_prefix,
+        drive = driver
+      ))
     )
     purrr::map2(uri, dttm, ~ list(uri = .x, dttm = .y))
   }) |>
@@ -450,4 +477,23 @@ c.vrt_collection <- function(x, ...) {
     maskfun = unique_attr("maskfun"),
     warped = all(unique_attr("warped")),
   )
+}
+
+#' internal gdal vrt_collect argument checks
+#' @noRd
+#' @keywords internal
+gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_opts) {
+  rlang::arg_match(
+    vsi_prefix,
+    c("", gdalraster::vsi_get_fs_prefixes()),
+    multiple = TRUE
+  )
+  rlang::arg_match(driver, c("", gdal_raster_drivers(TRUE)))
+
+  if (driver == "EOPFZARR") {
+    check_blosc()
+  }
+
+  v_assert_is_named(config_opts, "config_opts")
+  v_assert_type(config_opts, "config_opts", "character", multiple = TRUE)
 }

@@ -32,7 +32,7 @@ multi-band compositing and time series filtering.
   indices or calculating complex time series functions. All powered by
   [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
-- vrtility enables the use of GDAL VRT python and built-in pixel
+- vrtility enables the use of GDAL VRT python and built-in (C++) pixel
   functions. The python [numpy](https://numpy.org/)-based pixel
   functions can be used to apply cloud masks and summarise pixel values
   (e.g. median) from multiple images (i.e create a composite image). All
@@ -98,16 +98,9 @@ library(vrtility)
 #> ✔ Using GDAL version 3.11.3
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   vrtility::set_gdal_cache_max()
-```
-
-``` r
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(6)
-#> [1] 6
-```
-
-``` r
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -129,9 +122,6 @@ s2_stac <- sentinel2_stac_query(
 # number of items:
 length(s2_stac$features)
 #> [1] 3
-```
-
-``` r
 
 system.time({
   median_composite <- vrt_collect(s2_stac) |>
@@ -148,10 +138,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  15.119   0.356  16.807
-```
-
-``` r
+#>  22.088   0.230  23.217
 
 plot_raster_src(
   median_composite,

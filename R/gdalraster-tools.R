@@ -27,6 +27,10 @@ raster_template_params <- function(
     seq_len(nbands),
     ~ tds$getScale(.x)
   )
+  offset_vals <- purrr::map_vec(
+    seq_len(nbands),
+    ~ tds$getOffset(.x)
+  )
   data_type <- tds$getDataTypeName(1)
 
   return(list(
@@ -37,7 +41,8 @@ raster_template_params <- function(
     blksize = blksize,
     nbands = nbands,
     scale_vals = scale_vals,
-    data_type = data_type
+    data_type = data_type,
+    offset_vals = offset_vals
   ))
 }
 
@@ -60,4 +65,29 @@ gdalraster_engine_asserts_init <- function(
     nullok = FALSE
   )
   v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
+}
+
+#' Build a VSI source string for GDAL raster drivers
+#' @param src character source path
+#' @param vsi character VSI prefix (e.g., "/vsicurl/")
+#' @param drive character GDAL driver prefix (e.g., "EOPFZARR")
+#' @return character VSI source string
+#' @keywords internal
+#' @noRd
+gdal_driver_vsi_src_builder <- function(src, vsi = "", drive = "") {
+  osrc <- paste0(vsi, src)
+  if (drive == "EOPFZARR") {
+    parts <- strsplit(
+      osrc,
+      split = "(?<=\\.zarr)",
+      perl = TRUE
+    )
+    osrc <- sapply(parts, function(x) {
+      paste0(drive, ":", '"', x[1], '":', x[2])
+    })
+  } else if (nzchar(drive)) {
+    osrc <- paste0(drive, ":", '"', osrc, '"')
+  }
+
+  return(osrc)
 }
