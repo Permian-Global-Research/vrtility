@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+    <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
@@ -115,9 +116,8 @@ concurrent requests to the CDSE API.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># only use 4 daemons!</span></span>
-<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
+<span><span class="co"># only use 2 daemons!</span></span>
+<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="query-the-stac-api">Query the STAC API<a class="anchor" aria-label="anchor" href="#query-the-stac-api"></a>
@@ -190,7 +190,7 @@ across bands and image tiles.</p>
 <span>  <span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_move_band.html">vrt_move_band</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_nodata.html">vrt_set_nodata</a></span><span class="op">(</span><span class="fl">0</span>, band_idx <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_set_scale.html">vrt_set_scale</a></span><span class="op">(</span>scale_value <span class="op">=</span> <span class="fl">0.0001</span>, offset_value <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/vrt_set_scale.html">vrt_set_scale</a></span><span class="op">(</span>scale_value <span class="op">=</span> <span class="fl">0.0001</span>, offset_value <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, band_idx <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
 <span>    mask_band <span class="op">=</span> <span class="st">"SCL_20m"</span>,</span>
 <span>    mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">8</span>, <span class="fl">9</span>, <span class="fl">10</span>, <span class="fl">11</span><span class="op">)</span>,</span>

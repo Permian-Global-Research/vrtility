@@ -9,7 +9,7 @@ preserved in derived VRT and GeoTIFF files."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@ preserved in derived VRT and GeoTIFF files."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+    <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul></li>
@@ -106,7 +107,7 @@ for. If NULL, The nodatavalue will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;GeoTransform&gt;  2.8981358026064973e+05,  1.9992966901116390e+01,  0.0000000000000000e+00,  9.5714024721781345e+04,  0.0000000000000000e+00, -1.9992966901116390e+01&lt;/GeoTransform&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="1"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ColorInterp&gt;Gray&lt;/ColorInterp&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource name="B02"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceFilename relativeToVRT="0"&gt;/home/runner/work/_temp/Library/vrtility/s2-data/exe_2024-06-02_12-21-19_EPSG27700.tif&lt;/SourceFilename&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceBand&gt;1&lt;/SourceBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceProperties RasterXSize="361" RasterYSize="342" DataType="UInt16" BlockXSize="361" BlockYSize="2"/&gt;</span></span>
@@ -118,7 +119,7 @@ for. If NULL, The nodatavalue will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="2"&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource name="B03"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceFilename relativeToVRT="0"&gt;/home/runner/work/_temp/Library/vrtility/s2-data/exe_2024-06-02_12-21-19_EPSG27700.tif&lt;/SourceFilename&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceBand&gt;2&lt;/SourceBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceProperties RasterXSize="361" RasterYSize="342" DataType="UInt16" BlockXSize="361" BlockYSize="2"/&gt;</span></span>
@@ -130,7 +131,7 @@ for. If NULL, The nodatavalue will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="3"&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource name="B04"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceFilename relativeToVRT="0"&gt;/home/runner/work/_temp/Library/vrtility/s2-data/exe_2024-06-02_12-21-19_EPSG27700.tif&lt;/SourceFilename&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceBand&gt;3&lt;/SourceBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceProperties RasterXSize="361" RasterYSize="342" DataType="UInt16" BlockXSize="361" BlockYSize="2"/&gt;</span></span>
@@ -142,7 +143,7 @@ for. If NULL, The nodatavalue will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="4"&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource name="B08"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceFilename relativeToVRT="0"&gt;/home/runner/work/_temp/Library/vrtility/s2-data/exe_2024-06-02_12-21-19_EPSG27700.tif&lt;/SourceFilename&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceBand&gt;4&lt;/SourceBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceProperties RasterXSize="361" RasterYSize="342" DataType="UInt16" BlockXSize="361" BlockYSize="2"/&gt;</span></span>
@@ -154,7 +155,7 @@ for. If NULL, The nodatavalue will be set for all bands.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;NoDataValue&gt;0&lt;/NoDataValue&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;/VRTRasterBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">  &lt;VRTRasterBand dataType="UInt16" band="5"&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">    &lt;ComplexSource name="SCL"&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceFilename relativeToVRT="0"&gt;/home/runner/work/_temp/Library/vrtility/s2-data/exe_2024-06-02_12-21-19_EPSG27700.tif&lt;/SourceFilename&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceBand&gt;5&lt;/SourceBand&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00; font-style: italic;">      &lt;SourceProperties RasterXSize="361" RasterYSize="342" DataType="UInt16" BlockXSize="361" BlockYSize="2"/&gt;</span></span>

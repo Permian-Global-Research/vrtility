@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+    <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
@@ -97,9 +98,10 @@ mirai daemons you want to use (R processes that will download the data
 in parallel).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; ✔ Using GDAL version 3.11.3</span></span>
+<span><span class="co">#&gt; ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()</span></span>
 <span></span>
-<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 5</span></span></code></pre></div>
+<span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="locating-the-data">Locating the data<a class="anchor" aria-label="anchor" href="#locating-the-data"></a>
@@ -177,9 +179,8 @@ bucket.</p>
 <span><span class="co">#&gt; Start Date: 2024-01-01 UTC</span></span>
 <span><span class="co">#&gt; End Date: 2024-01-01 UTC</span></span>
 <span><span class="co">#&gt; Number of Items: 2</span></span>
-<span><span class="co">#&gt; Assets: SR_B2, SR_B3, SR_B4, SR_B5</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; Assets: SR_B2, SR_B3, SR_B4, SR_B5</span></span>
+<span></span>
 <span><span class="co"># if you just want to look at one of the tiles...</span></span>
 <span><span class="co"># plot(l8l9_vrt[[1]][[2]], c(3, 2, 1))</span></span>
 <span></span>
@@ -205,7 +206,7 @@ bucket.</p>
 </h2>
 <p>Let’s have a look at the data in both true colour and false
 colour.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_par.html" class="external-link">with_par</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>    <span class="va">l8l9file</span>,</span>

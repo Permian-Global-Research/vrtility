@@ -11,7 +11,7 @@ function."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ function."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+    <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul></li>
@@ -69,6 +70,7 @@ function.</p>
 <span>  patch_size <span class="op">=</span> <span class="fl">600</span>,</span>
 <span>  patch_overlap <span class="op">=</span> <span class="fl">300</span>,</span>
 <span>  batch_size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  inference_dtype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bfloat16"</span>, <span class="st">"float32"</span><span class="op">)</span>,</span>
 <span>  inference_device <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nodata_value <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -95,8 +97,8 @@ attributes: <code>mask_name</code>, <code>mask_description</code>, and <code>req
 
 
 <dt id="arg-nodata-value">nodata_value<a class="anchor" aria-label="anchor" href="#arg-nodata-value"></a></dt>
-<dd><p>The value to set as no data pixels
-(numeric, default: 0).</p></dd>
+<dd><p>The nodata value to use in the output mask (numeric,
+default: 0).</p></dd>
 
 
 <dt id="arg-cache-dir">cache_dir<a class="anchor" aria-label="anchor" href="#arg-cache-dir"></a></dt>
@@ -116,6 +118,12 @@ This should rarely need to be changed.</p></dd>
 
 <dt id="arg-batch-size">batch_size<a class="anchor" aria-label="anchor" href="#arg-batch-size"></a></dt>
 <dd><p>The batch size to use for prediction (numeric default: 1).</p></dd>
+
+
+<dt id="arg-inference-dtype">inference_dtype<a class="anchor" aria-label="anchor" href="#arg-inference-dtype"></a></dt>
+<dd><p>The data type to use for inference. Options include
+"bfloat16" and "float32" (character, default: "bfloat16"). using "bfloat16"
+should be faster if supported by the hardware.</p></dd>
 
 
 <dt id="arg-inference-device">inference_device<a class="anchor" aria-label="anchor" href="#arg-inference-device"></a></dt>

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
+    <li><a class="dropdown-item" href="articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
     <li><a class="dropdown-item" href="articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
@@ -77,7 +78,7 @@
 </h2>
 <ul>
 <li><p>Modular design: We’re basically creating remote sensing pipelines using nested VRTs. This allows for the easy addition of new pixel and masking functions. but could easily be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
-<li><p>vrtility enables the use of GDAL VRT python and built-in pixel functions. The python <a href="https://numpy.org/" class="external-link">numpy</a>-based pixel functions can be used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>. Built-In GDAL pixel functions vary depending on the GDAL version, but are highly performant - recent GDAL versions even support <a href="https://mirai.r-lib.org/index.html" class="external-link">expressions</a> for more complex operations.</p></li>
+<li><p>vrtility enables the use of GDAL VRT python and built-in (C++) pixel functions. The python <a href="https://numpy.org/" class="external-link">numpy</a>-based pixel functions can be used to apply cloud masks and summarise pixel values (e.g. median) from multiple images (i.e create a composite image). All python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>. Built-In GDAL pixel functions vary depending on the GDAL version, but are highly performant - recent GDAL versions even support <a href="https://mirai.r-lib.org/index.html" class="external-link">expressions</a> for more complex operations.</p></li>
 <li><p>Efficient parallel processing using <a href="https://mirai.r-lib.org/index.html" class="external-link">{mirai}</a></p></li>
 <li><p>Advanced compositing methods that maintain spectral consistency, such as the geometric median and medoid.</p></li>
 <li><p>Time series filtering functions to improve temporal consistency and reduce noise.</p></li>
@@ -109,14 +110,11 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ✔ Using GDAL version 3.11.3</span></span>
 <span><span class="co">#&gt; ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use</span></span>
-<span><span class="co">#&gt;   vrtility::set_gdal_cache_max()</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt;   vrtility::set_gdal_cache_max()</span></span>
+<span></span>
 <span><span class="co">#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun</span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 6</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span></span>
 <span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
 <span>  wkt <span class="op">=</span> <span class="st">"POINT (144.3 -7.6)"</span>,</span>
 <span>  extend_x <span class="op">=</span> <span class="fl">0.17</span>,</span>
@@ -136,9 +134,8 @@
 <span><span class="op">)</span></span>
 <span><span class="co"># number of items:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">$</span><span class="va">features</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 3</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; [1] 3</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">median_composite</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
@@ -154,9 +151,8 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;  15.119   0.356  16.807</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt;  22.088   0.230  23.217</span></span>
+<span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>  <span class="va">median_composite</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -173,7 +169,7 @@
 </h2>
 <p>We can also use on-disk raster files (or indeed urls) too, as shown here with this example dataset - note that the inputs have multiple spatial reference systems and therefore we need to warp them (as in the above example) before “stacking”. We can plot these <code>vrt_{x}</code> objects using <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> but note that, for very large rasters, where we are computing pixel functions, this can be slow and we are better off using <code>vrt_compute</code> to write to disk and then plotting the output.</p>
 <p>In this example, we create a <code>medoid</code> composite from the warped collection. Using medoid or other multi-band pixel functions (e.g. <code>geomedian</code>) can be extremely powerful but requires more compute power/time than band-wise pixel functions.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s2files</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"s2-data"</span>, package <span class="op">=</span> <span class="st">"vrtility"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">ex_collect</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2files</span><span class="op">)</span></span>
@@ -199,7 +195,7 @@
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example2-1.png" width="100%"><img src="reference/figures/README-example2-2.png" width="100%"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># extract a block to use as a template for warping</span></span>
 <span><span class="va">t_block</span> <span class="op">&lt;-</span> <span class="va">ex_collect</span><span class="op">$</span><span class="va">vrt</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
