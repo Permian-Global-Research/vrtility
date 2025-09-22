@@ -67,8 +67,6 @@ adequate coverage of our area of interest.
 
 ``` r
 library(vrtility)
-#> ✔ Using GDAL version 3.11.3
-#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (12.56 55.67)",
@@ -165,7 +163,7 @@ purrr::walk(
 )
 ```
 
-![](figure/cloud-masking-1.png)![](figure/cloud-masking-2.png)![](figure/cloud-masking-3.png)![](figure/cloud-masking-4.png)![](figure/cloud-masking-5.png)![](figure/cloud-masking-6.png)
+<img src="figure/cloud-masking-1.png" width="50%" /><img src="figure/cloud-masking-2.png" width="50%" /><img src="figure/cloud-masking-3.png" width="50%" /><img src="figure/cloud-masking-4.png" width="50%" /><img src="figure/cloud-masking-5.png" width="50%" /><img src="figure/cloud-masking-6.png" width="50%" />
 
 ## Geometric median composite
 
@@ -265,5 +263,5 @@ purrr::walk(
 )
 ```
 
-![](figure/derived-bands-1.png)![](figure/derived-bands-2.png)![](figure/derived-bands-3.png)![](figure/derived-bands-4.png)
+<img src="figure/derived-bands-1.png" width="50%" /><img src="figure/derived-bands-2.png" width="50%" /><img src="figure/derived-bands-3.png" width="50%" /><img src="figure/derived-bands-4.png" width="50%" />
 

@@ -147,7 +147,7 @@ references the newly created cloud-masked GeoTIFF files, allowing us to continue
 working with the data in a virtualized format for subsequent processing steps.
 
 
-```{r cloud-masking}
+```{r cloud-masking, out.width="50%"}
 eopf_s2_mask <- eopf_s2_chgn |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
@@ -216,7 +216,7 @@ memory-efficient computation without requiring intermediate file storage.
 
 In this example, we'll calculate several useful indices and visualize the results:
 
-```{r derived-bands}
+```{r derived-bands, out.width="50%"}
 exptest <- vrt_derived_block(
   eopf_s2_median,
   ndvi ~ (B08_10m - B04_10m) / (B08_10m + B04_10m),
