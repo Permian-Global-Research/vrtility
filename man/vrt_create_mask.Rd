@@ -18,6 +18,7 @@ create_omnicloudmask(
   patch_size = 600,
   patch_overlap = 300,
   batch_size = 1,
+  inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
   nodata_value = 0
 )
@@ -33,8 +34,8 @@ to the input bands to create the mask. Currently the only provided function
 is \code{\link{create_omnicloudmask}}. This string must also have three key
 attributes: \code{mask_name}, \code{mask_description}, and \code{required_bands}.}
 
-\item{nodata_value}{The value to set as no data pixels
-(numeric, default: 0).}
+\item{nodata_value}{The nodata value to use in the output mask (numeric,
+default: 0).}
 
 \item{cache_dir}{A character string specifying the directory to use for
 caching temporary files. Default is the value of the \code{vrt.cache} option.
@@ -46,6 +47,10 @@ This should rarely need to be changed.}
 \item{patch_overlap}{The overlap between patches (numeric default: 300).}
 
 \item{batch_size}{The batch size to use for prediction (numeric default: 1).}
+
+\item{inference_dtype}{The data type to use for inference. Options include
+"bfloat16" and "float32" (character, default: "bfloat16"). using "bfloat16"
+should be faster if supported by the hardware.}
 
 \item{inference_device}{The device to use for inference. If \code{NULL}, the
 function will automatically select the best available device (character,
