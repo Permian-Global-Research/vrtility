@@ -198,7 +198,8 @@ check_gdal_and_warn <- function(maj_v_min = 3, min_v_min = 8, patch_v_min = 0) {
   gdal_warn <- function() {
     cli::cli_inform(
       c(
-        "!" = "You are using GDAL version {version} which is not compliant ",
+        "!" = "You are using GDAL version {gdalraster::gdal_version()[4]} which 
+        is not compliant ",
         " " = "with the minimum recommended version
         {maj_v_min}.{min_v_min}.{patch_v_min}.",
         " " = "Please update GDAL to a newer version to ensure compatibility
@@ -210,39 +211,23 @@ check_gdal_and_warn <- function(maj_v_min = 3, min_v_min = 8, patch_v_min = 0) {
   }
   gdal_inform <- function() {
     cli::cli_inform(
-      c("v" = "Using GDAL version {version}"),
+      c("v" = "Using GDAL version {gdalraster::gdal_version()[4]}"),
       class = "packageStartupMessage"
     )
     return(invisible(TRUE))
   }
 
-  inform_warn_logic <- function(v, target_v) {
-    if (v > target_v) {
-      return(gdal_inform)
-    } else if (v < target_v) {
-      return(gdal_warn)
-    } else {
-      return(TRUE)
-    }
+  if (
+    !gdalraster::gdal_version_num() >=
+      gdalraster::gdal_compute_version(maj_v_min, min_v_min, patch_v_min)
+  ) {
+    gdal_warn()
+    return(invisible(FALSE))
+  } else {
+    gdal_inform()
   }
 
-  version <- gdalraster::gdal_version()[4]
-
-  split_version <- as.numeric(strsplit(version, "\\.")[[1]])
-
-  iwl <- inform_warn_logic(split_version[1], maj_v_min)
-  if (inherits(iwl, "function")) {
-    return(iwl())
-  }
-  iwl <- inform_warn_logic(split_version[2], min_v_min)
-  if (inherits(iwl, "function")) {
-    return(iwl())
-  }
-  iwl <- inform_warn_logic(split_version[3], patch_v_min)
-  if (inherits(iwl, "function")) {
-    return(iwl())
-  }
-  gdal_inform() # if we reach here, installed gdal matches the minimum version.
+  # if we reach here, installed gdal matches the minimum version.
   return(invisible(TRUE))
 }
 
