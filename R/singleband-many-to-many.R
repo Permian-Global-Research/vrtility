@@ -131,13 +131,6 @@ singleband_m2m.vrt_collection_warped <- function(
     }
   )
 
-  on.exit(
-    purrr::walk(ds_list, function(ds) {
-      ds$close()
-    }),
-    add = TRUE
-  )
-
   if (mirai::daemons_set()) {
     async_gdalreader_singleband_m2m_read_write(
       blocks_df,
@@ -146,6 +139,14 @@ singleband_m2m.vrt_collection_warped <- function(
       m2m_fun = m2m_fun
     )
   } else {
+    on.exit(
+      # only done in sequential async handles this for promises.
+      purrr::walk(ds_list, function(ds) {
+        ds$close()
+      }),
+      add = TRUE
+    )
+
     sequential_gdalreader_singleband_m2m_read_write(
       blocks_df,
       x,

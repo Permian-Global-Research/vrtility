@@ -147,7 +147,7 @@ multiband_reduce.vrt_collection_warped <- function(
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
-  on.exit(ds$close(), add = TRUE)
+
   purrr::iwalk(x$assets, function(asset, band) {
     ds$setDescription(
       band = band,
@@ -178,6 +178,7 @@ multiband_reduce.vrt_collection_warped <- function(
       reduce_fun
     )
   } else {
+    on.exit(ds$close(), add = TRUE)
     sequential_gdalreader_multiband_reduce_read_write(
       blocks_df,
       x,
