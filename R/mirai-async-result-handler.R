@@ -47,30 +47,6 @@ mirai_async_result_handler <- function(
       })
   })
 
-  # if (length(promise_list) > 1) {
-  #   promise_list <- promises::promise_all(.list = promise_list)
-  # } else {
-  #   promise_list <- promise_list[[1]]
-  # }
-
-  # promise_list |>
-  #   promises::then(function() {
-  #     invisible()
-  #   }) |>
-  #   promises::finally(
-  #     \(p) {
-  #       if (inherits(ds, "GDALRaster")) {
-  #         ds$close()
-  #       } else if (is.list(ds)) {
-  #         purrr::walk(ds, \(d) d$close())
-  #       } else {
-  #         cli::cli_alert_warning(
-  #           "ds is not a GDALRaster or list of GDALRasters"
-  #         )
-  #       }
-  #     }
-  #   )
-
   # "Pump" the event loop to process promise callbacks
   sleep_interval <- 0.001
   max_sleep_interval <- 0.1
