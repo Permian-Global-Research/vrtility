@@ -21,7 +21,7 @@ mirai_async_result_handler <- function(
 
   completed_count <- 0
 
-  promise_list <- purrr::imap(jobs, function(j, i) {
+  purrr::iwalk(jobs, function(j, i) {
     j |>
       promises::then(
         onFulfilled = function(j_result) {
@@ -47,31 +47,62 @@ mirai_async_result_handler <- function(
       })
   })
 
-  if (length(promise_list) > 1) {
-    promise_list <- promises::promise_all(.list = promise_list)
-  } else {
-    promise_list <- promise_list[[1]]
-  }
+  # if (length(promise_list) > 1) {
+  #   promise_list <- promises::promise_all(.list = promise_list)
+  # } else {
+  #   promise_list <- promise_list[[1]]
+  # }
 
-  promise_list |>
-    promises::then(function() {
-      invisible()
-    }) |>
-    promises::finally(
-      \(p) {
-        if (length(ds) == 1) {
-          ds$close()
-        } else {
-          purrr::walk(ds, \(d) d$close())
-        }
-      }
-    )
+  # promise_list |>
+  #   promises::then(function() {
+  #     invisible()
+  #   }) |>
+  #   promises::finally(
+  #     \(p) {
+  #       if (inherits(ds, "GDALRaster")) {
+  #         ds$close()
+  #       } else if (is.list(ds)) {
+  #         purrr::walk(ds, \(d) d$close())
+  #       } else {
+  #         cli::cli_alert_warning(
+  #           "ds is not a GDALRaster or list of GDALRasters"
+  #         )
+  #       }
+  #     }
+  #   )
 
   # "Pump" the event loop to process promise callbacks
+  sleep_interval <- 0.001
+  max_sleep_interval <- 0.1
   while (completed_count < length(jobs)) {
     later::run_now(0.01) # This processes promise callbacks!
-    Sys.sleep(0.001) # Small sleep to prevent busy waiting
+    Sys.sleep(sleep_interval)
+    sleep_interval <- min(sleep_interval * 2, max_sleep_interval)
   }
 
+  close_datasets_safely(ds)
+
   return(invisible())
+}
+
+
+close_datasets_safely <- function(ds) {
+  if (is.null(ds)) {
+    return()
+  }
+
+  datasets <- if (inherits(ds, "list")) ds else list(ds)
+
+  purrr::walk(datasets, function(d) {
+    if (inherits(d, "GDALRaster")) {
+      tryCatch(
+        {
+          if (d$isOpen()) d$close()
+        },
+        error = function(e) {
+          cli::cli_warn("Failed to close dataset: {e$message}")
+        }
+      )
+    }
+  })
 }
