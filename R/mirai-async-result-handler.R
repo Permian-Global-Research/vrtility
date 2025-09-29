@@ -137,7 +137,6 @@ mirai_async_result_handler_win <- function(
           class = "mirai_async_error"
         )
       }
-      browser()
 
       rlang::eval_bare(expr)
       # If the job is resolved, mark it as such
