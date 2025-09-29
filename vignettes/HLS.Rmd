@@ -56,7 +56,7 @@ box.
 ``` r
 library(vrtility)
 
-mirai::daemons(machine_cores())
+mirai::daemons(gdalraster::get_num_cpus())
 #> [1] 20
 ```
 

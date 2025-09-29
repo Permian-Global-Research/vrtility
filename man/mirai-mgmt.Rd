@@ -2,19 +2,9 @@
 % Please edit documentation in R/mirai-mgmt.R
 \name{n_daemons}
 \alias{n_daemons}
-\alias{machine_cores}
 \title{Mirai Daemon Management}
 \usage{
 n_daemons()
-
-machine_cores(all.tests = FALSE, logical = TRUE)
-}
-\arguments{
-\item{all.tests}{Logical: if true apply all known tests.}
-
-\item{logical}{Logical: if possible, use the number of physical CPUs/cores
-(if FALSE) or logical CPUs (if TRUE). Currently this is honoured only on
-macOS, Solaris and Windows.}
 }
 \description{
 Just some helpful functions for managing the mirai daemons and
@@ -22,8 +12,4 @@ parallel processing.
 }
 \details{
 \code{n_daemons()} returns the number of mirai daemons running.
-
-\code{machine_cores()} returns the number of cores on the machine. This function
-is from \code{\link[parallel]{detectCores}} and is used detect the number of
-cores on the machine.
 }

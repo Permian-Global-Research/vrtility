@@ -60,7 +60,7 @@ box.
 ```{r setup}
 library(vrtility)
 
-mirai::daemons(machine_cores())
+mirai::daemons(gdalraster::get_num_cpus())
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
