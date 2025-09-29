@@ -21,7 +21,7 @@ mirai_async_result_handler <- function(
 
   completed_count <- 0
 
-  purrr::iwalk(jobs, function(j, i) {
+  promise_list <- purrr::imap(jobs, function(j, i) {
     j |>
       promises::then(
         onFulfilled = function(j_result) {
@@ -47,6 +47,8 @@ mirai_async_result_handler <- function(
       })
   })
 
+  close_datasets_safely(promise_list, ds)
+
   # "Pump" the event loop to process promise callbacks
   sleep_interval <- 0.001
   max_sleep_interval <- 0.1
@@ -56,29 +58,39 @@ mirai_async_result_handler <- function(
     sleep_interval <- min(sleep_interval * 2, max_sleep_interval)
   }
 
-  close_datasets_safely(ds)
-
   return(invisible())
 }
 
 
-close_datasets_safely <- function(ds) {
-  if (is.null(ds)) {
-    return()
-  }
-
+close_datasets_safely <- function(plist, ds) {
   datasets <- if (inherits(ds, "list")) ds else list(ds)
 
-  purrr::walk(datasets, function(d) {
-    if (inherits(d, "GDALRaster")) {
-      tryCatch(
-        {
-          if (d$isOpen()) d$close()
-        },
-        error = function(e) {
-          cli::cli_warn("Failed to close dataset: {e$message}")
-        }
-      )
-    }
-  })
+  if (length(plist) > 1) {
+    plist <- promises::promise_all(.list = plist)
+  } else {
+    plist <- plist[[1]]
+  }
+
+  plist |>
+    promises::then(function() {
+      invisible()
+    }) |>
+    promises::finally(
+      \(p) {
+        purrr::walk(datasets, function(d) {
+          if (inherits(d, "GDALRaster")) {
+            tryCatch(
+              {
+                if (d$isOpen()) d$close()
+              },
+              error = function(e) {
+                cli::cli_warn("Failed to close dataset: {e$message}")
+              }
+            )
+          }
+        })
+      }
+    )
+
+  return(invisible())
 }
