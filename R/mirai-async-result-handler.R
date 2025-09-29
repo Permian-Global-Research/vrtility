@@ -50,10 +50,19 @@ mirai_async_result_handler <- function(
   close_datasets_safely(promise_list, ds)
 
   # "Pump" the event loop to process promise callbacks
-  sleep_interval <- 0.001
-  max_sleep_interval <- 0.1
+
+  if (.Platform$OS.type == "windows") {
+    run_now_dur <- 0.1
+    sleep_interval <- 0.01
+    max_sleep_interval <- 0.3
+  } else {
+    run_now_dur <- 0.01
+    sleep_interval <- 0.001
+    max_sleep_interval <- 0.1
+  }
+
   while (completed_count < length(jobs)) {
-    later::run_now(0.01) # This processes promise callbacks!
+    later::run_now(run_now_dur) # This processes promise callbacks!
     Sys.sleep(sleep_interval)
     sleep_interval <- min(sleep_interval * 2, max_sleep_interval)
   }
