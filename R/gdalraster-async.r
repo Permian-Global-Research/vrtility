@@ -63,56 +63,6 @@ sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
   return(invisible())
 }
 
-#' @title Mirai asynchronous result handler
-#' @description Handles the results of asynchronous mirai jobs, checking for
-#' unresolved values and evaluating an expression when resolved.
-#' @param jobs A list of mirai jobs.
-#' @param ds The GDALRaster dataset to write to.
-#' @param ... Additional arguments to bind in the current environment.
-#' @param expr The expression to evaluate when a job is resolved.
-#' @param msg The message to display in case of an error.
-#' @return invisible
-#' @keywords internal
-#' @noRd
-mirai_async_result_handler <- function(
-  jobs,
-  ds,
-  ...,
-  expr,
-  msg = "mirai async error"
-) {
-  dots <- rlang::list2(...)
-  rlang::env_bind(rlang::current_env(), !!!dots)
-  resolved <- logical(length(jobs))
-  unresolved_idx <- seq_along(jobs)
-  while (any(!resolved)) {
-    for (i in unresolved_idx) {
-      if (inherits(jobs[[i]]$data, "unresolvedValue")) {
-        next
-      }
-
-      if (resolved[[i]]) {
-        next
-      }
-
-      j <- mirai::collect_mirai(jobs[[i]])
-
-      if (inherits(j, "miraiError")) {
-        cli::cli_abort(
-          "{msg}:  {j}",
-          class = "mirai_async_error"
-        )
-      }
-
-      rlang::eval_bare(expr)
-      # If the job is resolved, mark it as such
-      resolved[[i]] <- TRUE
-      unresolved_idx <- which(!resolved)
-    }
-  }
-  return(invisible())
-}
-
 #' @title Block reader function
 #' @description Reads a block of data from a GDALRaster dataset.
 #' @param inds The GDALRaster dataset object.
@@ -154,21 +104,6 @@ blockwriter <- function(ds, bps, data) {
   return(invisible())
 }
 
-# #' @title Scale applicator function
-# #' @description Applies scale factors to band data if available.
-# #' @param inds The GDALRaster dataset object.
-# #' @param band_data A matrix of raster data for the specified block.
-# #' @param block_params A list of block parameters including band number.
-# #' @return A matrix of scaled raster data.
-# #' @keywords internal
-# #' @noRd
-# scale_applicator <- function(inds, band_data, band_number) {
-#   bscale <- inds$getScale(band_number)
-#   if (!is.na(bscale)) {
-#     band_data <- band_data * bscale
-#   }
-#   return(band_data)
-# }
 
 #' @title Asynchronous multi-band reduction read/write
 #' @description Reads multi-band data in blocks, applies a reduction function,
@@ -407,6 +342,7 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
     },
     .progress = !quiet
   )
+
   return(invisible())
 }
 

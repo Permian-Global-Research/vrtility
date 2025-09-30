@@ -148,6 +148,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
   on.exit(ds$close(), add = TRUE)
+
   purrr::iwalk(x$assets, function(asset, band) {
     ds$setDescription(
       band = band,

@@ -39,7 +39,7 @@ gdal_config_opts <- function(
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = "ALL_CPUS",
   # as.character(
-  #   ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+  #   ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
   # ),
   GDAL_DISABLE_READDIR_ON_OPEN = "FALSE", # "TRUE",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
@@ -85,7 +85,7 @@ gdal_creation_options <- function(
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
   NUM_THREADS = as.character(
-    ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+    ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
   ),
   BIGTIFF = "IF_NEEDED",
   TILED = "YES",
@@ -134,7 +134,7 @@ gdalwarp_options <- function(
   multi = FALSE,
   warp_memory = "50%",
   num_threads = as.character(
-    ceiling(vrtility::machine_cores() / pmax(vrtility::n_daemons(), 1))
+    ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
   ),
   unified_src_nodata = c("NO", "YES", "PARTIAL")
 ) {

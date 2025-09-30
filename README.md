@@ -21,7 +21,7 @@ features such as pixel functions but also harnesses the VRT data
 structure to facilitate complex image processing tasks such as
 multi-band compositing and time series filtering.
 
-> [!CAUTION]
+> [!NOTE]
 > This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
 
 ## Features
@@ -138,7 +138,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>  22.088   0.230  23.217
+#>   3.551   0.448  13.865
 
 plot_raster_src(
   median_composite,
@@ -152,15 +152,11 @@ plot_raster_src(
 
 {vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
 parallel processing. By setting `mirai::daemons(n)` before running the
-vrt pipeline, we can sometimes improve performance, depending on the
-speed of the server holding the data. In some cases this will make
-little difference; for example, the Microsoft Planetary Computer STAC
-API is already pretty fast. However, for NASA’s Earthdata STAC API, this
-can make a huge difference. In order to use asynchronous processing, in
-the `vrt_compute` function, we need to set `engine = "gdalraster"` or we
-can use `engine = "warp"` if we are downloading multiple images
-individually (This is a much faster approach on Nasa’s Earthdata
-server).
+vrt pipeline, we can often improve performance, depending on the speed
+of the server holding the data. In order to use asynchronous processing,
+in the `vrt_compute` function, we must set `engine = "gdalraster"` or we
+can use `engine = "warp"` if we are computing a `vrt_collection`
+(multiple discrete images).
 
 ## Using on-disk rasters
 

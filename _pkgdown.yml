@@ -76,7 +76,6 @@ reference:
     desc: Helper functions for parallel processing
     contents:
       - n_daemons
-      - machine_cores
   - title: Spatial helper functions
     desc: Helper functions for spatial operations
     contents:
