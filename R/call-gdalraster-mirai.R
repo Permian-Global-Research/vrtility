@@ -43,6 +43,7 @@ call_gdalraster_mirai <- function(
   ))
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
+  on.exit(ds$close(), add = TRUE)
   purrr::iwalk(x$assets, function(asset, band) {
     ds$setDescription(
       band = band,
@@ -64,7 +65,6 @@ call_gdalraster_mirai <- function(
       ds = ds
     )
   } else {
-    on.exit(ds$close(), add = TRUE)
     sequential_gdalreader_band_read_write(
       blocks_df,
       vrt_file = vrt_template,
