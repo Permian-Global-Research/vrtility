@@ -9,7 +9,7 @@ parallel processing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.01</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,31 +55,12 @@ parallel processing.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">n_daemons</span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">machine_cores</span><span class="op">(</span>all.tests <span class="op">=</span> <span class="cn">FALSE</span>, logical <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">n_daemons</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
-    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-
-
-<dl><dt id="arg-all-tests">all.tests<a class="anchor" aria-label="anchor" href="#arg-all-tests"></a></dt>
-<dd><p>Logical: if true apply all known tests.</p></dd>
-
-
-<dt id="arg-logical">logical<a class="anchor" aria-label="anchor" href="#arg-logical"></a></dt>
-<dd><p>Logical: if possible, use the number of physical CPUs/cores
-(if FALSE) or logical CPUs (if TRUE). Currently this is honoured only on
-macOS, Solaris and Windows.</p></dd>
-
-</dl></div>
-    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>n_daemons()</code> returns the number of mirai daemons running.</p>
-<p><code>machine_cores()</code> returns the number of cores on the machine. This function
-is from <code><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></code> and is used detect the number of
-cores on the machine.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

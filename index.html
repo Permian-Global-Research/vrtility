@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.01</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,7 @@
 
 <p>vrtility is an R package that aims to make the best use of <a href="https://gdal.org/en/stable/index.html" class="external-link">GDAL</a>’s <a href="https://gdal.org/en/stable/drivers/raster/vrt.html" class="external-link">VRT</a> capabilities for efficient processing of large raster datasets - mainly with Earth Observation (EO) in mind. vrtility uses the VRT format to access awesome features such as pixel functions but also harnesses the VRT data structure to facilitate complex image processing tasks such as multi-band compositing and time series filtering.</p>
 <blockquote>
-<p>[!CAUTION] This package is under active development and is likely to change. Contributions and suggestions are still very welcome!</p>
+<p>[!NOTE] This package is under active development and is likely to change. Contributions and suggestions are still very welcome!</p>
 </blockquote>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
@@ -151,7 +151,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;  22.088   0.230  23.217</span></span>
+<span><span class="co">#&gt;   3.551   0.448  13.865</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>  <span class="va">median_composite</span>,</span>
@@ -162,7 +162,7 @@
 <div class="section level2">
 <h2 id="asynchronous-downloadprocessing">Asynchronous download/processing<a class="anchor" aria-label="anchor" href="#asynchronous-downloadprocessing"></a>
 </h2>
-<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallel processing. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can sometimes improve performance, depending on the speed of the server holding the data. In some cases this will make little difference; for example, the Microsoft Planetary Computer STAC API is already pretty fast. However, for NASA’s Earthdata STAC API, this can make a huge difference. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we need to set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are downloading multiple images individually (This is a much faster approach on Nasa’s Earthdata server).</p>
+<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallel processing. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can often improve performance, depending on the speed of the server holding the data. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we must set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are computing a <code>vrt_collection</code> (multiple discrete images).</p>
 </div>
 <div class="section level2">
 <h2 id="using-on-disk-rasters">Using on-disk rasters<a class="anchor" aria-label="anchor" href="#using-on-disk-rasters"></a>
