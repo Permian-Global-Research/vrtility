@@ -208,7 +208,7 @@ test_that("pipeline extras", {
 })
 
 
-testthat("user no data passes to gdalraster vrt_compute method", {
+test_that("user no data passes to gdalraster vrt_compute method", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   v <- ex_collect <- vrt_collect(s2files[1])
