@@ -206,3 +206,28 @@ test_that("pipeline extras", {
     )
   )
 })
+
+
+testthat("user no data passes to gdalraster vrt_compute method", {
+  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+
+  v <- ex_collect <- vrt_collect(s2files[1])
+
+  vw <- v |>
+    vrt_warp(
+      t_srs = v$srs,
+      te = v$bbox,
+      tr = v$res
+    )
+
+  y <- vrt_compute(
+    vw,
+    outfile = fs::file_temp(ext = "tif"),
+    engine = "gdalraster",
+    dst_nodata = -999
+  )
+
+  ds <- methods::new(gdalraster::GDALRaster, y)
+
+  expect_equal(ds$getNoDataValue(band = 1), -999)
+})

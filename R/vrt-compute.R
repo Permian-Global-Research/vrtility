@@ -204,8 +204,9 @@ vrt_compute.vrt_block <- function(
       outfile = outfile,
       config_options = config_options,
       creation_options = creation_options,
-      nsplits = nsplits,
-      quiet = quiet
+      dst_nodata = dst_nodata,
+      quiet = quiet,
+      nsplits = nsplits
     )
   } else if (engine == "translate") {
     result <- compute_with_py_env(
