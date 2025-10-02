@@ -5,6 +5,7 @@
 \alias{vrt_collect.character}
 \alias{vrt_collect.doc_items}
 \alias{print.vrt_collection}
+\alias{c.vrt_block}
 \alias{c.vrt_collection}
 \title{Construct the base VRT object for composing VRT pipelines.}
 \usage{
@@ -30,6 +31,8 @@ vrt_collect(x, ...)
 )
 
 \method{print}{vrt_collection}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, blocks = FALSE, ...)
+
+\method{c}{vrt_block}(x, ...)
 
 \method{c}{vrt_collection}(x, ...)
 }

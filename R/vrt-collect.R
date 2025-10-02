@@ -456,16 +456,40 @@ print.vrt_collection <- function(
 #' @details
 #' You can use the `c` method to combine multiple vrt_collection objects. All
 #' collections must have the same number of bands.
-c.vrt_collection <- function(x, ...) {
+c.vrt_block <- function(x, ...) {
   dots <- rlang::dots_list(...)
   nbands <- length(x$assets)
 
   purrr::walk(dots, function(vrtc) {
-    v_assert_type(vrtc, "...", "vrt_collection")
+    v_assert_type(
+      vrtc,
+      "...",
+      c("vrt_collection", "vrt_block"),
+      nullok = FALSE,
+      multiple = TRUE
+    )
     v_assert_length(vrtc$assets, "...", nbands)
   })
 
-  clist <- (c(x[[1]], purrr::flatten(purrr::map(dots, function(x) x[[1]]))))
+  dots_inherit_block <- purrr::map_lgl(dots, ~ class(.x)[1] == "vrt_block")
+
+  flat_blocks <- dots[dots_inherit_block]
+  flatten_collects <- purrr::flatten(purrr::map(
+    dots[!dots_inherit_block],
+    function(x) {
+      x[[1]]
+    }
+  ))
+
+  flatten_dots <- c(flat_blocks, flatten_collects)
+
+  x_set <- if (inherits(x, "vrt_collection")) {
+    x[[1]]
+  } else {
+    list(x)
+  }
+
+  clist <- (c(x_set, flatten_dots))
 
   unique_attr <- function(at) {
     unlist(unique(x[at], purrr::flatten(purrr::map(dots, function(x) x[at]))))
@@ -477,6 +501,12 @@ c.vrt_collection <- function(x, ...) {
     maskfun = unique_attr("maskfun"),
     warped = all(unique_attr("warped")),
   )
+}
+
+#' @export
+#' @rdname vrt_collect
+c.vrt_collection <- function(x, ...) {
+  NextMethod()
 }
 
 #' internal gdal vrt_collect argument checks

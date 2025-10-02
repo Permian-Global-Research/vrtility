@@ -5,6 +5,7 @@ call_gdalraster_mirai <- function(
   outfile = fs::file_temp(ext = "tif"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
+  dst_nodata = NULL,
   quiet = FALSE,
   nsplits = NULL
 ) {
@@ -31,6 +32,10 @@ call_gdalraster_mirai <- function(
     nsplits
   ) |>
     merge(data.frame(band_n = seq_len(rt$nbands)))
+
+  if (!is.null(dst_nodata)) {
+    rt$nodataval <- dst_nodata
+  }
 
   # Initialize output raster
   nr <- suppressMessages(gdalraster::rasterFromRaster(

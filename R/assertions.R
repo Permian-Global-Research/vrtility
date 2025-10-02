@@ -9,6 +9,7 @@ v_assert_type <- function(
     "function",
     "stac_vrt",
     "vrt_collection",
+    "vrt_block",
     "doc_items",
     "formula"
   ),
