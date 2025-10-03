@@ -80,9 +80,19 @@ vrt_set_py_pixelfun.vrt_block <- function(
     warped <- FALSE
   }
   if (inherits(x, "vrt_stack")) {
-    build_vrt_stack(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
+    build_vrt_stack(
+      vrt_to_vrt(tf),
+      maskfun = x$maskfun,
+      pixfun = pixfun,
+      warped = warped
+    )
   } else {
-    build_vrt_block(tf, maskfun = x$maskfun, pixfun = pixfun, warped = warped)
+    build_vrt_block(
+      vrt_to_vrt(tf),
+      maskfun = x$maskfun,
+      pixfun = pixfun,
+      warped = warped
+    )
   }
 }
 
