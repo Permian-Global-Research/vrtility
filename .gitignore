@@ -3,6 +3,7 @@
 
 # dev space
 scratch*
+z-scratch/*
 benchmark.R
 # files to ignore
 *.tif
