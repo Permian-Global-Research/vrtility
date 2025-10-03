@@ -18,27 +18,19 @@ build_vrt_block <- function(
 
   # read and verify and get attrs for modified VRT
   gdr <- methods::new(gdalraster::GDALRaster, x)
-  ras_count <- gdr$getRasterCount()
-  assets <- purrr::map_chr(
-    seq_len(ras_count),
-    function(.x) gdr$getDescription(.x)
-  )
-  no_data_val <- purrr::map_dbl(
-    seq_len(ras_count),
-    function(.x) gdr$getNoDataValue(.x)
-  )
-  dttm <- gdr$getMetadataItem(0, "datetime", "")
-  mask_band_name <- gdr$getMetadataItem(0, "mask_band_name", "")
+  on.exit(gdr$close(), add = TRUE)
+  bt <- block_template(gdr)
 
   rvrt <- list(
     vrt = as.character(xml2::read_xml(x)),
+    vrt_src = x,
     srs = gdr$getProjection(),
     bbox = gdr$bbox(),
     res = gdr$res(),
-    date_time = dttm,
-    assets = assets,
-    no_data_val = no_data_val,
-    mask_band_name = mask_band_name,
+    date_time = bt$dttm,
+    assets = bt$assets,
+    no_data_val = bt$no_data_val,
+    mask_band_name = bt$mask_band_name,
     pixfun = pixfun,
     maskfun = maskfun,
     warped = warped
@@ -47,6 +39,27 @@ build_vrt_block <- function(
   class(rvrt) <- c("vrt_block", "list")
 
   return(rvrt)
+}
+
+
+block_template <- function(ds) {
+  ras_count <- ds$getRasterCount()
+  assets <- purrr::map_chr(
+    seq_len(ras_count),
+    function(.x) ds$getDescription(.x)
+  )
+  no_data_val <- purrr::map_dbl(
+    seq_len(ras_count),
+    function(.x) ds$getNoDataValue(.x)
+  )
+  dttm <- ds$getMetadataItem(0, "datetime", "")
+  mask_band_name <- ds$getMetadataItem(0, "mask_band_name", "")
+  list(
+    assets = assets,
+    no_data_val = no_data_val,
+    dttm = dttm,
+    mask_band_name = mask_band_name
+  )
 }
 
 #' @export
