@@ -194,3 +194,39 @@ vrt_squish_bands <- function(band_files, inbands, vrt) {
 
   return(invisible(vrt))
 }
+
+
+vrt_to_vrt <- function(
+  in_vrt,
+  out_vrt = fs::file_temp(ext = ".vrt"),
+  cl_arg = NULL,
+  quiet = TRUE
+) {
+  inds <- methods::new(gdalraster::GDALRaster, in_vrt)
+  on.exit(inds$close())
+  bt <- block_template(inds) # to check it opens
+
+  gdalraster::buildVRT(out_vrt, in_vrt, cl_arg = cl_arg, quiet = quiet)
+
+  set_vrt_descriptions(out_vrt, bt$assets, as_file = TRUE)
+
+  # for consistency we should always set this even if ""
+  out_vrt <- set_vrt_metadata(
+    out_vrt,
+    keys = "datetime",
+    values = bt$dttm,
+    as_file = TRUE
+  )
+
+  # This is  only set when creating a mask so make it conditional
+  if (nzchar(bt$mask_band_name)) {
+    out_vrt <- set_vrt_metadata(
+      out_vrt,
+      keys = "mask_band_name",
+      values = bt$mask_band_name,
+      as_file = TRUE
+    )
+  }
+
+  return(out_vrt)
+}
