@@ -4,9 +4,10 @@ test_that("raster plotting works", {
   skip_on_covr()
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
-  ex_collect <- vrt_collect(s2files)
-
-  ex_collect
+  ex_collect <- vrt_collect(
+    s2files,
+    datetimes = paste0("2020-06-0", seq_len(length(s2files)))
+  )
 
   ex_vrt_mask <- ex_collect |>
     vrt_set_maskfun(
@@ -16,15 +17,30 @@ test_that("raster plotting works", {
     )
 
   vdiffr::expect_doppelganger(
-    "collect plot works",
+    "collect plot works with default title",
     plot(ex_vrt_mask, item = 2, c(3, 2, 1))
+  )
+
+  vdiffr::expect_doppelganger(
+    "collect plot works with title = 'none'",
+    plot(ex_vrt_mask, item = 2, c(3, 2, 1), title = "none")
   )
 
   t_block <- ex_vrt_mask[[1]][[1]]
 
   vdiffr::expect_doppelganger(
-    "block plot works",
+    "block plot works with default title",
     plot(t_block, 2)
+  )
+
+  vdiffr::expect_doppelganger(
+    "block plot works with title = 'none'",
+    plot(t_block, 2, title = "none")
+  )
+
+  vdiffr::expect_doppelganger(
+    "block plot works with title = 'dttm'",
+    plot(t_block, 2, title = "dttm")
   )
 
   ex_vrt_mask_warp <- vrt_warp(

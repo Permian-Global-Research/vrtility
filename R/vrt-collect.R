@@ -151,14 +151,10 @@ vrt_collect.character <- function(
       }
     }
 
-    # TODO: delete this...
-    if (ds$isOpen()) {
-      ds$close()
-    }
+    # required because of subsequent reading below.
     if (dst$isOpen()) {
       dst$close()
     }
-    ####
 
     tf <- set_vrt_descriptions(
       x = tf,

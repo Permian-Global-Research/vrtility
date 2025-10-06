@@ -36,11 +36,7 @@ vrt_derived_block.default <- function(x, ...) {
 #' @keywords internal
 #' @export
 vrt_derived_block.vrt_stack <- function(x, ...) {
-  cli::cli_abort(
-    "{cli::code_highlight('vrt_derived_block()')}
-    cannot be used with a vrt_stack object.
-    Each band must contain a single source raster."
-  )
+  NextMethod()
 }
 
 #' @export
@@ -138,7 +134,7 @@ vrt_derived_block.vrt_block <- function(x, ...) {
   })
 
   build_vrt_block(
-    tf,
+    vrt_to_vrt(tf),
     maskfun = x$maskfun,
     pixfun = expr_pf,
     warped = x$warped

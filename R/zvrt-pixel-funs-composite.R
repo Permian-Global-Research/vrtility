@@ -5,11 +5,13 @@
 #' `mean_numpy` works in the same way but calculates the mean.`
 #' @export
 median_numpy <- function() {
+  # TODO: this will need another look when masking is implemented!!
   glue::glue(
     "
 import numpy as np
 def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
     no_data_val = int(kwargs['no_data_value'])
+
     # Stack the input arrays first
     stacked = np.stack(in_ar)
     

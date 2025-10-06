@@ -100,7 +100,7 @@
 
 vrt_compute <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
@@ -130,7 +130,7 @@ vrt_compute.default <- function(x, ...) {
 #' @rdname vrt_compute
 vrt_compute.vrt_block <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -240,7 +240,7 @@ vrt_compute.vrt_block <- function(
 #' @rdname vrt_compute
 vrt_compute.vrt_stack_warped <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -296,7 +296,7 @@ vrt_compute.vrt_stack_warped <- function(
 #' @rdname vrt_compute
 vrt_compute.vrt_stack <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
@@ -338,7 +338,7 @@ vrt_compute.vrt_stack <- function(
 #' @rdname vrt_compute
 vrt_compute.vrt_collection_warped <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -395,7 +395,7 @@ vrt_compute.vrt_collection_warped <- function(
 #' @rdname vrt_compute
 vrt_compute.vrt_collection <- function(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
