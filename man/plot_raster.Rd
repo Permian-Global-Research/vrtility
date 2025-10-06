@@ -13,7 +13,7 @@ plot_raster_src(
   bands = 1,
   pal = grDevices::hcl.colors(10, "Viridis"),
   nbands = length(bands),
-  title = TRUE,
+  title = c("description", "dttm", "none"),
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
@@ -63,8 +63,10 @@ plot_raster_src(
 default), then \code{nbands = 3} is assumed if the input data contain 3 bands,
 otherwise band 1 is used.}
 
-\item{title}{logical. If TRUE the band description will be used as a title. ignored
-if main is provided.}
+\item{title}{a character string indicating what to use as the title of the
+plot. One of "description", "dttm", or "none". If "description" the band
+description (name) is used, if "dttm" the datetime of the block is used, if
+"none" no title is used. Ignored if main is provided.}
 
 \item{col_tbl}{A color table as a matrix or data frame with four or five
 columns. Column 1 contains the numeric pixel values. Columns 2:4 contain
