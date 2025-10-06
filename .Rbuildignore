@@ -1,6 +1,7 @@
 ^vrtility\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^z-scratch$
 ^scratch.*\.R$
 ^scratch.*\.sh$
 ^big-test$
