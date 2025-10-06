@@ -9,7 +9,7 @@ process of plotting a raster file."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ process of plotting a raster file.</p>
 <span>  bands <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pal <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">10</span>, <span class="st">"Viridis"</span><span class="op">)</span>,</span>
 <span>  nbands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">bands</span><span class="op">)</span>,</span>
-<span>  title <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"description"</span>, <span class="st">"dttm"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  col_tbl <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  maxColorValue <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -127,8 +127,10 @@ otherwise band 1 is used.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
-<dd><p>logical. If TRUE the band description will be used as a title. ignored
-if main is provided.</p></dd>
+<dd><p>a character string indicating what to use as the title of the
+plot. One of "description", "dttm", or "none". If "description" the band
+description (name) is used, if "dttm" the datetime of the block is used, if
+"none" no title is used. Ignored if main is provided.</p></dd>
 
 
 <dt id="arg-col-tbl">col_tbl<a class="anchor" aria-label="anchor" href="#arg-col-tbl"></a></dt>
