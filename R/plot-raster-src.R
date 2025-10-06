@@ -7,8 +7,10 @@
 #' @param pal a character vector of colors to use when plotting a single band.
 #' @param adj_low a numeric value to adjust the lower quantile value by. useful
 #' for example when sea presents as very dark.
-#' @param title logical. If TRUE the band description will be used as a title. ignored
-#' if main is provided.
+#' @param title a character string indicating what to use as the title of the
+#' plot. One of "description", "dttm", or "none". If "description" the band
+#' description (name) is used, if "dttm" the datetime of the block is used, if
+#' "none" no title is used. Ignored if main is provided.
 #' @inheritParams gdalraster::plot_raster
 #' @rdname plot_raster
 #' @export
@@ -17,7 +19,7 @@ plot_raster_src <- function(
   bands = 1,
   pal = grDevices::hcl.colors(10, "Viridis"),
   nbands = length(bands),
-  title = TRUE,
+  title = c("description", "dttm", "none"),
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
@@ -44,6 +46,7 @@ plot_raster_src <- function(
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
+  title <- rlang::arg_match(title)
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
@@ -99,8 +102,16 @@ plot_raster_src <- function(
     minmax_def <- rep(mm, each = nbands)
   }
 
-  if (nchar(main) == 0 && nbands == 1 && title) {
-    main <- ds$getDescription(bands)
+  if (nchar(main) == 0 && nbands == 1) {
+    if (title == "description") {
+      main <- ds$getDescription(bands)
+    } else if (title == "dttm") {
+      main <- ds$getMetadataItem(0, "datetime", "")
+    }
+  } else if (nchar(main) == 0 && nbands == 3) {
+    if (title != "none") {
+      main <- ds$getMetadataItem(0, "datetime", "")
+    }
   }
 
   gdalraster::plot_raster(
