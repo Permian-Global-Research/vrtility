@@ -63,10 +63,13 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
     warped <- FALSE
   }
 
+  # browser()
+
   build_vrt_stack(
     main_vrt,
-    pix_fun = x$pixfun,
+    n_items = x$n_items,
     maskfun = x$maskfun,
+    pixfun = x$pixfun,
     warped = warped
   )
 }
@@ -76,15 +79,17 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
 #' @param x A vrt_collection type object
 #' @param maskfun The code of the mask function
 #' @param pixfun The code of the pixel function
-#' @param ... Additional arguments not used.
+#' @param warped Logical. Is this a warped VRT?
+#' @param n_items Number of items in the collection
+#' @return A vrt_stack object
 #' @keywords internal
 #' @noRd
 build_vrt_stack <- function(
   x,
+  n_items,
   maskfun = NULL,
   pixfun = NULL,
-  warped = FALSE,
-  ...
+  warped = FALSE
 ) {
   # validate the vrt against the schema
   v_assert_valid_schema(x)
@@ -99,9 +104,9 @@ build_vrt_stack <- function(
     seq_len(ras_count),
     function(.x) gdr$getNoDataValue(.x)
   )
-  nits <- length(setdiff(gdr$getFileList(), gdr$getFilename()))
+
   dttm <- purrr::map_chr(
-    seq_len(nits),
+    seq_len(n_items),
     ~ gdr$getMetadataItem(0, paste0("datetime_", .x), "")
   )
 
@@ -111,7 +116,7 @@ build_vrt_stack <- function(
     bbox = gdr$bbox(),
     res = gdr$res(),
     date_time = dttm,
-    n_items = nits,
+    n_items = n_items,
     assets = assets,
     no_data_val = no_data_val,
     pixfun = pixfun,

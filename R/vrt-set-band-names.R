@@ -33,7 +33,20 @@ vrt_set_band_names.vrt_stack <- function(x, band_names) {
   v_assert_length(band_names, "band_names", length(x$assets))
   tf <- vrt_save(x)
   of <- set_vrt_descriptions(tf, band_names, as_file = TRUE)
-  build_vrt_stack(of, maskfun = x$maskfun, pixfun = x$pixfun)
+
+  if (inherits(x, "vrt_stack_warped")) {
+    warped <- TRUE
+  } else {
+    warped <- FALSE
+  }
+
+  build_vrt_stack(
+    of,
+    n_items = x$n_items,
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    warped = warped
+  )
 }
 
 #' @export
