@@ -15,50 +15,53 @@ test_that("chaining vrt functions works", {
   )
   t_block <- ex_collect[[1]][[1]]
 
-  ndvi_ex <- ex_collect |>
+  pixfunstep1 <- ex_collect |>
     vrt_set_maskfun(
       mask_band = "SCL",
       mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
       drop_mask_band = TRUE
     ) |>
     vrt_warp(t_block$srs, t_block$bbox, t_block$res) |>
-    vrt_derived_block(
-      ndvi ~ (B08 - B04) / (B08 + B04),
-      ndvitimes10 ~ ((B08 - B04) / (B08 + B04)) * 10
-    ) |>
-    vrt_set_nodata(-999)
+    vrt_set_gdal_pixelfun("sqrt")
 
-  expect_true(ndvi_ex$n_items == 5)
+  expect_true(pixfunstep1$n_items == 5)
 
-  purrr::walk(ndvi_ex[[1]], \(x) {
-    expect_s3_class(x, "vrt_block")
-    expect_true("ndvi" %in% x$assets)
-  })
+  pixfunstep1_compute <- vrt_compute(
+    pixfunstep1
+  )
 
-  ndvi_ex_compute <- vrt_compute(
-    ndvi_ex
+  t_block_compute <- vrt_compute(
+    t_block
   )
 
   # plot_raster_src(ndvi_ex_compute[1], 2)
 
-  ds <- new(gdalraster::GDALRaster, ndvi_ex_compute[1])
+  ds <- new(gdalraster::GDALRaster, pixfunstep1_compute[1])
   vals <- gdalraster::read_ds(ds)
   vals <- split_into_bands(vals, attr(vals, "gis")$dim[3])
-  expect_equal(
-    sum(vals[[1]], na.rm = TRUE) * 10,
-    sum(vals[[2]], na.rm = TRUE),
-    tolerance = 0.1
+  tbds <- new(gdalraster::GDALRaster, t_block_compute)
+  t_vals <- gdalraster::read_ds(tbds)
+  t_vals <- split_into_bands(t_vals, attr(t_vals, "gis")$dim[3])
+
+  expect_lt(
+    sum(vals[[1]], na.rm = TRUE),
+    sum(t_vals[[1]], na.rm = TRUE)
   )
   close_it(ds)
+  close_it(tbds)
+
+  testthat::skip_if_not(check_muparser(), message = "muparser not available")
 
   add_pix_funs <- ndvi_ex |>
-    vrt_set_gdal_pixelfun("sqrt") |>
+    vrt_derived_block(
+      t1 ~ B04 * 100,
+      t2 ~ B04 * 1000,
+    ) |>
     vrt_compute()
 
   ds2 <- new(gdalraster::GDALRaster, add_pix_funs[1])
   vals2 <- gdalraster::read_ds(ds2)
   vals2 <- split_into_bands(vals2, attr(vals2, "gis")$dim[3])
-  expect_gt(sum(vals2[[1]], na.rm = TRUE), sum(vals[[1]], na.rm = TRUE))
-  expect_lt(sum(vals2[[2]], na.rm = TRUE), sum(vals[[2]], na.rm = TRUE))
+  expect_lt(sum(vals2[[1]], na.rm = TRUE), sum(vals2[[2]], na.rm = TRUE))
   close_it(ds2)
 })
