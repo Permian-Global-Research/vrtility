@@ -11,7 +11,7 @@
 \usage{
 vrt_compute(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
@@ -30,7 +30,7 @@ vrt_compute(
 
 \method{vrt_compute}{vrt_block}(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -50,7 +50,7 @@ vrt_compute(
 
 \method{vrt_compute}{vrt_stack_warped}(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -70,7 +70,7 @@ vrt_compute(
 
 \method{vrt_compute}{vrt_stack}(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
@@ -90,7 +90,7 @@ vrt_compute(
 
 \method{vrt_compute}{vrt_collection_warped}(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs = x$srs,
   te = x$bbox,
   tr = x$res,
@@ -110,7 +110,7 @@ vrt_compute(
 
 \method{vrt_compute}{vrt_collection}(
   x,
-  outfile,
+  outfile = fs::file_temp(ext = "tif"),
   t_srs,
   te,
   tr,
