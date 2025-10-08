@@ -157,43 +157,43 @@ vrt_find_first_src <- function(x) {
   )
 }
 
+vrt_subset_bands <- function(
+  vrt,
+  band_selection,
+  output_vrt = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = ".vrt"),
+  return_type = c("file", "xml")
+) {
+  return_type <- rlang::arg_match(return_type)
+  xvrt <- xml2::read_xml(vrt)
+  xvrt_bands <- xml2::xml_find_all(xvrt, ".//VRTRasterBand")
+  xml2::xml_remove(xvrt_bands[seq_along(xvrt_bands)[-band_selection]])
 
-vrt_collapse <- function(vrt) {
-  vrt_xml <- xml2::read_xml(vrt)
+  sfn <- xml2::xml_find_all(xvrt, ".//SourceFilename")
+  sfn_chr <- xml2::xml_text(sfn)
 
-  vrt_bands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
-  vrt_srcs <- vrt_find_all_srcs(vrt_xml)
+  srcbandnum <- xml2::xml_find_all(xvrt, ".//SourceBand")
+  src_bands_chr <- as.character(
+    rbind("-b", xml2::xml_text(srcbandnum))
+  )
 
-  xml2::xml_remove(vrt_bands[seq_along(vrt_bands)[-1]])
+  mask_src <- purrr::map2_chr(sfn_chr, is_source_relative(sfn), \(.x, .y) {
+    if (.y) {
+      fs::path(fs::path_dir(vrt), .x)
+    } else {
+      .x
+    }
+  })
 
-  vrt_b1_srcs <- vrt_find_all_srcs(vrt_xml)
-  xml2::xml_remove(vrt_b1_srcs)
-
-  vrt_b1 <- xml2::xml_find_first(vrt_xml, ".//VRTRasterBand")
-  purrr::walk(vrt_srcs, ~ xml2::xml_add_child(vrt_b1, .x))
-
-  xml2::write_xml(vrt_xml, vrt)
-  return(invisible(vrt))
-}
-
-
-vrt_squish_bands <- function(band_files, inbands, vrt) {
-  if (length(band_files) == 1) {
-    gdalraster::buildVRT(
-      vrt,
-      band_files,
-      cl_arg = c(unlist(purrr::map(inbands, ~ c("-b", .x)))),
-      quiet = TRUE
-    )
-
-    vrt_collapse(vrt)
-  } else {
-    #TODO: this may not be required...
-    msk_file <- band_files[inbands]
-    gdalraster::buildVRT(vrt, msk_file, quiet = TRUE)
+  gdalraster::buildVRT(
+    output_vrt,
+    mask_src,
+    cl_arg = src_bands_chr,
+    quiet = TRUE
+  )
+  if (return_type == "xml") {
+    output_vrt <- xml2::read_xml(output_vrt)
   }
-
-  return(invisible(vrt))
+  return(output_vrt)
 }
 
 
@@ -230,4 +230,19 @@ vrt_to_vrt <- function(
   }
 
   return(out_vrt)
+}
+
+
+is_source_relative <- function(xmlnode) {
+  purrr::map_lgl(
+    xmlnode,
+    \(.x) {
+      rel_to_vrt <- xml2::xml_attr(.x, "relativeToVRT")
+      if (!is.na(rel_to_vrt) && rel_to_vrt == "1") {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    }
+  )
 }
