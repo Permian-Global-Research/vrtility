@@ -187,7 +187,7 @@ apply_band_formula_scales <- function(req_bands, req_band_names, form) {
     } else {
       ""
     }
-    # browser()
+
     offset_chr <- if (!is.null(.x[["offset"]])) {
       paste0(" + ", .x[["offset"]])
     } else {
