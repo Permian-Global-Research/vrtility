@@ -11,11 +11,10 @@ set_mask_numpy <- function() {
     "
 import numpy as np
 def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
-                  raster_ysize, buf_radius, gt, **kwargs):
+                  raster_ysize, buf_radius, gt, **kwargs):          
     valid_vals =  [int(x) for x in kwargs['valid_values'].decode().split(',')]
     no_data_val = int(kwargs['no_data_value'])
     out_ar[:] = np.where(in_ar[1] > 0, in_ar[0], no_data_val)
-    
 "
   )
 }

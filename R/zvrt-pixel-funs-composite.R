@@ -5,7 +5,6 @@
 #' `mean_numpy` works in the same way but calculates the mean.`
 #' @export
 median_numpy <- function() {
-  # TODO: this will need another look when masking is implemented!!
   glue::glue(
     "
 import numpy as np
@@ -19,7 +18,7 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
     mask = (stacked == no_data_val)
     
     # Create a masked array - more efficient than np.where for this operation
-    masked_data = np.ma.array(stacked, mask=mask, shrink=False)
+    masked_data = np.ma.array(stacked, mask = mask, shrink = False)
     
     # Calculate median on masked array directly
     out_ar[:] = np.ma.median(masked_data, axis=0).filled(fill_value=no_data_val)
