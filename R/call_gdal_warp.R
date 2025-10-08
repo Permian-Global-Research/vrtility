@@ -15,7 +15,7 @@ call_gdal_warp <- function(
   on.exit(set_gdal_config(orig_config))
 
   # new gdalraster raises warnings here... although I think we can ignore.
-  # browser()
+
   purrr::insistently(
     function() {
       gdalraster::warp(
