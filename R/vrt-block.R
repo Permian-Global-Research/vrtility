@@ -52,13 +52,23 @@ block_template <- function(ds) {
     seq_len(ras_count),
     function(.x) ds$getNoDataValue(.x)
   )
-  dttm <- ds$getMetadataItem(0, "datetime", "")
+  # for stacks there will be multiple datetime_{n} keys
+  metadata_items <- ds$getMetadata(0, "")
+  datetime_keys <- metadata_items[grepl("^datetime_\\d+", metadata_items)]
+  datetime_keys <- sub("=.*", "", datetime_keys)
+  if (length(datetime_keys) == 0) {
+    datetime_keys <- "datetime"
+  }
+  dttm <- purrr::map_chr(datetime_keys, ~ ds$getMetadataItem(0, .x, ""))
+
+  # mask band name
   mask_band_name <- ds$getMetadataItem(0, "mask_band_name", "")
   list(
     assets = assets,
     no_data_val = no_data_val,
     dttm = dttm,
-    mask_band_name = mask_band_name
+    mask_band_name = mask_band_name,
+    dttm_keys = datetime_keys
   )
 }
 
