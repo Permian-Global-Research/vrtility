@@ -223,6 +223,7 @@ vrt_compute.vrt_block <- function(
       )
     )
   }
+
   if (!recollect) {
     return(result)
   }
