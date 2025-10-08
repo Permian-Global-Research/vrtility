@@ -15,8 +15,7 @@ vrt_set_maskfun(
   mask_values,
   build_mask_pixfun,
   set_mask_pixfun,
-  drop_mask_band,
-  cache_dir
+  drop_mask_band
 )
 
 \method{vrt_set_maskfun}{vrt_block}(
@@ -25,8 +24,7 @@ vrt_set_maskfun(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE,
-  cache_dir = getOption("vrt.cache")
+  drop_mask_band = TRUE
 )
 
 \method{vrt_set_maskfun}{vrt_collection}(
@@ -35,8 +33,7 @@ vrt_set_maskfun(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE,
-  cache_dir = getOption("vrt.cache")
+  drop_mask_band = TRUE
 )
 
 set_mask_numpy()
@@ -62,10 +59,6 @@ details.}
 
 \item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
 the VRT block.}
-
-\item{cache_dir}{A character string of the directory to use for temporary
-files. In general this should be left alone. main purpose is to manage cache
-location when running asyncronously with mirai.}
 }
 \value{
 A VRT block with the mask band set.
