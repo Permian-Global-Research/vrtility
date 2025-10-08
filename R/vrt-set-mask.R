@@ -116,6 +116,7 @@ vrt_set_maskfun.vrt_block <- function(
 
   msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
+  xml2::xml_set_attr(msk_band, "DataType", "Byte")
   drop_nodatavalue(msk_band)
   xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
   xml2::xml_add_child(msk_band, "PixelFunctionType", "build_mask")
@@ -134,12 +135,27 @@ vrt_set_maskfun.vrt_block <- function(
   wrp_msk_pf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
 
+  # materialize the mask
+  wrp_msk_pf_mat <- fs::file_temp(tmp_dir = cache_dir, ext = "tif")
+  compute_with_py_env(
+    gdalraster::translate(
+      wrp_msk_pf,
+      wrp_msk_pf_mat,
+      gdal_creation_options(
+        COPY_SRC_OVERVIEWS = "NO",
+        ZLEVEL = 1,
+        cli_format = TRUE
+      ),
+      quiet = TRUE
+    )
+  )
+
   wmxmlsrc <- xml2::read_xml(as.character(
     vrt_find_first_src(bands[[mask_idx[1]]])
   ))
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
-  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf)) #
+  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf_mat))
   sourceband <- xml2::xml_find_first(wmxmlsrc, ".//SourceBand")
   xml2::xml_remove(sourceband)
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
