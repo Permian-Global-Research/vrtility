@@ -63,8 +63,6 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
     warped <- FALSE
   }
 
-  # browser()
-
   build_vrt_stack(
     main_vrt,
     n_items = x$n_items,
