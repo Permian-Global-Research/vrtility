@@ -100,16 +100,9 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  ts <- vrt_save(x)
-  ds <- methods::new(gdalraster::GDALRaster, ts)
-  band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  # this to capture mask bands that are still virtual - TODO: more testing
-  if (length(band_files) == 1) {
-    band_files <- ds$getFilename()
-  }
   mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
   vrt_squish_bands(
-    band_files,
+    x$vrt_src,
     mask_idx,
     mskvrt
   )
