@@ -98,16 +98,14 @@ vrt_create_mask.vrt_block <- function(
     "count(.//VRTRasterBand[last()]/preceding-sibling::*) + 1"
   )
 
-  # ts <- vrt_save(x)
-  # ds <- methods::new(gdalraster::GDALRaster, ts)
-  # band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
-  vrt_squish_bands(x$vrt_src, inbands, mskvrt)
+  msk_vrt_xml <- vrt_subset_bands(
+    x$vrt_src,
+    inbands,
+    return_type = "xml"
+  )
 
-  msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
   set_nodatavalue(msk_band, nodata_value)
-  # xml2::xml_set_attr(msk_band, "dataType", "Byte")
   xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
   xml2::xml_add_child(msk_band, "PixelFunctionType", "create_mask")
   xml2::xml_add_child(msk_band, "PixelFunctionLanguage", "Python")
