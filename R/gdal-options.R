@@ -70,6 +70,8 @@ gdal_config_opts <- function(
 #' @param BLOCKXSIZE Block size in X
 #' @param BLOCKYSIZE Block size in Y
 #' @param COPY_SRC_OVERVIEWS Copy source overviews
+#' @param cli_format Logical indicating whether to return the options in a format
+#' suitable for passing to system calls (i.e. with -co prefixes)
 #' @param ... Additional -co options to set
 #' @rdname gdal_options
 #' @export
@@ -92,6 +94,7 @@ gdal_creation_options <- function(
   BLOCKXSIZE = "128", # changed from 256
   BLOCKYSIZE = "128",
   COPY_SRC_OVERVIEWS = "YES",
+  cli_format = FALSE,
   ...
 ) {
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
@@ -101,14 +104,21 @@ gdal_creation_options <- function(
     co_args$NUM_THREADS <- "1"
   }
 
-  keep_names <- setdiff(names(co_args), "output_format")
+  keep_names <- setdiff(names(co_args), c("output_format", "cli_format"))
   co_args <- co_args[keep_names]
   co_args <- paste0(names(co_args), "=", co_args)
 
+  if (cli_format) {
+    co_args <- as.character(rbind(
+      "-co",
+      co_args
+    ))
+  }
+
   if (!is.null(output_format)) {
-    c("-of", output_format, co_args)
+    return(c("-of", output_format, co_args))
   } else {
-    co_args
+    return(co_args)
   }
 }
 

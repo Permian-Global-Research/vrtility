@@ -42,6 +42,7 @@ gdal_creation_options(
   BLOCKXSIZE = "128",
   BLOCKYSIZE = "128",
   COPY_SRC_OVERVIEWS = "YES",
+  cli_format = FALSE,
   ...
 )
 
@@ -118,6 +119,9 @@ requests.}
 \item{BLOCKYSIZE}{Block size in Y}
 
 \item{COPY_SRC_OVERVIEWS}{Copy source overviews}
+
+\item{cli_format}{Logical indicating whether to return the options in a format
+suitable for passing to system calls (i.e. with -co prefixes)}
 
 \item{multi}{Logical indicating whether to use multi-threading, equivalent
 to -multi on the CLI}

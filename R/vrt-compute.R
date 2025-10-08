@@ -214,7 +214,11 @@ vrt_compute.vrt_block <- function(
         src_files = tmp_vrt,
         outfile = outfile,
         config_options = config_options,
-        cl_arg = c(as.vector(rbind("-co", creation_options)), "-r", resampling),
+        cl_arg = c(
+          as.character(rbind("-co", creation_options)),
+          "-r",
+          resampling
+        ),
         quiet = quiet
       )
     )
