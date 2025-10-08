@@ -188,6 +188,7 @@ vrt_squish_bands <- function(band_files, inbands, vrt) {
 
     vrt_collapse(vrt)
   } else {
+    #TODO: this may not be required...
     msk_file <- band_files[inbands]
     gdalraster::buildVRT(vrt, msk_file, quiet = TRUE)
   }
@@ -213,7 +214,7 @@ vrt_to_vrt <- function(
   # for consistency we should always set this even if ""
   out_vrt <- set_vrt_metadata(
     out_vrt,
-    keys = "datetime",
+    keys = bt$dttm_keys,
     values = bt$dttm,
     as_file = TRUE
   )
