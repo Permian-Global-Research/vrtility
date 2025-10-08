@@ -94,6 +94,7 @@ vrt_collect.character <- function(
     "character",
     nullok = TRUE
   )
+
   v_assert_type(datetimes, "datetimes", "character", nullok = TRUE)
   v_assert_length(datetimes, "datetimes", length(x), nullok = TRUE)
 
