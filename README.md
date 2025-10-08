@@ -116,8 +116,7 @@ s2_stac <- sentinel2_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 20,
-  assets = c("B02", "B03", "B04", "SCL"),
-  limit = 10
+  assets = c("B02", "B03", "B04", "SCL")
 )
 # number of items:
 length(s2_stac$features)
@@ -138,7 +137,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.551   0.448  13.865
+#>   7.315   0.514  17.342
 
 plot_raster_src(
   median_composite,
