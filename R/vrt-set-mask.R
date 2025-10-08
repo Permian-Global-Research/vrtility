@@ -10,9 +10,6 @@
 #' details.
 #' @param drop_mask_band Logical. If TRUE, the mask band will be removed from
 #' the VRT block.
-#' @param cache_dir A character string of the directory to use for temporary
-#' files. In general this should be left alone. main purpose is to manage cache
-#' location when running asyncronously with mirai.
 #' @export
 #' @rdname vrt_set_maskfun
 #' @details
@@ -42,8 +39,7 @@ vrt_set_maskfun <- function(
   mask_values,
   build_mask_pixfun,
   set_mask_pixfun,
-  drop_mask_band,
-  cache_dir
+  drop_mask_band
 ) {
   UseMethod("vrt_set_maskfun")
 }
@@ -66,8 +62,7 @@ vrt_set_maskfun.vrt_block <- function(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE,
-  cache_dir = getOption("vrt.cache")
+  drop_mask_band = TRUE
 ) {
   v_assert_type(mask_band, "mask_band", "character", nullok = FALSE)
   v_assert_type(
@@ -100,16 +95,13 @@ vrt_set_maskfun.vrt_block <- function(
     ))
   }
 
-  mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
-  vrt_squish_bands(
+  msk_vrt_xml <- vrt_subset_bands(
     x$vrt_src,
     mask_idx,
-    mskvrt
+    return_type = "xml"
   )
 
-  msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
-  xml2::xml_set_attr(msk_band, "DataType", "Byte")
   drop_nodatavalue(msk_band)
   xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
   xml2::xml_add_child(msk_band, "PixelFunctionType", "build_mask")
@@ -125,11 +117,11 @@ vrt_set_maskfun.vrt_block <- function(
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
 
-  wrp_msk_pf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  wrp_msk_pf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
 
   # materialize the mask
-  wrp_msk_pf_mat <- fs::file_temp(tmp_dir = cache_dir, ext = "tif")
+  wrp_msk_pf_mat <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif")
   compute_with_py_env(
     gdalraster::translate(
       wrp_msk_pf,
@@ -191,7 +183,7 @@ vrt_set_maskfun.vrt_block <- function(
   }
 
   # Write back to block
-  tf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
 
   tf <- set_vrt_metadata(
@@ -202,7 +194,7 @@ vrt_set_maskfun.vrt_block <- function(
   )
 
   build_vrt_block(
-    vrt_to_vrt(tf), #REVRT
+    tf, #vrt_to_vrt(tf), #REVRT
     maskfun = build_mask_pixfun,
     pixfun = x$pixfun,
     warped = x$warped
@@ -220,8 +212,7 @@ vrt_set_maskfun.vrt_collection <- function(
   mask_values,
   build_mask_pixfun = vrtility::build_intmask(),
   set_mask_pixfun = vrtility::set_mask_numpy(),
-  drop_mask_band = TRUE,
-  cache_dir = getOption("vrt.cache")
+  drop_mask_band = TRUE
 ) {
   check_mask_band(x, mask_band)
   daemon_setup()
@@ -236,16 +227,14 @@ vrt_set_maskfun.vrt_collection <- function(
           mask_values = mask_values,
           build_mask_pixfun = build_mask_pixfun,
           set_mask_pixfun = set_mask_pixfun,
-          drop_mask_band = drop_mask_band,
-          cache_dir = cache_dir
+          drop_mask_band = drop_mask_band
         )
       },
       mask_band = mask_band,
       mask_values = mask_values,
       build_mask_pixfun = build_mask_pixfun,
       set_mask_pixfun = set_mask_pixfun,
-      drop_mask_band = drop_mask_band,
-      cache_dir = getOption("vrt.cache")
+      drop_mask_band = drop_mask_band
     )
   )
 
