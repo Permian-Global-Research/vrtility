@@ -137,7 +137,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   7.315   0.514  17.342
+#>   7.540   0.514  15.514
 
 plot_raster_src(
   median_composite,
@@ -155,7 +155,9 @@ vrt pipeline, we can often improve performance, depending on the speed
 of the server holding the data. In order to use asynchronous processing,
 in the `vrt_compute` function, we must set `engine = "gdalraster"` or we
 can use `engine = "warp"` if we are computing a `vrt_collection`
-(multiple discrete images).
+(multiple discrete images). It is strongly recommended to use
+multi-processing, especially for multi-band reduction methods
+(i.e. `multiband_reduce`).
 
 ## Using on-disk rasters
 
