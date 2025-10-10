@@ -116,8 +116,7 @@ s2_stac <- sentinel2_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 20,
-  assets = c("B02", "B03", "B04", "SCL"),
-  limit = 10
+  assets = c("B02", "B03", "B04", "SCL")
 )
 # number of items:
 length(s2_stac$features)
@@ -138,7 +137,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.551   0.448  13.865
+#>   7.540   0.514  15.514
 
 plot_raster_src(
   median_composite,
@@ -156,7 +155,9 @@ vrt pipeline, we can often improve performance, depending on the speed
 of the server holding the data. In order to use asynchronous processing,
 in the `vrt_compute` function, we must set `engine = "gdalraster"` or we
 can use `engine = "warp"` if we are computing a `vrt_collection`
-(multiple discrete images).
+(multiple discrete images). It is strongly recommended to use
+multi-processing, especially for multi-band reduction methods
+(i.e. `multiband_reduce`).
 
 ## Using on-disk rasters
 

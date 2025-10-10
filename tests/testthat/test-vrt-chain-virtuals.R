@@ -52,7 +52,7 @@ test_that("chaining vrt functions works", {
 
   testthat::skip_if_not(check_muparser(), message = "muparser not available")
 
-  add_pix_funs <- ndvi_ex |>
+  add_pix_funs <- pixfunstep1 |>
     vrt_derived_block(
       t1 ~ B04 * 100,
       t2 ~ B04 * 1000,

@@ -250,7 +250,7 @@
           mask = (stacked == no_data_val)
           
           # Create a masked array - more efficient than np.where for this operation
-          masked_data = np.ma.array(stacked, mask=mask, shrink=False)
+          masked_data = np.ma.array(stacked, mask = mask, shrink = False)
           
           # Calculate median on masked array directly
           out_ar[:] = np.ma.median(masked_data, axis=0).filled(fill_value=no_data_val)
@@ -523,7 +523,7 @@
           mask = (stacked == no_data_val)
           
           # Create a masked array - more efficient than np.where for this operation
-          masked_data = np.ma.array(stacked, mask=mask, shrink=False)
+          masked_data = np.ma.array(stacked, mask = mask, shrink = False)
           
           # Calculate median on masked array directly
           out_ar[:] = np.ma.median(masked_data, axis=0).filled(fill_value=no_data_val)

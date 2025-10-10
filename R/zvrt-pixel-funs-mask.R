@@ -1,4 +1,9 @@
 #' Masking functions VRT pixel functions.
+#' @param buffer_size A buffer size to apply to the mask (numeric, default: 0). A buffer
+#' size > 0 will dilate the mask by the specified number of pixels.
+#' This can be useful to remove edge effects around clouds.
+#' If a buffer size > 0 is specified, the `scipy` python library will
+#' automatically be installed.
 #' @export
 #' @details `set_mask_numpy` simply applies a given mask where values of 0 are
 #' assumed to have nodata and values > 0 (typically 255) contain valid data.
@@ -6,16 +11,57 @@
 #' `vrt_set_maskfun()`. Alternatively a custom function could be provided if,
 #' for example a user wishes to buffer the mask.
 #' @rdname vrt_set_maskfun
-set_mask_numpy <- function() {
+set_mask_numpy <- function(buffer_size = 0) {
+  v_assert_type(
+    buffer_size,
+    "buffer_size",
+    c("numeric", "integer"),
+    multiple = TRUE
+  )
+
+  v_assert_within_range(
+    buffer_size,
+    "buffer_size",
+    0,
+    Inf
+  )
+
+  if (buffer_size > 0) {
+    # assert omicloudmask is installed
+    omc <- try(
+      reticulate::import("scipy", delay_load = TRUE),
+      silent = TRUE
+    )
+
+    if (inherits(omc, "try-error")) {
+      vrtility_py_require("scipy")
+    }
+  }
+
   glue::glue(
     "
 import numpy as np
+
 def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
-                  raster_ysize, buf_radius, gt, **kwargs):
+                  raster_ysize, buf_radius, gt, **kwargs):          
     valid_vals =  [int(x) for x in kwargs['valid_values'].decode().split(',')]
     no_data_val = int(kwargs['no_data_value'])
-    out_ar[:] = np.where(in_ar[1] > 0, in_ar[0], no_data_val)
+    buffer_size = {buffer_size}
     
+    if buffer_size > 0:
+        from scipy import ndimage
+        # Create mask (True = nodata)
+        mask = in_ar[1] == 0
+        
+        # Buffer the mask
+        structure = ndimage.generate_binary_structure(2, 2)  # 8-connectivity
+        buffered_mask = ndimage.binary_dilation(mask, structure=structure, iterations=buffer_size)
+        
+        # Apply buffered mask
+        out_ar[:] = np.where(buffered_mask, no_data_val, in_ar[0])
+    else:
+        # Original behavior - no buffering
+        out_ar[:] = np.where(in_ar[1] > 0, in_ar[0], no_data_val)
 "
   )
 }
@@ -87,6 +133,8 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' selection is based on availability: "cuda" > "mps" > "cpu".
 #' @param nodata_value The nodata value to use in the output mask (numeric,
 #' default: 0).
+#' @param model_version The version of the OmniCloudMask model to use
+#' (character, default: "3.0"). Options include "3.0", "2.0", and "1.0".
 #' @return A Python function that can be used as a pixel function in a VRT
 #' raster. The function will apply the OmniCloudMask model to the specified
 #' bands and create a cloud mask.
@@ -95,12 +143,13 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' OmniCloudMask GitHub repository: \url{https://github.com/DPIRD-DMA/OmniCloudMask}
 #' @export
 create_omnicloudmask <- function(
-  patch_size = 600,
+  patch_size = 1000,
   patch_overlap = 300,
   batch_size = 1,
   inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
-  nodata_value = 0
+  nodata_value = 0,
+  model_version = c("3.0", "2.0", "1.0")
 ) {
   # assert omicloudmask is installed
   omc <- try(
@@ -171,6 +220,8 @@ create_omnicloudmask <- function(
 
   inference_dtype <- rlang::arg_match(inference_dtype)
 
+  model_version <- rlang::arg_match(model_version)
+
   pyfun <- glue::glue(
     "
 import numpy as np
@@ -189,7 +240,8 @@ def create_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         batch_size = {batch_size},
         inference_device = '{inference_device}',
         inference_dtype = torch.{inference_dtype},
-        no_data_value = {nodata_value}
+        no_data_value = {nodata_value},
+        model_version = {model_version}
       ) 
 
       out_ar[:] = pred_mask[0]

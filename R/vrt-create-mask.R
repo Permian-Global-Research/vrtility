@@ -98,18 +98,15 @@ vrt_create_mask.vrt_block <- function(
     "count(.//VRTRasterBand[last()]/preceding-sibling::*) + 1"
   )
 
-  ts <- vrt_save(x)
-  ds <- methods::new(gdalraster::GDALRaster, ts)
-  band_files <- setdiff(ds$getFileList(), ds$getFilename())
-  mskvrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  msk_vrt_xml <- vrt_subset_bands(
+    x$vrt_src,
+    inbands,
+    return_type = "xml",
+    collapse = TRUE
+  )
 
-  vrt_squish_bands(band_files, inbands, mskvrt)
-
-  msk_vrt_xml <- xml2::read_xml(mskvrt)
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
   set_nodatavalue(msk_band, nodata_value)
-  xml2::xml_set_attr(msk_band, "dataType", "Byte")
-  xml2::xml_set_attr(msk_band, "band", length(bands) + 1)
   xml2::xml_set_attr(msk_band, "subClass", "VRTDerivedRasterBand")
   xml2::xml_add_child(msk_band, "PixelFunctionType", "create_mask")
   xml2::xml_add_child(msk_band, "PixelFunctionLanguage", "Python")
@@ -123,7 +120,47 @@ vrt_create_mask.vrt_block <- function(
     attributes(maskfun)$mask_description
   )
 
-  xml2::xml_add_child(vx, msk_band, .where = last_band_index)
+  virt_mask_vrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  mat_mask_tif <- fs::file_temp(tmp_dir = cache_dir, ext = "tif")
+  mat_mask_vrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+
+  xml2::write_xml(msk_vrt_xml, virt_mask_vrt)
+
+  ds <- new(gdalraster::GDALRaster, x$vrt_src)
+  ds$getProjection()
+
+  compute_with_py_env({
+    call_gdal_warp(
+      src_files = virt_mask_vrt,
+      outfile = mat_mask_tif,
+      t_srs = x$srs,
+      cl_arg = combine_warp_opts(
+        creation_options = gdal_creation_options(
+          COPY_SRC_OVERVIEWS = "NO"
+        ),
+        warp_opts = gdalwarp_options(),
+        resampling = "bilinear",
+        te = x$bbox,
+        res = x$res,
+        dst_nodata = nodata_value
+      ),
+      config_options = gdal_config_opts(),
+      quiet = TRUE
+    )
+  })
+
+  gdalraster::translate(
+    mat_mask_tif,
+    mat_mask_vrt,
+    quiet = TRUE
+  )
+
+  mat_mask_xml <- xml2::read_xml(mat_mask_vrt)
+  mat_mask_rasband <- xml2::xml_find_first(mat_mask_xml, ".//VRTRasterBand")
+  xml2::xml_set_attr(mat_mask_rasband, "band", length(bands) + 1)
+  # drop_nodatavalue(mat_mask_rasband)
+
+  xml2::xml_add_child(vx, mat_mask_rasband, .where = last_band_index)
 
   # Write back to block
   tf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")

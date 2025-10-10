@@ -39,10 +39,10 @@ filtering.
 ## Features
 
 - Modular design: We're basically creating remote sensing pipelines using 
-nested VRTs. This allows for the easy addition of new pixel and
-masking functions. but could easily be adapted for deriving spectral indices
-or calculating complex time series functions. All powered by 
-[{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
+  nested VRTs. This allows for the easy addition of new pixel and
+  masking functions. but could easily be adapted for deriving spectral indices
+  or calculating complex time series functions. All powered by 
+  [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
 - vrtility enables the use of GDAL VRT python and built-in (C++) pixel functions. The
   python [numpy](https://numpy.org/)-based pixel functions can be used to apply
@@ -55,8 +55,8 @@ or calculating complex time series functions. All powered by
 
 - Efficient parallel processing using [{mirai}](https://mirai.r-lib.org/index.html)
 
-- Advanced compositing methods that maintain spectral consistency, such as the
-geometric median and medoid. 
+- Advanced compositing methods that maintain spectral consistency, such as the 
+  geometric median and medoid. 
 
 - Time series filtering functions to improve temporal consistency
   and reduce noise.
@@ -119,8 +119,7 @@ s2_stac <- sentinel2_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 20,
-  assets = c("B02", "B03", "B04", "SCL"),
-  limit = 10
+  assets = c("B02", "B03", "B04", "SCL")
 )
 # number of items:
 length(s2_stac$features)
@@ -154,7 +153,8 @@ pipeline, we can often improve performance, depending on the speed of the
 server holding the data. In order to use asynchronous processing, in the 
 `vrt_compute` function, we must set `engine = "gdalraster"` or we can use 
 `engine = "warp"` if we are computing a `vrt_collection` 
-(multiple discrete images).
+(multiple discrete images). It is strongly recommended to use multi-processing, 
+especially for multi-band reduction methods (i.e. `multiband_reduce`).
 
 ## Using on-disk rasters
 

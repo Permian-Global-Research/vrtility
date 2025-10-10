@@ -70,9 +70,7 @@
   if (is.na(Sys.getenv("RETICULATE_USE_MANAGED_VENV", unset = NA))) {
     Sys.setenv(RETICULATE_USE_MANAGED_VENV = "yes")
   }
-  vrtility_py_require(c(
-    "numpy"
-  ))
+  vrtility_py_require("numpy")
   cache_init_checks()
   vrt_opts_set()
 
