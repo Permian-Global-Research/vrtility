@@ -160,6 +160,7 @@ vrt_find_first_src <- function(x) {
 vrt_subset_bands <- function(
   vrt,
   band_selection,
+  collapse = FALSE,
   output_vrt = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = ".vrt"),
   return_type = c("file", "xml")
 ) {
@@ -186,14 +187,45 @@ vrt_subset_bands <- function(
 
   gdalraster::buildVRT(
     output_vrt,
-    mask_src,
-    cl_arg = src_bands_chr,
+    unique(mask_src),
+    cl_arg = c(src_bands_chr),
     quiet = TRUE
   )
   if (return_type == "xml") {
     output_vrt <- xml2::read_xml(output_vrt)
   }
+
+  if (collapse) {
+    output_vrt <- vrt_collapse(output_vrt, return_type = return_type)
+  }
+
   return(output_vrt)
+}
+
+
+vrt_collapse <- function(vrt, return_type = c("file", "xml")) {
+  return_type <- rlang::arg_match(return_type)
+  if (inherits(vrt, "character")) {
+    vrt_xml <- xml2::read_xml(vrt)
+  } else {
+    vrt_xml <- vrt
+  }
+
+  vrt_bands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
+  vrt_srcs <- vrt_find_all_srcs(vrt_xml)
+
+  xml2::xml_remove(vrt_bands[seq_along(vrt_bands)[-1]])
+
+  vrt_b1_srcs <- vrt_find_all_srcs(vrt_xml)
+  xml2::xml_remove(vrt_b1_srcs)
+
+  vrt_b1 <- xml2::xml_find_first(vrt_xml, ".//VRTRasterBand")
+  purrr::walk(vrt_srcs, ~ xml2::xml_add_child(vrt_b1, .x))
+  if (return_type == "xml") {
+    return(vrt_xml)
+  }
+  xml2::write_xml(vrt_xml, vrt)
+  return(vrt)
 }
 
 
