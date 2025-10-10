@@ -120,27 +120,12 @@ vrt_set_maskfun.vrt_block <- function(
   wrp_msk_pf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(msk_vrt_xml, wrp_msk_pf)
 
-  # materialize the mask
-  wrp_msk_pf_mat <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif")
-  compute_with_py_env(
-    gdalraster::translate(
-      wrp_msk_pf,
-      wrp_msk_pf_mat,
-      gdal_creation_options(
-        COPY_SRC_OVERVIEWS = "NO",
-        ZLEVEL = 1,
-        cli_format = TRUE
-      ),
-      quiet = TRUE
-    )
-  )
-
   wmxmlsrc <- xml2::read_xml(as.character(
     vrt_find_first_src(bands[[mask_idx[1]]])
   ))
 
   source_filename <- xml2::xml_find_first(wmxmlsrc, ".//SourceFilename")
-  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf_mat))
+  xml2::xml_set_text(source_filename, fs::path_file(wrp_msk_pf))
   sourceband <- xml2::xml_find_first(wmxmlsrc, ".//SourceBand")
   xml2::xml_remove(sourceband)
   xml2::xml_attr(source_filename, "relativeToVRT") <- "1"
@@ -194,7 +179,7 @@ vrt_set_maskfun.vrt_block <- function(
   )
 
   build_vrt_block(
-    tf, #vrt_to_vrt(tf), #REVRT
+    vrt_to_vrt(tf), #REVRT
     maskfun = build_mask_pixfun,
     pixfun = x$pixfun,
     warped = x$warped
