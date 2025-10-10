@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,8 +129,7 @@
 <span>  start_date <span class="op">=</span> <span class="st">"2023-01-01"</span>,</span>
 <span>  end_date <span class="op">=</span> <span class="st">"2023-12-31"</span>,</span>
 <span>  max_cloud_cover <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>  assets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B02"</span>, <span class="st">"B03"</span>, <span class="st">"B04"</span>, <span class="st">"SCL"</span><span class="op">)</span>,</span>
-<span>  limit <span class="op">=</span> <span class="fl">10</span></span>
+<span>  assets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B02"</span>, <span class="st">"B03"</span>, <span class="st">"B04"</span>, <span class="st">"SCL"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co"># number of items:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">$</span><span class="va">features</span><span class="op">)</span></span>
@@ -151,7 +150,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   3.551   0.448  13.865</span></span>
+<span><span class="co">#&gt;   7.540   0.514  15.514</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
 <span>  <span class="va">median_composite</span>,</span>
@@ -162,7 +161,7 @@
 <div class="section level2">
 <h2 id="asynchronous-downloadprocessing">Asynchronous download/processing<a class="anchor" aria-label="anchor" href="#asynchronous-downloadprocessing"></a>
 </h2>
-<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallel processing. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can often improve performance, depending on the speed of the server holding the data. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we must set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are computing a <code>vrt_collection</code> (multiple discrete images).</p>
+<p>{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous parallel processing. By setting <code>mirai::daemons(n)</code> before running the vrt pipeline, we can often improve performance, depending on the speed of the server holding the data. In order to use asynchronous processing, in the <code>vrt_compute</code> function, we must set <code>engine = "gdalraster"</code> or we can use <code>engine = "warp"</code> if we are computing a <code>vrt_collection</code> (multiple discrete images). It is strongly recommended to use multi-processing, especially for multi-band reduction methods (i.e. <code>multiband_reduce</code>).</p>
 </div>
 <div class="section level2">
 <h2 id="using-on-disk-rasters">Using on-disk rasters<a class="anchor" aria-label="anchor" href="#using-on-disk-rasters"></a>
