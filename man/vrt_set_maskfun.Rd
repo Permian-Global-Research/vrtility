@@ -36,7 +36,7 @@ vrt_set_maskfun(
   drop_mask_band = TRUE
 )
 
-set_mask_numpy()
+set_mask_numpy(buffer_size = 0)
 
 build_intmask()
 
@@ -59,6 +59,12 @@ details.}
 
 \item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
 the VRT block.}
+
+\item{buffer_size}{A buffer size to apply to the mask (numeric, default: 0). A buffer
+size > 0 will dilate the mask by the specified number of pixels.
+This can be useful to remove edge effects around clouds.
+If a buffer size > 0 is specified, the \code{scipy} python library will
+automatically be installed.}
 }
 \value{
 A VRT block with the mask band set.
