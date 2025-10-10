@@ -101,7 +101,8 @@ vrt_create_mask.vrt_block <- function(
   msk_vrt_xml <- vrt_subset_bands(
     x$vrt_src,
     inbands,
-    return_type = "xml"
+    return_type = "xml",
+    collapse = TRUE
   )
 
   msk_band <- xml2::xml_find_first(msk_vrt_xml, ".//VRTRasterBand")
@@ -124,14 +125,26 @@ vrt_create_mask.vrt_block <- function(
   mat_mask_vrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
 
   xml2::write_xml(msk_vrt_xml, virt_mask_vrt)
+
+  ds <- new(gdalraster::GDALRaster, x$vrt_src)
+  ds$getProjection()
+
   compute_with_py_env({
-    gdalraster::translate(
-      virt_mask_vrt,
-      mat_mask_tif,
-      gdal_creation_options(
-        COPY_SRC_OVERVIEWS = "NO",
-        cli_format = TRUE
+    call_gdal_warp(
+      src_files = virt_mask_vrt,
+      outfile = mat_mask_tif,
+      t_srs = x$srs,
+      cl_arg = combine_warp_opts(
+        creation_options = gdal_creation_options(
+          COPY_SRC_OVERVIEWS = "NO"
+        ),
+        warp_opts = gdalwarp_options(),
+        resampling = "bilinear",
+        te = x$bbox,
+        res = c(20, 20), #x$res,
+        dst_nodata = nodata_value
       ),
+      config_options = gdal_config_opts(),
       quiet = TRUE
     )
   })
@@ -141,6 +154,7 @@ vrt_create_mask.vrt_block <- function(
     mat_mask_vrt,
     quiet = TRUE
   )
+  # browser()
 
   mat_mask_xml <- xml2::read_xml(mat_mask_vrt)
   mat_mask_rasband <- xml2::xml_find_first(mat_mask_xml, ".//VRTRasterBand")
