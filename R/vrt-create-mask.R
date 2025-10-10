@@ -141,7 +141,7 @@ vrt_create_mask.vrt_block <- function(
         warp_opts = gdalwarp_options(),
         resampling = "bilinear",
         te = x$bbox,
-        res = c(20, 20), #x$res,
+        res = x$res,
         dst_nodata = nodata_value
       ),
       config_options = gdal_config_opts(),
@@ -154,7 +154,6 @@ vrt_create_mask.vrt_block <- function(
     mat_mask_vrt,
     quiet = TRUE
   )
-  # browser()
 
   mat_mask_xml <- xml2::read_xml(mat_mask_vrt)
   mat_mask_rasband <- xml2::xml_find_first(mat_mask_xml, ".//VRTRasterBand")
