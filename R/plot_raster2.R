@@ -254,7 +254,7 @@
       side = 3,
       line = 0.5,
       at = plot_center_x,
-      cex = 1.8,
+      cex = 1.5,
       font = 2
     )
     graphics::mtext(xlab, side = 1, line = 2.5, at = plot_center_x, cex = 1.3)
@@ -470,9 +470,53 @@
 
 #' @param data An object of class \code{Rcpp_GDALRaster} see
 #' \code{\link[gdalraster]{GDALRaster}}
+#' @param xsize Integer. Number of pixels in the x dimension for the output plot.
+#' If \code{NULL}, uses the full raster width.
+#' @param ysize Integer. Number of pixels in the y dimension for the output plot.
+#' If \code{NULL}, uses the full raster height.
+#' @param bands Integer vector of length 1 or 3. Band number(s) to plot.
+#' For grayscale plots use a single band, for RGB use three bands.
+#' @param max_pixels Numeric. Maximum number of pixels to read. If
+#' \code{xsize * ysize} exceeds this value, the raster will be downsampled.
+#' @param scale_values Logical. Whether to apply scale and offset values
+#' from the raster metadata.
+#' @param col_tbl Color table as returned by \code{ds$getColorTable()}.
+#' If provided, overrides the \code{col} parameter.
+#' @param maxColorValue Numeric. Maximum color value when using a color table.
+#' @param normalize Logical. Whether to normalize pixel values to \[0,1\] range
+#' before color mapping. Automatically disabled for discrete data.
+#' @param minmax_def Numeric vector of min/max values for color scaling.
+#' For RGB plots, should be length 6: c(min_r, min_g, min_b, max_r, max_g, max_b).
+#' @param minmax_pct_cut Numeric vector of length 2. Percentile cutoff values
+#' for color scaling (e.g., c(2, 98) for 2nd and 98th percentiles).
 #' @param col Colors to interpolate; must be a valid argument to
-#' \code{\link[grDevices]{col2rgb}}
+#' \code{\link[grDevices]{col2rgb}}. Ignored if \code{col_tbl} is provided.
+#' @param pixel_fn Function to apply to pixel values before plotting.
+#' @param xlim Numeric vector of length 2. X-axis limits in coordinate system units.
+#' @param ylim Numeric vector of length 2. Y-axis limits in coordinate system units.
+#' @param interpolate Logical. Whether to apply smoothing to the raster image.
+#' @param axes Logical. Whether to draw axes and axis labels.
+#' @param main Character string. Plot title.
+#' @param xlab Character string. X-axis label.
+#' @param ylab Character string. Y-axis label.
+#' @param legend Logical. Whether to draw a color legend. Only supported for
+#' single-band plots. Automatically detects discrete vs continuous data.
+#' @param digits Integer. Number of decimal places for legend labels.
+#' @param na_col Color for NA/nodata pixels. Default is transparent.
+#' @param mar Numeric vector of length 4. Additional margin adjustments
+#' to add to the base margins when legend is enabled.
+#' @param ... Additional arguments passed to \code{\link[graphics]{plot.window}}.
 #' @rdname plot_raster
+#' @examples
+#' s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' ds <- methods::new(gdalraster::GDALRaster, s2_imgs[2])
+#' on.exit(ds$close(), add = TRUE)
+#
+#' plot(
+#'   ds,
+#'   bands = 4,
+#'   legend = TRUE
+#' )
 #' @export
 plot.Rcpp_GDALRaster <- function(
   data,

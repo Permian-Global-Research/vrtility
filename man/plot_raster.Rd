@@ -14,10 +14,8 @@ plot_raster_src(
   bands = 1,
   col = grDevices::hcl.colors(10, "Viridis"),
   title = c("description", "dttm", "none"),
-  rgb_trans = c("linear", "gamma", "hist", "hist_all", "none"),
+  rgb_trans = c("linear", "gamma", "hist", "hist_all"),
   col_tbl = NULL,
-  maxColorValue = 1,
-  normalize = TRUE,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
   xlim = NULL,
@@ -29,7 +27,7 @@ plot_raster_src(
   ylab = "",
   legend = if (length(bands) == 1) TRUE else FALSE,
   digits = 2,
-  na_col = grDevices::rgb(0, 0, 0, 0),
+  na_col = "#95acbe",
   ...
 )
 
@@ -72,108 +70,78 @@ plot_raster_src(
 \arguments{
 \item{x}{A path to a raster file}
 
-\item{bands}{a numeric vector of band numbers to plot must be of length
-1 or 3.}
+\item{bands}{Integer vector of length 1 or 3. Band number(s) to plot.
+For grayscale plots use a single band, for RGB use three bands.}
 
 \item{col}{Colors to interpolate; must be a valid argument to
-\code{\link[grDevices]{col2rgb}}}
+\code{\link[grDevices]{col2rgb}}. Ignored if \code{col_tbl} is provided.}
 
 \item{title}{a character string indicating what to use as the title of the
 plot. One of "description", "dttm", or "none". If "description" the band
 description (name) is used, if "dttm" the datetime of the block is used, if
 "none" no title is used. Ignored if main is provided.}
 
-\item{col_tbl}{A color table as a matrix or data frame with four or five
-columns. Column 1 contains the numeric pixel values. Columns 2:4 contain
-the intensities of the red, green and blue primaries (\code{0:1} by default,
-or use integer \code{0:255} by setting \code{maxColorValue = 255}).
-An optional column 5 may contain alpha transparency values, \code{0} for fully
-transparent to \code{1} (or \code{maxColorValue}) for opaque (the default if column 5
-is missing). If \code{data} is a \code{GDALRaster} object, a built-in color table will
-be used automatically if one exists in the dataset.}
+\item{col_tbl}{Color table as returned by \code{ds$getColorTable()}.
+If provided, overrides the \code{col} parameter.}
 
-\item{maxColorValue}{A number giving the maximum of the color values range
-in \code{col_tbl} (see above). The default is \code{1}.}
+\item{minmax_def}{Numeric vector of min/max values for color scaling.
+For RGB plots, should be length 6: c(min_r, min_g, min_b, max_r, max_g, max_b).}
 
-\item{normalize}{Logical. \code{TRUE} to rescale pixel values so that their
-range is \verb{[0,1]}, normalized to the full range of the pixel data by default
-(\code{min(data)}, \code{max(data)}, per band). Ignored if \code{col_tbl} is used.
-Set \code{normalize} to \code{FALSE} if a color map function is used that
-operates on raw pixel values (see \code{col_map_fn} below).}
+\item{minmax_pct_cut}{Numeric vector of length 2. Percentile cutoff values
+for color scaling (e.g., c(2, 98) for 2nd and 98th percentiles).}
 
-\item{minmax_def}{Normalize to user-defined min/max values (in terms of
-the pixel data, per band). For single-band grayscale, a numeric vector of
-length two containing min, max. For 3-band RGB, a numeric vector of length
-six containing b1_min, b2_min, b3_min, b1_max, b2_max, b3_max.}
+\item{xlim}{Numeric vector of length 2. X-axis limits in coordinate system units.}
 
-\item{minmax_pct_cut}{Normalize to a truncated range of the pixel data using
-percentile cutoffs (removes outliers). A numeric vector of length two giving
-the percentiles to use (e.g., \code{c(2, 98)}). Applied per band. Ignored if
-\code{minmax_def} is used.}
+\item{ylim}{Numeric vector of length 2. Y-axis limits in coordinate system units.}
 
-\item{xlim}{Numeric vector of length two giving the x coordinate range.
-If \code{data} is a \code{GDALRaster} object, the default is the raster xmin, xmax in
-georeferenced coordinates, otherwise the default uses pixel/line
-coordinates (\code{c(0, xsize)}).}
+\item{interpolate}{Logical. Whether to apply smoothing to the raster image.}
 
-\item{ylim}{Numeric vector of length two giving the y coordinate range.
-If \code{data} is a \code{GDALRaster} object, the default is the raster ymin, ymax in
-georeferenced coordinates, otherwise the default uses pixel/line
-coordinates (\code{c(ysize, 0)}).}
+\item{axes}{Logical. Whether to draw axes and axis labels.}
 
-\item{interpolate}{Logical indicating whether to apply linear interpolation
-to the image when drawing (default \code{TRUE}).}
+\item{main}{Character string. Plot title.}
 
-\item{axes}{Logical. \code{TRUE} to draw axes (the default).}
+\item{xlab}{Character string. X-axis label.}
 
-\item{main}{The main title (on top).}
+\item{ylab}{Character string. Y-axis label.}
 
-\item{xlab}{Title for the x axis (see \code{?title}).}
+\item{legend}{Logical. Whether to draw a color legend. Only supported for
+single-band plots. Automatically detects discrete vs continuous data.}
 
-\item{ylab}{Title for the y axis (see \code{?title}).}
+\item{digits}{Integer. Number of decimal places for legend labels.}
 
-\item{legend}{Logical indicating whether to include a legend on the plot.
-Currently, legends are only supported for continuous data. A color table
-will be used if one is specified or the raster has a built-in color table,
-otherwise the value for \code{col_map_fn} will be used.}
+\item{na_col}{Color for NA/nodata pixels. Default is transparent.}
 
-\item{digits}{The number of digits to display after the decimal point in
-the legend labels when raster data are floating point.}
-
-\item{na_col}{Color to use for \code{NA} as a 7- or 9-character hexadecimal code.
-The default is transparent (\code{"#00000000"}, the return value of
-\code{rgb(0,0,0,0)}).}
-
-\item{...}{Other parameters to be passed to \code{plot.default()}.}
+\item{...}{Additional arguments passed to \code{\link[graphics]{plot.window}}.}
 
 \item{config_options}{A named character vector of gdal config options to set
 before attempting to read the VRT.}
 
 \item{item}{The numeric index of the item, in the vrt_collection, to plot}
 
-\item{data}{Either a \code{GDALRaster} object from which data will be read, or
-a numeric vector of pixel values arranged in left to right, top to
-bottom order, or a list of band vectors. If input is vector or list,
-the information in attribute \code{gis} will be used if present (see \code{\link[gdalraster:read_ds]{read_ds()}}),
-potentially ignoring values below for \code{xsize}, \code{ysize}, \code{nbands}.}
+\item{data}{An object of class \code{Rcpp_GDALRaster} see
+\code{\link[gdalraster]{GDALRaster}}}
 
-\item{xsize}{The number of pixels along the x dimension in \code{data}. If \code{data}
-is a \code{GDALRaster} object, specifies the size at which the raster will be
-read (used for argument \code{out_xsize} in \code{GDALRaster$read()}). By default,
-the entire raster will be read at full resolution.}
+\item{xsize}{Integer. Number of pixels in the x dimension for the output plot.
+If \code{NULL}, uses the full raster width.}
 
-\item{ysize}{The number of pixels along the y dimension in \code{data}. If \code{data}
-is a \code{GDALRaster} object, specifies the size at which the raster will be
-read (used for argument \code{out_ysize} in \code{GDALRaster$read()}). By default,
-the entire raster will be read at full resolution.}
+\item{ysize}{Integer. Number of pixels in the y dimension for the output plot.
+If \code{NULL}, uses the full raster height.}
 
-\item{max_pixels}{The maximum number of pixels that the function will
-attempt to display (per band). An error is raised if \code{(xsize * ysize)}
-exceeds this value. Setting to \code{NULL} turns off this check.}
+\item{max_pixels}{Numeric. Maximum number of pixels to read. If
+\code{xsize * ysize} exceeds this value, the raster will be downsampled.}
 
-\item{pixel_fn}{An optional function that will be applied to the input
-pixel data. Must accept vector input and return a numeric vector of the same
-length as its input.}
+\item{scale_values}{Logical. Whether to apply scale and offset values
+from the raster metadata.}
+
+\item{maxColorValue}{Numeric. Maximum color value when using a color table.}
+
+\item{normalize}{Logical. Whether to normalize pixel values to [0,1] range
+before color mapping. Automatically disabled for discrete data.}
+
+\item{pixel_fn}{Function to apply to pixel values before plotting.}
+
+\item{mar}{Numeric vector of length 4. Additional margin adjustments
+to add to the base margins when legend is enabled.}
 
 \item{pal}{a character vector of colors to use when plotting a single band.
 for example when sea presents as very dark.}
@@ -181,4 +149,14 @@ for example when sea presents as very dark.}
 \description{
 A wrapper around \code{gdalraster::plot_raster} that simplifies the
 process of plotting a raster file.
+}
+\examples{
+s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+ds <- methods::new(gdalraster::GDALRaster, s2_imgs[2])
+on.exit(ds$close(), add = TRUE)
+plot(
+  ds,
+  bands = 4,
+  legend = TRUE
+)
 }
