@@ -18,10 +18,8 @@ plot_raster_src <- function(
   bands = 1,
   col = grDevices::hcl.colors(10, "Viridis"),
   title = c("description", "dttm", "none"),
-  rgb_trans = c("linear", "gamma", "hist", "hist_all", "none"),
+  rgb_trans = c("linear", "gamma", "hist", "hist_all"),
   col_tbl = NULL,
-  maxColorValue = 1,
-  normalize = TRUE,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
   xlim = NULL,
@@ -33,17 +31,18 @@ plot_raster_src <- function(
   ylab = "",
   legend = if (length(bands) == 1) TRUE else FALSE,
   digits = 2,
-  na_col = grDevices::rgb(0, 0, 0, 0),
+  na_col = "#95acbe",
   ...
 ) {
-  rgb_trans <- rlang::arg_match(rgb_trans)
+  if (!is.null(rgb_trans)) {
+    rgb_trans <- rlang::arg_match(rgb_trans)
+  }
+
   title <- rlang::arg_match(title)
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
-  dpi <- 500 / 10
-  # dev_inches <- graphics::par("din") # Returns c(width, height) in inches
-  dev_inches <- c(10, 8)
+  dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
-  target_divisor <- dev_size[1] * 2
+  target_divisor <- dev_size[1] * 10
 
   ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(ds$close(), add = TRUE)
@@ -51,30 +50,29 @@ plot_raster_src <- function(
   rys <- ds$getRasterYSize()
 
   rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
-  gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "BILINEAR")
+  gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "NEAREST")
   on.exit(
     gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", rior_or),
     add = TRUE
   )
 
-  if (is.null(minmax_def) && length(bands) == 3) {
-    # if (is.null(minmax_pct_cut)) {
-    #   # minmax_pct_cut <- c(0.02, 0.98)
-    # }
+  # Determine rgb transformation function gdalraster already applies the linear transform
+  if (is.null(minmax_def) && length(bands) == 3 && !is.null(rgb_trans)) {
+    if (is.null(minmax_pct_cut)) {
+      minmax_pct_cut <- c(0, 98)
+    }
     trans_fn <- switch(
       rgb_trans,
-      linear = linear_trans,
+      linear = NULL,
       gamma = gamma_trans,
       hist = histeq_trans,
-      hist_all = hist_all_trans,
-      none = NULL
+      hist_all = hist_all_trans
     )
-    # r <- trans_fn(r, minmax_pct_cut[1], minmax_pct_cut[2])
-    # minmax_pct_cut <- NULL
   } else {
     trans_fn <- NULL
   }
 
+  # Determine main title
   if (nchar(main) == 0 && length(bands) == 1) {
     if (title == "description") {
       main <- ds$getDescription(bands)
@@ -106,9 +104,9 @@ plot_raster_src <- function(
     ),
     col = col,
     col_tbl = col_tbl,
-    maxColorValue = maxColorValue,
+    maxColorValue = 1,
     pixel_fn = trans_fn,
-    normalize = normalize,
+    normalize = TRUE,
     minmax_def = minmax_def,
     minmax_pct_cut = minmax_pct_cut,
     xlim = xlim,
@@ -123,20 +121,6 @@ plot_raster_src <- function(
     na_col = na_col,
     ...
   )
-
-  # par_orig <- graphics::par(no.readonly = TRUE)
-  # mfg <- graphics::par("mfg")
-
-  # on.exit(
-  #   {
-  #     if (mfg[1] == mfg[3] && mfg[2] == mfg[4]) {
-  #       graphics::par(par_orig)
-  #     }
-  #   },
-  #   add = TRUE
-  # )
-
-  invisible()
 }
 
 
