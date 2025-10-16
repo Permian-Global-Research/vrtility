@@ -172,9 +172,10 @@ vrt_subset_bands <- function(
   sfn <- xml2::xml_find_all(xvrt, ".//SourceFilename")
   sfn_chr <- xml2::xml_text(sfn)
 
-  srcbandnum <- xml2::xml_find_all(xvrt, ".//SourceBand")
+  srcbandnum <- xml2::xml_text(xml2::xml_find_all(xvrt, ".//SourceBand"))
+
   src_bands_chr <- as.character(
-    rbind("-b", xml2::xml_text(srcbandnum))
+    rbind("-b", unique(srcbandnum))
   )
 
   mask_src <- purrr::map2_chr(sfn_chr, is_source_relative(sfn), \(.x, .y) {
