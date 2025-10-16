@@ -177,15 +177,58 @@ plot.Rcpp_GDALRaster <- function(
     )
   }
 
+  # Create discrete-aware color mapping for both main plot and legend
+  final_col_map_fn <- col_map_fn
+  use_normalization <- normalize # Default to original normalize parameter
+  is_discrete_data <- FALSE
+
+  if (nbands == 1 && is.null(col_tbl) && !is.null(col_map_fn)) {
+    unique_vals <- unique(data_in[!is.na(data_in)])
+    n_unique_vals <- length(unique_vals)
+
+    if (n_unique_vals < 12) {
+      # This is discrete data
+      is_discrete_data <- TRUE
+      use_normalization <- FALSE # Turn off normalization for discrete data
+
+      # For discrete data, create a custom color mapping function
+      unique_vals_sorted <- sort(unique_vals)
+
+      # Get distinct colors using evenly spaced positions
+      if (n_unique_vals > 1) {
+        color_positions <- seq(0, 1, length.out = n_unique_vals)
+      } else {
+        color_positions <- 0.5
+      }
+      discrete_colors <- col_map_fn(color_positions)
+
+      # Create a function that maps actual values to discrete colors
+      final_col_map_fn <- function(x) {
+        # For each input value, find which discrete value it matches
+        result <- character(length(x))
+        for (i in seq_along(unique_vals_sorted)) {
+          mask <- abs(x - unique_vals_sorted[i]) < 1e-10
+          result[mask] <- discrete_colors[i]
+        }
+        # Handle any unmatched values (shouldn't happen, but safety)
+        unmatched <- result == ""
+        if (any(unmatched)) {
+          result[unmatched] <- discrete_colors[1]
+        }
+        return(result)
+      }
+    }
+  }
+
   a <- array(data_in, dim = c(xsize, ysize, nbands))
   r <- gdalraster:::.as_raster(
     a,
     col_tbl = col_tbl,
     maxColorValue = maxColorValue,
-    normalize = normalize,
+    normalize = use_normalization, # Use conditional normalization
     minmax_def = minmax_def,
     minmax_pct_cut = minmax_pct_cut,
-    col_map_fn = col_map_fn,
+    col_map_fn = final_col_map_fn,
     na_col = na_col
   )
   if (legend && nbands != 1) {
@@ -304,14 +347,59 @@ plot.Rcpp_GDALRaster <- function(
     } else {
       mm <- c(min(data_in, na.rm = TRUE), max(data_in, na.rm = TRUE))
     }
+
+    # Check for discrete vs continuous legend
+    unique_values <- unique(data_in[!is.na(data_in)])
+    n_unique <- length(unique_values)
+    is_discrete <- n_unique < 12
+
     if (is.null(col_tbl)) {
-      leg_data <- seq(mm[1], mm[2], length.out = 256)
-      if (normalize) {
-        leg_data <- gdalraster:::.normalize(leg_data, mm)
+      if (is_discrete) {
+        # Discrete legend: remap values to sequential indices for distinct colors
+        unique_values <- sort(unique_values)
+
+        # For discrete data, use sequential positions to get distinct colors
+        # This prevents interpolation between widely spaced values
+        if (n_unique > 1) {
+          # Map to evenly spaced positions in [0,1] for distinct colors
+          normalized_values <- seq(0, 1, length.out = n_unique)
+        } else {
+          normalized_values <- 0.5 # single value gets middle color
+        }
+
+        # Get distinct colors for each unique value (no interpolation)
+        colors_for_values <- col_map_fn(normalized_values)
+
+        # Create distinct color segments - each gets equal space in the legend
+        legend_height <- 256
+        pixels_per_value <- floor(legend_height / n_unique)
+
+        # Build the color vector by creating blocks for each unique value
+        leg_colors <- character(legend_height)
+        for (i in 1:n_unique) {
+          start_idx <- (i - 1) * pixels_per_value + 1
+          end_idx <- min(i * pixels_per_value, legend_height)
+          leg_colors[start_idx:end_idx] <- colors_for_values[i]
+        }
+
+        # Fill any remaining pixels with the last color
+        if (any(leg_colors == "")) {
+          leg_colors[leg_colors == ""] <- colors_for_values[n_unique]
+        }
+
+        # Reverse for top-to-bottom display (highest values at top)
+        leg_colors <- rev(leg_colors)
+        leg_img <- grDevices::as.raster(matrix(leg_colors, ncol = 1))
+      } else {
+        # Continuous legend: use interpolated values
+        leg_data <- seq(mm[1], mm[2], length.out = 256)
+        if (normalize) {
+          leg_data <- gdalraster:::.normalize(leg_data, mm)
+        }
+        leg_data <- sort(leg_data, decreasing = TRUE)
+        leg_data <- col_map_fn(leg_data)
+        leg_img <- grDevices::as.raster(matrix(leg_data, ncol = 1))
       }
-      leg_data <- sort(leg_data, decreasing = TRUE)
-      leg_data <- col_map_fn(leg_data)
-      leg_img <- grDevices::as.raster(matrix(leg_data, ncol = 1))
     } else {
       leg_data <- sort(seq(mm[1], mm[2], by = 1), decreasing = TRUE)
       leg_data <- array(leg_data, dim = c(1, length(leg_data), 1))
@@ -352,19 +440,39 @@ plot.Rcpp_GDALRaster <- function(
     )
 
     # Add legend labels
-    if (is(data_in, "integer")) {
-      leg_lab <- formatC(seq(mm[1], mm[2], length.out = 5), format = "d")
-    } else {
-      leg_lab <- formatC(
-        seq(mm[1], mm[2], length.out = 5),
-        format = "f",
-        digits = digits
+    if (is_discrete) {
+      # Discrete legend: show all unique values
+      if (is(unique_values, "integer")) {
+        leg_lab <- formatC(rev(unique_values), format = "d")
+      } else {
+        leg_lab <- formatC(rev(unique_values), format = "f", digits = digits)
+      }
+      # Position labels at the center of each color block
+      legend_height_plot <- legend_y_end - legend_y_start
+      block_height <- legend_height_plot / n_unique
+      # Calculate center positions for each block (from top to bottom)
+      text_y <- seq(
+        legend_y_end - block_height / 2, # center of top block
+        legend_y_start + block_height / 2, # center of bottom block
+        length.out = n_unique
       )
+    } else {
+      # Continuous legend: show 5 evenly spaced values
+      if (is(data_in, "integer")) {
+        leg_lab <- formatC(seq(mm[1], mm[2], length.out = 5), format = "d")
+      } else {
+        leg_lab <- formatC(
+          seq(mm[1], mm[2], length.out = 5),
+          format = "f",
+          digits = digits
+        )
+      }
+      # Position labels evenly across legend height
+      text_y <- seq(legend_y_start, legend_y_end, length.out = 5)
     }
 
     # Position text labels to the right of the color bar, matching legend height
     text_x <- xlim[2] + 0.09 * diff(xlim) # adjusted for closer legend position
-    text_y <- seq(legend_y_start, legend_y_end, length.out = 5)
 
     # Add tick marks on the right side of the legend aligned with labels
     tick_length <- 0.01 * diff(xlim) # small tick length
