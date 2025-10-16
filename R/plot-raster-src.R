@@ -5,7 +5,6 @@
 #' @param bands a numeric vector of band numbers to plot must be of length
 #' 1 or 3.
 #' @param pal a character vector of colors to use when plotting a single band.
-#' @param adj_low a numeric value to adjust the lower quantile value by. useful
 #' for example when sea presents as very dark.
 #' @param title a character string indicating what to use as the title of the
 #' plot. One of "description", "dttm", or "none". If "description" the band
@@ -17,44 +16,37 @@
 plot_raster_src <- function(
   x,
   bands = 1,
-  pal = grDevices::hcl.colors(10, "Viridis"),
-  nbands = length(bands),
+  col = grDevices::hcl.colors(10, "Viridis"),
   title = c("description", "dttm", "none"),
+  rgb_trans = c("linear", "gamma", "hist", "hist_all", "none"),
   col_tbl = NULL,
   maxColorValue = 1,
   normalize = TRUE,
-  adj_low = 0.8,
   minmax_def = NULL,
   minmax_pct_cut = NULL,
-  col_map_fn = if (nbands == 1) {
-    scales::colour_ramp(pal, alpha = FALSE)
-  } else {
-    NULL
-  },
   xlim = NULL,
   ylim = NULL,
   interpolate = TRUE,
-  asp = 1,
   axes = TRUE,
   main = "",
   xlab = "",
   ylab = "",
-  xaxs = "r",
-  yaxs = "r",
-  legend = if (nbands == 1) TRUE else FALSE,
+  legend = if (length(bands) == 1) TRUE else FALSE,
   digits = 2,
   na_col = grDevices::rgb(0, 0, 0, 0),
   ...
 ) {
+  rgb_trans <- rlang::arg_match(rgb_trans)
   title <- rlang::arg_match(title)
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
-  dev_inches <- graphics::par("din") # Returns c(width, height) in inches
+  dpi <- 500 / 10
+  # dev_inches <- graphics::par("din") # Returns c(width, height) in inches
+  dev_inches <- c(10, 8)
   dev_size <- dev_inches * dpi
   target_divisor <- dev_size[1] * 2
 
   ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(ds$close(), add = TRUE)
-
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
 
@@ -65,91 +57,84 @@ plot_raster_src <- function(
     add = TRUE
   )
 
-  r <- gdalraster::read_ds(
+  if (is.null(minmax_def) && length(bands) == 3) {
+    # if (is.null(minmax_pct_cut)) {
+    #   # minmax_pct_cut <- c(0.02, 0.98)
+    # }
+    trans_fn <- switch(
+      rgb_trans,
+      linear = linear_trans,
+      gamma = gamma_trans,
+      hist = histeq_trans,
+      hist_all = hist_all_trans,
+      none = NULL
+    )
+    # r <- trans_fn(r, minmax_pct_cut[1], minmax_pct_cut[2])
+    # minmax_pct_cut <- NULL
+  } else {
+    trans_fn <- NULL
+  }
+
+  if (nchar(main) == 0 && length(bands) == 1) {
+    if (title == "description") {
+      main <- ds$getDescription(bands)
+    } else if (title == "dttm") {
+      main <- ds$getMetadataItem(0, "datetime", "")
+    }
+  } else if (nchar(main) == 0 && length(bands) == 3) {
+    if (title != "none") {
+      main <- ds$getMetadataItem(0, "datetime", "")
+    }
+  }
+
+  plot(
     ds,
     bands = bands,
-    out_xsize = pmin(
+    xsize = pmin(
       rxs,
       ceiling(
         rxs /
           ceiling(rxs / target_divisor)
       )
     ),
-    out_ysize = pmin(
+    ysize = pmin(
       rys,
       ceiling(
         rys /
           ceiling(rys / target_divisor)
       )
-    )
-  )
-
-  #TODO: make this more robust by getting scale for all bands...
-  scale_val <- ds$getScale(bands[1])
-  if (!is.na(scale_val) && scale_val != 1) {
-    r <- r * scale_val
-  }
-
-  if (is.null(minmax_def) && is.null(minmax_pct_cut) && nbands == 3) {
-    mm <- stats::quantile(
-      r,
-      probs = c(0.03, 0.995),
-      na.rm = TRUE,
-      names = FALSE
-    )
-    mm[1] <- mm[1] * adj_low
-
-    minmax_def <- rep(mm, each = nbands)
-  }
-
-  if (nchar(main) == 0 && nbands == 1) {
-    if (title == "description") {
-      main <- ds$getDescription(bands)
-    } else if (title == "dttm") {
-      main <- ds$getMetadataItem(0, "datetime", "")
-    }
-  } else if (nchar(main) == 0 && nbands == 3) {
-    if (title != "none") {
-      main <- ds$getMetadataItem(0, "datetime", "")
-    }
-  }
-
-  gdalraster::plot_raster(
-    r,
-    nbands = nbands,
+    ),
+    col = col,
     col_tbl = col_tbl,
     maxColorValue = maxColorValue,
+    pixel_fn = trans_fn,
     normalize = normalize,
     minmax_def = minmax_def,
     minmax_pct_cut = minmax_pct_cut,
-    col_map_fn = col_map_fn,
     xlim = xlim,
     ylim = ylim,
     interpolate = interpolate,
-    asp = asp,
     axes = axes,
     main = main,
     xlab = xlab,
     ylab = ylab,
-    xaxs = xaxs,
-    yaxs = yaxs,
     legend = legend,
     digits = digits,
     na_col = na_col,
     ...
   )
 
-  par_orig <- graphics::par(no.readonly = TRUE)
-  mfg <- graphics::par("mfg")
+  # par_orig <- graphics::par(no.readonly = TRUE)
+  # mfg <- graphics::par("mfg")
 
-  on.exit(
-    {
-      if (mfg[1] == mfg[3] && mfg[2] == mfg[4]) {
-        graphics::par(par_orig)
-      }
-    },
-    add = TRUE
-  )
+  # on.exit(
+  #   {
+  #     if (mfg[1] == mfg[3] && mfg[2] == mfg[4]) {
+  #       graphics::par(par_orig)
+  #     }
+  #   },
+  #   add = TRUE
+  # )
 
   invisible()
 }
