@@ -193,13 +193,19 @@
   nbands,
   col_tbl,
   col_map_fn,
-  normalize
+  normalize,
+  nodata_value = NULL
 ) {
   final_col_map_fn <- col_map_fn
   use_normalization <- normalize
 
   if (nbands == 1 && is.null(col_tbl) && !is.null(col_map_fn)) {
-    unique_vals <- unique(data_in[!is.na(data_in)])
+    # Filter out NoData values for discrete detection
+    if (!is.null(nodata_value)) {
+      unique_vals <- unique(data_in[!is.na(data_in) & data_in != nodata_value])
+    } else {
+      unique_vals <- unique(data_in[!is.na(data_in)])
+    }
     n_unique_vals <- length(unique_vals)
 
     if (n_unique_vals < 12) {
@@ -319,25 +325,33 @@
   minmax_pct_cut,
   maxColorValue,
   na_col,
-  digits
+  digits,
+  nodata_value = NULL
 ) {
+  # Filter out NoData values for calculations
+  if (!is.null(nodata_value)) {
+    valid_data <- data_in[!is.na(data_in) & data_in != nodata_value]
+  } else {
+    valid_data <- data_in[!is.na(data_in)]
+  }
+
   # Calculate data range
   mm <- NULL
   if (!is.null(minmax_def)) {
     mm <- minmax_def
   } else if (!is.null(minmax_pct_cut)) {
     mm <- stats::quantile(
-      data_in,
+      valid_data,
       probs = c(minmax_pct_cut[1] / 100, minmax_pct_cut[2] / 100),
       na.rm = TRUE,
       names = FALSE
     )
   } else {
-    mm <- c(min(data_in, na.rm = TRUE), max(data_in, na.rm = TRUE))
+    mm <- c(min(valid_data, na.rm = TRUE), max(valid_data, na.rm = TRUE))
   }
 
   # Check for discrete vs continuous legend
-  unique_values <- unique(data_in[!is.na(data_in)])
+  unique_values <- unique(valid_data)
   n_unique <- length(unique_values)
   is_discrete <- n_unique < 12
 
@@ -607,13 +621,23 @@ plot.Rcpp_GDALRaster <- function(
     )
   }
 
+  # 7.5. Get NoData value for single band rasters
+  nodata_value <- NULL
+  if (nbands == 1) {
+    nodata_value <- data$getNoDataValue(bands[1])
+    if (is.na(nodata_value)) {
+      nodata_value <- NULL
+    }
+  }
+
   # 8. Create discrete-aware color mapping
   color_mapping <- .create_color_mapping(
     data_in,
     nbands,
     col_tbl,
     col_map_fn,
-    normalize
+    normalize,
+    nodata_value
   )
 
   # 9. Create the main raster image
@@ -635,11 +659,23 @@ plot.Rcpp_GDALRaster <- function(
     legend <- FALSE
   }
 
-  # 11. Setup plot margins if legend is requested
+  # 11. Setup plot margins
+  op_mar <- graphics::par("mar")
+  on.exit(graphics::par(mar = op_mar))
+
+  # Adjust top margin based on title content
+  top_margin <- if (is.null(main) || main == "" || nchar(trimws(main)) == 0) {
+    1
+  } else {
+    3
+  }
+
   if (legend) {
-    op_mar <- graphics::par("mar")
-    on.exit(graphics::par(mar = op_mar))
-    base_mar <- c(4, 4, 3, 1) + 0.1
+    base_mar <- c(4, 4, top_margin, 1) + 0.1
+    graphics::par(mar = base_mar + mar)
+  } else {
+    # Set margins even when no legend to control title spacing
+    base_mar <- c(4, 4, top_margin, 1) + 0.1
     graphics::par(mar = base_mar + mar)
   }
 
@@ -681,7 +717,8 @@ plot.Rcpp_GDALRaster <- function(
       minmax_pct_cut,
       maxColorValue,
       na_col,
-      digits
+      digits,
+      nodata_value
     )
     .draw_legend(legend_data, xlim, ylim, digits)
   }
