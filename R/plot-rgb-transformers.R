@@ -10,7 +10,7 @@ gamma_trans <- function(r) {
   attribs <- attributes(r)
   band_arrays <- vals_to_array(r)
   # Apply gamma correction
-  gamma_values <- c(12.4, 12.3, 12.0) #  brighten red/green for natural look
+  gamma_values <- c(1.3, 1.1, 1.0) #  brighten red/green for natural look
 
   # nolint start
   for (band in 1:3) {
