@@ -111,38 +111,49 @@ bbox <- gdalraster::bbox_from_wkt(
 te <- bbox_to_projected(bbox)
 trs <- attr(te, "wkt")
 
-s2_stac <- sentinel2_stac_query(
+s2_stac <- hls_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
   end_date = "2023-12-31",
-  max_cloud_cover = 20,
-  assets = c("B02", "B03", "B04", "SCL")
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "hls2-s30",
+  max_cloud_cover = 40,
+  assets = c("B02", "B03", "B04", "B8A", "Fmask")
 )
 # number of items:
 length(s2_stac$features)
-#> [1] 3
+#> [1] 10
 
 system.time({
   median_composite <- vrt_collect(s2_stac) |>
     vrt_set_maskfun(
-      mask_band = "SCL",
-      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+      mask_band = "Fmask",
+      mask_values = c(0, 1, 2, 3),
+      build_mask_pixfun = build_bitmask()
     ) |>
-    vrt_warp(t_srs = trs, te = te, tr = c(10, 10)) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
     vrt_stack() |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     vrt_compute(
-      outfile = fs::file_temp(ext = "tif"),
       engine = "gdalraster"
     )
 })
 #>    user  system elapsed 
-#>   7.540   0.514  15.514
+#>    3.96    0.59   37.07
 
-plot_raster_src(
-  median_composite,
-  c(3, 2, 1)
-)
+withr::with_par(list(mfrow = c(2, 1)), {
+  purrr::walk2(
+    .x = list(c(3, 2, 1), c(4, 3, 2)),
+    .y = list("linear", "hist"),
+    ~ {
+      plot_raster_src(
+        median_composite,
+        .x,
+        rgb_trans = .y
+      )
+    }
+  )
+})
 ```
 
 <img src="man/figures/README-example1-1.png" width="100%" />
