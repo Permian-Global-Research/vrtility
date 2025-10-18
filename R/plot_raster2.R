@@ -663,19 +663,36 @@ plot.Rcpp_GDALRaster <- function(
   op_mar <- graphics::par("mar")
   on.exit(graphics::par(mar = op_mar))
 
-  # Adjust top margin based on title content
+  # Adjust margins based on label content
+  # Top margin for title
   top_margin <- if (is.null(main) || main == "" || nchar(trimws(main)) == 0) {
     1
   } else {
     3
   }
 
+  # Bottom margin for x-axis label
+  bottom_margin <- if (
+    is.null(xlab) || xlab == "" || nchar(trimws(xlab)) == 0
+  ) {
+    2
+  } else {
+    4
+  }
+
+  # Left margin for y-axis label
+  left_margin <- if (is.null(ylab) || ylab == "" || nchar(trimws(ylab)) == 0) {
+    2
+  } else {
+    4
+  }
+
   if (legend) {
-    base_mar <- c(4, 4, top_margin, 1) + 0.1
+    base_mar <- c(bottom_margin, left_margin, top_margin, 1) + 0.1
     graphics::par(mar = base_mar + mar)
   } else {
-    # Set margins even when no legend to control title spacing
-    base_mar <- c(4, 4, top_margin, 1) + 0.1
+    # Set margins even when no legend to control spacing
+    base_mar <- c(bottom_margin, left_margin, top_margin, 1) + 0.1
     graphics::par(mar = base_mar + mar)
   }
 

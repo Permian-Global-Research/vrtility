@@ -139,7 +139,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>    3.96    0.59   37.07
+#>   3.935   0.555  37.719
 
 withr::with_par(list(mfrow = c(2, 1)), {
   purrr::walk2(
