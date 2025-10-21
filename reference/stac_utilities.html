@@ -11,7 +11,7 @@ convenience for common tasks."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,17 @@ convenience for common tasks.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">stac_query</span><span class="op">(</span><span class="va">bbox</span>, <span class="va">stac_source</span>, <span class="va">collection</span>, <span class="va">start_date</span>, <span class="va">end_date</span>, limit <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">stac_query</span><span class="op">(</span></span>
+<span>  <span class="va">bbox</span>,</span>
+<span>  <span class="va">stac_source</span>,</span>
+<span>  <span class="va">collection</span>,</span>
+<span>  <span class="va">start_date</span>,</span>
+<span>  <span class="va">end_date</span>,</span>
+<span>  assets <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mpc_sign <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"planetarycomputer\\.microsoft\\.com"</span>, <span class="va">stac_source</span><span class="op">)</span>,</span>
+<span>  drop_duplicates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  check_collection <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">sentinel2_stac_query</span><span class="op">(</span></span>
 <span>  <span class="va">bbox</span>,</span>
@@ -68,9 +78,7 @@ convenience for common tasks.</p>
 <span>    <span class="st">"B12"</span>, <span class="st">"SCL"</span><span class="op">)</span>,</span>
 <span>  max_cloud_cover <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  stac_source <span class="op">=</span> <span class="st">"https://planetarycomputer.microsoft.com/api/stac/v1/"</span>,</span>
-<span>  collection <span class="op">=</span> <span class="st">"sentinel-2-l2a"</span>,</span>
-<span>  mpc_sign <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  limit <span class="op">=</span> <span class="fl">999</span></span>
+<span>  collection <span class="op">=</span> <span class="st">"sentinel-2-l2a"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">hls_stac_query</span><span class="op">(</span></span>
@@ -80,12 +88,10 @@ convenience for common tasks.</p>
 <span>  assets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B01"</span>, <span class="st">"B02"</span>, <span class="st">"B03"</span>, <span class="st">"B04"</span>, <span class="st">"B05"</span>, <span class="st">"B06"</span>, <span class="st">"B07"</span>, <span class="st">"B08"</span>, <span class="st">"B8A"</span>, <span class="st">"B09"</span>, <span class="st">"B10"</span>,</span>
 <span>    <span class="st">"B11"</span>, <span class="st">"B12"</span>, <span class="st">"Fmask"</span><span class="op">)</span>,</span>
 <span>  max_cloud_cover <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  stac_source <span class="op">=</span> <span class="st">"https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"</span>,</span>
-<span>  collection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HLSS30_2.0"</span>, <span class="st">"HLSL30_2.0"</span><span class="op">)</span>,</span>
-<span>  limit <span class="op">=</span> <span class="fl">999</span></span>
+<span>  stac_source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://planetarycomputer.microsoft.com/api/stac/v1/"</span>,</span>
+<span>    <span class="st">"https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"</span><span class="op">)</span>,</span>
+<span>  collection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HLSS30_2.0"</span>, <span class="st">"HLSL30_2.0"</span>, <span class="st">"hls2-s30"</span>, <span class="st">"hls2-l30"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">stac_cloud_filter</span><span class="op">(</span><span class="va">items</span>, <span class="va">max_cloud_cover</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">sentinel1_stac_query</span><span class="op">(</span></span>
 <span>  <span class="va">bbox</span>,</span>
@@ -94,16 +100,18 @@ convenience for common tasks.</p>
 <span>  assets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hh"</span>, <span class="st">"hv"</span>, <span class="st">"vh"</span>, <span class="st">"vv"</span><span class="op">)</span>,</span>
 <span>  orbit_state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"descending"</span>, <span class="st">"ascending"</span><span class="op">)</span>,</span>
 <span>  stac_source <span class="op">=</span> <span class="st">"https://planetarycomputer.microsoft.com/api/stac/v1/"</span>,</span>
-<span>  collection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sentinel-1-rtc"</span>, <span class="st">"sentinel-1-grd"</span><span class="op">)</span>,</span>
-<span>  mpc_sign <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  limit <span class="op">=</span> <span class="fl">999</span></span>
+<span>  collection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sentinel-1-rtc"</span>, <span class="st">"sentinel-1-grd"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stac_cloud_filter</span><span class="op">(</span><span class="va">items</span>, <span class="va">max_cloud_cover</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">stac_orbit_filter</span><span class="op">(</span><span class="va">items</span>, orbit_state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"descending"</span>, <span class="st">"ascending"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">stac_coverage_filter</span><span class="op">(</span><span class="va">items</span>, <span class="va">bbox</span>, min_coverage <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">sign_mpc_items</span><span class="op">(</span><span class="va">items</span>, subscription_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"MPC_TOKEN"</span>, unset <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">sign_mpc_items</span><span class="op">(</span><span class="va">items</span>, subscription_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"MPC_TOKEN"</span>, unset <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">stac_drop_duplicates</span><span class="op">(</span><span class="va">items</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -115,11 +123,11 @@ convenience for common tasks.</p>
 
 
 <dt id="arg-stac-source">stac_source<a class="anchor" aria-label="anchor" href="#arg-stac-source"></a></dt>
-<dd><p>A character string of the STAC source</p></dd>
+<dd><p>The STAC source to query</p></dd>
 
 
 <dt id="arg-collection">collection<a class="anchor" aria-label="anchor" href="#arg-collection"></a></dt>
-<dd><p>A character string of the collection to query</p></dd>
+<dd><p>The collection to query</p></dd>
 
 
 <dt id="arg-start-date">start_date<a class="anchor" aria-label="anchor" href="#arg-start-date"></a></dt>
@@ -130,16 +138,8 @@ convenience for common tasks.</p>
 <dd><p>The end date for the query</p></dd>
 
 
-<dt id="arg-limit">limit<a class="anchor" aria-label="anchor" href="#arg-limit"></a></dt>
-<dd><p>The number of items to return</p></dd>
-
-
 <dt id="arg-assets">assets<a class="anchor" aria-label="anchor" href="#arg-assets"></a></dt>
 <dd><p>A character vector of the asset names to include</p></dd>
-
-
-<dt id="arg-max-cloud-cover">max_cloud_cover<a class="anchor" aria-label="anchor" href="#arg-max-cloud-cover"></a></dt>
-<dd><p>A numeric value of the maximum cloud cover percentage</p></dd>
 
 
 <dt id="arg-mpc-sign">mpc_sign<a class="anchor" aria-label="anchor" href="#arg-mpc-sign"></a></dt>
@@ -148,12 +148,30 @@ Planetary Computer API's signing method (only required if using the
 Planetary Computer STAC API).</p></dd>
 
 
-<dt id="arg-items">items<a class="anchor" aria-label="anchor" href="#arg-items"></a></dt>
-<dd><p>A STACItemCollection.</p></dd>
+<dt id="arg-drop-duplicates">drop_duplicates<a class="anchor" aria-label="anchor" href="#arg-drop-duplicates"></a></dt>
+<dd><p>A logical indicating whether to drop duplicate items
+from the collection. Duplicates are identified based on identical bounding
+boxes (with a precision of 4 decimal places) and datetime properties.
+Duplicate items in the Microsoft Planetary Computer STAC API are a known
+issue.</p></dd>
+
+
+<dt id="arg-check-collection">check_collection<a class="anchor" aria-label="anchor" href="#arg-check-collection"></a></dt>
+<dd><p>A logical, should the collection name be checked
+against available collections in the <code>stac_source</code>? If FALSE,  the collection
+is assumed to exist.</p></dd>
+
+
+<dt id="arg-max-cloud-cover">max_cloud_cover<a class="anchor" aria-label="anchor" href="#arg-max-cloud-cover"></a></dt>
+<dd><p>A numeric value of the maximum cloud cover percentage</p></dd>
 
 
 <dt id="arg-orbit-state">orbit_state<a class="anchor" aria-label="anchor" href="#arg-orbit-state"></a></dt>
 <dd><p>A character string of the orbit state to filter by</p></dd>
+
+
+<dt id="arg-items">items<a class="anchor" aria-label="anchor" href="#arg-items"></a></dt>
+<dd><p>A <span class="pkg">rstac</span> doc_items object</p></dd>
 
 
 <dt id="arg-min-coverage">min_coverage<a class="anchor" aria-label="anchor" href="#arg-min-coverage"></a></dt>
@@ -171,6 +189,7 @@ is set.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <span class="pkg">rstac</span> doc_items object</p>
 <p>A STACItemCollection object with signed assets url.</p>
+<p>A <span class="pkg">rstac</span> doc_items object with duplicate items removed</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -183,22 +202,34 @@ and open catalogue of EO data. To access these assets, urls must be signed -
 this can be done using <code>sign_mpc_items</code>,
 <code><a href="https://brazil-data-cube.github.io/rstac/reference/items_sign_planetary_computer.html" class="external-link">items_sign_planetary_computer</a></code><code>, or with GDAL by setting the environment variable </code>VSICURL_PC_URL_SIGNING<code>to</code>YES`. see the examples for more details.</p>
 <p><code>sentinel2_stac_query</code> facilitates the querying of the Sentinel-2
-level 2A data from the Planetary Computer STAC API. It returns a
-catalogue to generate a Sentinel 2 rstac doc_items object.</p>
+level 2A data from the Microsoft Planetary Computer STAC API (or other S2
+STAC sources) catalogue to generate a Sentinel 2 rstac doc_items object.
+This is a convenience function that saves you needing to remember the exact
+stac source and name but is simply a thin wrapper around <code>stac_query</code> and
+<code>stac_cloud_filter</code>. Checks are not performed on the stac source or
+collection name; assets are checked following the collection query and will
+fail if requested assets are not present in the collection. Note that some
+STAC sources use different names for the Sentinel-2 level 2A assets and the
+provided defaults may not work for all sources.</p>
 <p>The <code>hls_stac_query</code> function generates a Harmonized Landsat Sentinel (HLS)
 stac collection doc_items object. In order to access HLS data you will need a
 NASA Earthdata account. You can create one at
 <a href="https://urs.earthdata.nasa.gov/users/new" class="external-link">https://urs.earthdata.nasa.gov/users/new</a>. Once you have
 an account, you can set your credentials using the <code>earthdatalogin</code> package
-as shown in the examples.</p>
-<p>The <code>stac_cloud_filter</code> function filters a STAC item collection by cloud cover
-percentage. It uses the <code>eo:cloud_cover</code> property to filter the items.
-Items with a cloud cover percentage less than the specified <code>max_cloud_cover</code>
-are retained.</p>
+as shown in the examples.
+You can alternatively use the Microsoft Planetary Computer STAC API to access
+HLS data, which does not require an Earthdata account. Note that you must
+specify the collection as <code>hls2-s30</code> or <code>hls2-l30</code> when using the
+Planetary Computer STAC API and that the data is only available from 2020
+onwards.</p>
 <p>The <code>sentinel1_stac_query</code> function generates a Sentinel 1 stac collection
 doc_items object. It allows you to query Sentinel 1 data from the Planetary
 Computer STAC API. The function returns a collection of Sentinel 1 items
 that can be used to generate a Sentinel 1 rstac doc_items object.</p>
+<p>The <code>stac_cloud_filter</code> function filters a STAC item collection by cloud cover
+percentage. It uses the <code>eo:cloud_cover</code> property to filter the items.
+Items with a cloud cover percentage less than the specified <code>max_cloud_cover</code>
+are retained.</p>
 <p>The <code>stac_orbit_filter</code> function filters a STAC item collection by orbit
 state. It uses the <code>sat:orbit_state</code> property to filter the items.
 Items with an orbit state matching the specified <code>orbit_state</code> are retained.
@@ -219,6 +250,11 @@ caches collection-level signing tokens for 45 minutes to avoid repeated
 requests for the same collection within a short time period. This can avoid
 429 (permission denied) errors when signing many items from the same
 collection.</p>
+<p>The <code>stac_drop_duplicates</code> function removes duplicate items from a STAC item
+collection. Duplicates are identified based on identical bounding boxes (
+with a precision of 4 decimal places), datetime properties and platform.
+Duplicate items in the Microsoft Planetary Computer STAC API are a known
+issue.</p>
     </div>
 
     <div class="section level2">
@@ -229,8 +265,7 @@ collection.</p>
 <span class="r-in"><span>  stac_source <span class="op">=</span> <span class="st">"https://planetarycomputer.microsoft.com/api/stac/v1/"</span>,</span></span>
 <span class="r-in"><span>  collection <span class="op">=</span> <span class="st">"sentinel-2-l2a"</span>,</span></span>
 <span class="r-in"><span>  start_date <span class="op">=</span> <span class="st">"2023-01-01"</span>,</span></span>
-<span class="r-in"><span>  end_date <span class="op">=</span> <span class="st">"2023-01-31"</span>,</span></span>
-<span class="r-in"><span>  limit <span class="op">=</span> <span class="fl">10</span></span></span>
+<span class="r-in"><span>  end_date <span class="op">=</span> <span class="st">"2023-01-31"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># For Microsoft Planetary Computer (MPC) assets, sign the the items using the</span></span></span>

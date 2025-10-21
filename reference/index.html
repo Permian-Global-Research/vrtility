@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -265,7 +265,7 @@
 
       <dl><dt>
 
-          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code> <code><a href="stac_utilities.html">hls_stac_query()</a></code> <code><a href="stac_utilities.html">stac_cloud_filter()</a></code> <code><a href="stac_utilities.html">sentinel1_stac_query()</a></code> <code><a href="stac_utilities.html">stac_orbit_filter()</a></code> <code><a href="stac_utilities.html">stac_coverage_filter()</a></code> <code><a href="stac_utilities.html">sign_mpc_items()</a></code>
+          <code><a href="stac_utilities.html">stac_query()</a></code> <code><a href="stac_utilities.html">sentinel2_stac_query()</a></code> <code><a href="stac_utilities.html">hls_stac_query()</a></code> <code><a href="stac_utilities.html">sentinel1_stac_query()</a></code> <code><a href="stac_utilities.html">stac_cloud_filter()</a></code> <code><a href="stac_utilities.html">stac_orbit_filter()</a></code> <code><a href="stac_utilities.html">stac_coverage_filter()</a></code> <code><a href="stac_utilities.html">sign_mpc_items()</a></code> <code><a href="stac_utilities.html">stac_drop_duplicates()</a></code>
 
         </dt>
         <dd>Query a STAC source</dd>
@@ -282,7 +282,7 @@
 
       <dl><dt>
 
-          <code><a href="plot_raster.html">plot_raster_src()</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_block&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_stack&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_stack_warped&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_collection&gt;</i>)</a></code>
+          <code><a href="plot_raster.html">plot(<i>&lt;Rcpp_GDALRaster&gt;</i>)</a></code> <code><a href="plot_raster.html">plot_raster_src()</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_block&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_stack&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_stack_warped&gt;</i>)</a></code> <code><a href="plot_raster.html">plot(<i>&lt;vrt_collection&gt;</i>)</a></code>
 
         </dt>
         <dd>plot a raster file or <code>vrt_x</code> object</dd>
@@ -337,6 +337,23 @@
 
         </dt>
         <dd>Project a lat/long bounding box to a generic projected coordinate system</dd>
+      </dl></div><div class="section level2">
+      <h2 id="gdalraster-helpers">gdalraster helpers<a class="anchor" aria-label="anchor" href="#gdalraster-helpers"></a></h2>
+
+      <div class="section-desc"><p>Helper functions for GDALRasterDataset objects</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="gdalraster-helpers.html">vector_to_MEM()</a></code>
+
+        </dt>
+        <dd>Create an in-memory GDAL raster dataset from R data</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
