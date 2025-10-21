@@ -14,7 +14,7 @@ vector_to_MEM(
 )
 }
 \arguments{
-\item{data}{numeric or integer vector of raster values}
+\item{data}{numeric vector, matrix or array}
 
 \item{nbands}{numeric number of bands}
 

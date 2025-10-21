@@ -11,7 +11,9 @@ v_assert_type <- function(
     "vrt_collection",
     "vrt_block",
     "doc_items",
-    "formula"
+    "formula",
+    "matrix",
+    "array"
   ),
   nullok = TRUE,
   multiple = FALSE

@@ -93,7 +93,7 @@ gdal_driver_vsi_src_builder <- function(src, vsi = "", drive = "") {
 }
 
 #' Create an in-memory GDAL raster dataset from R data
-#' @param data numeric or integer vector of raster values
+#' @param data numeric vector, matrix or array
 #' @param nbands numeric number of bands
 #' @param xsize numeric number of pixels in x direction
 #' @param ysize numeric number of pixels in y direction
@@ -128,7 +128,7 @@ vector_to_MEM <- function(
   v_assert_type(
     data,
     "data",
-    c("numeric", "integer"),
+    c("numeric", "integer", "matrix", "array"),
     nullok = FALSE,
     multiple = TRUE
   )
