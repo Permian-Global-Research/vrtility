@@ -1,11 +1,3 @@
-vals_to_array <- function(r) {
-  dims <- attributes(r)$gis$dim
-  rows <- dims[1]
-  cols <- dims[2]
-  array(r, dim = c(rows, cols, 3))
-}
-
-
 gamma_trans <- function(r) {
   attribs <- attributes(r)
   band_arrays <- vals_to_array(r)
