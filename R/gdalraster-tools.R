@@ -251,16 +251,10 @@ vals_to_array <- function(r, dims = attributes(r)$gis$dim) {
   total_length <- length(r)
 
   if (total_length %% pixels_per_band != 0) {
-    stop(
-      "Data length (",
-      total_length,
-      ") is not a multiple of spatial dimensions (",
-      rows,
-      " × ",
-      cols,
-      " = ",
-      pixels_per_band,
-      ")"
+    cli::cli_abort(
+      "Data length is not a multiple of spatial dimensions 
+      {rows * cols}. Cannot reshape to array.",
+      class = "invalid_data_length_error"
     )
   }
 
