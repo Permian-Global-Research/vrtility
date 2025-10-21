@@ -10,7 +10,7 @@
 \title{plot a raster file or \code{vrt_x} object}
 \usage{
 \method{plot}{Rcpp_GDALRaster}(
-  data,
+  x,
   xsize = NULL,
   ysize = NULL,
   bands = 1,
@@ -68,8 +68,7 @@ plot_raster_src(
 \method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_opts())
 }
 \arguments{
-\item{data}{An object of class \code{Rcpp_GDALRaster} see
-\code{\link[gdalraster]{GDALRaster}}}
+\item{x}{A path to a raster file}
 
 \item{xsize}{Integer. Number of pixels in the x dimension for the output plot.
 If \code{NULL}, uses the full raster width.}
@@ -100,8 +99,8 @@ For RGB plots, should be length 6: c(min_r, min_g, min_b, max_r, max_g, max_b).}
 \item{minmax_pct_cut}{Numeric vector of length 2. Percentile cutoff values
 for color scaling (e.g., c(2, 98) for 2nd and 98th percentiles).}
 
-\item{col}{Colors to interpolate; must be a valid argument to
-\code{\link[grDevices]{col2rgb}}. Ignored if \code{col_tbl} is provided.}
+\item{col}{a character vector of colors to use when plotting a single band.
+for example when sea presents as very dark.}
 
 \item{pixel_fn}{Function to apply to pixel values before plotting.}
 
@@ -131,24 +130,35 @@ to add to the base margins when legend is enabled.}
 
 \item{...}{Additional arguments passed to \code{\link[graphics]{plot.window}}.}
 
-\item{x}{A path to a raster file}
-
 \item{title}{a character string indicating what to use as the title of the
 plot. One of "description", "dttm", or "none". If "description" the band
 description (name) is used, if "dttm" the datetime of the block is used, if
 "none" no title is used. Ignored if main is provided.}
 
+\item{rgb_trans}{a character string indicating the type of RGB transformation
+to apply when plotting 3 bands. One of "linear", "gamma", "hist", or
+"hist_all". See details for more information.}
+
 \item{config_options}{A named character vector of gdal config options to set
 before attempting to read the VRT.}
 
 \item{item}{The numeric index of the item, in the vrt_collection, to plot}
-
-\item{pal}{a character vector of colors to use when plotting a single band.
-for example when sea presents as very dark.}
 }
 \description{
 A wrapper around \code{gdalraster::plot_raster} that simplifies the
 process of plotting a raster file.
+}
+\details{
+When plotting 3 bands, the \code{rgb_trans} parameter controls the type
+of transformation applied to the RGB values before plotting. The options are:
+\itemize{
+\item "linear": No transformation is applied (default).
+\item "gamma": A gamma correction is applied to enhance mid-tone contrast.
+\item "hist": Histogram equalization is applied to each band individually to
+enhance contrast.
+\item "hist_all": Histogram equalization is applied across all bands to enhance
+overall contrast.
+}
 }
 \examples{
 s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
