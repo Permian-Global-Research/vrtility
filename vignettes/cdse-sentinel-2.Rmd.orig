@@ -53,7 +53,7 @@ and create an "access key" and a "secret access key". Then Save these keys in yo
 ## Set up the environment
 
 first we need to load vrtility and then set up parallel processing. You must not 
-set more than 4 daemons, as this is the limit for concurrent requests to the 
+set more than 2 daemons, as this is the limit for concurrent requests to the 
 CDSE API.
 
 
@@ -92,11 +92,9 @@ s2copdse <- stac_query(
   stac_source = "https://stac.dataspace.copernicus.eu/v1",
   collection = "sentinel-2-l2a",
   start_date = "2025-06-01",
-  end_date = "2025-06-30"
+  end_date = "2025-06-30",
+  assets = c("B02_10m", "B03_10m", "B04_10m", "B08_10m", "SCL_20m")
 ) |>
-  rstac::assets_select(
-    asset_names = c("B02_10m", "B03_10m", "B04_10m", "B08_10m", "SCL_20m")
-  ) |>
   stac_cloud_filter(max_cloud_cover = 30)
 ```
 
@@ -159,7 +157,7 @@ s2_median <- vrt_collect(s2copdse,
 
 Finally, let's plot the NIR band on its own and then the RGB composite.
 
-```{r s2-plots, fig.cap= ""}
+```{r s2-plots, fig.width=10, fig.height=7.5, fig.cap= ""}
 plot_raster_src(s2_median, bands = 4)
 
 plot_raster_src(s2_median, bands = c(3, 2, 1))

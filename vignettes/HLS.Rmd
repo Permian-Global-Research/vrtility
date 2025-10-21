@@ -57,10 +57,6 @@ box.
 library(vrtility)
 
 mirai::daemons(gdalraster::get_num_cpus())
-#> [1] 20
-```
-
-``` r
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -85,12 +81,14 @@ hlssl_stac <- hls_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 35,
-  collection = "HLSL30_2.0"
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
+  collection = "HLSL30_2.0",
+  assets = c( 
+    "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B10", "B11", "Fmask")
 )
 print(hlssl_stac)
 #> ###Items
-#> - matched feature(s): 70
-#> - features (6 item(s) / 64 not fetched):
+#> - features (6 item(s)):
 #>   - HLS.L30.T55MBM.2023017T003226.v2.0
 #>   - HLS.L30.T54MZS.2023017T003226.v2.0
 #>   - HLS.L30.T55MBM.2023065T003210.v2.0
@@ -113,12 +111,12 @@ hlsss_stac <- hls_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 35,
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
   collection = "HLSS30_2.0"
 )
 print(hlsss_stac)
 #> ###Items
-#> - matched feature(s): 98
-#> - features (8 item(s) / 90 not fetched):
+#> - features (8 item(s)):
 #>   - HLS.S30.T54MZS.2023029T004701.v2.0
 #>   - HLS.S30.T55MBM.2023074T004709.v2.0
 #>   - HLS.S30.T55MBM.2023079T004701.v2.0
@@ -173,9 +171,6 @@ print(hls_sl_col)
 #> End Date: 2023-12-03 00:32:19 UTC
 #> Number of Items: 6
 #> Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask
-```
-
-``` r
 
 hls_ss_col <- vrt_collect(hlsss_stac)
 print(hls_ss_col)
@@ -266,7 +261,7 @@ print(hls_col_mask, maskfun = TRUE)
 #> → <VRT Collection>
 #> Mask Function:
 #> import numpy as np
-#> def build_bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
+#> def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #>                   raster_ysize, buf_radius, gt, **kwargs):
 #>     bit_positions = [int(x) for x in kwargs['mask_values'].decode().split(',')]
 #>     mask = np.zeros_like(in_ar[0], dtype=bool)
@@ -394,7 +389,7 @@ withr::with_par(
     plot_raster_src(
       hls_composite,
       bands = i,
-      pal = hcl.colors(256, "Rocket"),
+      col = hcl.colors(100, "Rocket"),
       legend = FALSE,
       axes = FALSE
     )

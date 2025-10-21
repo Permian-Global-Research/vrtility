@@ -84,7 +84,10 @@ hlssl_stac <- hls_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 35,
-  collection = "HLSL30_2.0"
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
+  collection = "HLSL30_2.0",
+  assets = c( 
+    "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B10", "B11", "Fmask")
 )
 print(hlssl_stac)
 ```
@@ -99,6 +102,7 @@ hlsss_stac <- hls_stac_query(
   start_date = "2023-01-01",
   end_date = "2023-12-31",
   max_cloud_cover = 35,
+  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
   collection = "HLSS30_2.0"
 )
 print(hlsss_stac)
@@ -297,14 +301,14 @@ withr::with_par(list(mar = c(0, 0, 0, 0)), {
 
 And all the other bands too:
 
-```{r hls-plot-bands, fig.width=10, fig.height=8, fig.cap= ""}
+```{r hls-plot-bands, fig.width=10, fig.height=16, fig.cap= ""}
 withr::with_par(
   list(mfrow = c(5, 3), mar = c(0, 0, 1, 0)),
   purrr::walk(1:15, function(i) {
     plot_raster_src(
       hls_composite,
       bands = i,
-      pal = hcl.colors(256, "Rocket"),
+      col = hcl.colors(100, "Rocket"),
       legend = FALSE,
       axes = FALSE
     )
