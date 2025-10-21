@@ -106,6 +106,10 @@ test_that("stac_orbit_filter works correctly", {
 })
 
 test_that("stac_coverage_filter works correctly", {
+  skip_if_not(
+    gdalraster::gdal_version_num() >= gdalraster::gdal_compute_version(3, 9, 0),
+    message = "GDAL >= 3.9.0 required for stac_coverage_filter tests"
+  )
   # Create items with known bounding boxes
   mock_items <- create_mock_stac_items(3)
 
