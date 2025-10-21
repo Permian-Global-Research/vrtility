@@ -55,7 +55,18 @@
 #' \item{\code{\link{vrt_save}}}{Save a VRT object to a file}
 #' \item{\code{\link{vrt_schema}}}{(data object)The official GDAL VRT schema as a character object}
 #' }
-#'
+#' @section gdalraster helpers:
+#' \describe{
+#' \item{\code{\link{vector_to_MEM}}}{Convert a vector to a GDALRasterDataset in memory}
+#' }
+#' @section Composite reducers:
+#' \describe{
+#' \item{\code{\link{multiband_reduce}}}{Create composite reductions that require all bands}
+#' \item{\code{\link{geomedian}}}{A geometric median reducer function}
+#' \item{\code{\link{medoid}}}{A medoid reducer function}
+#' \item{\code{\link{geomedoid}}}{A geometric medoid reducer function}
+#' \item{\code{\link{quantoid}}}{A quantoid reducer function}
+#' }
 #' @seealso
 #' \href{https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.nasa.gov/stac/LPCLOUD/}{LPCLOUD STAC Browser}
 #'

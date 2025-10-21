@@ -3,7 +3,7 @@
 #' @return A numeric vector of length 4 representing a bounding box
 #' @noRd
 #' @keywords internal
-validate_bbox <- function(bbox) {
+validate_bbox <- function(bbox, check_latlong = TRUE) {
   v_assert_type(bbox, "bbox", "numeric")
   v_assert_length(bbox, "bbox", 4)
 
@@ -19,12 +19,13 @@ validate_bbox <- function(bbox) {
   c_bbox <- gdalraster::bbox_from_wkt(bbox_poly)
 
   if (
-    !rlang::is_true(
-      c_bbox[1] >= -180 &&
-        c_bbox[3] <= 180 &&
-        c_bbox[2] >= -90 &&
-        c_bbox[4] <= 90
-    )
+    check_latlong &&
+      !rlang::is_true(
+        c_bbox[1] >= -180 &&
+          c_bbox[3] <= 180 &&
+          c_bbox[2] >= -90 &&
+          c_bbox[4] <= 90
+      )
   ) {
     rlang::abort(
       c(

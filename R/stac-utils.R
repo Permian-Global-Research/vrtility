@@ -8,6 +8,25 @@ format_stac_date <- function(x) {
 }
 
 
+#' make a request to a stac source using GET first then POST if it fails.
+#' @param search_obj An rstac query object
+#' @return an rstac_doc object
+#' @noRd
+#' @keywords internal
+execute_stac_request <- function(search_obj) {
+  # Try GET first, fall back to POST if needed
+  tryCatch(
+    {
+      rstac::get_request(search_obj)
+    },
+    error = function(e) {
+      cli::cli_inform("GET request failed, attempting to POST request")
+      rstac::post_request(search_obj)
+    }
+  )
+}
+
+
 #' @title Query a STAC source
 #' @description A set of helper functions to query STAC APIs. These are very
 #' thin wrappers around existing \pkg{rstac} functions, but provide some
@@ -17,7 +36,18 @@ format_stac_date <- function(x) {
 #' @param collection The collection to query
 #' @param start_date The start date for the query
 #' @param end_date The end date for the query
-#' @param limit The number of items to return
+#' @param assets A character vector of the asset names to include
+#' @param mpc_sign A logical indicating whether to sign the items using the
+#' Planetary Computer API's signing method (only required if using the
+#' Planetary Computer STAC API).
+#' @param drop_duplicates A logical indicating whether to drop duplicate items
+#' from the collection. Duplicates are identified based on identical bounding
+#' boxes (with a precision of 4 decimal places) and datetime properties.
+#' Duplicate items in the Microsoft Planetary Computer STAC API are a known
+#' issue.
+#' @param check_collection A logical, should the collection name be checked
+#' against available collections in the `stac_source`? If FALSE,  the collection
+#' is assumed to exist.
 #' @return A \pkg{rstac} doc_items object
 #' @rdname stac_utilities
 #' @export
@@ -27,8 +57,7 @@ format_stac_date <- function(x) {
 #'   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
 #'   collection = "sentinel-2-l2a",
 #'   start_date = "2023-01-01",
-#'   end_date = "2023-01-31",
-#'   limit = 10
+#'   end_date = "2023-01-31"
 #' )
 #'
 #' # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
@@ -54,14 +83,20 @@ stac_query <- function(
   collection,
   start_date,
   end_date,
-  limit = 999
+  assets = NULL,
+  mpc_sign = grepl(
+    "planetarycomputer\\.microsoft\\.com",
+    stac_source
+  ),
+  drop_duplicates = TRUE,
+  check_collection = TRUE
 ) {
   validate_bbox(bbox)
   v_assert_type(stac_source, "stac_source", "character")
   v_assert_type(collection, "collection", "character")
   v_assert_type(start_date, "start_date", "character")
   v_assert_type(end_date, "end_date", "character")
-  v_assert_type(limit, "limit", "numeric")
+  v_assert_type(check_collection, "check_collection", "logical")
 
   if (!is.null(start_date)) {
     datetime <- paste0(
@@ -73,27 +108,55 @@ stac_query <- function(
     datetime <- NULL
   }
 
+  # set stac endpoint
+  stac_get <- rstac::stac(stac_source)
+
+  # check collection against available collections
+  if (check_collection) {
+    tryCatch(
+      {
+        stac_colls <- execute_stac_request(rstac::collections(stac_get))
+        coll_list <- purrr::map_chr(stac_colls$collections, ~ .x$id)
+        collection <- rlang::arg_match(collection, coll_list)
+      },
+      error = function(e) {
+        cli::cli_warn(
+          "Could not retrieve collections from STAC source: {stac_source}.
+        Proceeding without collection check."
+        )
+      }
+    )
+  }
+
+  # perform search
   search <- rstac::stac_search(
-    rstac::stac(stac_source),
+    stac_get,
     collections = collection,
     bbox = bbox,
-    datetime = datetime,
-    limit = limit
+    datetime = datetime
   )
+  stac_its <- rstac::items_fetch(execute_stac_request(search))
 
-  return(rstac::items_fetch(rstac::get_request(search)))
+  if (drop_duplicates) {
+    stac_its <- stac_drop_duplicates(stac_its)
+  }
+
+  if (!is.null(assets)) {
+    assets <- rlang::arg_match(
+      assets,
+      rstac::items_assets(stac_its),
+      multiple = TRUE
+    )
+    stac_its <- rstac::assets_select(stac_its, asset_names = assets)
+  }
+
+  if (mpc_sign) {
+    stac_its <- sign_mpc_items(stac_its)
+  }
+  return(stac_its)
 }
 
 
-#' Generate a Sentinel 2 stac collection doc_items object
-#' @param bbox A numeric vector of the bounding box (length 4) in lat/long
-#' @param assets A character vector of the asset names to include
-#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
-#' @param stac_source A character string of the STAC source
-#' @param collection A character string of the collection to query
-#' @param mpc_sign A logical indicating whether to sign the items using the
-#' Planetary Computer API's signing method (only required if using the
-#' Planetary Computer STAC API).
 #' @rdname stac_utilities
 #' @export
 #' @examplesIf interactive()
@@ -105,8 +168,15 @@ stac_query <- function(
 #'   assets = c("B02", "B03", "B04", "B08", "SCL")
 #' )
 #' @details `sentinel2_stac_query` facilitates the querying of the Sentinel-2
-#' level 2A data from the Planetary Computer STAC API. It returns a
-#' catalogue to generate a Sentinel 2 rstac doc_items object.
+#' level 2A data from the Microsoft Planetary Computer STAC API (or other S2
+#' STAC sources) catalogue to generate a Sentinel 2 rstac doc_items object.
+#' This is a convenience function that saves you needing to remember the exact
+#' stac source and name but is simply a thin wrapper around `stac_query` and
+#' `stac_cloud_filter`. Checks are not performed on the stac source or
+#' collection name; assets are checked following the collection query and will
+#' fail if requested assets are not present in the collection. Note that some
+#' STAC sources use different names for the Sentinel-2 level 2A assets and the
+#' provided defaults may not work for all sources.
 sentinel2_stac_query <- function(
   bbox,
   start_date,
@@ -128,28 +198,19 @@ sentinel2_stac_query <- function(
   ),
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "sentinel-2-l2a",
-  mpc_sign = TRUE,
-  limit = 999
+  collection = "sentinel-2-l2a"
 ) {
-  assets <- rlang::arg_match(assets, multiple = TRUE)
   stac_its <- stac_query(
     bbox = bbox,
     stac_source = stac_source,
+    collection = collection[1],
     start_date = start_date,
     end_date = end_date,
-    collection = collection,
-    limit = limit
+    assets = assets
   )
 
   if (!is.null(max_cloud_cover)) {
     stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
-  }
-
-  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
-
-  if (mpc_sign) {
-    stac_its <- sign_mpc_items(stac_its)
   }
 
   return(stac_its)
@@ -181,6 +242,11 @@ sentinel2_stac_query <- function(
 #' \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
 #' an account, you can set your credentials using the `earthdatalogin` package
 #' as shown in the examples.
+#' You can alternatively use the Microsoft Planetary Computer STAC API to access
+#' HLS data, which does not require an Earthdata account. Note that you must
+#' specify the collection as `hls2-s30` or `hls2-l30` when using the
+#' Planetary Computer STAC API and that the data is only available from 2020
+#' onwards.
 #' @export
 hls_stac_query <- function(
   bbox,
@@ -203,95 +269,27 @@ hls_stac_query <- function(
     "Fmask"
   ),
   max_cloud_cover = 10,
-  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
-  collection = c("HLSS30_2.0", "HLSL30_2.0"),
-  limit = 999
-) {
-  assets <- rlang::arg_match(assets, multiple = TRUE)
-  collection <- rlang::arg_match(collection)
-  stac_its <- stac_query(
-    bbox = bbox,
-    stac_source = stac_source,
-    start_date = start_date,
-    end_date = end_date,
-    collection = collection,
-    limit = limit
-  )
-
-  if (!is.null(max_cloud_cover)) {
-    stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
-  }
-
-  rstac::assets_select(stac_its, asset_names = assets)
-}
-
-
-hls_mpc_stac_query <- function(
-  bbox,
-  start_date,
-  end_date,
-  assets = c(
-    "B01",
-    "B02",
-    "B03",
-    "B04",
-    "B05",
-    "B06",
-    "B07",
-    "B08",
-    "B8A",
-    "B09",
-    "B10",
-    "B11",
-    "B12",
-    "Fmask"
+  stac_source = c(
+    "https://planetarycomputer.microsoft.com/api/stac/v1/",
+    "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"
   ),
-  max_cloud_cover = 10,
-  mpc_sign = TRUE,
-  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = c("hls2-s30", "hls2-l30"),
-  limit = 999
+  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
 ) {
-  assets <- rlang::arg_match(assets, multiple = TRUE)
-  collection <- rlang::arg_match(collection)
+  stac_source <- rlang::arg_match(stac_source)
+  v_asset_hls_catalog(stac_source, collection[1])
+
   stac_its <- stac_query(
     bbox = bbox,
     stac_source = stac_source,
+    collection = collection,
     start_date = start_date,
     end_date = end_date,
-    collection = collection,
-    limit = limit
+    assets = assets
   )
 
   if (!is.null(max_cloud_cover)) {
     stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
   }
-
-  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
-
-  if (mpc_sign) {
-    stac_its <- sign_mpc_items(stac_its)
-  }
-  return(stac_its)
-}
-
-#' Filter a STAC item collection by cloud cover
-#' @param items An \pkg{rstac} doc_items object
-#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
-#' @rdname stac_utilities
-#' @export
-#' @details
-#' The `stac_cloud_filter` function filters a STAC item collection by cloud cover
-#' percentage. It uses the `eo:cloud_cover` property to filter the items.
-#' Items with a cloud cover percentage less than the specified `max_cloud_cover`
-#' are retained.
-stac_cloud_filter <- function(items, max_cloud_cover) {
-  v_assert_type(items, "items", "doc_items")
-  v_assert_type(max_cloud_cover, "max_cloud_cover", "numeric")
-  items |>
-    rstac::items_filter(
-      filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
-    )
 }
 
 
@@ -320,33 +318,43 @@ sentinel1_stac_query <- function(
   assets = c("hh", "hv", "vh", "vv"),
   orbit_state = c("descending", "ascending"),
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = c("sentinel-1-rtc", "sentinel-1-grd"),
-  mpc_sign = TRUE,
-  limit = 999
+  collection = c("sentinel-1-rtc", "sentinel-1-grd")
 ) {
-  assets <- rlang::arg_match(assets, multiple = TRUE)
   orbit_state <- rlang::arg_match(orbit_state, multiple = TRUE)
-  collection <- rlang::arg_match(collection)
-
   stac_its <- stac_query(
     bbox = bbox,
     stac_source = stac_source,
+    collection = collection[1],
     start_date = start_date,
     end_date = end_date,
-    collection = collection,
-    limit = limit
+    assets = assets
   )
 
   stac_its <- stac_orbit_filter(stac_its, orbit_state)
 
-  stac_its <- rstac::assets_select(stac_its, asset_names = assets)
-
-  if (mpc_sign) {
-    stac_its <- sign_mpc_items(stac_its)
-  }
-
   return(stac_its)
 }
+
+
+#' Filter a STAC item collection by cloud cover
+#' @param items An \pkg{rstac} doc_items object
+#' @param max_cloud_cover A numeric value of the maximum cloud cover percentage
+#' @rdname stac_utilities
+#' @export
+#' @details
+#' The `stac_cloud_filter` function filters a STAC item collection by cloud cover
+#' percentage. It uses the `eo:cloud_cover` property to filter the items.
+#' Items with a cloud cover percentage less than the specified `max_cloud_cover`
+#' are retained.
+stac_cloud_filter <- function(items, max_cloud_cover) {
+  v_assert_type(items, "items", "doc_items")
+  v_assert_type(max_cloud_cover, "max_cloud_cover", "numeric")
+  items |>
+    rstac::items_filter(
+      filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
+    )
+}
+
 
 #' Filter a STAC item collection by orbit state
 #' @param items A \pkg{rstac} doc_items object
@@ -435,8 +443,10 @@ sign_mpc_items <- function(
   items,
   subscription_key = Sys.getenv("MPC_TOKEN", unset = NA)
 ) {
+  v_assert_type(items, "items", "doc_items", nullok = FALSE)
   if (rlang::is_empty(items$features)) {
-    cli::cli_abort("There are no MPC items to sign.")
+    cli::cli_warn("There are no MPC items to sign.", class = "No_items_to_sign")
+    return(items)
   }
 
   collection <- items$features[[1]]$collection
@@ -444,6 +454,7 @@ sign_mpc_items <- function(
   token_cache_file <- set_token_cache(collection)
 
   reuse_token <- is_token_valid(token_cache_file)
+  # browser()
 
   collection_token <- read_token(
     reuse_token,
@@ -491,10 +502,8 @@ is_token_valid <- function(token_cache_file) {
       lubridate::ymd_hms(collection_token$`msft:expiry`, tz = "UTC")
 
     if (token_age < 0) {
-      # cli::cli_alert_info("Using cached MPC token")
       return(TRUE)
     } else {
-      # cli::cli_alert_info("MPC token expired - requesting new token")
       return(FALSE)
     }
   } else {
@@ -549,4 +558,69 @@ read_token <- function(
     collection_token <- readRDS(token_cache_file)
   }
   return(collection_token)
+}
+
+#' Check for duplicate items in a STAC item collection
+#' @param x A \pkg{rstac} doc_items object
+#' @return An integer vector of the indices of unique items
+#' @noRd
+#' @keywords internal
+check_for_dups <- function(x) {
+  # Handle empty features
+  if (rlang::is_empty(x$features)) {
+    return(integer(0))
+  }
+
+  bbox_dttm_list <- purrr::map(x$features, \(feature) {
+    list(
+      platform = feature$properties$platform %||% "",
+      bbox = round(feature$bbox, 4),
+      datetime = feature$properties$datetime %||% "",
+      orbit_state = feature$properties$`sat:orbit_state` %||% ""
+    )
+  })
+
+  # Convert to a more comparable format
+  bbox_dttm_df <- purrr::map(
+    bbox_dttm_list,
+    \(item) {
+      data.frame(
+        platform = item$platform,
+        bbox_str = paste(item$bbox, collapse = ","),
+        datetime = item$datetime,
+        orbit_state = item$orbit_state
+      )
+    }
+  ) |>
+    purrr::list_rbind(names_to = "feature_index")
+
+  # Find duplicates
+  which(
+    !duplicated(bbox_dttm_df[, c(
+      "bbox_str",
+      "datetime",
+      "platform",
+      "orbit_state"
+    )])
+  )
+}
+
+#' Remove duplicate items from a STAC item collection
+#' @param items A \pkg{rstac} doc_items object
+#' @return A \pkg{rstac} doc_items object with duplicate items removed
+#' @rdname stac_utilities
+#' @export
+#' @details
+#' The `stac_drop_duplicates` function removes duplicate items from a STAC item
+#' collection. Duplicates are identified based on identical bounding boxes (
+#' with a precision of 4 decimal places), datetime properties and platform.
+#' Duplicate items in the Microsoft Planetary Computer STAC API are a known
+#' issue.
+stac_drop_duplicates <- function(items) {
+  v_assert_type(items, "items", "doc_items", nullok = FALSE)
+  if (rlang::is_empty(items$features)) {
+    cli::cli_warn("There are no items from which to drop duplicates.")
+    return(items)
+  }
+  rstac::items_select(items, check_for_dups(items))
 }

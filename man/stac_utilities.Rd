@@ -4,14 +4,25 @@
 \alias{stac_query}
 \alias{sentinel2_stac_query}
 \alias{hls_stac_query}
-\alias{stac_cloud_filter}
 \alias{sentinel1_stac_query}
+\alias{stac_cloud_filter}
 \alias{stac_orbit_filter}
 \alias{stac_coverage_filter}
 \alias{sign_mpc_items}
+\alias{stac_drop_duplicates}
 \title{Query a STAC source}
 \usage{
-stac_query(bbox, stac_source, collection, start_date, end_date, limit = 999)
+stac_query(
+  bbox,
+  stac_source,
+  collection,
+  start_date,
+  end_date,
+  assets = NULL,
+  mpc_sign = grepl("planetarycomputer\\\\.microsoft\\\\.com", stac_source),
+  drop_duplicates = TRUE,
+  check_collection = TRUE
+)
 
 sentinel2_stac_query(
   bbox,
@@ -21,9 +32,7 @@ sentinel2_stac_query(
     "B12", "SCL"),
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "sentinel-2-l2a",
-  mpc_sign = TRUE,
-  limit = 999
+  collection = "sentinel-2-l2a"
 )
 
 hls_stac_query(
@@ -33,12 +42,10 @@ hls_stac_query(
   assets = c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B10",
     "B11", "B12", "Fmask"),
   max_cloud_cover = 10,
-  stac_source = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
-  collection = c("HLSS30_2.0", "HLSL30_2.0"),
-  limit = 999
+  stac_source = c("https://planetarycomputer.microsoft.com/api/stac/v1/",
+    "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"),
+  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
 )
-
-stac_cloud_filter(items, max_cloud_cover)
 
 sentinel1_stac_query(
   bbox,
@@ -47,41 +54,51 @@ sentinel1_stac_query(
   assets = c("hh", "hv", "vh", "vv"),
   orbit_state = c("descending", "ascending"),
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = c("sentinel-1-rtc", "sentinel-1-grd"),
-  mpc_sign = TRUE,
-  limit = 999
+  collection = c("sentinel-1-rtc", "sentinel-1-grd")
 )
+
+stac_cloud_filter(items, max_cloud_cover)
 
 stac_orbit_filter(items, orbit_state = c("descending", "ascending"))
 
 stac_coverage_filter(items, bbox, min_coverage = 0.5)
 
 sign_mpc_items(items, subscription_key = Sys.getenv("MPC_TOKEN", unset = NA))
+
+stac_drop_duplicates(items)
 }
 \arguments{
 \item{bbox}{A numeric vector of length 4 representing a bounding box}
 
-\item{stac_source}{A character string of the STAC source}
+\item{stac_source}{The STAC source to query}
 
-\item{collection}{A character string of the collection to query}
+\item{collection}{The collection to query}
 
 \item{start_date}{The start date for the query}
 
 \item{end_date}{The end date for the query}
 
-\item{limit}{The number of items to return}
-
 \item{assets}{A character vector of the asset names to include}
-
-\item{max_cloud_cover}{A numeric value of the maximum cloud cover percentage}
 
 \item{mpc_sign}{A logical indicating whether to sign the items using the
 Planetary Computer API's signing method (only required if using the
 Planetary Computer STAC API).}
 
-\item{items}{A STACItemCollection.}
+\item{drop_duplicates}{A logical indicating whether to drop duplicate items
+from the collection. Duplicates are identified based on identical bounding
+boxes (with a precision of 4 decimal places) and datetime properties.
+Duplicate items in the Microsoft Planetary Computer STAC API are a known
+issue.}
+
+\item{check_collection}{A logical, should the collection name be checked
+against available collections in the \code{stac_source}? If FALSE,  the collection
+is assumed to exist.}
+
+\item{max_cloud_cover}{A numeric value of the maximum cloud cover percentage}
 
 \item{orbit_state}{A character string of the orbit state to filter by}
+
+\item{items}{A \pkg{rstac} doc_items object}
 
 \item{min_coverage}{A numeric value between 0 and 1 representing the minimum
 coverage of the bounding box required to retain the item}
@@ -94,6 +111,8 @@ is set.}
 A \pkg{rstac} doc_items object
 
 A STACItemCollection object with signed assets url.
+
+A \pkg{rstac} doc_items object with duplicate items removed
 }
 \description{
 A set of helper functions to query STAC APIs. These are very
@@ -112,8 +131,15 @@ this can be done using \code{\link{sign_mpc_items}},
 \code{\link[rstac]{items_sign_planetary_computer}}\verb{, or with GDAL by setting the environment variable }VSICURL_PC_URL_SIGNING\code{to}YES`. see the examples for more details.
 
 \code{sentinel2_stac_query} facilitates the querying of the Sentinel-2
-level 2A data from the Planetary Computer STAC API. It returns a
-catalogue to generate a Sentinel 2 rstac doc_items object.
+level 2A data from the Microsoft Planetary Computer STAC API (or other S2
+STAC sources) catalogue to generate a Sentinel 2 rstac doc_items object.
+This is a convenience function that saves you needing to remember the exact
+stac source and name but is simply a thin wrapper around \code{stac_query} and
+\code{stac_cloud_filter}. Checks are not performed on the stac source or
+collection name; assets are checked following the collection query and will
+fail if requested assets are not present in the collection. Note that some
+STAC sources use different names for the Sentinel-2 level 2A assets and the
+provided defaults may not work for all sources.
 
 The \code{hls_stac_query} function generates a Harmonized Landsat Sentinel (HLS)
 stac collection doc_items object. In order to access HLS data you will need a
@@ -121,16 +147,21 @@ NASA Earthdata account. You can create one at
 \url{https://urs.earthdata.nasa.gov/users/new}. Once you have
 an account, you can set your credentials using the \code{earthdatalogin} package
 as shown in the examples.
-
-The \code{stac_cloud_filter} function filters a STAC item collection by cloud cover
-percentage. It uses the \code{eo:cloud_cover} property to filter the items.
-Items with a cloud cover percentage less than the specified \code{max_cloud_cover}
-are retained.
+You can alternatively use the Microsoft Planetary Computer STAC API to access
+HLS data, which does not require an Earthdata account. Note that you must
+specify the collection as \code{hls2-s30} or \code{hls2-l30} when using the
+Planetary Computer STAC API and that the data is only available from 2020
+onwards.
 
 The \code{sentinel1_stac_query} function generates a Sentinel 1 stac collection
 doc_items object. It allows you to query Sentinel 1 data from the Planetary
 Computer STAC API. The function returns a collection of Sentinel 1 items
 that can be used to generate a Sentinel 1 rstac doc_items object.
+
+The \code{stac_cloud_filter} function filters a STAC item collection by cloud cover
+percentage. It uses the \code{eo:cloud_cover} property to filter the items.
+Items with a cloud cover percentage less than the specified \code{max_cloud_cover}
+are retained.
 
 The \code{stac_orbit_filter} function filters a STAC item collection by orbit
 state. It uses the \code{sat:orbit_state} property to filter the items.
@@ -155,6 +186,12 @@ caches collection-level signing tokens for 45 minutes to avoid repeated
 requests for the same collection within a short time period. This can avoid
 429 (permission denied) errors when signing many items from the same
 collection.
+
+The \code{stac_drop_duplicates} function removes duplicate items from a STAC item
+collection. Duplicates are identified based on identical bounding boxes (
+with a precision of 4 decimal places), datetime properties and platform.
+Duplicate items in the Microsoft Planetary Computer STAC API are a known
+issue.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -163,8 +200,7 @@ s2_its <- stac_query(
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "sentinel-2-l2a",
   start_date = "2023-01-01",
-  end_date = "2023-01-31",
-  limit = 10
+  end_date = "2023-01-31"
 )
 
 # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
