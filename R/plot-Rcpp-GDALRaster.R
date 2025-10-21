@@ -335,6 +335,20 @@
     valid_data <- data_in[!is.na(data_in)]
   }
 
+  # Handle edge case of no valid data early to avoid warnings
+  if (length(valid_data) == 0) {
+    # Create a simple single-color legend for no-data case
+    leg_colors <- rep("#CCCCCC", 256) # Gray color for no data
+    leg_img <- grDevices::as.raster(matrix(leg_colors, ncol = 1))
+    return(list(
+      img = leg_img,
+      mm = c(0, 1), # Default range
+      unique_values = NULL,
+      is_discrete = TRUE,
+      n_unique = 0
+    ))
+  }
+
   # Calculate data range
   mm <- NULL
   if (!is.null(minmax_def)) {
@@ -447,18 +461,25 @@
   # Add labels
   if (legend_data$is_discrete) {
     unique_values <- legend_data$unique_values
-    if (is(unique_values, "integer")) {
-      leg_lab <- formatC(rev(unique_values), format = "d")
+
+    # Handle case where there are no unique values (all NA)
+    if (is.null(unique_values) || length(unique_values) == 0) {
+      leg_lab <- "No Data"
+      text_y <- (legend_y_start + legend_y_end) / 2
     } else {
-      leg_lab <- formatC(rev(unique_values), format = "f", digits = digits)
+      if (is(unique_values, "integer")) {
+        leg_lab <- formatC(rev(unique_values), format = "d")
+      } else {
+        leg_lab <- formatC(rev(unique_values), format = "f", digits = digits)
+      }
+      legend_height_plot <- legend_y_end - legend_y_start
+      block_height <- legend_height_plot / legend_data$n_unique
+      text_y <- seq(
+        legend_y_end - block_height / 2,
+        legend_y_start + block_height / 2,
+        length.out = legend_data$n_unique
+      )
     }
-    legend_height_plot <- legend_y_end - legend_y_start
-    block_height <- legend_height_plot / legend_data$n_unique
-    text_y <- seq(
-      legend_y_end - block_height / 2,
-      legend_y_start + block_height / 2,
-      length.out = legend_data$n_unique
-    )
   } else {
     mm <- legend_data$mm
     leg_lab <- formatC(
@@ -494,8 +515,8 @@
 #' \code{xsize * ysize} exceeds this value, the raster will be downsampled.
 #' @param scale_values Logical. Whether to apply scale and offset values
 #' from the raster metadata.
-#' @param col_tbl Color table as returned by \code{ds$getColorTable()}.
-#' If provided, overrides the \code{col} parameter.
+#' @param col_tbl A data frame with the columns:
+#' "VALUE", "RED", "GREEN", "BLUE".
 #' @param maxColorValue Numeric. Maximum color value when using a color table.
 #' @param normalize Logical. Whether to normalize pixel values to \[0,1\] range
 #' before color mapping. Automatically disabled for discrete data.
@@ -536,7 +557,7 @@ plot.Rcpp_GDALRaster <- function(
   data,
   xsize = NULL,
   ysize = NULL,
-  bands = NULL,
+  bands = 1,
   max_pixels = 2.5e+07,
   scale_values = TRUE,
   col_tbl = NULL,
