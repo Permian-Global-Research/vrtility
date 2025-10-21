@@ -299,7 +299,6 @@ test_that("discrete vs continuous legend detection works", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   # Create a raster with discrete values for testing
-  library(terra)
   ds <- methods::new(gdalraster::GDALRaster, s2files[1])
   on.exit(ds$close())
 
