@@ -103,7 +103,7 @@ in parallel across bands and image tiles.
 library(vrtility)
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
+mirai::daemons(10)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -149,7 +149,8 @@ withr::with_par(list(mfrow = c(2, 1)), {
       plot_raster_src(
         median_composite,
         .x,
-        rgb_trans = .y
+        rgb_trans = .y,
+        title = "none"
       )
     }
   )
@@ -182,7 +183,7 @@ Using medoid or other multi-band pixel functions (e.g. `geomedian`) can be
 extremely powerful but requires more compute power/time than band-wise pixel 
 functions.
 
-```{r example2, fig.width=10, fig.height=8}
+```{r example2, fig.width=10, fig.height=9}
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
 
 ex_collect <- vrt_collect(s2files)
@@ -193,19 +194,16 @@ ex_collect_mask <- vrt_set_maskfun(
   mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
-withr::with_par(
-  list(mfrow = c(2, 2)),
-  {
-    purrr::walk(
-      seq_len(ex_collect$n_items),
-      ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
-    )
+par(mfrow = c(2, 2))
 
-    purrr::walk(
-      seq_len(ex_collect_mask$n_items),
-      ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
-    )
-  }
+purrr::walk(
+  seq_len(ex_collect$n_items),
+  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
+)
+
+purrr::walk(
+  seq_len(ex_collect_mask$n_items),
+  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
 )
 
 # extract a block to use as a template for warping
@@ -217,9 +215,12 @@ ex_composite <- vrt_warp(
   te = t_block$bbox,
   tr = c(20, 20)
 ) |>
+  vrt_set_scale(scale_value = 0.0001, offset = -0.1, band_idx = 1:4) |>
   multiband_reduce(reduce_fun = medoid())
 
-
-plot_raster_src(ex_composite, bands = c(3, 2, 1))
+purrr::walk(
+  1:4,
+  ~ plot_raster_src(ex_composite, bands = .x, minmax_pct_cut = c(2, 98))
+)
 ```
 

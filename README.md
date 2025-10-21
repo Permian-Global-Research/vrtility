@@ -100,7 +100,7 @@ library(vrtility)
 #>   vrtility::set_gdal_cache_max()
 
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
+mirai::daemons(10)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -139,7 +139,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.935   0.555  37.719
+#>   3.816   0.472  29.855
 
 withr::with_par(list(mfrow = c(2, 1)), {
   purrr::walk2(
@@ -149,7 +149,8 @@ withr::with_par(list(mfrow = c(2, 1)), {
       plot_raster_src(
         median_composite,
         .x,
-        rgb_trans = .y
+        rgb_trans = .y,
+        title = "none"
       )
     }
   )
@@ -196,23 +197,25 @@ ex_collect_mask <- vrt_set_maskfun(
   mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
-withr::with_par(
-  list(mfrow = c(2, 2)),
-  {
-    purrr::walk(
-      seq_len(ex_collect$n_items),
-      ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
-    )
+par(mfrow = c(2, 2))
 
-    purrr::walk(
-      seq_len(ex_collect_mask$n_items),
-      ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
-    )
-  }
+purrr::walk(
+  seq_len(ex_collect$n_items),
+  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
 )
 ```
 
-<img src="man/figures/README-example2-1.png" width="100%" /><img src="man/figures/README-example2-2.png" width="100%" />
+<img src="man/figures/README-example2-1.png" width="100%" />
+
+``` r
+
+purrr::walk(
+  seq_len(ex_collect_mask$n_items),
+  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+)
+```
+
+<img src="man/figures/README-example2-2.png" width="100%" />
 
 ``` r
 
@@ -225,10 +228,13 @@ ex_composite <- vrt_warp(
   te = t_block$bbox,
   tr = c(20, 20)
 ) |>
+  vrt_set_scale(scale_value = 0.0001, offset = -0.1, band_idx = 1:4) |>
   multiband_reduce(reduce_fun = medoid())
 
-
-plot_raster_src(ex_composite, bands = c(3, 2, 1))
+purrr::walk(
+  1:4,
+  ~ plot_raster_src(ex_composite, bands = .x, minmax_pct_cut = c(2, 98))
+)
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />
