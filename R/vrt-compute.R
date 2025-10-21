@@ -224,13 +224,21 @@ vrt_compute.vrt_block <- function(
     )
   }
 
-  if (!recollect) {
-    return(result)
-  }
-
   if (length(x$date_time) > 1) {
     lubdttm <- lubridate::as_datetime(x$date_time)
     x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+    ds <- methods::new(gdalraster::GDALRaster, result, read_only = FALSE)
+    ds$setMetadataItem(
+      0,
+      mdi_name = "datetime",
+      mdi_value = x$date_time,
+      domain = ""
+    )
+    on.exit(ds$close(), add = TRUE)
+  }
+
+  if (!recollect) {
+    return(result)
   }
 
   vrt_collect(
