@@ -503,7 +503,7 @@
   graphics::text(text_x, text_y, labels = leg_lab, adj = c(0, 0.5), cex = 1.2)
 }
 
-#' @param data An object of class \code{Rcpp_GDALRaster} see
+#' @param x An object of class \code{Rcpp_GDALRaster} see
 #' \code{\link[gdalraster]{GDALRaster}}
 #' @param xsize Integer. Number of pixels in the x dimension for the output plot.
 #' If \code{NULL}, uses the full raster width.
@@ -554,7 +554,7 @@
 #' )
 #' @export
 plot.Rcpp_GDALRaster <- function(
-  data,
+  x,
   xsize = NULL,
   ysize = NULL,
   bands = 1,
@@ -590,11 +590,11 @@ plot.Rcpp_GDALRaster <- function(
   col_map_fn <- params$col_map_fn
 
   # 2. Setup plot dimensions
-  dimensions <- .setup_plot_dimensions(data, xsize, ysize, params$max_pixels)
+  dimensions <- .setup_plot_dimensions(x, xsize, ysize, params$max_pixels)
 
   # 3. Read and process the raster data
   processed_data <- .read_and_process_data(
-    data,
+    x,
     bands,
     dimensions,
     scale_values,
@@ -607,16 +607,16 @@ plot.Rcpp_GDALRaster <- function(
   # 4. Handle color table setup for single band plots
   if (nbands == 1 && is.null(col_tbl) && is.null(col)) {
     if (
-      !is.null(data$getColorTable(band = 1)) &&
-        data$getPaletteInterp(band = 1) == "RGB"
+      !is.null(x$getColorTable(band = 1)) &&
+        x$getPaletteInterp(band = 1) == "RGB"
     ) {
-      col_tbl <- data$getColorTable(band = 1)
+      col_tbl <- x$getColorTable(band = 1)
       maxColorValue <- 255
     }
   }
 
   # 5. Setup coordinate system
-  coords <- .setup_coordinates(data, dimensions, xlim, ylim)
+  coords <- .setup_coordinates(x, dimensions, xlim, ylim)
   xlim <- coords$xlim
   ylim <- coords$ylim
   south_up <- coords$south_up
@@ -645,7 +645,7 @@ plot.Rcpp_GDALRaster <- function(
   # 7.5. Get NoData value for single band rasters
   nodata_value <- NULL
   if (nbands == 1) {
-    nodata_value <- data$getNoDataValue(bands[1])
+    nodata_value <- x$getNoDataValue(bands[1])
     if (is.na(nodata_value)) {
       nodata_value <- NULL
     }
