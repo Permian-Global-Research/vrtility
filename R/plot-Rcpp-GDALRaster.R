@@ -162,9 +162,6 @@
 #' @noRd
 .setup_coordinates <- function(data, dimensions, xlim, ylim) {
   dm <- dimensions$dm
-  xsize <- dimensions$xsize
-  ysize <- dimensions$ysize
-
   gt <- data$getGeoTransform()
   south_up <- FALSE
 
