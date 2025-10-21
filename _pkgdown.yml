@@ -81,3 +81,7 @@ reference:
     contents:
       - bbox_to_projected
       - to_wkt
+  - title: gdalraster helpers
+    desc: Helper functions for GDALRasterDataset objects
+    contents:
+      - vector_to_MEM

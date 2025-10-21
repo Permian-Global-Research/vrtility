@@ -21,7 +21,7 @@ stac_query(
   assets = NULL,
   mpc_sign = grepl("planetarycomputer\\\\.microsoft\\\\.com", stac_source),
   drop_duplicates = TRUE,
-  limit = 999
+  check_collection = TRUE
 )
 
 sentinel2_stac_query(
@@ -32,8 +32,7 @@ sentinel2_stac_query(
     "B12", "SCL"),
   max_cloud_cover = 10,
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = "sentinel-2-l2a",
-  limit = 999
+  collection = "sentinel-2-l2a"
 )
 
 hls_stac_query(
@@ -43,10 +42,9 @@ hls_stac_query(
   assets = c("B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B10",
     "B11", "B12", "Fmask"),
   max_cloud_cover = 10,
-  stac_source = c("https://cmr.earthdata.nasa.gov/stac/LPCLOUD/",
-    "https://planetarycomputer.microsoft.com/api/stac/v1/"),
-  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30"),
-  limit = 999
+  stac_source = c("https://planetarycomputer.microsoft.com/api/stac/v1/",
+    "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"),
+  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
 )
 
 sentinel1_stac_query(
@@ -56,8 +54,7 @@ sentinel1_stac_query(
   assets = c("hh", "hv", "vh", "vv"),
   orbit_state = c("descending", "ascending"),
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
-  collection = c("sentinel-1-rtc", "sentinel-1-grd"),
-  limit = 999
+  collection = c("sentinel-1-rtc", "sentinel-1-grd")
 )
 
 stac_cloud_filter(items, max_cloud_cover)
@@ -93,7 +90,9 @@ boxes (with a precision of 4 decimal places) and datetime properties.
 Duplicate items in the Microsoft Planetary Computer STAC API are a known
 issue.}
 
-\item{limit}{The number of items to return}
+\item{check_collection}{A logical, should the collection name be checked
+against available collections in the \code{stac_source}? If FALSE,  the collection
+is assumed to exist.}
 
 \item{max_cloud_cover}{A numeric value of the maximum cloud cover percentage}
 
@@ -201,8 +200,7 @@ s2_its <- stac_query(
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "sentinel-2-l2a",
   start_date = "2023-01-01",
-  end_date = "2023-01-31",
-  limit = 10
+  end_date = "2023-01-31"
 )
 
 # For Microsoft Planetary Computer (MPC) assets, sign the the items using the
