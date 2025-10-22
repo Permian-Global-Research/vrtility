@@ -1,7 +1,17 @@
 pipeline_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
-  ex_collect <- vrt_collect(s2files)
+  ex_collect <- vrt_collect(
+    s2files,
+    datetimes = c(
+      # these dates are made up btw.
+      "2024-01-01",
+      "2024-03-01",
+      "2024-05-01",
+      "2024-07-01",
+      "2024-09-01"
+    )
+  )
 
   t_block <- ex_collect[[1]][[1]]
   expect_snapshot(print(t_block))
@@ -58,7 +68,6 @@ pipeline_tests <- function() {
 
   exe_comp <- vrt_compute(
     ex_collect_mask_warp_stack_med,
-    outfile = fs::file_temp(ext = "tif"),
     engine = "translate"
   )
 

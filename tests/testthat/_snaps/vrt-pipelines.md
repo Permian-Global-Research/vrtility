@@ -16,7 +16,7 @@
       Pixel res: 19.9929669011164, 19.9929669011164
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-01-01 UTC
 
 ---
 
@@ -36,8 +36,8 @@
     Message
       Bounding Box: NA
       Pixel res: 19.9923198138287, 19.9923198138287
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -61,7 +61,7 @@
       Pixel res: 19.9929669011164, 19.9929669011164
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-01-01 UTC
     Output
       
       [[2]]
@@ -79,7 +79,7 @@
       Pixel res: 19.9923198138287, 19.9923198138287
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-03-01 UTC
     Output
       
       [[3]]
@@ -97,7 +97,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-05-01 UTC
     Output
       
       [[4]]
@@ -115,7 +115,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-07-01 UTC
     Output
       
       [[5]]
@@ -133,7 +133,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-09-01 UTC
     Output
       
 
@@ -153,8 +153,8 @@
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
       Pixel res: 19.9929669011164, 19.9929669011164
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -180,8 +180,8 @@
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
       Pixel res: 19.9929669011164, 19.9929669011164
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -202,8 +202,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -226,8 +226,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -266,8 +266,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -289,7 +289,7 @@
       Pixel res: 19.9929669011164, 19.9929669011164
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-01-01 UTC
 
 ---
 
@@ -309,8 +309,8 @@
     Message
       Bounding Box: NA
       Pixel res: 19.9923198138287, 19.9923198138287
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -334,7 +334,7 @@
       Pixel res: 19.9929669011164, 19.9929669011164
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-01-01 UTC
     Output
       
       [[2]]
@@ -352,7 +352,7 @@
       Pixel res: 19.9923198138287, 19.9923198138287
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-03-01 UTC
     Output
       
       [[3]]
@@ -370,7 +370,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-05-01 UTC
     Output
       
       [[4]]
@@ -388,7 +388,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-07-01 UTC
     Output
       
       [[5]]
@@ -406,7 +406,7 @@
       Pixel res: 20, 20
       Assets: B02, B03, B04, B08, SCL
       No Data Value(s): 0, 0, 0, 0, 0
-      Date Time: NA
+      Date Time: 2024-09-01 UTC
     Output
       
 
@@ -426,8 +426,8 @@
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
       Pixel res: 19.9929669011164, 19.9929669011164
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -453,8 +453,8 @@
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
       Pixel res: 19.9929669011164, 19.9929669011164
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -475,8 +475,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -499,8 +499,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
@@ -539,8 +539,8 @@
       
     Message
       Bounding Box: 289813.58 88876.43 297031.04 95714.02
-      Start Date: NA
-      End Date: NA
+      Start Date: 2024-01-01 UTC
+      End Date: 2024-09-01 UTC
       Number of Items: 5
       Assets: B02, B03, B04, B08, SCL
 
