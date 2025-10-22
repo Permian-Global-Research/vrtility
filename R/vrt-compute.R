@@ -223,11 +223,13 @@ vrt_compute.vrt_block <- function(
       )
     )
   }
+  # browser()
 
-  if (length(x$date_time) > 1) {
+  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
     lubdttm <- lubridate::as_datetime(x$date_time)
     x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
-    ds <- methods::new(gdalraster::GDALRaster, result, read_only = FALSE)
+
+    ds <- methods::new(gdalraster::GDALRaster, result)
     ds$setMetadataItem(
       0,
       mdi_name = "datetime",
