@@ -313,8 +313,6 @@
 #' @noRd
 .create_legend <- function(
   data_in,
-  xlim,
-  ylim,
   col_map_fn,
   col_tbl,
   normalize,
@@ -322,7 +320,6 @@
   minmax_pct_cut,
   maxColorValue,
   na_col,
-  digits,
   nodata_value = NULL
 ) {
   # Filter out NoData values for calculations
@@ -743,8 +740,6 @@ plot.Rcpp_GDALRaster <- function(
   if (legend) {
     legend_data <- .create_legend(
       data_in,
-      xlim,
-      ylim,
       col_map_fn,
       col_tbl,
       normalize,
@@ -752,7 +747,6 @@ plot.Rcpp_GDALRaster <- function(
       minmax_pct_cut,
       maxColorValue,
       na_col,
-      digits,
       nodata_value
     )
     .draw_legend(legend_data, xlim, ylim, digits)
