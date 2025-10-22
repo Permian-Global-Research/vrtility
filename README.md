@@ -139,22 +139,13 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.816   0.472  29.855
+#>   2.429   0.354  31.191
 
-withr::with_par(list(mfrow = c(2, 1)), {
-  purrr::walk2(
-    .x = list(c(3, 2, 1), c(4, 3, 2)),
-    .y = list("linear", "hist"),
-    ~ {
-      plot_raster_src(
-        median_composite,
-        .x,
-        rgb_trans = .y,
-        title = "none"
-      )
-    }
-  )
-})
+
+plot_raster_src(
+  median_composite,
+  c(3, 2, 1)
+)
 ```
 
 <img src="man/figures/README-example1-1.png" width="100%" />
@@ -171,20 +162,18 @@ can use `engine = "warp"` if we are computing a `vrt_collection`
 multi-processing, especially for multi-band reduction methods
 (i.e. `multiband_reduce`).
 
-## Using on-disk rasters
+## Direct file access for on-disk or remote rasters
 
-We can also use on-disk raster files (or indeed urls) too, as shown here
-with this example dataset - note that the inputs have multiple spatial
-reference systems and therefore we need to warp them (as in the above
-example) before “stacking”. We can plot these `vrt_{x}` objects using
-`plot()` but note that, for very large rasters, where we are computing
-pixel functions, this can be slow and we are better off using
-`vrt_compute` to write to disk and then plotting the output.
+We can also directly access raster files (or indeed remote files as
+urls) too, as shown here with this example dataset - note that the
+inputs have multiple spatial reference systems and therefore we need to
+warp them (as in the above example) before stacking or applying any
+reduction-type function.
 
 In this example, we create a `medoid` composite from the warped
 collection. Using medoid or other multi-band pixel functions
 (e.g. `geomedian`) can be extremely powerful but requires more compute
-power/time than band-wise pixel functions.
+than band-wise pixel functions.
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
