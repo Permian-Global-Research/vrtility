@@ -103,6 +103,11 @@ gdal_driver_vsi_src_builder <- function(src, vsi = "", drive = "") {
 #' @return GDALRasterDataset object
 #' @rdname gdalraster-helpers
 #' @export
+#' @details
+#' If `data` has been generated from \code{\link[gdalraster]{read_ds}} it will
+#' include a `gis` attribute containing the necessary spatial metadata. If this
+#' is the case, the spatial parameters are automatically extracted from the
+#' `gis` attribute.
 #' @examples
 #' v2m <- vector_to_MEM(
 #'   as.vector(c(
@@ -123,7 +128,9 @@ vector_to_MEM <- function(
   xsize = NULL,
   ysize = NULL,
   bbox = NULL,
-  srs = NULL
+  srs = NULL,
+  data_type = NULL,
+  no_data_value = NULL
 ) {
   v_assert_type(
     data,
@@ -165,6 +172,7 @@ vector_to_MEM <- function(
     dims <- gis$dim
     bbox <- gis$bbox
     srs <- gis$srs
+    data_type <- purrr::reduce(gis$datatype, gdalraster::dt_union)
   } else {
     if (is.null(nbands)) {
       rlang::abort(
@@ -184,8 +192,20 @@ vector_to_MEM <- function(
       bbox <- c(0, 0, xsize, ysize)
     }
     dims <- c(xsize, ysize, nbands)
+
+    if (is.null(data_type)) {
+      data_type <- "Float32"
+    }
+  }
+  # set no data
+  if (is.null(no_data_value)) {
+    no_data_value <- get_nodata_value(data_type)
+    if (!is.na(no_data_value)) {
+      data[is.na(data)] <- no_data_value
+    }
   }
 
+  # Construct geo transform
   geo_trans <- c(
     bbox[1], # top left x
     (bbox[3] - bbox[1]) / dims[1], # pixel width
@@ -202,13 +222,19 @@ vector_to_MEM <- function(
     xsize = dims[1],
     ysize = dims[2],
     nbands = nbands,
-    dataType = "Float32",
+    dataType = data_type,
     return_obj = TRUE
   )
   if (!is.null(srs)) {
     memds$setProjection(srs)
   }
   memds$setGeoTransform(geo_trans)
+  purrr::walk(seq_len(nbands), function(band_idx) {
+    memds$setNoDataValue(
+      band = band_idx,
+      noDataValue = no_data_value
+    )
+  })
 
   band_vals <- asplit(
     vals_to_array(data, dims = dims),
@@ -261,4 +287,29 @@ vals_to_array <- function(r, dims = attributes(r)$gis$dim) {
   nbands <- total_length / pixels_per_band
 
   array(r, dim = c(rows, cols, nbands))
+}
+
+
+#' Get appropriate NoData value for GDAL data type
+#' @param data_type character GDAL data type name
+#' @return numeric NoData value appropriate for the data type
+#' @keywords internal
+#' @noRd
+get_nodata_value <- function(data_type) {
+  switch(
+    data_type,
+    "Byte" = 255, # Max value for unsigned byte
+    "Int8" = -128, # Min value for signed byte
+    "UInt16" = 65535, # Max value for unsigned 16-bit
+    "Int16" = -32768, # Min value for signed 16-bit
+    "UInt32" = 4294967295, # Max value for unsigned 32-bit
+    "Int32" = -2147483648, # Min value for signed 32-bit
+    "Float32" = NA_real_, # NaN for 32-bit float
+    "Float64" = NA_real_, # NaN for 64-bit float
+    "CInt16" = -32768, # Complex types use min int
+    "CInt32" = -2147483648,
+    "CFloat32" = NA_real_,
+    "CFloat64" = NA_real_,
+    0 # Default fallback
+  )
 }
