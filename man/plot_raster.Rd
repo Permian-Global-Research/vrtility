@@ -54,7 +54,7 @@ plot_raster_src(
   xlab = "",
   ylab = "",
   legend = if (length(bands) == 1) TRUE else FALSE,
-  digits = 2,
+  digits = NULL,
   na_col = "#95acbe",
   ...
 )
