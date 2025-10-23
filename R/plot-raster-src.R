@@ -40,7 +40,7 @@ plot_raster_src <- function(
   xlab = "",
   ylab = "",
   legend = if (length(bands) == 1) TRUE else FALSE,
-  digits = 2,
+  digits = NULL,
   na_col = "#95acbe",
   ...
 ) {
@@ -52,12 +52,14 @@ plot_raster_src <- function(
   dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
   dev_inches <- graphics::par("din") # Returns c(width, height) in inches
   dev_size <- dev_inches * dpi
-  target_divisor <- dev_size[1] * 2
 
   ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(ds$close(), add = TRUE)
   rxs <- ds$getRasterXSize()
   rys <- ds$getRasterYSize()
+
+  # get approx scaling factor for plotting  - we dont need all the data.
+  scale_factor <- pmax(rxs / dev_size[1], rys / dev_size[2])
 
   rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
   gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "NEAREST")
@@ -69,7 +71,7 @@ plot_raster_src <- function(
   # Determine rgb transformation function gdalraster already applies the linear transform
   if (is.null(minmax_def) && length(bands) == 3 && !is.null(rgb_trans)) {
     if (is.null(minmax_pct_cut)) {
-      minmax_pct_cut <- c(0, 98)
+      minmax_pct_cut <- c(0.01, 98)
     }
     trans_fn <- switch(
       rgb_trans,
@@ -100,17 +102,11 @@ plot_raster_src <- function(
     bands = bands,
     xsize = pmin(
       rxs,
-      ceiling(
-        rxs /
-          ceiling(rxs / target_divisor)
-      )
+      ceiling(rxs / scale_factor)
     ),
     ysize = pmin(
       rys,
-      ceiling(
-        rys /
-          ceiling(rys / target_divisor)
-      )
+      ceiling(rys / scale_factor)
     ),
     col = col,
     col_tbl = col_tbl,
