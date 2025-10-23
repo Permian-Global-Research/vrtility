@@ -423,9 +423,62 @@
   ))
 }
 
+#' Automatically determine appropriate number of digits for legend labels
+#' @param values Numeric vector of values to format
+#' @return Integer number of decimal places
+#' @noRd
+.auto_determine_digits <- function(values) {
+  # Remove NA and infinite values
+  clean_values <- values[is.finite(values)]
+
+  if (length(clean_values) == 0) {
+    return(0)
+  }
+
+  # If all values are integers, use 0 digits
+  if (all(clean_values == floor(clean_values))) {
+    return(0)
+  }
+
+  # Calculate the range and magnitude of values
+  value_range <- diff(range(clean_values, na.rm = TRUE))
+  max_magnitude <- max(abs(clean_values), na.rm = TRUE)
+
+  # For large magnitude values, use fewer digits
+  if (max_magnitude >= 1000) {
+    return(0) # Large numbers, no decimals needed
+  } else if (max_magnitude >= 100) {
+    return(1) # Hundreds, 1 decimal
+  } else if (max_magnitude >= 10) {
+    return(1) # Tens, 1 decimal
+  } else if (value_range >= 1) {
+    return(2) # Range spans units, 2 decimals
+  } else if (value_range >= 0.1) {
+    return(2) # Range spans tenths, 2 decimals
+  } else if (value_range >= 0.01) {
+    return(3) # Range spans hundredths, 3 decimals
+  } else {
+    # For very small ranges, use scientific notation logic
+    # Find the smallest non-zero difference between values
+    if (length(clean_values) > 1) {
+      sorted_vals <- sort(unique(clean_values))
+      if (length(sorted_vals) > 1) {
+        # Need at least 2 unique values for diff
+        min_diff <- min(diff(sorted_vals))
+        if (min_diff > 0) {
+          # Number of digits needed to represent the smallest difference
+          digits_needed <- max(0, ceiling(-log10(min_diff)) + 1)
+          return(min(digits_needed, 6)) # Cap at 6 digits
+        }
+      }
+    }
+    return(4) # Default for very small values
+  }
+}
+
 #' Draw legend on plot
 #' @noRd
-.draw_legend <- function(legend_data, xlim, ylim, digits) {
+.draw_legend <- function(legend_data, xlim, ylim, digits = NULL) {
   # Calculate legend position
   legend_x_start <- xlim[2] + 0.02 * diff(xlim)
   legend_x_end <- xlim[2] + 0.07 * diff(xlim)
@@ -464,6 +517,11 @@
       if (is(unique_values, "integer")) {
         leg_lab <- formatC(rev(unique_values), format = "d")
       } else {
+        # Auto-determine digits for discrete values if not specified
+        if (is.null(digits)) {
+          # For discrete data, use minimal digits needed to distinguish values
+          digits <- .auto_determine_digits(unique_values)
+        }
         leg_lab <- formatC(rev(unique_values), format = "f", digits = digits)
       }
       legend_height_plot <- legend_y_end - legend_y_start
@@ -476,6 +534,10 @@
     }
   } else {
     mm <- legend_data$mm
+    # Auto-determine digits for continuous data if not specified
+    if (is.null(digits)) {
+      digits <- .auto_determine_digits(mm)
+    }
     leg_lab <- formatC(
       seq(mm[1], mm[2], length.out = 5),
       format = "f",
@@ -530,7 +592,8 @@
 #' @param ylab Character string. Y-axis label.
 #' @param legend Logical. Whether to draw a color legend. Only supported for
 #' single-band plots. Automatically detects discrete vs continuous data.
-#' @param digits Integer. Number of decimal places for legend labels.
+#' @param digits Integer. Number of decimal places for legend labels. If `NULL`
+#' (default), automatically determines appropriate precision based on data range.
 #' @param na_col Color for NA/nodata pixels. Default is transparent.
 #' @param mar Numeric vector of length 4. Additional margin adjustments
 #' to add to the base margins when legend is enabled.
@@ -549,9 +612,9 @@
 #' @export
 plot.Rcpp_GDALRaster <- function(
   x,
+  bands = 1,
   xsize = NULL,
   ysize = NULL,
-  bands = 1,
   max_pixels = 2.5e+07,
   scale_values = TRUE,
   col_tbl = NULL,
@@ -569,7 +632,7 @@ plot.Rcpp_GDALRaster <- function(
   xlab = "x",
   ylab = "y",
   legend = FALSE,
-  digits = 2,
+  digits = NULL,
   na_col = grDevices::rgb(0, 0, 0, 0),
   mar = c(0, 0, 0, 0),
   ...
