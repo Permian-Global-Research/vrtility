@@ -89,9 +89,10 @@ Here is a simple example where we:
 
 6.  A median pixel function is then added to the `vrt_stack`.
 
-7.  Finally, we calculate the median composite using the `gdalraster`
-    engine to write the output which, in combination with the mirai
-    package processes the data in parallel across bands and image tiles.
+7.  Finally, we calculate the median composite using `vrt_compute` with
+    the `gdalraster` engine to write the output which, in combination
+    with the mirai package processes the data in parallel across bands
+    and image tiles.
 
 ``` r
 library(vrtility)
@@ -139,7 +140,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   2.429   0.354  31.191
+#>   2.452   0.315  29.874
 
 
 plot_raster_src(

@@ -95,9 +95,9 @@ layers in each VRTRasterBand), giving us a `vrt_stack` object.
 
 1. A median pixel function is then added to the `vrt_stack`. 
 
-2. Finally, we calculate the median composite using the `gdalraster` engine to 
-write the output which, in combination with the mirai package processes the data
-in parallel across bands and image tiles.
+2. Finally, we calculate the median composite using `vrt_compute` with the 
+   `gdalraster` engine to write the output which, in combination with the mirai 
+   package processes the data in parallel across bands and image tiles.
 
 ```{r example1, fig.width=8, fig.height=6}
 library(vrtility)
