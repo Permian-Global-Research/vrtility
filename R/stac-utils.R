@@ -84,17 +84,22 @@ get_all_collections <- function(stac_obj, target_collection = NULL) {
     }
 
     # Fetch next page using the next URL
-    tryCatch(
+    collections_response <- try(
       {
-        collections_response <- httr2::request(next_url) |>
+        httr2::request(next_url) |>
           httr2::req_perform() |>
           httr2::resp_body_json()
       },
-      error = function(e) {
-        cli::cli_warn("Failed to fetch next page: {e$message}")
-        break
-      }
+      silent = TRUE
     )
+
+    # If error occurred, exit the loop
+    if (inherits(collections_response, "try-error")) {
+      cli::cli_warn(
+        "Failed to fetch next page: {attr(collections_response, 'condition')$message}"
+      )
+      break
+    }
 
     # Safety check to prevent infinite loops
     if (length(all_collections) > 10000) {
