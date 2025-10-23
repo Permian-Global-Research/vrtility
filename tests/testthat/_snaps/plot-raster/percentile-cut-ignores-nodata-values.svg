@@ -66,10 +66,10 @@
 <line x1='615.92' y1='280.80' x2='620.91' y2='280.80' style='stroke-width: 0.75;' />
 <line x1='615.92' y1='186.34' x2='620.91' y2='186.34' style='stroke-width: 0.75;' />
 <line x1='615.92' y1='91.87' x2='620.91' y2='91.87' style='stroke-width: 0.75;' />
-<text x='625.89' y='474.68' style='font-size: 14.40px; font-family: sans;' textLength='52.06px' lengthAdjust='spacingAndGlyphs'>1241.00</text>
-<text x='625.89' y='380.22' style='font-size: 14.40px; font-family: sans;' textLength='52.06px' lengthAdjust='spacingAndGlyphs'>1572.28</text>
-<text x='625.89' y='285.76' style='font-size: 14.40px; font-family: sans;' textLength='52.06px' lengthAdjust='spacingAndGlyphs'>1903.56</text>
-<text x='625.89' y='191.29' style='font-size: 14.40px; font-family: sans;' textLength='52.06px' lengthAdjust='spacingAndGlyphs'>2234.84</text>
-<text x='625.89' y='96.83' style='font-size: 14.40px; font-family: sans;' textLength='52.06px' lengthAdjust='spacingAndGlyphs'>2566.12</text>
+<text x='625.89' y='474.68' style='font-size: 14.40px; font-family: sans;' textLength='32.04px' lengthAdjust='spacingAndGlyphs'>1241</text>
+<text x='625.89' y='380.22' style='font-size: 14.40px; font-family: sans;' textLength='32.04px' lengthAdjust='spacingAndGlyphs'>1572</text>
+<text x='625.89' y='285.76' style='font-size: 14.40px; font-family: sans;' textLength='32.04px' lengthAdjust='spacingAndGlyphs'>1904</text>
+<text x='625.89' y='191.29' style='font-size: 14.40px; font-family: sans;' textLength='32.04px' lengthAdjust='spacingAndGlyphs'>2235</text>
+<text x='625.89' y='96.83' style='font-size: 14.40px; font-family: sans;' textLength='32.04px' lengthAdjust='spacingAndGlyphs'>2566</text>
 </g>
 </svg>
