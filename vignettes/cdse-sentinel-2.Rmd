@@ -55,6 +55,8 @@ CDSE API.
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.11.3
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 # only use 2 daemons!
 mirai::daemons(2)
