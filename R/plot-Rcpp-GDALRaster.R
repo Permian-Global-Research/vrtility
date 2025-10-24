@@ -119,6 +119,8 @@
     out_ysize = ysize
   )
 
+  data_in[is.infinite(data_in)] <- NA
+
   nbands <- length(bands)
 
   # Apply scaling if needed
@@ -429,6 +431,7 @@
 #' @noRd
 .auto_determine_digits <- function(values) {
   # Remove NA and infinite values
+  orig_length <- length(values)
   clean_values <- values[is.finite(values)]
 
   if (length(clean_values) == 0) {
@@ -436,7 +439,7 @@
   }
 
   # If all values are integers, use 0 digits
-  if (all(clean_values == floor(clean_values))) {
+  if (all(clean_values == floor(clean_values)) && orig_length > 2) {
     return(0)
   }
 
@@ -766,7 +769,7 @@ plot.Rcpp_GDALRaster <- function(
   }
 
   if (legend) {
-    base_mar <- c(bottom_margin, left_margin, top_margin, 1) + 0.1
+    base_mar <- c(bottom_margin, left_margin, top_margin, 0.75) + 0.1
     graphics::par(mar = base_mar + mar)
   } else {
     # Set margins even when no legend to control spacing
