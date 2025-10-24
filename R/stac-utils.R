@@ -353,7 +353,7 @@ hls_stac_query <- function(
     "https://planetarycomputer.microsoft.com/api/stac/v1/",
     "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"
   ),
-  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
+  collection = c("hls2-s30", "hls2-l30", "HLSS30_2.0", "HLSL30_2.0")
 ) {
   stac_source <- rlang::arg_match(stac_source)
   v_asset_hls_catalog(stac_source, collection[1])
