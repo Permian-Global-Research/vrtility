@@ -101,7 +101,6 @@ layers in each VRTRasterBand), giving us a `vrt_stack` object.
 
 ```{r example1, fig.width=8, fig.height=6}
 library(vrtility)
-
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(10)
 

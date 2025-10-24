@@ -99,7 +99,6 @@ library(vrtility)
 #> ✔ Using GDAL version 3.11.3
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   vrtility::set_gdal_cache_max()
-
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(10)
 
@@ -140,7 +139,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   2.452   0.315  29.874
+#>   1.964   0.214  16.800
 
 
 plot_raster_src(
