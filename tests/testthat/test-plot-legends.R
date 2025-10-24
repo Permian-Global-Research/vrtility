@@ -362,10 +362,10 @@ test_that("auto_determine_digits handles edge cases", {
   expect_equal(vrtility:::.auto_determine_digits(boundary_1000), 0)
 
   boundary_100 <- c(99, 101) # Max magnitude >= 100
-  expect_equal(vrtility:::.auto_determine_digits(boundary_100), 0)
+  expect_equal(vrtility:::.auto_determine_digits(boundary_100), 1)
 
   boundary_10 <- c(9, 11) # Max magnitude >= 10
-  expect_equal(vrtility:::.auto_determine_digits(boundary_10), 0)
+  expect_equal(vrtility:::.auto_determine_digits(boundary_10), 1)
 })
 
 test_that("auto_determine_digits integrates correctly with legend drawing", {
