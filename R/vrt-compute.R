@@ -224,8 +224,8 @@ vrt_compute.vrt_block <- function(
     )
   }
 
-  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
-    x$date_time <- set_dttm_metadata(result, x$date_time)
+  if (all(nzchar(unique(x$date_time)))) {
+    x$date_time <- set_dttm_metadata(result, unique(x$date_time))
   }
 
   if (!recollect) {
@@ -501,6 +501,9 @@ vrt_compute.vrt_collection <- function(
 #' @noRd
 #' @keywords internal
 set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
+  if (length(dttm) == 1) {
+    .median <- FALSE
+  }
   lubdttm <- lubridate::as_datetime(dttm)
 
   if (.median) {
