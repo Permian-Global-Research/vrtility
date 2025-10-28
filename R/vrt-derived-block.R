@@ -128,7 +128,7 @@ vrt_derived_block.vrt_block <- function(x, ...) {
   set_nodatavalue(
     vx,
     value = "NaN",
-    nodata_targets = c(".//NoDataValue") #, ".//NODATA"
+    nodata_targets = c(".//NoDataValue")
   )
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
