@@ -157,6 +157,11 @@ singleband_m2m.vrt_collection_warped <- function(
   }
 
   if (!recollect) {
+    purrr::walk2(uniq_pths, x$date_time, function(result, dttm) {
+      if (nzchar(dttm)) {
+        set_dttm_metadata(result, dttm, .median = FALSE)
+      }
+    })
     return(uniq_pths)
   }
 

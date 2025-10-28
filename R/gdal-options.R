@@ -37,7 +37,7 @@
 gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
-  GDAL_NUM_THREADS = "ALL_CPUS",
+  GDAL_NUM_THREADS = 1, # "ALL_CPUS",
   # as.character(
   #   ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
   # ),

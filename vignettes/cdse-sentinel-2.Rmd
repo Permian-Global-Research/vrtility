@@ -48,13 +48,15 @@ and create an "access key" and a "secret access key". Then Save these keys in yo
 ## Set up the environment
 
 first we need to load vrtility and then set up parallel processing. You must not 
-set more than 4 daemons, as this is the limit for concurrent requests to the 
+set more than 2 daemons, as this is the limit for concurrent requests to the 
 CDSE API.
 
 
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.11.3
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 # only use 2 daemons!
 mirai::daemons(2)
@@ -89,11 +91,9 @@ s2copdse <- stac_query(
   stac_source = "https://stac.dataspace.copernicus.eu/v1",
   collection = "sentinel-2-l2a",
   start_date = "2025-06-01",
-  end_date = "2025-06-30"
+  end_date = "2025-06-30",
+  assets = c("B02_10m", "B03_10m", "B04_10m", "B08_10m", "SCL_20m")
 ) |>
-  rstac::assets_select(
-    asset_names = c("B02_10m", "B03_10m", "B04_10m", "B08_10m", "SCL_20m")
-  ) |>
   stac_cloud_filter(max_cloud_cover = 30)
 ```
 

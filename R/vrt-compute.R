@@ -224,13 +224,12 @@ vrt_compute.vrt_block <- function(
     )
   }
 
-  if (!recollect) {
-    return(result)
+  if (all(nzchar(unique(x$date_time)))) {
+    x$date_time <- set_dttm_metadata(result, unique(x$date_time))
   }
 
-  if (length(x$date_time) > 1) {
-    lubdttm <- lubridate::as_datetime(x$date_time)
-    x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+  if (!recollect) {
+    return(result)
   }
 
   vrt_collect(
@@ -496,6 +495,35 @@ vrt_compute.vrt_collection <- function(
     band_descriptions = x$assets,
     datetimes = x$date_time
   )
+}
+
+#' Set datetime metadata on a gdalraster object
+#' @noRd
+#' @keywords internal
+set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
+  if (length(dttm) == 1) {
+    .median <- FALSE
+  }
+  lubdttm <- lubridate::as_datetime(dttm)
+
+  if (.median) {
+    lubdttm <- median(lubdttm, na.rm = TRUE) |>
+      lubridate::as_date()
+    dttm <- glue::glue("median date: {as.character(lubdttm)}")
+  } else {
+    dttm <- as.character(lubdttm)
+  }
+
+  ds <- methods::new(gdalraster::GDALRaster, ras)
+  on.exit(ds$close(), add = TRUE)
+  ds$setMetadataItem(
+    0,
+    mdi_name = "datetime",
+    mdi_value = dttm,
+    domain = ""
+  )
+
+  return(invisible(dttm))
 }
 
 

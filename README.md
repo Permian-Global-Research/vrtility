@@ -89,18 +89,18 @@ Here is a simple example where we:
 
 6.  A median pixel function is then added to the `vrt_stack`.
 
-7.  Finally, we calculate the median composite using the `gdalraster`
-    engine to write the output which, in combination with the mirai
-    package processes the data in parallel across bands and image tiles.
+7.  Finally, we calculate the median composite using `vrt_compute` with
+    the `gdalraster` engine to write the output which, in combination
+    with the mirai package processes the data in parallel across bands
+    and image tiles.
 
 ``` r
 library(vrtility)
 #> ✔ Using GDAL version 3.11.3
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   vrtility::set_gdal_cache_max()
-
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(6)
+mirai::daemons(10)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -139,21 +139,13 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   3.935   0.555  37.719
+#>   1.964   0.214  16.800
 
-withr::with_par(list(mfrow = c(2, 1)), {
-  purrr::walk2(
-    .x = list(c(3, 2, 1), c(4, 3, 2)),
-    .y = list("linear", "hist"),
-    ~ {
-      plot_raster_src(
-        median_composite,
-        .x,
-        rgb_trans = .y
-      )
-    }
-  )
-})
+
+plot_raster_src(
+  median_composite,
+  c(3, 2, 1)
+)
 ```
 
 <img src="man/figures/README-example1-1.png" width="100%" />
@@ -170,20 +162,18 @@ can use `engine = "warp"` if we are computing a `vrt_collection`
 multi-processing, especially for multi-band reduction methods
 (i.e. `multiband_reduce`).
 
-## Using on-disk rasters
+## Direct file access for on-disk or remote rasters
 
-We can also use on-disk raster files (or indeed urls) too, as shown here
-with this example dataset - note that the inputs have multiple spatial
-reference systems and therefore we need to warp them (as in the above
-example) before “stacking”. We can plot these `vrt_{x}` objects using
-`plot()` but note that, for very large rasters, where we are computing
-pixel functions, this can be slow and we are better off using
-`vrt_compute` to write to disk and then plotting the output.
+We can also directly access raster files (or indeed remote files as
+urls) too, as shown here with this example dataset - note that the
+inputs have multiple spatial reference systems and therefore we need to
+warp them (as in the above example) before stacking or applying any
+reduction-type function.
 
 In this example, we create a `medoid` composite from the warped
 collection. Using medoid or other multi-band pixel functions
 (e.g. `geomedian`) can be extremely powerful but requires more compute
-power/time than band-wise pixel functions.
+than band-wise pixel functions.
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
@@ -196,23 +186,25 @@ ex_collect_mask <- vrt_set_maskfun(
   mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
 )
 
-withr::with_par(
-  list(mfrow = c(2, 2)),
-  {
-    purrr::walk(
-      seq_len(ex_collect$n_items),
-      ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
-    )
+par(mfrow = c(2, 2))
 
-    purrr::walk(
-      seq_len(ex_collect_mask$n_items),
-      ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
-    )
-  }
+purrr::walk(
+  seq_len(ex_collect$n_items),
+  ~ plot(ex_collect, item = .x, bands = c(3, 2, 1))
 )
 ```
 
-<img src="man/figures/README-example2-1.png" width="100%" /><img src="man/figures/README-example2-2.png" width="100%" />
+<img src="man/figures/README-example2-1.png" width="100%" />
+
+``` r
+
+purrr::walk(
+  seq_len(ex_collect_mask$n_items),
+  ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
+)
+```
+
+<img src="man/figures/README-example2-2.png" width="100%" />
 
 ``` r
 
@@ -225,10 +217,13 @@ ex_composite <- vrt_warp(
   te = t_block$bbox,
   tr = c(20, 20)
 ) |>
+  vrt_set_scale(scale_value = 0.0001, offset = -0.1, band_idx = 1:4) |>
   multiband_reduce(reduce_fun = medoid())
 
-
-plot_raster_src(ex_composite, bands = c(3, 2, 1))
+purrr::walk(
+  1:4,
+  ~ plot_raster_src(ex_composite, bands = .x, minmax_pct_cut = c(2, 98))
+)
 ```
 
 <img src="man/figures/README-example2-3.png" width="100%" />

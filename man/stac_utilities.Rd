@@ -44,7 +44,7 @@ hls_stac_query(
   max_cloud_cover = 10,
   stac_source = c("https://planetarycomputer.microsoft.com/api/stac/v1/",
     "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"),
-  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
+  collection = c("hls2-s30", "hls2-l30", "HLSS30_2.0", "HLSL30_2.0")
 )
 
 sentinel1_stac_query(

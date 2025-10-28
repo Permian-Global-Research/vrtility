@@ -27,6 +27,91 @@ execute_stac_request <- function(search_obj) {
 }
 
 
+#' Get all collections from a STAC API with pagination support
+#' @param stac_obj A STAC object from rstac::stac()
+#' @param target_collection Optional collection ID to search for - exits early if found
+#' @return A list of all collections
+#' @noRd
+#' @keywords internal
+get_all_collections <- function(stac_obj, target_collection = NULL) {
+  all_collections <- list()
+
+  # Start with first page
+  collections_response <- execute_stac_request(rstac::collections(
+    stac_obj,
+    limit = 100
+  ))
+
+  repeat {
+    # Validate response structure
+    if (
+      is.null(collections_response) ||
+        !is.list(collections_response) ||
+        is.null(collections_response$collections)
+    ) {
+      cli::cli_warn("Invalid collections response structure")
+      break
+    }
+
+    # Check if we got any collections
+    if (length(collections_response$collections) == 0) {
+      break
+    }
+
+    # Add collections to our list
+    all_collections <- c(all_collections, collections_response$collections)
+
+    # Early exit if we found the target collection
+    if (!is.null(target_collection)) {
+      collection_ids <- purrr::map_chr(all_collections, ~ .x$id)
+      if (target_collection %in% collection_ids) {
+        return(all_collections)
+      }
+    }
+
+    # Look for next link
+    next_url <- NULL
+    if (!is.null(collections_response$links)) {
+      next_link <- purrr::detect(collections_response$links, ~ .x$rel == "next")
+      if (!is.null(next_link)) {
+        next_url <- next_link$href
+      }
+    }
+
+    # If no next link, we're done
+    if (is.null(next_url)) {
+      break
+    }
+
+    # Fetch next page using the next URL
+    collections_response <- try(
+      {
+        httr2::request(next_url) |>
+          httr2::req_perform() |>
+          httr2::resp_body_json()
+      },
+      silent = TRUE
+    )
+
+    # If error occurred, exit the loop
+    if (inherits(collections_response, "try-error")) {
+      cli::cli_warn(
+        "Failed to fetch next page: {attr(collections_response, 'condition')$message}"
+      )
+      break
+    }
+
+    # Safety check to prevent infinite loops
+    if (length(all_collections) > 10000) {
+      cli::cli_warn("Stopped after retrieving 10,000+ collections")
+      break
+    }
+  }
+
+  return(all_collections)
+}
+
+
 #' @title Query a STAC source
 #' @description A set of helper functions to query STAC APIs. These are very
 #' thin wrappers around existing \pkg{rstac} functions, but provide some
@@ -113,19 +198,13 @@ stac_query <- function(
 
   # check collection against available collections
   if (check_collection) {
-    tryCatch(
-      {
-        stac_colls <- execute_stac_request(rstac::collections(stac_get))
-        coll_list <- purrr::map_chr(stac_colls$collections, ~ .x$id)
-        collection <- rlang::arg_match(collection, coll_list)
-      },
-      error = function(e) {
-        cli::cli_warn(
-          "Could not retrieve collections from STAC source: {stac_source}.
-        Proceeding without collection check."
-        )
-      }
+    # Get all collections with pagination (early exit if target found)
+    all_collections <- get_all_collections(
+      stac_get,
+      target_collection = collection
     )
+    coll_list <- purrr::map_chr(all_collections, ~ .x$id)
+    collection <- rlang::arg_match(collection, coll_list)
   }
 
   # perform search
@@ -133,7 +212,8 @@ stac_query <- function(
     stac_get,
     collections = collection,
     bbox = bbox,
-    datetime = datetime
+    datetime = datetime,
+    limit = 999
   )
   stac_its <- rstac::items_fetch(execute_stac_request(search))
 
@@ -273,7 +353,7 @@ hls_stac_query <- function(
     "https://planetarycomputer.microsoft.com/api/stac/v1/",
     "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/"
   ),
-  collection = c("HLSS30_2.0", "HLSL30_2.0", "hls2-s30", "hls2-l30")
+  collection = c("hls2-s30", "hls2-l30", "HLSS30_2.0", "HLSL30_2.0")
 ) {
   stac_source <- rlang::arg_match(stac_source)
   v_asset_hls_catalog(stac_source, collection[1])

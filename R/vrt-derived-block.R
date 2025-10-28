@@ -122,9 +122,14 @@ vrt_derived_block.vrt_block <- function(x, ...) {
       set_gdal_pixfun_xml(band, "expression", list(expression = mu_exp))
     }
   )
+  # browser()
 
   drop_scale(vx) # scale and offset are now applied at the formula level
-
+  set_nodatavalue(
+    vx,
+    value = "NaN",
+    nodata_targets = c(".//NoDataValue")
+  )
   # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)

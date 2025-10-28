@@ -57,7 +57,7 @@
 #' }
 #' @section gdalraster helpers:
 #' \describe{
-#' \item{\code{\link{vector_to_MEM}}}{Convert a vector to a GDALRasterDataset in memory}
+#' \item{\code{\link{r_to_MEM}}}{Convert a vector to a GDALRasterDataset in memory}
 #' }
 #' @section Composite reducers:
 #' \describe{

@@ -11,9 +11,9 @@
 \usage{
 \method{plot}{Rcpp_GDALRaster}(
   x,
+  bands = 1,
   xsize = NULL,
   ysize = NULL,
-  bands = 1,
   max_pixels = 2.5e+07,
   scale_values = TRUE,
   col_tbl = NULL,
@@ -31,7 +31,7 @@
   xlab = "x",
   ylab = "y",
   legend = FALSE,
-  digits = 2,
+  digits = NULL,
   na_col = grDevices::rgb(0, 0, 0, 0),
   mar = c(0, 0, 0, 0),
   ...
@@ -54,7 +54,7 @@ plot_raster_src(
   xlab = "",
   ylab = "",
   legend = if (length(bands) == 1) TRUE else FALSE,
-  digits = 2,
+  digits = NULL,
   na_col = "#95acbe",
   ...
 )
@@ -70,14 +70,14 @@ plot_raster_src(
 \arguments{
 \item{x}{A path to a raster file}
 
+\item{bands}{a numeric vector of band numbers to plot must be of length
+1 or 3.}
+
 \item{xsize}{Integer. Number of pixels in the x dimension for the output plot.
 If \code{NULL}, uses the full raster width.}
 
 \item{ysize}{Integer. Number of pixels in the y dimension for the output plot.
 If \code{NULL}, uses the full raster height.}
-
-\item{bands}{a numeric vector of band numbers to plot must be of length
-1 or 3.}
 
 \item{max_pixels}{Numeric. Maximum number of pixels to read. If
 \code{xsize * ysize} exceeds this value, the raster will be downsampled.}
@@ -121,7 +121,8 @@ for example when sea presents as very dark.}
 \item{legend}{Logical. Whether to draw a color legend. Only supported for
 single-band plots. Automatically detects discrete vs continuous data.}
 
-\item{digits}{Integer. Number of decimal places for legend labels.}
+\item{digits}{Integer. Number of decimal places for legend labels. If \code{NULL}
+(default), automatically determines appropriate precision based on data range.}
 
 \item{na_col}{Color for NA/nodata pixels. Default is transparent.}
 

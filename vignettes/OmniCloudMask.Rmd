@@ -34,6 +34,7 @@ by including imagery with up to 80% cloud cover.
 
 ``` r
 library(vrtility)
+mirai::daemons(6)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (8.51 47.38)",
@@ -52,29 +53,25 @@ s2_stac <- sentinel2_stac_query(
   assets = c("B02", "B03", "B04", "B08", "SCL")
 )
 # number of items:
-length(s2_stac$features)
+rstac::items_length(s2_stac)
 #> [1] 9
 ```
 
 Next, let's download all of the rasters locally. This step is not always 
-necessary, but in this case, we need the data on disk because cloud mask 
-inference cannot be run in parallel (at least not on my laptop). We use 
+necessary but, in this case, we are plotting intermediate data and we . We use 
 `with` to isolate the use of mirai daemons.
 
 
 ``` r
-with(mirai::daemons(6), {
-  zurich_vrt <- vrt_collect(s2_stac) |>
-    vrt_warp(
-      t_srs = trs,
-      te = te,
-      tr = c(10, 10)
-    ) |>
-    vrt_compute(
-      outfile = fs::file_temp(ext = ".tif"),
-      recollect = TRUE
-    )
-})
+zurich_vrt <- vrt_collect(s2_stac) |>
+  vrt_warp(
+    t_srs = trs,
+    te = te,
+    tr = c(10, 10)
+  ) |>
+  vrt_compute(
+    recollect = TRUE
+  )
 ```
 
 Now we are ready to create a cloud mask using the `vrt_create_mask` function. 
@@ -85,16 +82,20 @@ required input bands for the masking function. For OmniCloudMask, these are
 `"red"`, `"green"`, and `"nir"`.
 
 - `maskfun` specifies the masking function to use. Currently, the only available 
-option is `create_omnicloudmask()`, but `vrt_create_mask` is designed to support 
-additional masking functions in the future.
+  option is `create_omnicloudmask()`, but `vrt_create_mask` is designed to support 
+  additional masking functions in the future.
 
 This approach allows you to flexibly apply cloud masking to your VRT 
 collections using state-of-the-art models.
 
-Once the mask is created, it will be added as a new band to the VRT object. 
-We can then compute the mask with `vrt_compute()`, which will then materialise 
-the mask as a new raster file. Note that we use `recollect = TRUE` to return a 
-new `vrt_collection` object because we plan to do some further processing.
+# TODO: this needs rewriting masks are now materialised immediately.
+`vrt_create_mask` composes a new vrt file, which is then immediately 
+materialised. This is at odds with other materialisation in vrtility which
+will normally only occur when `vrt_compute()` is called. The reason for this
+is to ensure that expensive cloud masking operations are only performed once.
+
+Note that we use `recollect = TRUE` to return a  new `vrt_collection` object 
+because we plan to do some further processing.
 
 
 ``` r
@@ -102,10 +103,6 @@ zurich_vrt_mask <- zurich_vrt |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
     maskfun = create_omnicloudmask()
-  ) |>
-  vrt_compute(
-    fs::file_temp(ext = ".tif"),
-    recollect = TRUE
   )
 ```
 
@@ -122,10 +119,7 @@ purrr::walk2(
     zurich_vrt_mask,
     item = 6,
     .x,
-    main = .y,
-    legend = FALSE,
-    axes = FALSE,
-    na_col = "#b6b6b6"
+    main = .y
   )
 )
 ```
@@ -172,7 +166,6 @@ purrr::walk2(
     item = 6,
     c(3, 2, 1),
     main = .y,
-    axes = FALSE,
     na_col = "#eb4310"
   )
 )
@@ -194,20 +187,20 @@ compare their effectiveness.
 ``` r
 scl_median <- vrt_stack(scl_rgb) |>
   vrt_set_py_pixelfun(pixfun = mean_numpy()) |>
-  vrt_compute(outfile = fs::file_temp(ext = ".tif"))
+  vrt_compute()
 
 ocm_median <- vrt_stack(ocm_rgb) |>
   vrt_set_py_pixelfun(pixfun = mean_numpy()) |>
-  vrt_compute(outfile = fs::file_temp(ext = ".tif"))
+  vrt_compute()
 
 purrr::walk2(
   list(scl_median, ocm_median),
   list("SCL RGB median", "OmniCloudMask RGB median"),
   ~ plot_raster_src(
     .x,
-    item = 1,
     c(3, 2, 1),
     main = .y,
+    rgb_trans = "gamma",
     axes = FALSE
   )
 )

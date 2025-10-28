@@ -128,7 +128,6 @@ with(mirai::daemons(10), {
       tr = c(10, 10)
     ) |>
     vrt_compute(
-      outfile = fs::file_temp(ext = ".tif"),
       engine = "gdalraster",
       recollect = TRUE
     )
@@ -158,7 +157,6 @@ eopf_s2_mask <- eopf_s2_chgn |>
     mask_values = 1:3
   ) |>
   vrt_compute(
-    outfile = fs::file_temp(ext = ".tif"),
     engine = "warp",
     recollect = TRUE
   )
@@ -195,8 +193,7 @@ with(mirai::daemons(10), {
 plot(
   eopf_s2_median,
   c(3, 2, 1),
-  na_col = "#ffa928",
-  pal = grDevices::hcl.colors(10, "YlGnBu")
+  na_col = "#ffa928"
 )
 ```
 
@@ -239,9 +236,7 @@ purrr::walk(
     x,
     band = .x,
     minmax_def = if (.x == 3) c(-1, 1) else NULL,
-    pal = grDevices::hcl.colors(10, "Inferno"),
-    legend = FALSE,
-    axes = FALSE
+    col = grDevices::hcl.colors(10, "Inferno")
   )
 )
 ```

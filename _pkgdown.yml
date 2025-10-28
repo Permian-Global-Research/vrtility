@@ -84,4 +84,4 @@ reference:
   - title: gdalraster helpers
     desc: Helper functions for GDALRasterDataset objects
     contents:
-      - vector_to_MEM
+      - r_to_MEM

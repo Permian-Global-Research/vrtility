@@ -1,7 +1,17 @@
 sbm2m_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
-  ex_collect <- vrt_collect(s2files)
+  ex_collect <- vrt_collect(
+    s2files,
+    datetimes = c(
+      # these dates are made up btw.
+      "2024-01-01",
+      "2024-03-01",
+      "2024-05-01",
+      "2024-07-01",
+      "2024-09-01"
+    )
+  )
 
   t_block <- ex_collect[[1]][[1]]
 
@@ -23,6 +33,14 @@ sbm2m_tests <- function() {
     singleband_m2m(
       m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = TRUE)
     )
+
+  # check datetime metadata set correctly
+  ds <- methods::new(
+    gdalraster::GDALRaster,
+    hmpfiles[[1]]
+  )
+  on.exit(ds$close(), add = TRUE)
+  testthat::expect_equal(ds$getMetadataItem(0, "datetime", ""), "2024-01-01")
 
   expect_true(all(fs::file_exists(hmpfiles)))
 

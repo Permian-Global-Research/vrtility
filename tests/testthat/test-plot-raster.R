@@ -305,24 +305,19 @@ test_that("discrete vs continuous legend detection works", {
   # Test discrete legend
   vdiffr::expect_doppelganger("discrete legend with few unique values", {
     # Create discrete data by reading and modifying
-    data_raw <- gdalraster::read_ds(
-      ds,
-      bands = 1,
-      out_xsize = 100,
-      out_ysize = 100
-    )
-    # Convert to discrete values
-    data_discrete <- round(data_raw / 1000) + 1 # This should create few unique values
-
-    # Create a temporary raster with discrete values
-    temp_array <- array(data_discrete, dim = c(100, 100, 1))
-    temp_raster <- gdalraster:::.as_raster(temp_array)
 
     # Plot with discrete colors
     plot(
       ds,
-      bands = 1,
-      col = c('red', 'blue', 'green', 'orange'),
+      bands = 5,
+      col = c(
+        'red',
+        'blue',
+        'green',
+        'orange',
+        "purple",
+        "pink"
+      ),
       legend = TRUE,
       main = 'Discrete Legend Test',
       xsize = 100,
