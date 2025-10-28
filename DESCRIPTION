@@ -39,6 +39,7 @@ Imports:
 Suggests: 
     callr,
     earthdatalogin,
+    gifski,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
