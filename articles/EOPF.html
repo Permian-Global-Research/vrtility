@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
     <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
+    <li><a class="dropdown-item" href="../articles/ndvi-timeseries.html">Creating NDVI Time Series from HLS Data</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
 </li>
@@ -182,7 +183,6 @@ collection is returned rather than file paths.</p>
 <span>      tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
-<span>      outfile <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>      engine <span class="op">=</span> <span class="st">"gdalraster"</span>,</span>
 <span>      recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span></span>
@@ -211,7 +211,6 @@ for subsequent processing steps.</p>
 <span>    mask_values <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
-<span>    outfile <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/file_temp.html" class="external-link">file_temp</a></span><span class="op">(</span>ext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span>,</span>
 <span>    engine <span class="op">=</span> <span class="st">"warp"</span>,</span>
 <span>    recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span>
@@ -247,8 +246,7 @@ computationally intensive operation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">eopf_s2_median</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  na_col <span class="op">=</span> <span class="st">"#ffa928"</span>,</span>
-<span>  pal <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">10</span>, <span class="st">"YlGnBu"</span><span class="op">)</span></span>
+<span>  na_col <span class="op">=</span> <span class="st">"#ffa928"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/geomedian-1.png"></p>
 </div>
@@ -294,8 +292,8 @@ the results:</p>
 <span><span class="co">#&gt; Bounding Box: -18980 -22270 18980 22310</span></span>
 <span><span class="co">#&gt; Pixel res: 10, 10</span></span>
 <span><span class="co">#&gt; Assets: ndvi, ndti, evi, vgnirbi</span></span>
-<span><span class="co">#&gt; No Data Value(s): 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; Date Time: 2025-06-21 22:21:41 UTC</span></span>
+<span><span class="co">#&gt; No Data Value(s): NaN, NaN, NaN, NaN</span></span>
+<span><span class="co">#&gt; Date Time: 2025-06-21 UTC</span></span>
 <span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
 <span>  <span class="va">exptest</span>,</span>
@@ -309,9 +307,7 @@ the results:</p>
 <span>    <span class="va">x</span>,</span>
 <span>    band <span class="op">=</span> <span class="va">.x</span>,</span>
 <span>    minmax_def <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="va">.x</span> <span class="op">==</span> <span class="fl">3</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="kw">else</span> <span class="cn">NULL</span>,</span>
-<span>    pal <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">10</span>, <span class="st">"Inferno"</span><span class="op">)</span>,</span>
-<span>    legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    axes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>    col <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">10</span>, <span class="st">"Inferno"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="figure/derived-bands-1.png" width="50%"><img src="figure/derived-bands-2.png" width="50%"><img src="figure/derived-bands-3.png" width="50%"><img src="figure/derived-bands-4.png" width="50%"></p>
