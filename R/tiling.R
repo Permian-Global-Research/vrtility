@@ -38,27 +38,27 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
   # Vectorized approach - generate all x and y positions
   x_starts <- seq.int(1L, img_rows, y_window)
   y_starts <- seq.int(1L, img_cols, x_window)
-  
+
   # Calculate sizes vectorized
   nXSize_vec <- ifelse(
     x_starts + y_window + overlap <= img_rows,
     y_window + overlap,
     img_rows - x_starts + 1L
   )
-  
+
   nYSize_vec <- ifelse(
     y_starts + x_window + overlap <= img_cols,
     x_window + overlap,
     img_cols - y_starts + 1L
   )
-  
+
   # Create all combinations using expand.grid (more efficient than nested loops)
   grid <- expand.grid(
     x_idx = seq_along(x_starts),
     y_idx = seq_along(y_starts),
     KEEP.OUT.ATTRS = FALSE
   )
-  
+
   # Build result matrix
   mat <- matrix(
     c(
@@ -70,10 +70,10 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
     ncol = 4
   )
   colnames(mat) <- c("nXOff", "nYOff", "nXSize", "nYSize")
-  
+
   # Adjust offsets (0-based indexing for GDAL)
   mat[, 1:2] <- mat[, 1:2] - 1L
-  
+
   return(mat)
 }
 
@@ -99,7 +99,6 @@ optimise_tiling <- function(xs, ys, blksize, nsplits) {
 #' @param nbands Number of bands in the raster
 #' @param nitems Number of items to process in each chunk
 #' @param scalar A scalar to adjust the estimated RAM usage
-#' TODO: what is this really and do we need it?
 #' @return Suggested number of chunks (numeric)
 #' @noRd
 #' @keywords internal
