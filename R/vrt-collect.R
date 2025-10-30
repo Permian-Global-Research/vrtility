@@ -301,15 +301,16 @@ build_vrt_collection <- function(
   # Extract all properties in a single pass to avoid multiple iterations
   uniq_crs <- unique(purrr::map_chr(x, function(.x) .x$srs))
   sd <- purrr::map_chr(x, function(.x) .x$date_time)
-  uniq_assets <- unique(unlist(purrr::map(x, function(.x) .x$assets), use.names = FALSE))
+  uniq_assets <- unique(unlist(
+    purrr::map(x, function(.x) .x$assets),
+    use.names = FALSE
+  ))
   mask_band_name <- unique(purrr::map_chr(x, function(.x) .x$mask_band_name))
-  
+
   # Only compute bbox and res if needed
   if (length(uniq_crs) > 1) {
     bbox_all <- NA
     bbox <- NA
-    all_res <- purrr::map(x, function(.x) .x$res)
-    min_res <- all_res[[1]]  # Just use first as placeholder
   } else {
     bbox_all <- purrr::map(x, function(.x) .x$bbox)
     bbox <- purrr::reduce(
@@ -323,18 +324,18 @@ build_vrt_collection <- function(
         )
       }
     )
-    
-    all_res <- purrr::map(x, function(.x) .x$res)
-    min_res <- purrr::reduce(
-      all_res,
-      function(.x, .y) {
-        c(
-          min(.x[1], .y[1]),
-          min(.x[2], .y[2])
-        )
-      }
-    )
   }
+
+  all_res <- purrr::map(x, function(.x) .x$res)
+  min_res <- purrr::reduce(
+    all_res,
+    function(.x, .y) {
+      c(
+        min(.x[1], .y[1]),
+        min(.x[2], .y[2])
+      )
+    }
+  )
 
   # set to a warped class if all items have equal extent, res and crs.
   if (warped) {
@@ -343,7 +344,7 @@ build_vrt_collection <- function(
     # Check uniqueness more efficiently
     uniq_bbox_count <- if (is.na(bbox_all[1])) 2 else length(unique(bbox_all))
     uniq_res_count <- length(unique(all_res))
-    
+
     if (
       uniq_bbox_count == 1 &&
         length(uniq_crs) == 1 &&
