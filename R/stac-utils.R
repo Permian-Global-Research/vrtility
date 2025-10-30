@@ -27,22 +27,43 @@ execute_stac_request <- function(search_obj) {
 }
 
 
-#' Get all collections from a STAC API with pagination support
-#' @param stac_obj A STAC object from rstac::stac()
+#' Get all collections from a STAC API with pagination support using httr2 only
+#' @param stac_source A STAC source URL (character string)
 #' @param target_collection Optional collection ID to search for - exits early if found
-#' @return A list of all collections
+#' @param id_only Logical, if TRUE (default) return only collection IDs, if FALSE return full collection objects
+#' @return A character vector of collection IDs (if id_only=TRUE) or a list of all collections (if id_only=FALSE)
 #' @noRd
 #' @keywords internal
-get_all_collections <- function(stac_obj, target_collection = NULL) {
+get_all_collections <- function(
+  stac_source,
+  target_collection = NULL,
+  id_only = TRUE
+) {
   all_collections <- list()
 
-  # Start with first page
-  collections_response <- execute_stac_request(rstac::collections(
-    stac_obj,
-    limit = 100
-  ))
+  # Start with first page - construct collections URL
+  collections_url <- paste0(stac_source, "/collections")
 
   repeat {
+    # Fetch collections page using httr2
+    collections_response <- try(
+      {
+        httr2::request(collections_url) |>
+          httr2::req_url_query(limit = 100) |>
+          httr2::req_perform() |>
+          httr2::resp_body_json()
+      },
+      silent = TRUE
+    )
+
+    # If error occurred, exit the loop
+    if (inherits(collections_response, "try-error")) {
+      cli::cli_warn(
+        "Failed to fetch collections: {attr(collections_response, 'condition')$message}"
+      )
+      break
+    }
+
     # Validate response structure
     if (
       is.null(collections_response) ||
@@ -65,7 +86,11 @@ get_all_collections <- function(stac_obj, target_collection = NULL) {
     if (!is.null(target_collection)) {
       collection_ids <- purrr::map_chr(all_collections, ~ .x$id)
       if (target_collection %in% collection_ids) {
-        return(all_collections)
+        if (id_only) {
+          return(collection_ids)
+        } else {
+          return(all_collections)
+        }
       }
     }
 
@@ -83,23 +108,8 @@ get_all_collections <- function(stac_obj, target_collection = NULL) {
       break
     }
 
-    # Fetch next page using the next URL
-    collections_response <- try(
-      {
-        httr2::request(next_url) |>
-          httr2::req_perform() |>
-          httr2::resp_body_json()
-      },
-      silent = TRUE
-    )
-
-    # If error occurred, exit the loop
-    if (inherits(collections_response, "try-error")) {
-      cli::cli_warn(
-        "Failed to fetch next page: {attr(collections_response, 'condition')$message}"
-      )
-      break
-    }
+    # Update collections_url for next iteration
+    collections_url <- next_url
 
     # Safety check to prevent infinite loops
     if (length(all_collections) > 10000) {
@@ -108,7 +118,12 @@ get_all_collections <- function(stac_obj, target_collection = NULL) {
     }
   }
 
-  return(all_collections)
+  # Return based on id_only parameter
+  if (id_only) {
+    return(purrr::map_chr(all_collections, ~ .x$id))
+  } else {
+    return(all_collections)
+  }
 }
 
 
@@ -199,11 +214,11 @@ stac_query <- function(
   # check collection against available collections
   if (check_collection) {
     # Get all collections with pagination (early exit if target found)
-    all_collections <- get_all_collections(
-      stac_get,
-      target_collection = collection
+    coll_list <- get_all_collections(
+      stac_source,
+      target_collection = collection,
+      id_only = TRUE
     )
-    coll_list <- purrr::map_chr(all_collections, ~ .x$id)
     collection <- rlang::arg_match(collection, coll_list)
   }
 
