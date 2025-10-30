@@ -3,6 +3,9 @@
 #' for use with the official gdal VRT schema.
 #' @description Loads a copy of the official xml schema from the provided
 #' vrt_xml_schema dataset. The schema is cached after first load for performance.
+#' Note: The caching mechanism is not thread-safe, but this is generally not an
+#' issue in R due to single-threaded execution. If using in a multi-process
+#' context (e.g., with parallel backends), each process will maintain its own cache.
 #' @rdname vrt_tools
 #' @return An xml_document object
 #' @examples
@@ -13,6 +16,7 @@ vrt_schema <- local({
   
   function(schema = vrtility::vrt_xml_schema) {
     # Cache the parsed schema to avoid repeated parsing
+    # Note: Not thread-safe, but R is typically single-threaded
     if (is.null(cached_schema)) {
       cached_schema <<- xml2::read_xml(schema)
     }
@@ -21,7 +25,7 @@ vrt_schema <- local({
 })
 
 
-#' Iternal function to set the descriptions for the bands in a VRT
+#' Internal function to set the descriptions for the bands in a VRT
 #' @param x A character string of the path to the VRT
 #' @param descriptions A character vector of the descriptions
 #' @param as_file A logical indicating if the VRT should be saved to a file
