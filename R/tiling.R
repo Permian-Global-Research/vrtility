@@ -35,39 +35,45 @@ get_tiles <- function(img_rows, img_cols, x_window, y_window, overlap = 0) {
   y_window <- as.integer(y_window)
   overlap <- as.integer(overlap)
 
-  n <- ceiling((img_rows / x_window)) * ceiling((img_cols / y_window))
-
-  x_vec <- y_vec <- integer(n)
-  nXSize_vec <- nYSize_vec <- integer(n)
-
-  i <- 1L
-  for (x in seq.int(1L, img_rows, y_window)) {
-    if (x + y_window + overlap <= img_rows) {
-      nXSize <- y_window + overlap
-    } else {
-      nXSize <- img_rows - x + 1L
-    }
-
-    for (y in seq.int(1L, img_cols, x_window)) {
-      if (y + x_window + overlap <= img_cols) {
-        nYSize <- x_window + overlap
-      } else {
-        nYSize <- img_cols - y + 1L
-      }
-
-      x_vec[i] <- x
-      y_vec[i] <- y
-      nXSize_vec[i] <- nXSize
-      nYSize_vec[i] <- nYSize
-      i <- i + 1L
-    }
-  }
-
-  mat <- matrix(c(x_vec, y_vec, nXSize_vec, nYSize_vec), ncol = 4)
+  # Vectorized approach - generate all x and y positions
+  x_starts <- seq.int(1L, img_rows, y_window)
+  y_starts <- seq.int(1L, img_cols, x_window)
+  
+  # Calculate sizes vectorized
+  nXSize_vec <- ifelse(
+    x_starts + y_window + overlap <= img_rows,
+    y_window + overlap,
+    img_rows - x_starts + 1L
+  )
+  
+  nYSize_vec <- ifelse(
+    y_starts + x_window + overlap <= img_cols,
+    x_window + overlap,
+    img_cols - y_starts + 1L
+  )
+  
+  # Create all combinations using expand.grid (more efficient than nested loops)
+  grid <- expand.grid(
+    x_idx = seq_along(x_starts),
+    y_idx = seq_along(y_starts),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  
+  # Build result matrix
+  mat <- matrix(
+    c(
+      x_starts[grid$x_idx],
+      y_starts[grid$y_idx],
+      nXSize_vec[grid$x_idx],
+      nYSize_vec[grid$y_idx]
+    ),
+    ncol = 4
+  )
   colnames(mat) <- c("nXOff", "nYOff", "nXSize", "nYSize")
-
+  
+  # Adjust offsets (0-based indexing for GDAL)
   mat[, 1:2] <- mat[, 1:2] - 1L
-
+  
   return(mat)
 }
 

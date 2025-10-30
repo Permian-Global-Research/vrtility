@@ -298,50 +298,35 @@ build_vrt_collection <- function(
 
   x <- x[dateorder]
 
-  uniq_crs <- purrr::map(
-    x,
-    function(.x) .x$srs
-  ) |>
-    unlist() |>
-    unique()
-
+  # Extract all properties in a single pass to avoid multiple iterations
+  uniq_crs <- unique(purrr::map_chr(x, function(.x) .x$srs))
+  sd <- purrr::map_chr(x, function(.x) .x$date_time)
+  uniq_assets <- unique(unlist(purrr::map(x, function(.x) .x$assets), use.names = FALSE))
+  mask_band_name <- unique(purrr::map_chr(x, function(.x) .x$mask_band_name))
+  
+  # Only compute bbox and res if needed
   if (length(uniq_crs) > 1) {
     bbox_all <- NA
     bbox <- NA
+    all_res <- purrr::map(x, function(.x) .x$res)
+    min_res <- all_res[[1]]  # Just use first as placeholder
   } else {
     bbox_all <- purrr::map(x, function(.x) .x$bbox)
-    bbox <- bbox_all |>
-      purrr::reduce(
-        function(.x, .y) {
-          c(
-            min(.x[1], .y[1]),
-            min(.x[2], .y[2]),
-            max(.x[3], .y[3]),
-            max(.x[4], .y[4])
-          )
-        }
-      )
-  }
-
-  sd <- purrr::map_chr(
-    x,
-    function(.x) .x$date_time
-  )
-
-  uniq_assets <- purrr::map(
-    x,
-    function(.x) .x$assets
-  ) |>
-    unlist() |>
-    unique()
-
-  all_res <- purrr::map(
-    x,
-    function(.x) .x$res
-  )
-
-  min_res <- all_res |>
-    purrr::reduce(
+    bbox <- purrr::reduce(
+      bbox_all,
+      function(.x, .y) {
+        c(
+          min(.x[1], .y[1]),
+          min(.x[2], .y[2]),
+          max(.x[3], .y[3]),
+          max(.x[4], .y[4])
+        )
+      }
+    )
+    
+    all_res <- purrr::map(x, function(.x) .x$res)
+    min_res <- purrr::reduce(
+      all_res,
       function(.x, .y) {
         c(
           min(.x[1], .y[1]),
@@ -349,21 +334,20 @@ build_vrt_collection <- function(
         )
       }
     )
-
-  mask_band_name <- purrr::map_chr(
-    x,
-    function(.x) .x$mask_band_name
-  ) |>
-    unique()
+  }
 
   # set to a warped class if all items have equal extent, res and crs.
   if (warped) {
     warp_class <- "vrt_collection_warped"
   } else {
+    # Check uniqueness more efficiently
+    uniq_bbox_count <- if (is.na(bbox_all[1])) 2 else length(unique(bbox_all))
+    uniq_res_count <- length(unique(all_res))
+    
     if (
-      length(unique(bbox_all)) == 1 &&
+      uniq_bbox_count == 1 &&
         length(uniq_crs) == 1 &&
-        length(unique(all_res)) == 1
+        uniq_res_count == 1
     ) {
       warp_class <- "vrt_collection_warped"
       warped <- TRUE
