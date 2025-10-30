@@ -223,18 +223,13 @@
       discrete_colors <- col_map_fn(color_positions)
 
       # Create a function that maps actual values to discrete colors
+      # Using match() is much faster than looping
       final_col_map_fn <- function(x) {
-        # For each input value, find which discrete value it matches
-        result <- character(length(x))
-        for (i in seq_along(unique_vals_sorted)) {
-          mask <- abs(x - unique_vals_sorted[i]) < 1e-10
-          result[mask] <- discrete_colors[i]
-        }
+        # Use findInterval or match for O(n) instead of O(n*m) complexity
+        indices <- match(x, unique_vals_sorted)
+        result <- discrete_colors[indices]
         # Handle any unmatched values (shouldn't happen, but safety)
-        unmatched <- result == ""
-        if (any(unmatched)) {
-          result[unmatched] <- discrete_colors[1]
-        }
+        result[is.na(result)] <- discrete_colors[1]
         return(result)
       }
     }

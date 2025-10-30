@@ -2,15 +2,23 @@
 #' @param schema a character string of the xml schema - mainly intended only
 #' for use with the official gdal VRT schema.
 #' @description Loads a copy of the official xml schema from the provided
-#' vrt_xml_schema dataset.
+#' vrt_xml_schema dataset. The schema is cached after first load for performance.
 #' @rdname vrt_tools
 #' @return An xml_document object
 #' @examples
 #' vrt_schema()
 #' @export
-vrt_schema <- function(schema = vrtility::vrt_xml_schema) {
-  xml2::read_xml(schema)
-}
+vrt_schema <- local({
+  cached_schema <- NULL
+  
+  function(schema = vrtility::vrt_xml_schema) {
+    # Cache the parsed schema to avoid repeated parsing
+    if (is.null(cached_schema)) {
+      cached_schema <<- xml2::read_xml(schema)
+    }
+    cached_schema
+  }
+})
 
 
 #' Iternal function to set the descriptions for the bands in a VRT
