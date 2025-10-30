@@ -22,10 +22,10 @@ mirai_async_result_handler <- function(
   unresolved_idx <- seq_along(jobs)
   # Continue polling for results until all jobs are resolved
   while (any(!resolved)) {
-    # Check all unresolved jobs in one pass
-    any_resolved <- FALSE
+    # Iterate over unresolved jobs
     for (i in unresolved_idx) {
       if (mirai::unresolved(jobs[[i]])) {
+        Sys.sleep(0.001) # Sleep briefly to avoid busy-waiting
         next
       }
 
@@ -41,15 +41,7 @@ mirai_async_result_handler <- function(
       rlang::eval_bare(expr)
       # If the job is resolved, mark it as such
       resolved[[i]] <- TRUE
-      any_resolved <- TRUE
-    }
-    
-    # Update unresolved indices only once per iteration
-    unresolved_idx <- which(!resolved)
-    
-    # Only sleep if no jobs were resolved in this iteration to avoid busy-waiting
-    if (!any_resolved && length(unresolved_idx) > 0) {
-      Sys.sleep(0.01) # Sleep for 10ms instead of 1ms when no progress
+      unresolved_idx <- which(!resolved)
     }
   }
   return(invisible())
