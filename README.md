@@ -139,7 +139,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.964   0.214  16.800
+#>   2.859   0.377  21.965
 
 
 plot_raster_src(
