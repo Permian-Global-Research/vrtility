@@ -2,7 +2,7 @@
 % Please edit documentation in R/vrt-tools.R
 \name{set_vrt_descriptions}
 \alias{set_vrt_descriptions}
-\title{Iternal function to set the descriptions for the bands in a VRT}
+\title{Internal function to set the descriptions for the bands in a VRT}
 \usage{
 set_vrt_descriptions(x, descriptions, as_file = FALSE)
 }
@@ -17,6 +17,6 @@ set_vrt_descriptions(x, descriptions, as_file = FALSE)
 A character string of the path to the modified VRT
 }
 \description{
-Iternal function to set the descriptions for the bands in a VRT
+Internal function to set the descriptions for the bands in a VRT
 }
 \keyword{internal}

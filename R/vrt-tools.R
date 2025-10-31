@@ -2,7 +2,7 @@
 #' @param schema a character string of the xml schema - mainly intended only
 #' for use with the official gdal VRT schema.
 #' @description Loads a copy of the official xml schema from the provided
-#' vrt_xml_schema dataset. The schema is cached after first load for performance.
+#' vrt_xml_schema dataset.
 #' @rdname vrt_tools
 #' @return An xml_document object
 #' @examples
