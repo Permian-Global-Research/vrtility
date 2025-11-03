@@ -100,7 +100,7 @@ library(vrtility)
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   vrtility::set_gdal_cache_max()
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-mirai::daemons(10)
+mirai::daemons(8)
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -118,7 +118,7 @@ s2_stac <- hls_stac_query(
   stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
   collection = "hls2-s30",
   max_cloud_cover = 40,
-  assets = c("B02", "B03", "B04", "B8A", "Fmask")
+  assets = c("B02", "B03", "B04", "Fmask")
 )
 # number of items:
 length(s2_stac$features)
@@ -139,7 +139,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   2.859   0.377  21.965
+#>   2.169   0.287  18.099
 
 
 plot_raster_src(
