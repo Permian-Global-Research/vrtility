@@ -144,6 +144,7 @@
 <span>      mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>      build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/vrt_set_scale.html">vrt_set_scale</a></span><span class="op">(</span>scale_value <span class="op">=</span> <span class="fl">0.0001</span>, offset <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span>t_srs <span class="op">=</span> <span class="va">trs</span>, te <span class="op">=</span> <span class="va">te</span>, tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="reference/vrt_set_py_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -152,7 +153,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   2.169   0.287  18.099</span></span>
+<span><span class="co">#&gt;   2.238   0.403  19.141</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>
