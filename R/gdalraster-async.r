@@ -281,7 +281,6 @@ async_gdalreader_singleband_m2m_read_write <- function(
     },
     vrt_collection = vrt_collection,
     sb_reader_fun = single_band_reader(),
-    vrt_block_save_internal = vrt_block_save_internal,
     compute_with_py_env = compute_with_py_env,
     m2m_fun = m2m_fun,
     matrix_to_rowlist = matrix_to_rowlist

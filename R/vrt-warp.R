@@ -103,7 +103,7 @@ vrt_warp.vrt_block <- function(
   resamp_methods <- rep(resampling, length(assets))
   resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
 
-  tf <- vrt_block_save_internal(x, temp_vrt_dir = getOption("vrt.cache"))
+  tf <- x$vrt_src
 
   vrtwl <- purrr::map2_chr(
     seq_along(assets),
