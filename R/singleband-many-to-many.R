@@ -115,19 +115,7 @@ singleband_m2m.vrt_collection_warped <- function(
         dtName = rt$data_type
       ))
       ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
-
-      purrr::iwalk(x$assets, function(asset, band) {
-        ds$setDescription(
-          band = band,
-          description = asset
-        )
-        if (!is.na(rt$scale_vals[band])) {
-          ds$setScale(
-            band = band,
-            scale = rt$scale_vals[band]
-          )
-        }
-      })
+      set_desc_scale_offset(x, ds, rt)
       return(ds)
     }
   )

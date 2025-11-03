@@ -49,19 +49,7 @@ call_gdalraster_mirai <- function(
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
   on.exit(ds$close(), add = TRUE)
-  purrr::iwalk(x$assets, function(asset, band) {
-    ds$setDescription(
-      band = band,
-      description = asset
-    )
-
-    if (!is.na(rt$scale_vals[band])) {
-      ds$setScale(
-        band = band,
-        scale = rt$scale_vals[band]
-      )
-    }
-  })
+  set_desc_scale_offset(x, ds, rt)
 
   if (mirai::daemons_set()) {
     async_gdalreader_band_read_write(
@@ -79,4 +67,33 @@ call_gdalraster_mirai <- function(
   }
 
   return(outfile)
+}
+
+#' Set descriptions, scale, and offset for gdalraster dataset
+#' @param x a vrt block object.
+#' @param ds an open gdalraster GDALRaster object with write access.
+#' @param rt a list of raster template parameters from `raster_template_params`.
+#' @keywords internal
+#' @noRd
+set_desc_scale_offset <- function(x, ds, rt) {
+  purrr::iwalk(x$assets, function(asset, band) {
+    ds$setDescription(
+      band = band,
+      description = asset
+    )
+
+    if (!is.na(rt$scale_vals[band])) {
+      ds$setScale(
+        band = band,
+        scale = rt$scale_vals[band]
+      )
+    }
+
+    if (!is.na(rt$offset_vals[band])) {
+      ds$setOffset(
+        band = band,
+        offset = rt$offset_vals[band]
+      )
+    }
+  })
 }

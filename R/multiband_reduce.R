@@ -148,27 +148,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
   on.exit(ds$close(), add = TRUE)
-
-  purrr::iwalk(x$assets, function(asset, band) {
-    ds$setDescription(
-      band = band,
-      description = asset
-    )
-
-    if (!is.na(rt$scale_vals[band])) {
-      ds$setScale(
-        band = band,
-        scale = rt$scale_vals[band]
-      )
-    }
-
-    if (!is.na(rt$offset_vals[band])) {
-      ds$setOffset(
-        band = band,
-        offset = rt$offset_vals[band]
-      )
-    }
-  })
+  set_desc_scale_offset(x, ds, rt)
 
   if (mirai::daemons_set()) {
     async_gdalreader_multiband_reduce_read_write(
