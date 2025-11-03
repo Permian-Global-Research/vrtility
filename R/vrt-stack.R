@@ -110,6 +110,7 @@ build_vrt_stack <- function(
 
   rvrt <- list(
     vrt = as.character(xml2::read_xml(x)),
+    vrt_src = x,
     srs = gdr$getProjection(),
     bbox = gdr$bbox(),
     res = gdr$res(),

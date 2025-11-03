@@ -172,7 +172,7 @@ vrt_compute.vrt_block <- function(
   resampling <- rlang::arg_match(resampling)
   engine <- rlang::arg_match(engine)
 
-  tmp_vrt <- vrt_block_save_internal(x, getOption("vrt.cache"), apply_scale)
+  tmp_vrt <- x$vrt_src
 
   if (engine == "warp") {
     cl_arg <- combine_warp_opts(

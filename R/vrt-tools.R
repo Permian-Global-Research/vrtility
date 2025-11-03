@@ -13,7 +13,7 @@ vrt_schema <- function(schema = vrtility::vrt_xml_schema) {
 }
 
 
-#' Iternal function to set the descriptions for the bands in a VRT
+#' Internal function to set the descriptions for the bands in a VRT
 #' @param x A character string of the path to the VRT
 #' @param descriptions A character vector of the descriptions
 #' @param as_file A logical indicating if the VRT should be saved to a file

@@ -235,11 +235,7 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 single_band_reader <- function() {
   purrr::insistently(
     function(blk, block_params) {
-      # cli::cli_abort("THIS IS A TEST FAILURE")
-      vrtfile <- vrt_block_save_internal(
-        blk,
-        temp_vrt_dir = getOption("vrt.cache")
-      )
+      vrtfile <- blk$vrt_src
       inds <- methods::new(gdalraster::GDALRaster, vrtfile)
       on.exit(inds$close(), add = TRUE)
       compute_with_py_env(

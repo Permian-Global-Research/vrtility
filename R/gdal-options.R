@@ -37,11 +37,8 @@
 gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
-  GDAL_NUM_THREADS = 1, # "ALL_CPUS",
-  # as.character(
-  #   ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
-  # ),
-  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE", # "TRUE",
+  GDAL_NUM_THREADS = 1,
+  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
   GDAL_HTTP_MAX_RETRY = "3",
   GDAL_HTTP_RETRY_DELAY = "5",

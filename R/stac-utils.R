@@ -544,15 +544,14 @@ sign_mpc_items <- function(
   )
 
   # update the href for each asset in each item
-  for (i in seq_along(items$features)) {
-    for (j in seq_along(items$features[[i]]$assets)) {
-      items$features[[i]]$assets[[j]]$href <- paste0(
-        items$features[[i]]$assets[[j]]$href,
-        "?",
-        collection_token$token
-      )
-    }
-  }
+  # Use lapply instead of nested for loops for better performance
+  items$features <- purrr::map(items$features, function(feature) {
+    feature$assets <- purrr::map(feature$assets, function(asset) {
+      asset$href <- paste0(asset$href, "?", collection_token$token)
+      asset
+    })
+    feature
+  })
   return(items)
 }
 

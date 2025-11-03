@@ -11,11 +11,7 @@ raster_template_params <- function(
   temp_vrt_dir = getOption("vrt.cache"),
   apply_scale = TRUE
 ) {
-  vrt_template <- vrt_block_save_internal(
-    x,
-    temp_vrt_dir = temp_vrt_dir,
-    apply_scale = apply_scale
-  )
+  vrt_template <- x$vrt_src
   tds <- methods::new(gdalraster::GDALRaster, vrt_template)
   on.exit(tds$close(), add = TRUE)
   xs <- tds$getRasterXSize()
