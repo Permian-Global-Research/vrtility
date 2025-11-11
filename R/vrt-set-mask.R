@@ -206,7 +206,7 @@ vrt_set_maskfun.vrt_collection <- function(
     x$vrt,
     purrr::in_parallel(
       function(.x) {
-        vrtility::vrt_set_maskfun(
+        vrt_set_maskfun(
           .x,
           mask_band = mask_band,
           mask_values = mask_values,
@@ -215,11 +215,13 @@ vrt_set_maskfun.vrt_collection <- function(
           drop_mask_band = drop_mask_band
         )
       },
+      vrt_set_maskfun = vrt_set_maskfun,
       mask_band = mask_band,
       mask_values = mask_values,
       build_mask_pixfun = build_mask_pixfun,
       set_mask_pixfun = set_mask_pixfun,
-      drop_mask_band = drop_mask_band
+      drop_mask_band = drop_mask_band,
+      src_block_size = src_block_size
     )
   )
 
