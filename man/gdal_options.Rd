@@ -14,10 +14,10 @@ gdal_config_opts(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
-  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
+  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
-  GDAL_HTTP_MAX_RETRY = "3",
-  GDAL_HTTP_RETRY_DELAY = "5",
+  GDAL_HTTP_MAX_RETRY = "10",
+  GDAL_HTTP_RETRY_DELAY = "0.5",
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
@@ -38,10 +38,10 @@ gdal_creation_options(
   NUM_THREADS =
     as.character(ceiling(gdalraster::get_num_cpus()/pmax(vrtility::n_daemons(), 1))),
   BIGTIFF = "IF_NEEDED",
-  TILED = "YES",
-  BLOCKXSIZE = "128",
-  BLOCKYSIZE = "128",
-  COPY_SRC_OVERVIEWS = "YES",
+  TILED = if (identical(output_format, "COG")) NULL else "YES",
+  BLOCKXSIZE = NULL,
+  BLOCKYSIZE = NULL,
+  COPY_SRC_OVERVIEWS = if (identical(output_format, "COG")) NULL else "YES",
   cli_format = FALSE,
   ...
 )
