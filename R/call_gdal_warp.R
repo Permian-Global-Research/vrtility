@@ -14,24 +14,13 @@ call_gdal_warp <- function(
   orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
 
-  # new gdalraster raises warnings here... although I think we can ignore.
-
-  purrr::insistently(
-    function() {
-      gdalraster::warp(
-        src_files,
-        outfile,
-        t_srs = t_srs,
-        cl_arg = cl_arg,
-        quiet = quiet
-      )
-    },
-    rate = purrr::rate_backoff(
-      pause_base = getOption("vrt.pause.base"),
-      pause_cap = getOption("vrt.pause.cap"),
-      max_times = getOption("vrt.max.times")
-    )
-  )()
+  gdalraster::warp(
+    src_files,
+    outfile,
+    t_srs = t_srs,
+    cl_arg = cl_arg,
+    quiet = quiet
+  )
 
   return(normalizePath(outfile))
 }
@@ -54,7 +43,7 @@ combine_warp_opts <- function(
   opts_check(warp_opts, "-r")
 
   warp_opts <- c(
-    as.vector(rbind("-co", creation_options)),
+    split_of_and_co(creation_options),
     "-r",
     resampling,
     warp_opts,
@@ -80,4 +69,21 @@ combine_warp_opts <- function(
   }
 
   return(warp_opts)
+}
+
+
+split_of_and_co <- function(creation_options) {
+  if ("-of" %in% creation_options) {
+    ofkeyidx <- which(creation_options == "-of")
+    out_format <- creation_options[ofkeyidx + 1]
+    ofkeypair <- c("-of", out_format)
+    creation_options <- creation_options[-c(ofkeyidx, ofkeyidx + 1)]
+  } else {
+    ofkeypair <- NULL
+  }
+
+  return(c(
+    ofkeypair,
+    as.vector(rbind("-co", creation_options))
+  ))
 }
