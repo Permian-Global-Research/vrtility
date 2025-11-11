@@ -1,4 +1,4 @@
-pipeline_tests <- function() {
+pipeline_tests <- function(v) {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(
@@ -68,21 +68,47 @@ pipeline_tests <- function() {
 
   exe_comp <- vrt_compute(
     ex_collect_mask_warp_stack_med,
-    engine = "translate"
+    engine = "translate",
+    creation_options = gdal_creation_options(
+      output_format = "COG"
+    )
   )
+
+  ds <- methods::new(gdalraster::GDALRaster, exe_comp)
+  ds$getMetadata(0, "")
+
+  expect_true(grepl("COG", ds$infoAsJSON()))
+  expect_true(
+    "median date: 2024-05-01" %in% ds$getMetadataItem(0, "datetime", "")
+  )
+  ds$close()
 
   expect_true(fs::file_size(exe_comp) > 0)
 
   exe_compwarp <- vrt_compute(
     ex_collect_mask_warp_stack_med,
-    outfile = fs::file_temp(ext = "tif")
+    outfile = fs::file_temp(ext = "tif"),
+    creation_options = gdal_creation_options(
+      output_format = "COG"
+    ),
+    engine = "gdalraster"
   )
+
+  gdalraster::dump_open_datasets()
+
+  ds <- methods::new(gdalraster::GDALRaster, exe_compwarp)
+  ds$getMetadata(0, "")
+  expect_true(grepl("COG", ds$infoAsJSON()))
+  expect_equal(ds$getMetadataItem(0, "datetime", ""), "median date: 2024-05-01")
+  ds$close()
 
   expect_true(fs::file_size(exe_compwarp) > 0)
 
   ds <- methods::new(gdalraster::GDALRaster, exe_compwarp)
-  withr::defer(if (ds$isOpen()) ds$close())
+
   r <- gdalraster::read_ds(ds)
+  ds$close()
+
   expect_gt(sum(r, na.rm = TRUE), 6e+08)
 
   ex_collect_mask_gdr <- vrt_compute(
@@ -98,7 +124,7 @@ pipeline_tests <- function() {
   skip_on_ci()
   skip_on_covr()
   vdiffr::expect_doppelganger(
-    "s2 exeter plots",
+    glue::glue("{v} s2 exeter plots"),
     plot_raster_src(exe_compwarp, c(3, 2, 1))
   )
 }
@@ -108,14 +134,14 @@ test_that("full vrt pipeline works async", {
   if (!mirai::daemons_set()) {
     mirai::daemons(2)
   }
-  pipeline_tests()
+  pipeline_tests(v = "async")
 })
 
 test_that("full vrt pipeline works synchronously", {
   if (mirai::daemons_set()) {
     mirai::daemons(0)
   }
-  pipeline_tests()
+  pipeline_tests(v = "sync")
 })
 
 
