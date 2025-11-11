@@ -38,10 +38,17 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
   )
 
   main_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  blksize <- src_block_size(vrt_paths[1])
 
   suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
+    cl_arg = c(
+      "-co",
+      glue::glue("BLOCKXSIZE={blksize[1]}"),
+      "-co",
+      glue::glue("BLOCKYSIZE={blksize[2]}")
+    ),
     quiet = quiet
   ))
 
@@ -93,6 +100,7 @@ build_vrt_stack <- function(
   v_assert_valid_schema(x)
   # read and verify modified VRT
   gdr <- methods::new(gdalraster::GDALRaster, x)
+  on.exit(gdr$close(), add = TRUE)
   ras_count <- gdr$getRasterCount()
   assets <- purrr::map_chr(
     seq_len(ras_count),
@@ -122,6 +130,8 @@ build_vrt_stack <- function(
     maskfun = maskfun,
     warped = warped
   )
+
+  gdr$close()
 
   if (warped) {
     warped <- "vrt_stack_warped"
