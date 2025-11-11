@@ -113,13 +113,19 @@ vrt_warp.vrt_block <- function(
     }
   )
 
+  blksize <- src_block_size(vrtwl[1])
+
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   gdalraster::buildVRT(
     outtf,
     vrtwl,
     cl_arg = c(
-      "-separate"
+      "-separate",
+      "-co",
+      glue::glue("BLOCKXSIZE={blksize[1]}"),
+      "-co",
+      glue::glue("BLOCKYSIZE={blksize[2]}")
     ),
     quiet = TRUE
   )
@@ -234,7 +240,7 @@ vrt_to_warped_vrt <- function(
   temp_vrt_dir = getOption("vrt.cache")
 ) {
   tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
-
+  blksize <- src_block_size(src)
   call_gdal_warp(
     src,
     tfw,
@@ -246,7 +252,11 @@ vrt_to_warped_vrt <- function(
       resampling,
       "-te",
       te,
-      if (!is.null(tr)) c("-tr", tr) else NULL
+      if (!is.null(tr)) c("-tr", tr) else NULL,
+      "-co",
+      glue::glue("BLOCKXSIZE={blksize[1]}"),
+      "-co",
+      glue::glue("BLOCKYSIZE={blksize[2]}")
     ),
     config_options = gdal_config_opts(),
     quiet = TRUE
