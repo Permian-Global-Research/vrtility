@@ -122,7 +122,6 @@ vrt_derived_block.vrt_block <- function(x, ...) {
       set_gdal_pixfun_xml(band, "expression", list(expression = mu_exp))
     }
   )
-  # browser()
 
   drop_scale(vx) # scale and offset are now applied at the formula level
   set_nodatavalue(
