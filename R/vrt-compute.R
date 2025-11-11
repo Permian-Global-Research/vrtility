@@ -174,6 +174,12 @@ vrt_compute.vrt_block <- function(
 
   tmp_vrt <- x$vrt_src
 
+  # browser()
+
+  if (all(nzchar(unique(x$date_time)))) {
+    x$date_time <- set_dttm_metadata(tmp_vrt, unique(x$date_time))
+  }
+
   if (engine == "warp") {
     cl_arg <- combine_warp_opts(
       creation_options,
@@ -209,13 +215,14 @@ vrt_compute.vrt_block <- function(
       nsplits = nsplits
     )
   } else if (engine == "translate") {
+    # browser()
     result <- compute_with_py_env(
       call_gdal_tanslate(
         src_files = tmp_vrt,
         outfile = outfile,
         config_options = config_options,
         cl_arg = c(
-          as.character(rbind("-co", creation_options)),
+          split_of_and_co(creation_options),
           "-r",
           resampling
         ),
@@ -224,9 +231,11 @@ vrt_compute.vrt_block <- function(
     )
   }
 
-  if (all(nzchar(unique(x$date_time)))) {
-    x$date_time <- set_dttm_metadata(result, unique(x$date_time))
-  }
+  # browser()
+
+  # if (all(nzchar(unique(x$date_time)))) {
+  #   x$date_time <- set_dttm_metadata(result, unique(x$date_time))
+  # }
 
   if (!recollect) {
     return(result)
@@ -514,7 +523,15 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
     dttm <- as.character(lubdttm)
   }
 
-  ds <- methods::new(gdalraster::GDALRaster, ras)
+  ds <- tryCatch(
+    methods::new(gdalraster::GDALRaster, ras, read_only = FALSE),
+    error = function(e) {
+      cli::cli_warn(
+        "Re-opening GDALRaster in read-only mode to set metadata"
+      )
+      methods::new(gdalraster::GDALRaster, ras, read_only = TRUE)
+    }
+  )
   on.exit(ds$close(), add = TRUE)
   ds$setMetadataItem(
     0,
@@ -522,6 +539,8 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
     mdi_value = dttm,
     domain = ""
   )
+
+  ds$close()
 
   return(invisible(dttm))
 }
