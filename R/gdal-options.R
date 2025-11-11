@@ -38,10 +38,10 @@ gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
-  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
+  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
-  GDAL_HTTP_MAX_RETRY = "3",
-  GDAL_HTTP_RETRY_DELAY = "5",
+  GDAL_HTTP_MAX_RETRY = "10",
+  GDAL_HTTP_RETRY_DELAY = "0.5",
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
@@ -87,14 +87,16 @@ gdal_creation_options <- function(
     ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
   ),
   BIGTIFF = "IF_NEEDED",
-  TILED = "YES",
-  BLOCKXSIZE = "128", # changed from 256
-  BLOCKYSIZE = "128",
-  COPY_SRC_OVERVIEWS = "YES",
+  TILED = if (identical(output_format, "COG")) NULL else "YES",
+  BLOCKXSIZE = NULL,
+  BLOCKYSIZE = NULL,
+  COPY_SRC_OVERVIEWS = if (identical(output_format, "COG")) NULL else "YES",
   cli_format = FALSE,
   ...
 ) {
+  #
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
+  co_args <- co_args[!purrr::map_lgl(co_args, is.null)]
 
   # maybe just a windows thing..
   if (is.na(co_args$NUM_THREADS)) {
@@ -315,4 +317,22 @@ check_muparser <- function() {
     return(FALSE)
   }
   return("muparser" %in% strsplit(vrt_expr_dialects, ",")[[1]])
+}
+
+
+#' Get the output format from GDAL creation options
+#' @param creation_options A character vector of GDAL creation options created
+#' with \code{\link{gdal_creation_options}}
+#' @return Character string of the output format, or NULL if not specified
+#' @noRd
+#' @keywords internal
+format_options_for_create <- function(creation_options) {
+  of_index <- which(creation_options == "-of")
+  if (length(of_index) == 0) {
+    return(list(fmt = NULL, opts = creation_options))
+  }
+  return(list(
+    fmt = creation_options[of_index + 1],
+    opts = creation_options[-c(of_index, of_index + 1)]
+  ))
 }
