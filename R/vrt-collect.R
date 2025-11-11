@@ -109,11 +109,19 @@ vrt_collect.character <- function(
   vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
     tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
+    blksize <- src_block_size(.x)
+
     gdalraster::buildVRT(
       tf,
       .x,
       quiet = TRUE,
-      cl_arg = band_args
+      cl_arg = c(
+        band_args,
+        "-co",
+        glue::glue("BLOCKXSIZE={blksize[1]}"),
+        "-co",
+        glue::glue("BLOCKYSIZE={blksize[2]}")
+      )
     )
 
     ds <- methods::new(gdalraster::GDALRaster, .x)
@@ -233,6 +241,8 @@ vrt_collect.doc_items <- function(
           dttm <- dttm[1]
         }
 
+        blksize <- src_block_size(srcs[1])
+
         tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
         purrr::insistently(
           function() {
@@ -240,7 +250,11 @@ vrt_collect.doc_items <- function(
               tf,
               srcs,
               cl_arg = c(
-                "-separate"
+                "-separate",
+                "-co",
+                glue::glue("BLOCKXSIZE={blksize[1]}"),
+                "-co",
+                glue::glue("BLOCKYSIZE={blksize[2]}")
               ),
               quiet = TRUE
             )
@@ -269,7 +283,8 @@ vrt_collect.doc_items <- function(
       },
       set_vrt_descriptions = set_vrt_descriptions,
       set_vrt_metadata = set_vrt_metadata,
-      build_vrt_block = build_vrt_block
+      build_vrt_block = build_vrt_block,
+      src_block_size = src_block_size
     )
   )
 
