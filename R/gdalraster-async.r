@@ -32,6 +32,7 @@ async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
     ),
     msg = "mirai GDAL read/write error"
   )
+  ds$close()
   return(invisible())
 }
 
