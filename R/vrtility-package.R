@@ -78,6 +78,7 @@
 
 
 .onLoad <- function(libname, pkgname) {
+  # TODO: do we still need this? Check latest reticulate advice.
   if (is.na(Sys.getenv("RETICULATE_USE_MANAGED_VENV", unset = NA))) {
     Sys.setenv(RETICULATE_USE_MANAGED_VENV = "yes")
   }
