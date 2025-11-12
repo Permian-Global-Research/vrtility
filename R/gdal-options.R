@@ -95,19 +95,42 @@ gdal_creation_options <- function(
   ...
 ) {
   #
+  if (output_format == "MEM") {
+    cli::cli_abort(
+      c(
+        "Unfortunately the MEM format is not natively supported - because
+    of the need to serialize rasters from asynchronous processes.",
+        "i" = "If you have any suggestions on how to implement this, please
+    open an issue on GitHub."
+      ),
+      class = "unsupported_gdal_format_error"
+    )
+  }
+
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
   co_args <- co_args[!purrr::map_lgl(co_args, is.null)]
 
   # maybe just a windows thing..
-  if (is.na(co_args$NUM_THREADS)) {
-    co_args$NUM_THREADS <- "1"
+  if (!is.null(co_args$NUM_THREADS)) {
+    if (is.na(co_args$NUM_THREADS)) {
+      co_args$NUM_THREADS <- "1"
+    }
   }
 
   keep_names <- setdiff(names(co_args), c("output_format", "cli_format"))
   co_args <- co_args[keep_names]
-  co_args <- paste0(names(co_args), "=", co_args)
 
-  if (cli_format) {
+  no_co <- rlang::is_empty(co_args)
+
+  if (no_co) {
+    co_args <- character(0)
+  }
+
+  if (!no_co) {
+    co_args <- paste0(names(co_args), "=", co_args)
+  }
+
+  if (cli_format && !no_co) {
     co_args <- as.character(rbind(
       "-co",
       co_args
