@@ -49,7 +49,8 @@ pipeline_tests <- function(v) {
 
   coll_compute <- vrt_compute(
     ex_collect_mask_warp,
-    outfile = fs::file_temp(ext = "tif")
+    outfile = fs::file_temp(ext = "tif"),
+    engine = "gdalraster"
   )
 
   expect_true(all(file.exists(coll_compute)))
