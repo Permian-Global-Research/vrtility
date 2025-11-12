@@ -15,8 +15,8 @@ call_gdal_warp <- function(
   on.exit(set_gdal_config(orig_config))
 
   gdalraster::warp(
-    src_files,
-    outfile,
+    src_files = src_files,
+    dst_filename = outfile,
     t_srs = t_srs,
     cl_arg = cl_arg,
     quiet = quiet
@@ -80,6 +80,10 @@ split_of_and_co <- function(creation_options) {
     creation_options <- creation_options[-c(ofkeyidx, ofkeyidx + 1)]
   } else {
     ofkeypair <- NULL
+  }
+
+  if (rlang::is_empty(creation_options)) {
+    return(ofkeypair)
   }
 
   return(c(
