@@ -135,12 +135,13 @@ system.time({
     vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
     vrt_stack(lazy = FALSE) |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
+    # vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL >= 3.12.0
     vrt_compute(
       engine = "gdalraster"
     )
 })
 #>    user  system elapsed 
-#>   1.983   0.251   7.947
+#>   1.969   0.273   7.540
 
 
 plot_raster_src(
