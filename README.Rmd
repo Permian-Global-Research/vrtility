@@ -103,6 +103,7 @@ layers in each VRTRasterBand), giving us a `vrt_stack` object.
 library(vrtility)
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(8)
+daemons_load_vrtility()
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -132,9 +133,8 @@ system.time({
       mask_values = c(0, 1, 2, 3),
       build_mask_pixfun = build_bitmask()
     ) |>
-    vrt_set_scale(scale_value = 0.0001, offset = -0.1) |>
     vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
-    vrt_stack() |>
+    vrt_stack(lazy = FALSE) |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     vrt_compute(
       engine = "gdalraster"
