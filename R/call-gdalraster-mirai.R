@@ -74,20 +74,23 @@ call_gdalraster_mirai <- function(
   }
 
   on.exit(ds$close(), add = TRUE)
+
   set_desc_scale_offset(x, ds, rt)
 
   if (mirai::daemons_set()) {
     async_gdalreader_band_read_write(
       blocks_df,
       vrt_file = vrt_template,
-      ds = ds
+      ds = ds,
+      config_options = config_options
     )
   } else {
     sequential_gdalreader_band_read_write(
       blocks_df,
       vrt_file = vrt_template,
       ds = ds,
-      quiet = quiet
+      quiet = quiet,
+      config_options = config_options
     )
   }
 
