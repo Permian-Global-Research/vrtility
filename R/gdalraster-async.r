@@ -57,7 +57,13 @@ async_gdalreader_band_read_write <- function(
 #' @return invisible
 #' @keywords internal
 #' @noRd
-sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
+sequential_gdalreader_band_read_write <- function(
+  blocks,
+  vrt_file,
+  ds,
+  quiet,
+  config_options
+) {
   purrr::pwalk(
     blocks,
     function(...) {
@@ -66,7 +72,11 @@ sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
       on.exit(inds$close())
       # Read and combine bands
-      band_data <- blockreader(inds, block_params)
+      band_data <- blockreader(
+        inds,
+        block_params,
+        config_options = config_options
+      )
 
       blockwriter(ds, block_params, band_data)
     },
