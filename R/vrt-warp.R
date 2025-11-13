@@ -280,15 +280,13 @@ vrt_to_warped_vrt <- function(
       band,
       "-r",
       resampling,
-      # "-te",
-      # te,
-      # if (!is.null(tr)) c("-tr", tr) else NULL,
+      "-te",
+      te,
+      if (!is.null(tr)) c("-tr", tr) else NULL,
       "-co",
       glue::glue("BLOCKXSIZE={blksize[1]}"),
       "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}"),
-      "-s_srs",
-      s_srs
+      glue::glue("BLOCKYSIZE={blksize[2]}")
     ),
     config_options = gdal_config_opts(),
     quiet = TRUE
