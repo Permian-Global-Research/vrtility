@@ -445,7 +445,6 @@ vrt_compute.vrt_collection <- function(
   ) |>
     unique_fp(outfile)
 
-  # if (!mirai::daemons_set() || engine %in% c("translate", "warp")) {
   result <- purrr::map2_chr(
     .x = x[[1]],
     .y = uniq_pths,
@@ -486,74 +485,6 @@ vrt_compute.vrt_collection <- function(
     ),
     .progress = !quiet
   )
-  # } else {
-  #   async_job_components <- purrr::map2(
-  #     .x = x[[1]],
-  #     .y = uniq_pths,
-  #     function(.x, .y) {
-  #       async_gdalraster_collection_setup(
-  #         .x,
-  #         outfile = .y,
-  #         t_srs = t_srs,
-  #         te = te,
-  #         tr = tr,
-  #         resampling = resampling,
-  #         engine = engine,
-  #         warp_options = warp_options,
-  #         creation_options = creation_options,
-  #         config_options = config_options,
-  #         nsplits = nsplits,
-  #         add_cl_arg = add_cl_arg,
-  #         quiet = TRUE,
-  #         apply_scale = apply_scale,
-  #         dst_nodata = dst_nodata
-  #       )
-  #     }
-  #   ) |>
-  #     purrr::transpose()
-
-  #   src_names <- async_job_components$blocks |>
-  #     purrr::map_chr(~ unique(.x$src))
-
-  #   block_df <- async_job_components$blocks |>
-  #     purrr::list_rbind()
-
-  #   dest_ds_list <- async_job_components$dataset |>
-  #     purrr::set_names(src_names)
-
-  #   jobs <- mirai::mirai_map(
-  #     block_df,
-  #     function(...) {
-  #       # Extract block parameters correctly from the 1-row dataframe
-  #       block_params <- rlang::list2(...)
-  #       inds <- methods::new(gdalraster::GDALRaster, block_params$src)
-  #       on.exit(inds$close())
-  #       block_params$src <- NULL
-  #       band_data <- blockreader(
-  #         inds,
-  #         block_params
-  #       )
-  #       return(band_data)
-  #     },
-  #     blockreader = blockreader
-  #   )
-
-  #   mirai_async_result_handler(
-  #     jobs,
-  #     ds = dest_ds_list,
-  #     blocks = block_df,
-  #     expr = rlang::expr(
-  #       blockwriter(ds[[blocks$src[i]]], blocks[i, ], j) # nolint
-  #     ),
-  #     msg = "mirai GDAL read/write error"
-  #   )
-
-  #   purrr::walk(
-  #     dest_ds_list,
-  #     ~ .x$close()
-  #   )
-  #   result <- uniq_pths
-  # }
 
   if (!recollect) {
     return(result)
