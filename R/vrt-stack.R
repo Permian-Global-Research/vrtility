@@ -35,6 +35,7 @@ vrt_stack.vrt_collection <- function(
   engine = "warp",
   creation_options = gdal_creation_options(
     COMPRESS = "NONE",
+    PREDICTOR = NULL,
     NUM_THREADS = 1, #"ALL_CPUS"
     TILED = "NO"
     # COPY_SRC_OVERVIEWS = "NO"
