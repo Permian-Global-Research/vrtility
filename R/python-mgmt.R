@@ -55,6 +55,9 @@ set_py_env_vals <- function() {
 #' Call code that is executed in an environment with access to the vrtility
 #' python environment
 #' @param code The code to execute
+#' @param config_options A named character vector of configuration options to
+#' set in the environment before executing the code. eg. generated from
+#' \code{\link{gdal_config_opts}}
 #' @export
 #' @rdname vrtility_python
 #' @examples
@@ -63,7 +66,6 @@ compute_with_py_env <- function(
   code,
   config_options = NULL
 ) {
-  # browser()
   # First, ensure we have the correct paths
   py_bin <- Sys.getenv("VRTILITY_PY_EXECUTABLE", unset = NA)
 
