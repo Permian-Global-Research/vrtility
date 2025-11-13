@@ -95,16 +95,8 @@ gdal_creation_options <- function(
   ...
 ) {
   #
-  if (output_format == "MEM") {
-    cli::cli_abort(
-      c(
-        "Unfortunately the MEM format is not natively supported - because
-    of the need to serialize rasters from asynchronous processes.",
-        "i" = "If you have any suggestions on how to implement this, please
-    open an issue on GitHub."
-      ),
-      class = "unsupported_gdal_format_error"
-    )
+  if (!is.null(output_format)) {
+    check_output_format(output_format)
   }
 
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
@@ -358,4 +350,25 @@ format_options_for_create <- function(creation_options) {
     fmt = creation_options[of_index + 1],
     opts = creation_options[-c(of_index, of_index + 1)]
   ))
+}
+
+
+#' function to check output format
+#' @param fmt output format
+#' @return NULL, but will error if the format is unsupported
+#' @noRd
+#' @keywords internal
+check_output_format <- function(fmt) {
+  if (fmt == "MEM") {
+    cli::cli_abort(
+      c(
+        "Unfortunately the MEM format is not natively supported - because
+    of the need to serialize rasters from asynchronous processes.",
+        "i" = "If you have any suggestions on how to implement this, please
+    open an issue on GitHub."
+      ),
+      class = "unsupported_gdal_format_error"
+    )
+  }
+  rlang::arg_match(fmt, gdal_raster_drivers(TRUE))
 }
