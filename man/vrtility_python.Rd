@@ -16,7 +16,7 @@ vrtility_py_require(
 
 set_py_env_vals()
 
-compute_with_py_env(code)
+compute_with_py_env(code, config_options = NULL)
 }
 \arguments{
 \item{packages}{A character vector of Python packages to be available during
@@ -50,6 +50,10 @@ provided ones. Packages and the Python version can be set independently.
 }}
 
 \item{code}{The code to execute}
+
+\item{config_options}{A named character vector of configuration options to
+set in the environment before executing the code. eg. generated from
+\code{\link{gdal_config_opts}}}
 }
 \value{
 Invisible
