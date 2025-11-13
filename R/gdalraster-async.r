@@ -8,8 +8,13 @@
 #' @return invisible
 #' @keywords internal
 #' @noRd
-async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
-  # Create mirai map with promises
+async_gdalreader_band_read_write <- function(
+  blocks,
+  vrt_file,
+  ds = NULL,
+  config_options = NULL
+) {
+  # Create mirai jobs
   jobs <- mirai::mirai_map(
     blocks,
     function(...) {
@@ -17,12 +22,18 @@ async_gdalreader_band_read_write <- function(blocks, vrt_file, ds) {
       block_params <- rlang::list2(...)
       inds <- methods::new(gdalraster::GDALRaster, vrt_file)
       on.exit(inds$close())
-      band_data <- blockreader(inds, block_params)
+      band_data <- blockreader(
+        inds,
+        block_params,
+        config_options = config_options
+      )
       return(band_data)
     },
     vrt_file = vrt_file,
-    blockreader = blockreader
+    blockreader = blockreader,
+    config_options = config_options
   )
+
   mirai_async_result_handler(
     jobs,
     ds = ds,
@@ -71,7 +82,7 @@ sequential_gdalreader_band_read_write <- function(blocks, vrt_file, ds, quiet) {
 #' @return A matrix of raster data for the specified block.
 #' @keywords internal
 #' @noRd
-blockreader <- function(inds, block_params) {
+blockreader <- function(inds, block_params, config_options = NULL) {
   return(compute_with_py_env(
     inds$read(
       band = block_params[["band_n"]],
@@ -81,7 +92,8 @@ blockreader <- function(inds, block_params) {
       ysize = block_params[["nYSize"]],
       out_xsize = block_params[["nXSize"]],
       out_ysize = block_params[["nYSize"]]
-    )
+    ),
+    config_options = config_options
   ))
 }
 #' @title Block writer function
