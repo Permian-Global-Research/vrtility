@@ -55,7 +55,7 @@ CDSE API.
 
 ``` r
 library(vrtility)
-#> ✔ Using GDAL version 3.11.3
+#> ✔ Using GDAL version 3.12.0
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use vrtility::set_gdal_cache_max()
 
 # only use 2 daemons!
@@ -145,7 +145,7 @@ s2_median <- vrt_collect(s2copdse,
     te = bbx_proj,
     tr = c(10, 10)
   ) |>
-  vrt_stack() |>
+  vrt_stack(lazy=FALSE) |>
   vrt_set_py_pixelfun(median_numpy()) |>
   vrt_compute(
     outfile = fs::file_temp(ext = "tif"),

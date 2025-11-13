@@ -128,7 +128,6 @@ with(mirai::daemons(10), {
       tr = c(10, 10)
     ) |>
     vrt_compute(
-      engine = "gdalraster",
       recollect = TRUE
     )
 })
