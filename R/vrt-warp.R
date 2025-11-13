@@ -104,24 +104,36 @@ vrt_warp.vrt_block <- function(
   resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
 
   tf <- x$vrt_src
-
+  # browser()
   vrtwl <- purrr::map2_chr(
     seq_along(assets),
     resamp_methods,
     function(.x, .y) {
-      vrt_to_warped_vrt(tf, .x, t_srs, te, tr, .y, getOption("vrt.cache"))
+      vrt_to_warped_vrt(
+        tf,
+        .x,
+        t_srs,
+        te,
+        tr,
+        .y,
+        s_srs = x$srs,
+        temp_vrt_dir = getOption("vrt.cache")
+      )
     }
   )
 
   blksize <- src_block_size(vrtwl[1])
 
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-
+  # browser()
   gdalraster::buildVRT(
     outtf,
     vrtwl,
     cl_arg = c(
       "-separate",
+      "-te",
+      te,
+      if (!is.null(tr)) c("-tr", tr) else NULL,
       "-co",
       glue::glue("BLOCKXSIZE={blksize[1]}"),
       "-co",
@@ -129,6 +141,8 @@ vrt_warp.vrt_block <- function(
     ),
     quiet = TRUE
   )
+
+  # browser()
 
   outtf <- set_vrt_descriptions(
     x = outtf,
@@ -237,10 +251,26 @@ vrt_to_warped_vrt <- function(
   te,
   tr = NULL,
   resampling = "bilinear",
+  s_srs = NULL,
   temp_vrt_dir = getOption("vrt.cache")
 ) {
   tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
   blksize <- src_block_size(src)
+
+  # browser()
+  # ds <- methods::new(gdalraster::GDALRaster, src, read_only = TRUE)
+  # on.exit(ds$close(), add = TRUE)
+  # dsw <- gdalraster::autoCreateWarpedVRT(
+  #   src_ds = ds,
+  #   dst_wkt = t_srs,
+  #   resample_alg = resampling,
+  #   src_wkt = s_srs
+  # )
+  # on.exit(dsw$close(), add = TRUE)
+  # dsw$setFilename(tfw)
+
+  # return(tfw)
+
   call_gdal_warp(
     src,
     tfw,
@@ -250,13 +280,15 @@ vrt_to_warped_vrt <- function(
       band,
       "-r",
       resampling,
-      "-te",
-      te,
-      if (!is.null(tr)) c("-tr", tr) else NULL,
+      # "-te",
+      # te,
+      # if (!is.null(tr)) c("-tr", tr) else NULL,
       "-co",
       glue::glue("BLOCKXSIZE={blksize[1]}"),
       "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
+      glue::glue("BLOCKYSIZE={blksize[2]}"),
+      "-s_srs",
+      s_srs
     ),
     config_options = gdal_config_opts(),
     quiet = TRUE
