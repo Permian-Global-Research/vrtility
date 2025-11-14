@@ -146,7 +146,8 @@ async_gdalreader_multiband_reduce_read_write <- function(
   vrt_file,
   ds,
   raster_template,
-  reduce_fun
+  reduce_fun,
+  config_options
 ) {
   jobs <- mirai::mirai_map(
     blocks,
@@ -159,7 +160,8 @@ async_gdalreader_multiband_reduce_read_write <- function(
         xoff = block_params[["nXOff"]],
         yoff = block_params[["nYOff"]],
         xsize = block_params[["nXSize"]],
-        ysize = block_params[["nYSize"]]
+        ysize = block_params[["nYSize"]],
+        config_options = config_options
       )
       cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
       list(
@@ -172,7 +174,8 @@ async_gdalreader_multiband_reduce_read_write <- function(
     read_block_arrays = read_block_arrays,
     reduce_fun = reduce_fun,
     mdim_reduction_apply = mdim_reduction_apply,
-    restructure_cells = restructure_cells
+    restructure_cells = restructure_cells,
+    config_options = config_options
   )
 
   mirai_async_result_handler(
@@ -208,7 +211,8 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
   ds,
   raster_template,
   reduce_fun,
-  quiet
+  quiet,
+  config_options
 ) {
   purrr::pwalk(
     blocks,
@@ -221,7 +225,8 @@ sequential_gdalreader_multiband_reduce_read_write <- function(
         xoff = block_params[["nXOff"]],
         yoff = block_params[["nYOff"]],
         xsize = block_params[["nXSize"]],
-        ysize = block_params[["nYSize"]]
+        ysize = block_params[["nYSize"]],
+        config_options = config_options
       )
       cell_vals <- mdim_reduction_apply(ras_band_dat, reduce_fun)
 
@@ -282,7 +287,8 @@ async_gdalreader_singleband_m2m_read_write <- function(
   blocks,
   vrt_collection,
   ds_list,
-  m2m_fun
+  m2m_fun,
+  config_options
 ) {
   jobs <- mirai::mirai_map(
     blocks,
@@ -291,7 +297,7 @@ async_gdalreader_singleband_m2m_read_write <- function(
 
       band_data <- purrr::map(
         vrt_collection[[1]],
-        ~ sb_reader_fun(.x, block_params)
+        ~ sb_reader_fun(.x, block_params, config_options)
       )
 
       bdm <- do.call(rbind, band_data)
@@ -306,7 +312,8 @@ async_gdalreader_singleband_m2m_read_write <- function(
     sb_reader_fun = single_band_reader(),
     compute_with_py_env = compute_with_py_env,
     m2m_fun = m2m_fun,
-    matrix_to_rowlist = matrix_to_rowlist
+    matrix_to_rowlist = matrix_to_rowlist,
+    config_options = config_options
   )
 
   mirai_async_result_handler(
@@ -340,7 +347,8 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
   vrt_collection,
   ds_list,
   m2m_fun,
-  quiet
+  quiet,
+  config_options
 ) {
   purrr::pwalk(
     blocks,
@@ -348,7 +356,7 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
       block_params <- rlang::dots_list(...)
       band_data <- purrr::map(
         vrt_collection[[1]],
-        ~ single_band_reader()(.x, block_params)
+        ~ single_band_reader()(.x, block_params, config_options)
       )
 
       bdm <- do.call(rbind, band_data)

@@ -56,10 +56,7 @@ singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
   outfile = fs::file_temp(ext = "tif"),
-  config_options = gdal_config_opts(
-    GDAL_HTTP_MAX_RETRY = "3",
-    GDAL_HTTP_RETRY_DELAY = "20"
-  ),
+  config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
   nsplits = NULL,
@@ -137,7 +134,8 @@ singleband_m2m.vrt_collection_warped <- function(
       blocks_df,
       x,
       ds_list,
-      m2m_fun = m2m_fun
+      m2m_fun = m2m_fun,
+      config_options = config_options
     )
   } else {
     sequential_gdalreader_singleband_m2m_read_write(
@@ -145,7 +143,8 @@ singleband_m2m.vrt_collection_warped <- function(
       x,
       ds_list,
       m2m_fun = m2m_fun,
-      quiet = quiet
+      quiet = quiet,
+      config_options = config_options
     )
   }
 
@@ -222,7 +221,7 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' @keywords internal
 single_band_reader <- function() {
   purrr::insistently(
-    function(blk, block_params) {
+    function(blk, block_params, config_options) {
       vrtfile <- blk$vrt_src
       inds <- methods::new(gdalraster::GDALRaster, vrtfile)
       on.exit(inds$close(), add = TRUE)
@@ -235,7 +234,8 @@ single_band_reader <- function() {
           ysize = block_params[["nYSize"]],
           out_xsize = block_params[["nXSize"]],
           out_ysize = block_params[["nYSize"]]
-        )
+        ),
+        config_options = config_options
       )
     },
     rate = purrr::rate_backoff(

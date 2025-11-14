@@ -160,7 +160,8 @@ multiband_reduce.vrt_collection_warped <- function(
       x,
       ds,
       rt,
-      reduce_fun
+      reduce_fun,
+      config_options
     )
   } else {
     sequential_gdalreader_multiband_reduce_read_write(
@@ -169,7 +170,8 @@ multiband_reduce.vrt_collection_warped <- function(
       ds,
       rt,
       reduce_fun,
-      quiet
+      quiet,
+      config_options
     )
   }
 
@@ -252,7 +254,15 @@ mdim_reduction_apply <- function(x, mdim_fun) {
 #' @return a list of matrices, where each matrix corresponds to a band
 #' @noRd
 #' @keywords internal
-read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize) {
+read_block_arrays <- function(
+  x,
+  nbands,
+  xoff,
+  yoff,
+  xsize,
+  ysize,
+  config_options = NULL
+) {
   rba_insist <- purrr::insistently(
     function(.x) {
       tvrt <- fs::file_temp(
@@ -276,7 +286,8 @@ read_block_arrays <- function(x, nbands, xoff, yoff, xsize, ysize) {
           out_xsize = xsize,
           out_ysize = ysize,
           as_list = TRUE
-        )
+        ),
+        config_options = config_options
       )
     },
     rate = purrr::rate_backoff(
