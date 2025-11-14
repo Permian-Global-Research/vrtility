@@ -138,11 +138,30 @@ get_nodata_value <- function(data_type) {
 #' @return numeric vector of block size c(xsize, ysize)
 #' @keywords internal
 #' @noRd
-src_block_size <- function(src, band = 1) {
+src_block_size <- function(
+  src,
+  band = 1,
+  co_format = TRUE,
+  mingdal = gdalraster::gdal_compute_version(3, 10, 0)
+) {
   b1ds <- methods::new(gdalraster::GDALRaster, src)
   on.exit(b1ds$close(), add = TRUE)
   blksize <- b1ds$getBlockSize(band)
   b1ds$close()
+
+  if (co_format) {
+    if (mingdal <= gdalraster::gdal_version_num()) {
+      blksize <- c(
+        "-co",
+        glue::glue("BLOCKXSIZE={blksize[1]}"),
+        "-co",
+        glue::glue("BLOCKYSIZE={blksize[2]}")
+      )
+    } else {
+      blksize <- NULL
+    }
+  }
+
   return(blksize)
 }
 
