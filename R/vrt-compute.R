@@ -499,6 +499,11 @@ vrt_compute.vrt_collection <- function(
 }
 
 #' Set datetime metadata on a gdalraster object
+#' @param ras A path (normally) or an open gdalraster object.
+#' @param dttm A character vector of date-times
+#' @param .median A logical indicating whether to set the median date-time
+#' where multiple date-times are provided.
+#' @return Invisibly returns the date-time(s) set as character vector.
 #' @noRd
 #' @keywords internal
 set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
@@ -519,16 +524,22 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
     dttm <- as.character(lubdttm)
   }
 
-  ds <- tryCatch(
-    methods::new(gdalraster::GDALRaster, ras, read_only = FALSE),
-    error = function(e) {
-      cli::cli_warn(
-        "Re-opening GDALRaster in read-only mode to set metadata"
-      )
-      methods::new(gdalraster::GDALRaster, ras, read_only = TRUE)
-    }
-  )
-  on.exit(ds$close(), add = TRUE)
+  if (!inherits(ras, "Rcpp_GDALRaster")) {
+    ds <- tryCatch(
+      methods::new(gdalraster::GDALRaster, ras, read_only = FALSE),
+      error = function(e) {
+        cli::cli_warn(
+          "Re-opening GDALRaster in read-only mode to set metadata"
+        )
+        methods::new(gdalraster::GDALRaster, ras, read_only = TRUE)
+      }
+    )
+    on.exit(ds$close(), add = TRUE)
+  } else {
+    ds <- ras
+  }
+  # browser()
+
   ds$setMetadataItem(
     0,
     mdi_name = "datetime",
@@ -536,7 +547,7 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
     domain = ""
   )
 
-  ds$close()
+  # ds$close()
 
   return(invisible(dttm))
 }

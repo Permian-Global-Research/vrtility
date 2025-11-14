@@ -151,7 +151,7 @@ multiband_reduce.vrt_collection_warped <- function(
   set_desc_scale_offset(x, ds, rt)
 
   if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
-    x$date_time <- set_dttm_metadata(outfile, x$date_time)
+    x$date_time <- set_dttm_metadata(ds, x$date_time)
   }
 
   if (mirai::daemons_set()) {
