@@ -505,7 +505,11 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
   if (length(dttm) == 1) {
     .median <- FALSE
   }
-  lubdttm <- lubridate::as_datetime(dttm)
+  lubdttm <- suppressWarnings(lubridate::as_datetime(dttm))
+
+  if (all(is.na(lubdttm))) {
+    return(invisible())
+  }
 
   if (.median) {
     lubdttm <- median(lubdttm, na.rm = TRUE) |>
