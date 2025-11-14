@@ -7,7 +7,17 @@ close_it <- function(ds) {
 multiband_tests <- function() {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
-  ex_collect <- vrt_collect(s2files)
+  ex_collect <- vrt_collect(
+    s2files,
+    datetimes = c(
+      # these dates are made up btw.
+      "2024-01-01",
+      "2024-03-01",
+      "2024-05-01",
+      "2024-07-01",
+      "2024-09-01"
+    )
+  )
   t_block <- ex_collect[[1]][[1]]
 
   ex_collect_mask <- ex_collect |>
@@ -32,6 +42,8 @@ multiband_tests <- function() {
   expect_true(all(file.exists(ex_geomed_weizfeld)))
   ds <- new(gdalraster::GDALRaster, ex_geomed_weizfeld)
   vals <- gdalraster::read_ds(ds)
+
+  expect_equal(ds$getMetadataItem(0, "datetime", ""), "median date: 2024-05-01")
   expect_gt(sum(vals, na.rm = TRUE), 635000000)
   close_it(ds)
 
