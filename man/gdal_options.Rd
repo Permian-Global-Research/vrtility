@@ -35,8 +35,7 @@ gdal_creation_options(
   output_format = NULL,
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
-  NUM_THREADS =
-    as.character(ceiling(gdalraster::get_num_cpus()/pmax(vrtility::n_daemons(), 1))),
+  NUM_THREADS = if (identical(.Platform$OS.type, "windows")) NULL else 1,
   BIGTIFF = "IF_NEEDED",
   TILED = if (identical(output_format, "COG")) NULL else "YES",
   BLOCKXSIZE = NULL,
