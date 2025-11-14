@@ -56,10 +56,7 @@ singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
   outfile = fs::file_temp(ext = "tif"),
-  config_options = gdal_config_opts(
-    GDAL_HTTP_MAX_RETRY = "3",
-    GDAL_HTTP_RETRY_DELAY = "20"
-  ),
+  config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
   nsplits = NULL,
@@ -95,17 +92,18 @@ singleband_m2m.vrt_collection_warped <- function(
     merge(data.frame(band_n = seq_len(rt$nbands)))
 
   # Initialize output raster
-  uniq_pths <- purrr::imap_chr(
+  dttm_vec <- purrr::imap_chr(
     unname(x[[1]]),
     function(.x, .y) {
       if (nchar(.x$date_time) > 0) .x$date_time else as.character(.y)
     }
-  ) |>
-    unique_fp(outfile)
+  )
+  uniq_pths <- unique_fp(dttm_vec, outfile)
 
-  ds_list <- purrr::map(
+  ds_list <- purrr::map2(
     uniq_pths,
-    function(.x) {
+    dttm_vec,
+    function(.x, .y) {
       nr <- suppressMessages(gdalraster::rasterFromRaster(
         rt$vrt_template,
         normalizePath(.x, mustWork = FALSE),
@@ -116,6 +114,10 @@ singleband_m2m.vrt_collection_warped <- function(
       ))
       ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
       set_desc_scale_offset(x, ds, rt)
+      if (nzchar(.y)) {
+        set_dttm_metadata(nr, .y, .median = FALSE)
+      }
+
       return(ds)
     }
   )
@@ -132,7 +134,8 @@ singleband_m2m.vrt_collection_warped <- function(
       blocks_df,
       x,
       ds_list,
-      m2m_fun = m2m_fun
+      m2m_fun = m2m_fun,
+      config_options = config_options
     )
   } else {
     sequential_gdalreader_singleband_m2m_read_write(
@@ -140,16 +143,12 @@ singleband_m2m.vrt_collection_warped <- function(
       x,
       ds_list,
       m2m_fun = m2m_fun,
-      quiet = quiet
+      quiet = quiet,
+      config_options = config_options
     )
   }
 
   if (!recollect) {
-    purrr::walk2(uniq_pths, x$date_time, function(result, dttm) {
-      if (nzchar(dttm)) {
-        set_dttm_metadata(result, dttm, .median = FALSE)
-      }
-    })
     return(uniq_pths)
   }
 
@@ -222,7 +221,7 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' @keywords internal
 single_band_reader <- function() {
   purrr::insistently(
-    function(blk, block_params) {
+    function(blk, block_params, config_options) {
       vrtfile <- blk$vrt_src
       inds <- methods::new(gdalraster::GDALRaster, vrtfile)
       on.exit(inds$close(), add = TRUE)
@@ -235,7 +234,8 @@ single_band_reader <- function() {
           ysize = block_params[["nYSize"]],
           out_xsize = block_params[["nXSize"]],
           out_ysize = block_params[["nYSize"]]
-        )
+        ),
+        config_options = config_options
       )
     },
     rate = purrr::rate_backoff(

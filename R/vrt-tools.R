@@ -57,7 +57,10 @@ set_vrt_metadata <- function(x, keys, values, as_file = FALSE) {
   v_assert_length(keys, "keys", length(values))
   mvrt <- xml2::read_xml(x)
 
-  metadchild <- xml2::xml_add_child(mvrt, "Metadata")
+  metadchild <- xml2::xml_find_first(mvrt, ".//Metadata")
+  if (is.na(metadchild)) {
+    metadchild <- xml2::xml_add_child(mvrt, "Metadata")
+  }
   purrr::walk2(
     keys,
     values,
@@ -189,7 +192,10 @@ vrt_subset_bands <- function(
   gdalraster::buildVRT(
     output_vrt,
     unique(mask_src),
-    cl_arg = c(src_bands_chr),
+    cl_arg = c(
+      src_bands_chr,
+      src_block_size(unique(mask_src)[1])
+    ),
     quiet = TRUE
   )
   if (return_type == "xml") {
@@ -238,10 +244,17 @@ vrt_to_vrt <- function(
 ) {
   inds <- methods::new(gdalraster::GDALRaster, in_vrt)
   on.exit(inds$close())
-  bt <- block_template(inds) # to check it opens
+  bt <- block_template(inds)
 
-  gdalraster::buildVRT(out_vrt, in_vrt, cl_arg = cl_arg, quiet = quiet)
-
+  gdalraster::buildVRT(
+    out_vrt,
+    in_vrt,
+    cl_arg = c(
+      cl_arg,
+      src_block_size(in_vrt[1])
+    ),
+    quiet = quiet
+  )
   set_vrt_descriptions(out_vrt, bt$assets, as_file = TRUE)
 
   # for consistency we should always set this even if ""

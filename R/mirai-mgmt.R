@@ -47,3 +47,24 @@ daemon_setup <- function(gdal_config = NULL) {
   }
   invisible(mopts)
 }
+
+#' @description Load vrtility python environment in mirai daemons
+#' @param py_pkgs A character vector of python packages to ensure are loaded
+#' in the mirai daemons.
+#' @param ... Additional arguments passed to \code{\link{vrtility_py_require}}
+#' @rdname mirai-mgmt
+#' @export
+daemons_load_vrtility <- function(py_pkgs = "numpy", ...) {
+  if (mirai::daemons_set()) {
+    evw <- mirai::everywhere(
+      vrtility_py_require(packages = py_pkgs, ...),
+      vrtility_py_require = vrtility_py_require
+    )
+    invisible(evw[])
+  } else {
+    cli::cli_alert_warning(
+      "No mirai daemons are running - cannot load vrtility python environment."
+    )
+  }
+  return(invisible())
+}

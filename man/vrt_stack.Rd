@@ -8,7 +8,17 @@
 \usage{
 vrt_stack(x, ...)
 
-\method{vrt_stack}{vrt_collection}(x, quiet = TRUE, ...)
+\method{vrt_stack}{vrt_collection}(
+  x,
+  quiet = TRUE,
+  lazy = TRUE,
+  engine = "warp",
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL,
+    NUM_THREADS = 1, TILED = "NO"),
+  warp_options = gdalwarp_options(num_threads = 1),
+  config_options = gdal_config_opts(GDAL_NUM_THREADS = 1, GDAL_HTTP_MULTIPLEX = "NO"),
+  ...
+)
 
 \method{print}{vrt_stack}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, ...)
 }
@@ -18,6 +28,21 @@ vrt_stack(x, ...)
 \item{...}{Additional arguments not used}
 
 \item{quiet}{Logical. If TRUE, suppress GDAL progress bar}
+
+\item{lazy}{If TRUE, the incoming blocks will remain virtual. if FALSE,
+vrt_compute is called and the data is materialised to disk. using FALSE is
+significantly faster for remote data sources.}
+
+\item{engine}{A character vector of the engine to use for processing the
+raster data. See details.}
+
+\item{creation_options}{A character vector of options to pass to the
+the gdal "engine".}
+
+\item{warp_options}{A character vector of options to pass to gdalwarp}
+
+\item{config_options}{A character vector of options to set in the GDAL
+environment}
 
 \item{xml}{A logical indicating whether to print the XML}
 

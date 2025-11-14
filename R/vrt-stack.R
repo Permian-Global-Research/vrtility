@@ -1,6 +1,6 @@
 #' Stack VRT files from a vrt_collection object
 #' @param x A vrt_collection object
-#' @param ... Additional arguments passed to methods
+#' @param ... Additional arguments passed to \code{vrt_compute()} if needed
 #' @details This function stacks VRT files from a vrt_collection object into a
 #' single VRT file containing multiple layers for each RasterBand. The VRT
 #' files are stacked in the order they are provided in the vrt_collection
@@ -23,9 +23,44 @@ vrt_stack.default <- function(x, ...) {
 
 #' @export
 #' @param quiet Logical. If TRUE, suppress GDAL progress bar
+#' @param lazy If TRUE, the incoming blocks will remain virtual. if FALSE,
+#' vrt_compute is called and the data is materialised to disk. using FALSE is
+#' significantly faster for remote data sources.
+#' @inheritParams vrt_compute
 #' @rdname vrt_stack
-vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
+vrt_stack.vrt_collection <- function(
+  x,
+  quiet = TRUE,
+  lazy = TRUE,
+  engine = "warp",
+  creation_options = gdal_creation_options(
+    COMPRESS = "NONE",
+    PREDICTOR = NULL,
+    NUM_THREADS = 1, #"ALL_CPUS"
+    TILED = "NO"
+    # COPY_SRC_OVERVIEWS = "NO"
+  ),
+  warp_options = gdalwarp_options(num_threads = 1),
+  config_options = gdal_config_opts(
+    GDAL_NUM_THREADS = 1,
+    GDAL_HTTP_MULTIPLEX = "NO" #,
+    # GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "NO"
+  ),
+  ...
+) {
   assert_srs_len(x)
+
+  if (!lazy) {
+    x <- vrt_compute(
+      x,
+      engine = engine,
+      recollect = TRUE,
+      creation_options = creation_options,
+      warp_options = warp_options,
+      config_options = config_options,
+      ...
+    )
+  }
 
   vrt_paths <- purrr::map_chr(
     x[[1]],
@@ -42,6 +77,7 @@ vrt_stack.vrt_collection <- function(x, quiet = TRUE, ...) {
   suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
+    cl_arg = src_block_size(vrt_paths[1]),
     quiet = quiet
   ))
 
@@ -93,6 +129,7 @@ build_vrt_stack <- function(
   v_assert_valid_schema(x)
   # read and verify modified VRT
   gdr <- methods::new(gdalraster::GDALRaster, x)
+  on.exit(gdr$close(), add = TRUE)
   ras_count <- gdr$getRasterCount()
   assets <- purrr::map_chr(
     seq_len(ras_count),
@@ -122,6 +159,8 @@ build_vrt_stack <- function(
     maskfun = maskfun,
     warped = warped
   )
+
+  gdr$close()
 
   if (warped) {
     warped <- "vrt_stack_warped"

@@ -113,7 +113,10 @@ vrt_collect.character <- function(
       tf,
       .x,
       quiet = TRUE,
-      cl_arg = band_args
+      cl_arg = c(
+        band_args,
+        src_block_size(.x)
+      )
     )
 
     ds <- methods::new(gdalraster::GDALRaster, .x)
@@ -240,7 +243,8 @@ vrt_collect.doc_items <- function(
               tf,
               srcs,
               cl_arg = c(
-                "-separate"
+                "-separate",
+                src_block_size(srcs[1])
               ),
               quiet = TRUE
             )
@@ -269,7 +273,8 @@ vrt_collect.doc_items <- function(
       },
       set_vrt_descriptions = set_vrt_descriptions,
       set_vrt_metadata = set_vrt_metadata,
-      build_vrt_block = build_vrt_block
+      build_vrt_block = build_vrt_block,
+      src_block_size = src_block_size
     )
   )
 

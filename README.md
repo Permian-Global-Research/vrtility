@@ -96,11 +96,12 @@ Here is a simple example where we:
 
 ``` r
 library(vrtility)
-#> ✔ Using GDAL version 3.11.3
+#> ✔ Using GDAL version 3.12.0
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   vrtility::set_gdal_cache_max()
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(8)
+daemons_load_vrtility()
 
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (144.3 -7.6)",
@@ -131,16 +132,16 @@ system.time({
       mask_values = c(0, 1, 2, 3),
       build_mask_pixfun = build_bitmask()
     ) |>
-    vrt_set_scale(scale_value = 0.0001, offset = -0.1) |>
     vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
-    vrt_stack() |>
+    vrt_stack(lazy = FALSE) |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
+    # vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL >= 3.12.0
     vrt_compute(
       engine = "gdalraster"
     )
 })
 #>    user  system elapsed 
-#>   2.238   0.403  19.141
+#>   1.969   0.273   7.540
 
 
 plot_raster_src(

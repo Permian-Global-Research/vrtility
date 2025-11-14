@@ -1,15 +1,10 @@
 #' Generate params from a raster file
 #' @param x character path to the raster file
-#' @param temp_vrt_dir character path to the temporary VRT directory
-#' @param apply_scale logical indicating whether to apply the scale values
-#' (if they exist) to the data
 #' @return list containing the raster parameters
 #' @keywords internal
 #' @noRd
 raster_template_params <- function(
-  x,
-  temp_vrt_dir = getOption("vrt.cache"),
-  apply_scale = TRUE
+  x
 ) {
   vrt_template <- x$vrt_src
   tds <- methods::new(gdalraster::GDALRaster, vrt_template)
@@ -28,6 +23,8 @@ raster_template_params <- function(
     ~ tds$getOffset(.x)
   )
   data_type <- tds$getDataTypeName(1)
+
+  tds$close()
 
   return(list(
     vrt_template = vrt_template,
@@ -132,5 +129,56 @@ get_nodata_value <- function(data_type) {
     "CFloat32" = NA_real_,
     "CFloat64" = NA_real_,
     0 # Default fallback
+  )
+}
+
+#' get source block size from raster file
+#' @param src character path to raster file
+#' @param band numeric band number
+#' @return numeric vector of block size c(xsize, ysize)
+#' @keywords internal
+#' @noRd
+src_block_size <- function(
+  src,
+  band = 1,
+  co_format = TRUE,
+  mingdal = gdalraster::gdal_compute_version(3, 10, 0)
+) {
+  b1ds <- methods::new(gdalraster::GDALRaster, src)
+  on.exit(b1ds$close(), add = TRUE)
+  blksize <- b1ds$getBlockSize(band)
+  b1ds$close()
+
+  if (co_format) {
+    if (mingdal <= gdalraster::gdal_version_num()) {
+      blksize <- c(
+        "-co",
+        glue::glue("BLOCKXSIZE={blksize[1]}"),
+        "-co",
+        glue::glue("BLOCKYSIZE={blksize[2]}")
+      )
+    } else {
+      blksize <- NULL
+    }
+  }
+
+  return(blksize)
+}
+
+#' get source metadata from raster file
+#' @param src character path to raster file
+#' @return named character vector of metadata items
+#' @keywords internal
+#' @noRd
+read_src_metadata <- function(src) {
+  tds <- methods::new(gdalraster::GDALRaster, src)
+  on.exit(tds$close(), add = TRUE)
+  tmp_metadata <- tds$getMetadata(0, "")
+  tds$close()
+  mtd_name_splt <- strsplit(tmp_metadata, "=")
+
+  purrr::set_names(
+    purrr::map_chr(mtd_name_splt, function(x) x[2]),
+    purrr::map_chr(mtd_name_splt, function(x) x[1])
   )
 }

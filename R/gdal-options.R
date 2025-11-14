@@ -38,10 +38,10 @@ gdal_config_opts <- function(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
-  GDAL_DISABLE_READDIR_ON_OPEN = "FALSE",
+  GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
   CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
-  GDAL_HTTP_MAX_RETRY = "3",
-  GDAL_HTTP_RETRY_DELAY = "5",
+  GDAL_HTTP_MAX_RETRY = "10",
+  GDAL_HTTP_RETRY_DELAY = "0.5",
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
@@ -50,7 +50,7 @@ gdal_config_opts <- function(
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
   CPL_VSIL_CURL_ALLOWED_EXTENSIONS = NULL,
-  CPL_VSIL_CURL_USE_HEAD = NULL,
+  CPL_VSIL_CURL_USE_HEAD = "YES",
   CPL_VSIL_CURL_CHUNK_SIZE = NULL,
   ...
 ) {
@@ -83,29 +83,44 @@ gdal_creation_options <- function(
   output_format = NULL,
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
-  NUM_THREADS = as.character(
-    ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
-  ),
+  NUM_THREADS = 1,
   BIGTIFF = "IF_NEEDED",
-  TILED = "YES",
-  BLOCKXSIZE = "128", # changed from 256
-  BLOCKYSIZE = "128",
-  COPY_SRC_OVERVIEWS = "YES",
+  TILED = if (identical(output_format, "COG")) NULL else "YES",
+  BLOCKXSIZE = NULL,
+  BLOCKYSIZE = NULL,
+  COPY_SRC_OVERVIEWS = if (identical(output_format, "COG")) NULL else "YES",
   cli_format = FALSE,
   ...
 ) {
+  #
+  if (!is.null(output_format)) {
+    check_output_format(output_format)
+  }
+
   co_args <- c(as.list(rlang::current_env()), rlang::dots_list(...))
+  co_args <- co_args[!purrr::map_lgl(co_args, is.null)]
 
   # maybe just a windows thing..
-  if (is.na(co_args$NUM_THREADS)) {
-    co_args$NUM_THREADS <- "1"
+  if (!is.null(co_args$NUM_THREADS)) {
+    if (is.na(co_args$NUM_THREADS)) {
+      co_args$NUM_THREADS <- "1"
+    }
   }
 
   keep_names <- setdiff(names(co_args), c("output_format", "cli_format"))
   co_args <- co_args[keep_names]
-  co_args <- paste0(names(co_args), "=", co_args)
 
-  if (cli_format) {
+  no_co <- rlang::is_empty(co_args)
+
+  if (no_co) {
+    co_args <- character(0)
+  }
+
+  if (!no_co) {
+    co_args <- paste0(names(co_args), "=", co_args)
+  }
+
+  if (cli_format && !no_co) {
     co_args <- as.character(rbind(
       "-co",
       co_args
@@ -140,9 +155,7 @@ gdal_creation_options <- function(
 gdalwarp_options <- function(
   multi = FALSE,
   warp_memory = "50%",
-  num_threads = as.character(
-    ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
-  ),
+  num_threads = if (identical(.Platform$OS.type, "windows")) NULL else 1,
   unified_src_nodata = c("NO", "YES", "PARTIAL")
 ) {
   unified_src_nodata <- rlang::arg_match(unified_src_nodata)
@@ -315,4 +328,43 @@ check_muparser <- function() {
     return(FALSE)
   }
   return("muparser" %in% strsplit(vrt_expr_dialects, ",")[[1]])
+}
+
+
+#' Get the output format from GDAL creation options
+#' @param creation_options A character vector of GDAL creation options created
+#' with \code{\link{gdal_creation_options}}
+#' @return Character string of the output format, or NULL if not specified
+#' @noRd
+#' @keywords internal
+format_options_for_create <- function(creation_options) {
+  of_index <- which(creation_options == "-of")
+  if (length(of_index) == 0) {
+    return(list(fmt = NULL, opts = creation_options))
+  }
+  return(list(
+    fmt = creation_options[of_index + 1],
+    opts = creation_options[-c(of_index, of_index + 1)]
+  ))
+}
+
+
+#' function to check output format
+#' @param fmt output format
+#' @return NULL, but will error if the format is unsupported
+#' @noRd
+#' @keywords internal
+check_output_format <- function(fmt) {
+  if (fmt == "MEM") {
+    cli::cli_abort(
+      c(
+        "Unfortunately the MEM format is not natively supported - because
+    of the need to serialize rasters from asynchronous processes.",
+        "i" = "If you have any suggestions on how to implement this, please
+    open an issue on GitHub."
+      ),
+      class = "unsupported_gdal_format_error"
+    )
+  }
+  rlang::arg_match(fmt, gdal_raster_drivers(TRUE))
 }

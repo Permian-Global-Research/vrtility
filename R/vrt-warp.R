@@ -104,12 +104,21 @@ vrt_warp.vrt_block <- function(
   resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
 
   tf <- x$vrt_src
-
+  # browser()
   vrtwl <- purrr::map2_chr(
     seq_along(assets),
     resamp_methods,
     function(.x, .y) {
-      vrt_to_warped_vrt(tf, .x, t_srs, te, tr, .y, getOption("vrt.cache"))
+      vrt_to_warped_vrt(
+        tf,
+        .x,
+        t_srs,
+        te,
+        tr,
+        .y,
+        s_srs = x$srs,
+        temp_vrt_dir = getOption("vrt.cache")
+      )
     }
   )
 
@@ -119,7 +128,11 @@ vrt_warp.vrt_block <- function(
     outtf,
     vrtwl,
     cl_arg = c(
-      "-separate"
+      "-separate",
+      "-te",
+      te,
+      if (!is.null(tr)) c("-tr", tr) else NULL,
+      src_block_size(vrtwl[1])
     ),
     quiet = TRUE
   )
@@ -231,6 +244,7 @@ vrt_to_warped_vrt <- function(
   te,
   tr = NULL,
   resampling = "bilinear",
+  s_srs = NULL,
   temp_vrt_dir = getOption("vrt.cache")
 ) {
   tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
@@ -246,7 +260,8 @@ vrt_to_warped_vrt <- function(
       resampling,
       "-te",
       te,
-      if (!is.null(tr)) c("-tr", tr) else NULL
+      if (!is.null(tr)) c("-tr", tr) else NULL,
+      src_block_size(src)
     ),
     config_options = gdal_config_opts(),
     quiet = TRUE

@@ -299,7 +299,7 @@ band_level_median <- vrt_warp(
   tr = c(30, 30),
   resampling = "bilinear"
 ) |>
-  vrt_stack() |>
+  vrt_stack(lazy=FALSE) |>
   vrt_set_py_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(fs::file_temp(ext = ".tif"),
     engine = "gdalraster"

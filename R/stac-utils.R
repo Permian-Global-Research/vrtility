@@ -534,7 +534,6 @@ sign_mpc_items <- function(
   token_cache_file <- set_token_cache(collection)
 
   reuse_token <- is_token_valid(token_cache_file)
-  # browser()
 
   collection_token <- read_token(
     reuse_token,

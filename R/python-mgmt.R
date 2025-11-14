@@ -55,12 +55,16 @@ set_py_env_vals <- function() {
 #' Call code that is executed in an environment with access to the vrtility
 #' python environment
 #' @param code The code to execute
+#' @param config_options A named character vector of configuration options to
+#' set in the environment before executing the code. eg. generated from
+#' \code{\link{gdal_config_opts}}
 #' @export
 #' @rdname vrtility_python
 #' @examples
 #' compute_with_py_env(print("Hello World"))
 compute_with_py_env <- function(
-  code
+  code,
+  config_options = NULL
 ) {
   # First, ensure we have the correct paths
   py_bin <- Sys.getenv("VRTILITY_PY_EXECUTABLE", unset = NA)
@@ -75,9 +79,21 @@ compute_with_py_env <- function(
 
   py_env <- dirname(dirname(py_bin))
 
+  # ensure we dont pass out format
+  config_options <- format_options_for_create(config_options)$opts
+
+  # Parse config_options if they're in "KEY=VALUE" format (unnamed vector)
+  if (!is.null(config_options) && is.null(names(config_options))) {
+    # Split "KEY=VALUE" strings into named vector
+    config_list <- strsplit(config_options, "=", fixed = TRUE)
+    config_options <- purrr::map_chr(config_list, ~ .x[2]) |>
+      purrr::set_names(purrr::map_chr(config_list, ~ .x[1]))
+  }
+
   # Modified environment setup
   withr::with_envvar(
     new = c(
+      config_options,
       GDAL_VRT_ENABLE_PYTHON = "YES",
       RETICULATE_PYTHON = py_bin,
       PATH = paste(fs::path(py_env, "bin"), Sys.getenv("PATH"), sep = ":")

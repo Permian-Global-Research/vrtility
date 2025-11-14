@@ -106,20 +106,14 @@ print(l8l9_vrt)
 
 bbox_proj <- bbox_to_projected(bbox, l8l9_vrt$srs)
 
-l8l9_vrt_warped <- vrt_warp(
+l8l9file <- vrt_warp(
   l8l9_vrt,
   t_srs = attr(bbox_proj, "wkt"),
   te = bbox_proj,
   tr = c(30, 30)
 ) |>
-  vrt_stack()
+  vrt_stack(lazy=FALSE)
 
-
-l8l9file <- vrt_compute(
-  l8l9_vrt_warped,
-  outfile = fs::file_temp(ext = "tif"),
-  engine = "gdalraster"
-)
 ```
 
 ## Plotting the data

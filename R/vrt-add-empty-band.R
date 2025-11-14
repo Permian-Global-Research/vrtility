@@ -65,19 +65,19 @@ vrt_add_empty_band.vrt_block <- function(
       "ZSTD_LEVEL=1",
       "PREDICTOR=2",
       "TILED=YES",
-      glue::glue(
-        "BLOCKXSIZE={inblock$getBlockSize(1)[1]}"
-      ),
-      glue::glue(
-        "BLOCKYSIZE={inblock$getBlockSize(1)[2]}"
-      ),
       "BIGTIFF=IF_NEEDED"
     ),
     init = inblock$getNoDataValue(1)
   ))
 
   eb_vrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
-  gdalraster::buildVRT(eb_vrt, empty_band_src, quiet = TRUE)
+
+  gdalraster::buildVRT(
+    eb_vrt,
+    empty_band_src,
+    cl_arg = src_block_size(empty_band_src),
+    quiet = TRUE
+  )
 
   ebxml <- xml2::read_xml(eb_vrt)
   ebband <- xml2::xml_find_first(ebxml, ".//VRTRasterBand")
