@@ -9,7 +9,7 @@ Print a vrt_block object"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,17 @@ Print a vrt_block object"></head><body>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_stack</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_collection'</span></span>
-<span><span class="fu">vrt_stack</span><span class="op">(</span><span class="va">x</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">vrt_stack</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  lazy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  engine <span class="op">=</span> <span class="st">"warp"</span>,</span>
+<span>  creation_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_creation_options</a></span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"NONE"</span>, PREDICTOR <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    NUM_THREADS <span class="op">=</span> <span class="fl">1</span>, TILED <span class="op">=</span> <span class="st">"NO"</span><span class="op">)</span>,</span>
+<span>  warp_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdalwarp_options</a></span><span class="op">(</span>num_threads <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  config_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_opts</a></span><span class="op">(</span>GDAL_NUM_THREADS <span class="op">=</span> <span class="fl">1</span>, GDAL_HTTP_MULTIPLEX <span class="op">=</span> <span class="st">"NO"</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_stack'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, xml <span class="op">=</span> <span class="cn">FALSE</span>, pixfun <span class="op">=</span> <span class="cn">FALSE</span>, maskfun <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -79,6 +89,31 @@ Print a vrt_block object"></head><body>
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p>Logical. If TRUE, suppress GDAL progress bar</p></dd>
+
+
+<dt id="arg-lazy">lazy<a class="anchor" aria-label="anchor" href="#arg-lazy"></a></dt>
+<dd><p>If TRUE, the incoming blocks will remain virtual. if FALSE,
+vrt_compute is called and the data is materialised to disk. using FALSE is
+significantly faster for remote data sources.</p></dd>
+
+
+<dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
+<dd><p>A character vector of the engine to use for processing the
+raster data. See details.</p></dd>
+
+
+<dt id="arg-creation-options">creation_options<a class="anchor" aria-label="anchor" href="#arg-creation-options"></a></dt>
+<dd><p>A character vector of options to pass to the
+the gdal "engine".</p></dd>
+
+
+<dt id="arg-warp-options">warp_options<a class="anchor" aria-label="anchor" href="#arg-warp-options"></a></dt>
+<dd><p>A character vector of options to pass to gdalwarp</p></dd>
+
+
+<dt id="arg-config-options">config_options<a class="anchor" aria-label="anchor" href="#arg-config-options"></a></dt>
+<dd><p>A character vector of options to set in the GDAL
+environment</p></dd>
 
 
 <dt id="arg-xml">xml<a class="anchor" aria-label="anchor" href="#arg-xml"></a></dt>
@@ -114,7 +149,7 @@ object. If this is derived from a rstac object, the order should be ordered by d
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

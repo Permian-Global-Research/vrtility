@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -183,7 +183,6 @@ collection is returned rather than file paths.</p>
 <span>      tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
-<span>      engine <span class="op">=</span> <span class="st">"gdalraster"</span>,</span>
 <span>      recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
@@ -281,10 +280,10 @@ the results:</p>
 <span><span class="co">#&gt; VRT XML: [hidden]</span></span>
 <span><span class="co">#&gt;   run print(x, xml = TRUE) to view</span></span>
 <span><span class="co">#&gt; Pixel Function:</span></span>
-<span><span class="co">#&gt; ndvi ~ ((B08_10m * 0.0001) - (B04_10m * 0.0001))/((B08_10m * 0.0001) + (B04_10m * 0.0001))                                        </span></span>
-<span><span class="co">#&gt; ndti ~ ((B04_10m * 0.0001) - (B03_10m * 0.0001))/((B04_10m * 0.0001) + (B03_10m * 0.0001))                                        </span></span>
-<span><span class="co">#&gt; evi ~ 2.5 * ((B08_10m * 0.0001) - (B04_10m * 0.0001))/((B08_10m * 0.0001) + 6 * (B04_10m * 0.0001) - 7.5 * (B02_10m * 0.0001) + 1)</span></span>
-<span><span class="co">#&gt; vgnirbi ~ ((B03_10m * 0.0001) - (B08_10m * 0.0001))/((B03_10m * 0.0001) + (B08_10m * 0.0001))</span></span>
+<span><span class="co">#&gt; ndvi ~ ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + (B04_10m * 0.0001 + -0.1))                                               </span></span>
+<span><span class="co">#&gt; ndti ~ ((B04_10m * 0.0001 + -0.1) - (B03_10m * 0.0001 + -0.1))/((B04_10m * 0.0001 + -0.1) + (B03_10m * 0.0001 + -0.1))                                               </span></span>
+<span><span class="co">#&gt; evi ~ 2.5 * ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + 6 * (B04_10m * 0.0001 + -0.1) - 7.5 * (B02_10m * 0.0001 + -0.1) + 1)</span></span>
+<span><span class="co">#&gt; vgnirbi ~ ((B03_10m * 0.0001 + -0.1) - (B08_10m * 0.0001 + -0.1))/((B03_10m * 0.0001 + -0.1) + (B08_10m * 0.0001 + -0.1))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  VRT SRS: </span></span>
@@ -323,7 +322,7 @@ the results:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

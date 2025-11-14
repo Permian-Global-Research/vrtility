@@ -1,0 +1,265 @@
+# EOPF Sentinel-2 Level-2A
+
+This vignette demonstrates a modern workflow for processing Sentinel-2
+Level-2A data from the EOPF (Earth Observation Processing Framework)
+STAC API.
+
+The Earth Observation data landscape is rapidly evolving, with EOPF
+positioning itself as a key component of this transformation. There is a
+strong industry movement towards adopting Zarr, a modern cloud-native
+data format designed for efficient storage and access of large
+multi-dimensional arrays. While the tooling ecosystem around Zarr and
+EOPF-Zarr specifically is still maturing, this vignette provides a
+practical example of working with these data formats using the
+`vrtility` package.
+
+This vignette also demonstrates contemporary approaches to cloud-masking
+and image compositing using
+[OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask) and the
+geometric median algorithm, respectively.
+
+This example prioritizes data quality and modern processing methods over
+raw speed, demonstrating how to generate analysis-ready data using
+contemporary cloud-native workflows.
+
+We also demonstrate a powerful new feature of `vrtility`: the ability to
+create derived bands using
+[`vrt_derived_block()`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md).
+This feature enables you to generate spectral indices (such as NDVI and
+EVI) and other derived metrics directly within the VRT framework. Under
+the hood, it uses [muparser](https://github.com/beltoforion/muparser)
+expressions executed through VRT pixel functions, providing efficient
+computation without requiring intermediate file storage.
+
+## Prerequisites
+
+This workflow requires specific system dependencies that may need
+additional setup:
+
+1.  **EOPFZARR GDAL Plugin**: You’ll need to build and install the
+    [EOPFZARR
+    plugin](https://github.com/EOPF-Sample-Service/GDAL-ZARR-EOPF) to
+    read EOPF-Zarr formatted data.
+
+2.  **muparser Support**: Your GDAL installation must include muparser
+    support for derived band calculations. You can verify this by
+    running:
+    [`vrtility::check_muparser()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
+
+## Query the EOPF STAC API
+
+This example demonstrates the standard workflow for discovering and
+filtering satellite imagery through a STAC (SpatioTemporal Asset
+Catalog) API. We’ll query the EOPF STAC collection and apply filters to
+obtain the specific datasets we need.
+
+The process involves: 1. Querying the STAC collection for available
+imagery 2. Filtering by cloud coverage to ensure data quality 3.
+Applying coverage filters to guarantee sufficient spatial overlap
+
+In this example, we’re targeting a bounding box around Copenhagen,
+Denmark, and using
+[`stac_coverage_filter()`](https://permian-global-research.github.io/vrtility/reference/stac_utilities.md)
+to ensure we only retrieve images with adequate coverage of our area of
+interest.
+
+``` r
+library(vrtility)
+
+bbox <- gdalraster::bbox_from_wkt(
+  wkt = "POINT (12.56 55.67)",
+  extend_x = 0.3,
+  extend_y = 0.2
+)
+
+te <- bbox_to_projected(bbox)
+trs <- attr(te, "wkt")
+
+eopf_s2 <- stac_query(
+  bbox = bbox,
+  stac_source = "https://stac.core.eopf.eodc.eu/",
+  collection = "sentinel-2-l2a",
+  start_date = "2025-05-01",
+  end_date = "2025-07-30"
+)
+
+eopf_filter <- rstac::assets_select(
+  eopf_s2,
+  asset_names = c("B02_10m", "B03_10m", "B04_10m", "B08_10m")
+) |>
+  stac_cloud_filter(max_cloud_cover = 30) |>
+  stac_coverage_filter(bbox, min_coverage = 0.5)
+```
+
+## Download and warp the images
+
+Here we virtually warp the images and then download them to disk using
+multiple processes within an isolated set of mirai daemons. Note that we
+call
+[`mirai::daemons()`](https://mirai.r-lib.org/reference/daemons.html)
+within the [`with()`](https://rdrr.io/r/base/with.html) function to
+ensure that the daemons are properly cleaned up after use.
+
+Critically, we must specify the `driver = "EOPFZARR"` argument in
+[`vrt_collect()`](https://permian-global-research.github.io/vrtility/reference/vrt_collect.md)
+because GDAL will, by default, attempt to read the files using the
+built-in Zarr driver, which does not fully support the EOPF-Zarr format.
+
+Since we want to continue processing this image set, we use the
+`recollect = TRUE` argument to ensure that a new VRT collection is
+returned rather than file paths.
+
+``` r
+with(mirai::daemons(10), {
+  eopf_s2_chgn <- vrt_collect(
+    eopf_filter,
+    vsi_prefix = "/vsicurl/",
+    driver = "EOPFZARR"
+  ) |>
+    vrt_warp(
+      t_srs = trs,
+      te = te,
+      tr = c(10, 10)
+    ) |>
+    vrt_compute(
+      recollect = TRUE
+    )
+})
+```
+
+## Cloud masking
+
+Here we generate an OmniCloudMask for each image in the VRT collection
+using the red, green, and NIR bands. The cloud mask identifies pixels
+affected by clouds, cloud shadows, and other atmospheric interference.
+We then apply this mask to filter out low-quality pixels and compute the
+results to disk.
+
+Note that we use `recollect = TRUE` to return a new VRT collection that
+references the newly created cloud-masked GeoTIFF files, allowing us to
+continue working with the data in a virtualized format for subsequent
+processing steps.
+
+``` r
+eopf_s2_mask <- eopf_s2_chgn |>
+  vrt_create_mask(
+    inbands = c(red = 3, green = 2, nir = 4),
+    maskfun = create_omnicloudmask()
+  ) |>
+  vrt_set_maskfun(
+    mask_band = "omnicloudmask",
+    mask_values = 1:3
+  ) |>
+  vrt_compute(
+    engine = "warp",
+    recollect = TRUE
+  )
+
+purrr::walk(
+  seq_len(eopf_s2_mask$n_items),
+  ~ plot(eopf_s2_mask, item = .x, c(3, 2, 1), na_col = "#ffa928")
+)
+```
+
+![](figure/cloud-masking-1.png)![](figure/cloud-masking-2.png)![](figure/cloud-masking-3.png)![](figure/cloud-masking-4.png)![](figure/cloud-masking-5.png)![](figure/cloud-masking-6.png)
+
+## Geometric median composite
+
+Here we generate a geometric median composite from the cloud-masked
+images using
+[`multiband_reduce()`](https://permian-global-research.github.io/vrtility/reference/multiband_reduce.md)
+with the
+[`geomedian()`](https://permian-global-research.github.io/vrtility/reference/multiband_reduce.md)
+function. The geometric median is a robust statistical method that
+effectively reduces noise and preserves spectral characteristics while
+minimizing the influence of outliers and residual cloud contamination.
+
+We use
+[`mirai::daemons()`](https://mirai.r-lib.org/reference/daemons.html) to
+parallelize the computation across multiple cores, significantly
+improving processing speed for this computationally intensive operation.
+
+``` r
+with(mirai::daemons(10), {
+  eopf_s2_median <- multiband_reduce(
+    eopf_s2_mask,
+    reduce_fun = geomedian(),
+    outfile = fs::file_temp(ext = ".tif"),
+    recollect = TRUE
+  )
+})
+
+plot(
+  eopf_s2_median,
+  c(3, 2, 1),
+  na_col = "#ffa928"
+)
+```
+
+![](figure/geomedian-1.png)
+
+## Derived bands
+
+Spectral indices are essential tools in remote sensing for extracting
+meaningful information from multi-band imagery. Common indices like NDVI
+(Normalized Difference Vegetation Index), EVI (Enhanced Vegetation
+Index), and others help identify vegetation health, water content, and
+other surface characteristics.
+
+The `vrtility` package provides
+[`vrt_derived_block()`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md)
+for efficient creation of these derived bands. This function uses R’s
+intuitive formula syntax to define band calculations, which are then
+automatically translated to muparser expressions and executed using VRT
+pixel functions. This approach provides memory-efficient computation
+without requiring intermediate file storage.
+
+In this example, we’ll calculate several useful indices and visualize
+the results:
+
+``` r
+exptest <- vrt_derived_block(
+  eopf_s2_median,
+  ndvi ~ (B08_10m - B04_10m) / (B08_10m + B04_10m),
+  ndti ~ (B04_10m - B03_10m) / (B04_10m + B03_10m),
+  evi ~ 2.5 * (B08_10m - B04_10m) / (B08_10m + 6 * B04_10m - 7.5 * B02_10m + 1),
+  vgnirbi ~ (B03_10m - B08_10m) / (B03_10m + B08_10m)
+)
+
+print(exptest, pixfun = TRUE)
+#> → <VRT Block>
+#> VRT XML: [hidden]
+#>   run print(x, xml = TRUE) to view
+#> Pixel Function:
+#> ndvi ~ ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + (B04_10m * 0.0001 + -0.1))                                               
+#> ndti ~ ((B04_10m * 0.0001 + -0.1) - (B03_10m * 0.0001 + -0.1))/((B04_10m * 0.0001 + -0.1) + (B03_10m * 0.0001 + -0.1))                                               
+#> evi ~ 2.5 * ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + 6 * (B04_10m * 0.0001 + -0.1) - 7.5 * (B02_10m * 0.0001 + -0.1) + 1)
+#> vgnirbi ~ ((B03_10m * 0.0001 + -0.1) - (B08_10m * 0.0001 + -0.1))/((B03_10m * 0.0001 + -0.1) + (B08_10m * 0.0001 + -0.1))
+#> 
+#> 
+#>  VRT SRS: 
+#> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+#> Bounding Box: -18980 -22270 18980 22310
+#> Pixel res: 10, 10
+#> Assets: ndvi, ndti, evi, vgnirbi
+#> No Data Value(s): NaN, NaN, NaN, NaN
+#> Date Time: 2025-06-21 UTC
+
+x <- vrt_compute(
+  exptest,
+  outfile = fs::file_temp(ext = ".tif")
+)
+
+
+purrr::walk(
+  1:4,
+  ~ plot_raster_src(
+    x,
+    band = .x,
+    minmax_def = if (.x == 3) c(-1, 1) else NULL,
+    col = grDevices::hcl.colors(10, "Inferno")
+  )
+)
+```
+
+![](figure/derived-bands-1.png)![](figure/derived-bands-2.png)![](figure/derived-bands-3.png)![](figure/derived-bands-4.png)

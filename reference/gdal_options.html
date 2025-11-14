@@ -11,7 +11,7 @@ performance, control caching, and manage HTTP requests (among other things)"></h
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,10 +63,10 @@ performance, control caching, and manage HTTP requests (among other things)</p>
 <span>  VSI_CACHE <span class="op">=</span> <span class="st">"TRUE"</span>,</span>
 <span>  VSI_CACHE_SIZE <span class="op">=</span> <span class="st">"268435456"</span>,</span>
 <span>  GDAL_NUM_THREADS <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  GDAL_DISABLE_READDIR_ON_OPEN <span class="op">=</span> <span class="st">"FALSE"</span>,</span>
+<span>  GDAL_DISABLE_READDIR_ON_OPEN <span class="op">=</span> <span class="st">"EMPTY_DIR"</span>,</span>
 <span>  CPL_VSIL_CURL_CACHE_SIZE <span class="op">=</span> <span class="st">"1342177280"</span>,</span>
-<span>  GDAL_HTTP_MAX_RETRY <span class="op">=</span> <span class="st">"3"</span>,</span>
-<span>  GDAL_HTTP_RETRY_DELAY <span class="op">=</span> <span class="st">"5"</span>,</span>
+<span>  GDAL_HTTP_MAX_RETRY <span class="op">=</span> <span class="st">"10"</span>,</span>
+<span>  GDAL_HTTP_RETRY_DELAY <span class="op">=</span> <span class="st">"0.5"</span>,</span>
 <span>  GDAL_HTTP_MULTIPLEX <span class="op">=</span> <span class="st">"YES"</span>,</span>
 <span>  GDAL_HTTP_VERSION <span class="op">=</span> <span class="st">"2"</span>,</span>
 <span>  GDAL_HTTP_MERGE_CONSECUTIVE_RANGES <span class="op">=</span> <span class="st">"YES"</span>,</span>
@@ -75,7 +75,7 @@ performance, control caching, and manage HTTP requests (among other things)</p>
 <span>  GDAL_MAX_DATASET_POOL_SIZE <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  GDAL_INGESTED_BYTES_AT_OPEN <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  CPL_VSIL_CURL_ALLOWED_EXTENSIONS <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  CPL_VSIL_CURL_USE_HEAD <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  CPL_VSIL_CURL_USE_HEAD <span class="op">=</span> <span class="st">"YES"</span>,</span>
 <span>  CPL_VSIL_CURL_CHUNK_SIZE <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -84,13 +84,12 @@ performance, control caching, and manage HTTP requests (among other things)</p>
 <span>  output_format <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  COMPRESS <span class="op">=</span> <span class="st">"DEFLATE"</span>,</span>
 <span>  PREDICTOR <span class="op">=</span> <span class="st">"2"</span>,</span>
-<span>  NUM_THREADS <span class="op">=</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/get_num_cpus.html" class="external-link">get_num_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">n_daemons</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  NUM_THREADS <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  BIGTIFF <span class="op">=</span> <span class="st">"IF_NEEDED"</span>,</span>
-<span>  TILED <span class="op">=</span> <span class="st">"YES"</span>,</span>
-<span>  BLOCKXSIZE <span class="op">=</span> <span class="st">"128"</span>,</span>
-<span>  BLOCKYSIZE <span class="op">=</span> <span class="st">"128"</span>,</span>
-<span>  COPY_SRC_OVERVIEWS <span class="op">=</span> <span class="st">"YES"</span>,</span>
+<span>  TILED <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">output_format</span>, <span class="st">"COG"</span><span class="op">)</span><span class="op">)</span> <span class="cn">NULL</span> <span class="kw">else</span> <span class="st">"YES"</span>,</span>
+<span>  BLOCKXSIZE <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  BLOCKYSIZE <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  COPY_SRC_OVERVIEWS <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">output_format</span>, <span class="st">"COG"</span><span class="op">)</span><span class="op">)</span> <span class="cn">NULL</span> <span class="kw">else</span> <span class="st">"YES"</span>,</span>
 <span>  cli_format <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
@@ -98,8 +97,7 @@ performance, control caching, and manage HTTP requests (among other things)</p>
 <span><span class="fu">gdalwarp_options</span><span class="op">(</span></span>
 <span>  multi <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  warp_memory <span class="op">=</span> <span class="st">"50%"</span>,</span>
-<span>  num_threads <span class="op">=</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/get_num_cpus.html" class="external-link">get_num_cpus</a></span><span class="op">(</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fu">vrtility</span><span class="fu">::</span><span class="fu"><a href="mirai-mgmt.html">n_daemons</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  num_threads <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">.Platform</span><span class="op">$</span><span class="va">OS.type</span>, <span class="st">"windows"</span><span class="op">)</span><span class="op">)</span> <span class="cn">NULL</span> <span class="kw">else</span> <span class="fl">1</span>,</span>
 <span>  unified_src_nodata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NO"</span>, <span class="st">"YES"</span>, <span class="st">"PARTIAL"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -311,21 +309,21 @@ with muparser support; muparser is required for derived bands using
 <span class="r-out co"><span class="r-pr">#&gt;</span>                          VSI_CACHE                     VSI_CACHE_SIZE </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             "TRUE"                        "268435456" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   GDAL_NUM_THREADS       GDAL_DISABLE_READDIR_ON_OPEN </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                "1"                            "FALSE" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                "1"                        "EMPTY_DIR" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           CPL_VSIL_CURL_CACHE_SIZE                GDAL_HTTP_MAX_RETRY </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       "1342177280"                                "3" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       "1342177280"                               "10" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              GDAL_HTTP_RETRY_DELAY                GDAL_HTTP_MULTIPLEX </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                "5"                              "YES" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              "0.5"                              "YES" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_VERSION GDAL_HTTP_MERGE_CONSECUTIVE_RANGES </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                "2"                              "YES" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               GDAL_HTTP_COOKIEFILE                GDAL_HTTP_COOKIEJAR </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   "~/.cookies.txt"                   "~/.cookies.txt" </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  GDAL_HTTP_USERPWD </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    "user:password" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             CPL_VSIL_CURL_USE_HEAD                  GDAL_HTTP_USERPWD </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              "YES"                    "user:password" </span>
 <span class="r-in"><span><span class="fu">gdal_creation_options</span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"JPEG"</span>, JPEG_QUALITY <span class="op">=</span> <span class="st">"90"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=4"         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "BLOCKXSIZE=128"        </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "BLOCKYSIZE=128"         "COPY_SRC_OVERVIEWS=YES" "JPEG_QUALITY=90"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=1"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "COPY_SRC_OVERVIEWS=YES"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7] "JPEG_QUALITY=90"       </span>
 <span class="r-in"><span><span class="fu">gdalwarp_options</span><span class="op">(</span>multi <span class="op">=</span> <span class="cn">TRUE</span>, warp_memory <span class="op">=</span> <span class="st">"50%"</span>, num_threads <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "-multi"                "-wm"                   "50%"                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "-wo"                   "NUM_THREADS=4"         "-wo"                  </span>
@@ -347,7 +345,7 @@ with muparser support; muparser is required for derived bands using
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
