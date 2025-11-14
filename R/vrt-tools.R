@@ -189,17 +189,12 @@ vrt_subset_bands <- function(
     }
   })
 
-  blksize <- src_block_size(unique(mask_src)[1])
-
   gdalraster::buildVRT(
     output_vrt,
     unique(mask_src),
     cl_arg = c(
       src_bands_chr,
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
+      src_block_size(unique(mask_src)[1])
     ),
     quiet = TRUE
   )
@@ -251,16 +246,12 @@ vrt_to_vrt <- function(
   on.exit(inds$close())
   bt <- block_template(inds)
 
-  blksize <- src_block_size(in_vrt[1])
   gdalraster::buildVRT(
     out_vrt,
     in_vrt,
     cl_arg = c(
       cl_arg,
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
+      src_block_size(in_vrt[1])
     ),
     quiet = quiet
   )

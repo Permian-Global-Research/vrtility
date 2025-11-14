@@ -122,10 +122,8 @@ vrt_warp.vrt_block <- function(
     }
   )
 
-  blksize <- src_block_size(vrtwl[1])
-
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  # browser()
+
   gdalraster::buildVRT(
     outtf,
     vrtwl,
@@ -134,15 +132,10 @@ vrt_warp.vrt_block <- function(
       "-te",
       te,
       if (!is.null(tr)) c("-tr", tr) else NULL,
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
+      src_block_size(vrtwl[1])
     ),
     quiet = TRUE
   )
-
-  # browser()
 
   outtf <- set_vrt_descriptions(
     x = outtf,
@@ -255,21 +248,6 @@ vrt_to_warped_vrt <- function(
   temp_vrt_dir = getOption("vrt.cache")
 ) {
   tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
-  blksize <- src_block_size(src)
-
-  # browser()
-  # ds <- methods::new(gdalraster::GDALRaster, src, read_only = TRUE)
-  # on.exit(ds$close(), add = TRUE)
-  # dsw <- gdalraster::autoCreateWarpedVRT(
-  #   src_ds = ds,
-  #   dst_wkt = t_srs,
-  #   resample_alg = resampling,
-  #   src_wkt = s_srs
-  # )
-  # on.exit(dsw$close(), add = TRUE)
-  # dsw$setFilename(tfw)
-
-  # return(tfw)
 
   call_gdal_warp(
     src,
@@ -283,10 +261,7 @@ vrt_to_warped_vrt <- function(
       "-te",
       te,
       if (!is.null(tr)) c("-tr", tr) else NULL,
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
+      src_block_size(src)
     ),
     config_options = gdal_config_opts(),
     quiet = TRUE

@@ -73,17 +73,11 @@ vrt_stack.vrt_collection <- function(
   )
 
   main_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-  blksize <- src_block_size(vrt_paths[1])
 
   suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
-    cl_arg = c(
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
-    ),
+    cl_arg = src_block_size(vrt_paths[1]),
     quiet = quiet
   ))
 

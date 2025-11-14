@@ -71,16 +71,11 @@ vrt_add_empty_band.vrt_block <- function(
   ))
 
   eb_vrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
-  blksize <- src_block_size(empty_band_src)
+
   gdalraster::buildVRT(
     eb_vrt,
     empty_band_src,
-    cl_arg = c(
-      "-co",
-      glue::glue("BLOCKXSIZE={blksize[1]}"),
-      "-co",
-      glue::glue("BLOCKYSIZE={blksize[2]}")
-    ),
+    cl_arg = src_block_size(empty_band_src),
     quiet = TRUE
   )
 
