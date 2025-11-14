@@ -83,7 +83,7 @@ gdal_creation_options <- function(
   output_format = NULL,
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
-  NUM_THREADS = if (identical(.Platform$OS.type, "windows")) NULL else 1,
+  NUM_THREADS = 1,
   BIGTIFF = "IF_NEEDED",
   TILED = if (identical(output_format, "COG")) NULL else "YES",
   BLOCKXSIZE = NULL,
@@ -155,9 +155,7 @@ gdal_creation_options <- function(
 gdalwarp_options <- function(
   multi = FALSE,
   warp_memory = "50%",
-  num_threads = as.character(
-    ceiling(gdalraster::get_num_cpus() / pmax(vrtility::n_daemons(), 1))
-  ),
+  num_threads = if (identical(.Platform$OS.type, "windows")) NULL else 1,
   unified_src_nodata = c("NO", "YES", "PARTIAL")
 ) {
   unified_src_nodata <- rlang::arg_match(unified_src_nodata)
