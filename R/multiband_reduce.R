@@ -150,6 +150,10 @@ multiband_reduce.vrt_collection_warped <- function(
   on.exit(ds$close(), add = TRUE)
   set_desc_scale_offset(x, ds, rt)
 
+  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
+    x$date_time <- set_dttm_metadata(outfile, x$date_time)
+  }
+
   if (mirai::daemons_set()) {
     async_gdalreader_multiband_reduce_read_write(
       blocks_df,
@@ -169,9 +173,9 @@ multiband_reduce.vrt_collection_warped <- function(
     )
   }
 
-  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
-    x$date_time <- set_dttm_metadata(outfile, x$date_time)
-  }
+  # if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
+  #   x$date_time <- set_dttm_metadata(outfile, x$date_time)
+  # }
 
   if (!recollect) {
     return(outfile)

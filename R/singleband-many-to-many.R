@@ -95,17 +95,18 @@ singleband_m2m.vrt_collection_warped <- function(
     merge(data.frame(band_n = seq_len(rt$nbands)))
 
   # Initialize output raster
-  uniq_pths <- purrr::imap_chr(
+  dttm_vec <- purrr::imap_chr(
     unname(x[[1]]),
     function(.x, .y) {
       if (nchar(.x$date_time) > 0) .x$date_time else as.character(.y)
     }
-  ) |>
-    unique_fp(outfile)
+  )
+  uniq_pths <- unique_fp(dttm_vec, outfile)
 
-  ds_list <- purrr::map(
+  ds_list <- purrr::map2(
     uniq_pths,
-    function(.x) {
+    dttm_vec,
+    function(.x, .y) {
       nr <- suppressMessages(gdalraster::rasterFromRaster(
         rt$vrt_template,
         normalizePath(.x, mustWork = FALSE),
@@ -116,6 +117,10 @@ singleband_m2m.vrt_collection_warped <- function(
       ))
       ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
       set_desc_scale_offset(x, ds, rt)
+      if (nzchar(.y)) {
+        set_dttm_metadata(nr, .y, .median = FALSE)
+      }
+
       return(ds)
     }
   )
@@ -145,11 +150,6 @@ singleband_m2m.vrt_collection_warped <- function(
   }
 
   if (!recollect) {
-    purrr::walk2(uniq_pths, x$date_time, function(result, dttm) {
-      if (nzchar(dttm)) {
-        set_dttm_metadata(result, dttm, .median = FALSE)
-      }
-    })
     return(uniq_pths)
   }
 
