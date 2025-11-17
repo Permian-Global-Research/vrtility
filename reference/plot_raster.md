@@ -229,11 +229,18 @@ are:
 ``` r
 s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 ds <- methods::new(gdalraster::GDALRaster, s2_imgs[2])
-on.exit(ds$close(), add = TRUE)
+
 plot(
   ds,
   bands = 4,
   legend = TRUE
 )
-#> Error: dataset is not open
+
+
+ds$close()
+s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+plot_raster_src(
+  s2_imgs[3],
+  bands = c(3, 2, 1),
+)
 ```

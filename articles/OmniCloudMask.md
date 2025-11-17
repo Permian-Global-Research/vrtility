@@ -81,8 +81,6 @@ function. This function requires two main arguments: `inbands` and
 This approach allows you to flexibly apply cloud masking to your VRT
 collections using state-of-the-art models.
 
-## TODO: this needs rewriting masks are now materialised immediately.
-
 `vrt_create_mask` composes a new vrt file, which is then immediately
 materialised. This is at odds with other materialisation in vrtility
 which will normally only occur when

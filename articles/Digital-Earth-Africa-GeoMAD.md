@@ -122,7 +122,8 @@ l8l9file <- vrt_warp(
   te = bbox_proj,
   tr = c(30, 30)
 ) |>
-  vrt_stack(lazy=FALSE)
+  vrt_stack() |>
+  vrt_compute(recollect=TRUE)
 ```
 
 ## Plotting the data
@@ -130,18 +131,15 @@ l8l9file <- vrt_warp(
 Let’s have a look at the data in both true colour and false colour.
 
 ``` r
-withr::with_par(list(mar = c(0, 0, 0, 0)), {
-  plot_raster_src(
+  plot(
     l8l9file,
-    bands = c(3, 2, 1),
-    axes = FALSE
+    bands = c(3, 2, 1)
   )
 
-  plot_raster_src(
+  plot(
     l8l9file,
-    bands = c(4, 3, 2),
-    axes = FALSE
+    bands = c(4, 3, 2)
   )
-})
-#> Error in eval(ei, envir): Not compatible with STRSXP: [type=list].
 ```
+
+![](figure/dea-geomad-plot-1.png)![](figure/dea-geomad-plot-2.png)

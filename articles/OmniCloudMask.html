@@ -147,10 +147,6 @@ designed to support additional masking functions in the future.</p></li>
 </ul>
 <p>This approach allows you to flexibly apply cloud masking to your VRT
 collections using state-of-the-art models.</p>
-<div class="section level2">
-<h2 id="todo-this-needs-rewriting-masks-are-now-materialised-immediately-">TODO: this needs rewriting masks are now materialised
-immediately.<a class="anchor" aria-label="anchor" href="#todo-this-needs-rewriting-masks-are-now-materialised-immediately-"></a>
-</h2>
 <p><code>vrt_create_mask</code> composes a new vrt file, which is then
 immediately materialised. This is at odds with other materialisation in
 vrtility which will normally only occur when <code><a href="../reference/vrt_compute.html">vrt_compute()</a></code>
@@ -255,7 +251,6 @@ this example highlights the significant advantage of advanced cloud
 masking. Additionally, further improvements can be achieved by applying
 multi-dimensional reduction techniques such as those provided by
 <code><a href="../reference/multiband_reduce.html">multiband_reduce()</a></code>.</p>
-</div>
   </main>
 </div>
 
