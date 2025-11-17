@@ -22,6 +22,12 @@
 #'   enhance contrast.
 #' - "hist_all": Histogram equalization is applied across all bands to enhance
 #'   overall contrast.
+#' @examples
+#' s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
+#' plot_raster_src(
+#'   s2_imgs[3],
+#'   bands = c(3, 2, 1),
+#' )
 #' @export
 plot_raster_src <- function(
   x,
