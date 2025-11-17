@@ -600,13 +600,14 @@
 #' @examples
 #' s2_imgs <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #' ds <- methods::new(gdalraster::GDALRaster, s2_imgs[2])
-#' on.exit(ds$close(), add = TRUE)
-#
+#'
 #' plot(
 #'   ds,
 #'   bands = 4,
 #'   legend = TRUE
 #' )
+#'
+#' ds$close()
 #' @export
 plot.Rcpp_GDALRaster <- function(
   x,
