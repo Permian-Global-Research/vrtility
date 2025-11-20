@@ -106,13 +106,10 @@ suggest_n_chunks <- function(ys, xs, nbands, nitems, scalar = 3) {
   ram_info <- memuse::Sys.meminfo()
   if (mirai::daemons_set()) {
     nprocs <- pmax(n_daemons(), 1)
-    # we assume that if using mirai, the daemons may be hollding ram that might
-    # be released
-    avail_ram <- ram_info$totalram * 0.8
   } else {
     nprocs <- 1
-    avail_ram <- ram_info$freeram
   }
+  avail_ram <- ram_info$freeram * 0.7
 
   estimated_ram <- memuse::howbig(
     nrow = xs,
