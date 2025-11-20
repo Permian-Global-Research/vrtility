@@ -11,6 +11,8 @@
 #' @param driver A character string indicating the GDAL driver to use for the
 #' input source(s). if "" is provided, the driver will be automatically determined by GDAL.
 #' for available drivers use \code{\link{gdal_raster_drivers}}.
+#' @param check_src A logical indicating whether to check that the source files
+#' exist. Default is TRUE.
 #' @return A vrt_collection object.
 #' @rdname vrt_collect
 #' @export
@@ -76,10 +78,13 @@ vrt_collect.character <- function(
   datetimes = rep("", length(x)),
   vsi_prefix = "",
   driver = "",
+  check_src = TRUE,
   ...
 ) {
   gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
-  assert_files_exist(x, url_possible = TRUE)
+  if (check_src) {
+    assert_files_exist(x, url_possible = TRUE)
+  }
   x <- gdal_driver_vsi_src_builder(x, vsi_prefix, driver)
   v_assert_type(
     bands,
