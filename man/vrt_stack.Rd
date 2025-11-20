@@ -12,11 +12,11 @@ vrt_stack(x, ...)
   x,
   quiet = TRUE,
   lazy = TRUE,
-  engine = "warp",
-  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL,
-    NUM_THREADS = 1, TILED = "NO"),
-  warp_options = gdalwarp_options(num_threads = 1),
-  config_options = gdal_config_opts(GDAL_NUM_THREADS = 1, GDAL_HTTP_MULTIPLEX = "NO"),
+  engine = c("warp", "gdalraster", "translate"),
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL, TILED =
+    "NO"),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts(GDAL_HTTP_MULTIPLEX = "NO"),
   ...
 )
 

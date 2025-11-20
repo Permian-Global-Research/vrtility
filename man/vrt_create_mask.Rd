@@ -6,13 +6,7 @@
 \title{Create a new mask for a vrt object
 This function allows you to create a mask for a VRT object based on specified input bands and a mask function.}
 \usage{
-vrt_create_mask(
-  x,
-  inbands,
-  maskfun,
-  nodata_value = 0,
-  cache_dir = getOption("vrt.cache")
-)
+vrt_create_mask(x, inbands, maskfun, nodata_value = 0)
 
 create_omnicloudmask(
   patch_size = 1000,
@@ -37,10 +31,6 @@ attributes: \code{mask_name}, \code{mask_description}, and \code{required_bands}
 
 \item{nodata_value}{The nodata value to use in the output mask (numeric,
 default: 0).}
-
-\item{cache_dir}{A character string specifying the directory to use for
-caching temporary files. Default is the value of the \code{vrt.cache} option.
-This should rarely need to be changed.}
 
 \item{patch_size}{The size/dimension of the patches to use for prediction
 (numeric default: 600).}

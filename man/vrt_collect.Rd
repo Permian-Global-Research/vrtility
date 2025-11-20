@@ -19,6 +19,7 @@ vrt_collect(x, ...)
   datetimes = rep("", length(x)),
   vsi_prefix = "",
   driver = "",
+  check_src = TRUE,
   ...
 )
 
@@ -59,6 +60,9 @@ See \code{\link[gdalraster]{vsi_get_fs_prefixes}} for available options.}
 \item{driver}{A character string indicating the GDAL driver to use for the
 input source(s). if "" is provided, the driver will be automatically determined by GDAL.
 for available drivers use \code{\link{gdal_raster_drivers}}.}
+
+\item{check_src}{A logical indicating whether to check that the source files
+exist. Default is TRUE.}
 
 \item{xml}{logical indicating whether to print the XML of the VRT collection.}
 

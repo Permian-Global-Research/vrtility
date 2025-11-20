@@ -73,11 +73,11 @@ plot_raster_src(
 \item{bands}{a numeric vector of band numbers to plot must be of length
 1 or 3.}
 
-\item{xsize}{Integer. Number of pixels in the x dimension for the output plot.
-If \code{NULL}, uses the full raster width.}
+\item{xsize}{Integer. Desired width of the plotted raster in pixels.
+If NULL (default), dimension is rescaled in line with the device size.}
 
-\item{ysize}{Integer. Number of pixels in the y dimension for the output plot.
-If \code{NULL}, uses the full raster height.}
+\item{ysize}{Integer. Desired height of the plotted raster in pixels.
+If NULL (default), dimension is rescaled in line with the device size.}
 
 \item{max_pixels}{Numeric. Maximum number of pixels to read. If
 \code{xsize * ysize} exceeds this value, the raster will be downsampled.}
