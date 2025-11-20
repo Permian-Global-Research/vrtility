@@ -22,7 +22,8 @@ test_that("py pixel functions work", {
     median_numpy,
     mean_numpy,
     geomean_numpy,
-    \() quantile_numpy(q = 0.2),
+    \() quantile_numpy(q = 0.2, use_fastnanquantile = FALSE),
+    \() quantile_numpy(q = 0.2, use_fastnanquantile = TRUE),
     mean_db_numpy
   )
 

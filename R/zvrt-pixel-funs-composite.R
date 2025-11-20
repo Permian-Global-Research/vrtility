@@ -76,21 +76,42 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
   )
 }
 
+
 #' @param q Probability of the quantile to compute. Values must be between 0 and 1
 #' inclusive.
+#' @param use_fastnanquantile Logical indicating whether to use the
+#' `fastnanquantile` library for calculating the quantile. This is generally
+#' faster than the standard numpy implementation, especially for large arrays.
+#' However, it requires the `fastnanquantile` library to be installed in the
+#' Python environment (This is handled automatically). Default is TRUE.
 #' @details `quantile_numpy` is a pixel function that calculates the quantile
 #' of the input arrays for a given probability. This could be useful where
-#' the median fails to filter cloudy or shadowy images effectively.
+#' the median fails to filter cloudy pixels effectively. The defauly numpy
+#' nanquantile function is very slow and does not support masked arrays.
+#' Therefore, it is typically much faster to use the fastnanquantile library
+#' which uses numba to increase performance.
 #' @rdname vrt_set_py_pixelfun
 #' @export
-quantile_numpy <- function(q) {
+quantile_numpy <- function(q, use_fastnanquantile = TRUE) {
   v_assert_type(q, "q", "numeric", nullok = FALSE)
   v_assert_within_range(q, "q", 0, 1)
+
+  if (use_fastnanquantile) {
+    vrtility_py_require("fastnanquantile")
+    add_py_lib_to_options("fastnanquantile")
+  }
 
   glue::glue(
     "
 import numpy as np
 import warnings
+{if (use_fastnanquantile) {
+  'import fastnanquantile as fnq'
+} else {
+  ''
+}}
+
+
 def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, buf_radius, gt, **kwargs):
     no_data_val = int(kwargs['no_data_value'])
     # Stack the input arrays first
@@ -101,7 +122,13 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
     
     with warnings.catch_warnings():
       warnings.simplefilter('ignore', category=RuntimeWarning)
-      out_ar[:] = np.nanquantile(stacked, {q}, axis=0)
+      {if (use_fastnanquantile) {
+        glue::glue('out_ar[:] = fnq.nanquantile(stacked, {q}, axis=0)')
+
+      } else {
+        glue::glue('out_ar[:] = np.nanquantile(stacked, {q}, axis=0)')
+
+      }}
       out_ar[np.isnan(out_ar)] = no_data_val
 "
   )
