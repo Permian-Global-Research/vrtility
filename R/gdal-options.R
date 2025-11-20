@@ -83,7 +83,7 @@ gdal_creation_options <- function(
   output_format = NULL,
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
-  NUM_THREADS = 1,
+  NUM_THREADS = "ALL_CPUS",
   BIGTIFF = "IF_NEEDED",
   TILED = if (identical(output_format, "COG")) NULL else "YES",
   BLOCKXSIZE = NULL,
