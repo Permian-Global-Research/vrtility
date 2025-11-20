@@ -55,18 +55,11 @@ plot_raster_src <- function(
   }
 
   title <- rlang::arg_match(title)
-  dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
-  dev_inches <- graphics::par("din") # Returns c(width, height) in inches
-  dev_size <- dev_inches * dpi
 
   ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(ds$close(), add = TRUE)
-  rxs <- ds$getRasterXSize()
-  rys <- ds$getRasterYSize()
 
-  # get approx scaling factor for plotting  - we dont need all the data.
-  scale_factor <- pmax(rxs / dev_size[1], rys / dev_size[2])
-
+  # TODO: is this actually doing anything now we call plot?
   rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
   gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "NEAREST")
   on.exit(
@@ -106,14 +99,6 @@ plot_raster_src <- function(
   plot(
     ds,
     bands = bands,
-    xsize = pmin(
-      rxs,
-      ceiling(rxs / scale_factor)
-    ),
-    ysize = pmin(
-      rys,
-      ceiling(rys / scale_factor)
-    ),
     col = col,
     col_tbl = col_tbl,
     maxColorValue = 1,

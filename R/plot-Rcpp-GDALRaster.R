@@ -559,12 +559,12 @@
 
 #' @param x An object of class \code{Rcpp_GDALRaster} see
 #' \code{\link[gdalraster]{GDALRaster}}
-#' @param xsize Integer. Number of pixels in the x dimension for the output plot.
-#' If \code{NULL}, uses the full raster width.
-#' @param ysize Integer. Number of pixels in the y dimension for the output plot.
-#' If \code{NULL}, uses the full raster height.
 #' @param bands Integer vector of length 1 or 3. Band number(s) to plot.
 #' For grayscale plots use a single band, for RGB use three bands.
+#' @param xsize Integer. Desired width of the plotted raster in pixels.
+#' If NULL (default), dimension is rescaled in line with the device size.
+#' @param ysize Integer. Desired height of the plotted raster in pixels.
+#' If NULL (default), dimension is rescaled in line with the device size.
 #' @param max_pixels Numeric. Maximum number of pixels to read. If
 #' \code{xsize * ysize} exceeds this value, the raster will be downsampled.
 #' @param scale_values Logical. Whether to apply scale and offset values
@@ -636,6 +636,14 @@ plot.Rcpp_GDALRaster <- function(
   mar = c(0, 0, 0, 0),
   ...
 ) {
+  # browser()
+  # get adjusted raster dims:
+  if (is.null(xsize) && is.null(ysize)) {
+    dims <- raster_dims_scale_by_device(x)
+    xsize <- dims$xsize
+    ysize <- dims$ysize
+  }
+
   # 1. Validate inputs and setup basic parameters
   params <- .validate_plot_params(bands, max_pixels, col)
   if (!params$valid) {
@@ -815,4 +823,28 @@ plot.Rcpp_GDALRaster <- function(
   }
 
   invisible()
+}
+
+
+raster_dims_scale_by_device <- function(ds) {
+  dpi <- grDevices::dev.size("px")[1] / grDevices::dev.size("in")[1]
+  dev_inches <- graphics::par("din") # Returns c(width, height) in inches
+  dev_size <- dev_inches * dpi
+
+  rxs <- ds$getRasterXSize()
+  rys <- ds$getRasterYSize()
+
+  # get approx scaling factor for plotting  - we dont need all the data.
+  scale_factor <- pmax(rxs / dev_size[1], rys / dev_size[2])
+
+  return(list(
+    xsize = pmin(
+      rxs,
+      ceiling(rxs / scale_factor)
+    ),
+    ysize = pmin(
+      rys,
+      ceiling(rys / scale_factor)
+    )
+  ))
 }
