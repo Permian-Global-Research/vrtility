@@ -2,7 +2,7 @@
 #' @importFrom gdalraster GDALRaster
 call_gdalraster_mirai <- function(
   x,
-  outfile = fs::file_temp(ext = "tif"),
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   dst_nodata = NULL,
@@ -43,7 +43,7 @@ call_gdalraster_mirai <- function(
     cog <- TRUE
     create_opts$fmt <- NULL
     cogfile <- outfile
-    outfile <- fs::file_temp(ext = "tif")
+    outfile <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif")
   } else {
     cog <- FALSE
   }

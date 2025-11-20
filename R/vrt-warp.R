@@ -116,8 +116,7 @@ vrt_warp.vrt_block <- function(
         te,
         tr,
         .y,
-        s_srs = x$srs,
-        temp_vrt_dir = getOption("vrt.cache")
+        s_srs = x$srs
       )
     }
   )
@@ -244,10 +243,9 @@ vrt_to_warped_vrt <- function(
   te,
   tr = NULL,
   resampling = "bilinear",
-  s_srs = NULL,
-  temp_vrt_dir = getOption("vrt.cache")
+  s_srs = NULL
 ) {
-  tfw <- fs::file_temp(tmp_dir = temp_vrt_dir, ext = "vrt")
+  tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   call_gdal_warp(
     src,

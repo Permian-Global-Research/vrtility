@@ -238,7 +238,7 @@ vrt_collapse <- function(vrt, return_type = c("file", "xml")) {
 
 vrt_to_vrt <- function(
   in_vrt,
-  out_vrt = fs::file_temp(ext = ".vrt"),
+  out_vrt = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
   cl_arg = NULL,
   quiet = TRUE
 ) {

@@ -55,7 +55,7 @@ singleband_m2m.default <- function(x, ...) {
 singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
-  outfile = fs::file_temp(ext = "tif"),
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,

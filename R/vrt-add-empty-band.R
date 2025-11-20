@@ -40,8 +40,6 @@ vrt_add_empty_band.vrt_block <- function(
     )
   }
 
-  save_dir <- getOption("vrt.cache")
-
   tvrt <- vrt_save(x)
 
   inblock <- methods::new(
@@ -54,7 +52,7 @@ vrt_add_empty_band.vrt_block <- function(
   empty_band_src <- suppressMessages(gdalraster::rasterFromRaster(
     tvrt,
     fs::file_temp(
-      tmp_dir = save_dir,
+      tmp_dir = getOption("vrt.cache"),
       ext = "tif"
     ),
     fmt = "GTiff",
@@ -70,7 +68,7 @@ vrt_add_empty_band.vrt_block <- function(
     init = inblock$getNoDataValue(1)
   ))
 
-  eb_vrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+  eb_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   gdalraster::buildVRT(
     eb_vrt,
@@ -121,7 +119,7 @@ vrt_add_empty_band.vrt_block <- function(
     ~ xml2::xml_set_attr(.x, "band", as.character(.y))
   )
 
-  out_vrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+  out_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   # Save the modified VRT XML back to the file
   xml2::write_xml(vrt_xml, out_vrt)
