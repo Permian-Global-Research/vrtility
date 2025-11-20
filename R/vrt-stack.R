@@ -32,23 +32,36 @@ vrt_stack.vrt_collection <- function(
   x,
   quiet = TRUE,
   lazy = TRUE,
-  engine = "warp",
+  engine = c("warp", "gdalraster", "translate"),
   creation_options = gdal_creation_options(
     COMPRESS = "NONE",
     PREDICTOR = NULL,
-    NUM_THREADS = 1, #"ALL_CPUS"
     TILED = "NO"
-    # COPY_SRC_OVERVIEWS = "NO"
   ),
-  warp_options = gdalwarp_options(num_threads = 1),
+  warp_options = gdalwarp_options(),
   config_options = gdal_config_opts(
-    GDAL_NUM_THREADS = 1,
-    GDAL_HTTP_MULTIPLEX = "NO" #,
-    # GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "NO"
+    GDAL_HTTP_MULTIPLEX = "NO"
   ),
   ...
 ) {
   assert_srs_len(x)
+  v_assert_type(quiet, "quiet", "logical", nullok = FALSE)
+  engine <- rlang::arg_match(engine)
+  v_assert_type(lazy, "lazy", "logical", nullok = FALSE)
+  v_assert_type(
+    creation_options,
+    "creation_options",
+    "character",
+    nullok = FALSE
+  )
+  v_assert_type(warp_options, "warp_options", "character", nullok = FALSE)
+  v_assert_type(
+    config_options,
+    "config_options",
+    "character",
+    nullok = FALSE
+  )
+  v_assert_is_named(config_options, "config_options")
 
   if (!lazy) {
     x <- vrt_compute(
@@ -77,7 +90,6 @@ vrt_stack.vrt_collection <- function(
   suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
-    cl_arg = src_block_size(vrt_paths[1]),
     quiet = quiet
   ))
 
