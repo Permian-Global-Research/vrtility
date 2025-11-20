@@ -19,7 +19,8 @@ daemon_setup <- function(gdal_config = NULL) {
     vrt.pause.base = getOption("vrt.pause.base"),
     vrt.pause.cap = getOption("vrt.pause.cap"),
     vrt.max.times = getOption("vrt.max.times"),
-    vrt.cache = getOption("vrt.cache")
+    vrt.cache = getOption("vrt.cache"),
+    vrt.add.pylibs = getOption("vrt.add.pylibs")
   )
 
   mopts <- NULL
@@ -32,6 +33,10 @@ daemon_setup <- function(gdal_config = NULL) {
           set_gdal_config(gdal_config)
         }
 
+        if (!is.null(main_process_opts$vrt.add.pylibs)) {
+          vrtility_py_require(main_process_opts$vrt.add.pylibs)
+        }
+
         gdalraster::set_cache_max(cache_max_val)
 
         # get options that where name begins with vrt.
@@ -40,7 +45,8 @@ daemon_setup <- function(gdal_config = NULL) {
       main_process_opts = main_process_opts,
       set_gdal_config = set_gdal_config,
       gdal_config = gdal_config,
-      cache_max_val = gdalraster::get_cache_max("bytes")
+      cache_max_val = gdalraster::get_cache_max("bytes"),
+      vrtility_py_require = vrtility_py_require
     )
     # make sure we wait for options to be set
     mopts <- mirai::collect_mirai(evrywrs)
