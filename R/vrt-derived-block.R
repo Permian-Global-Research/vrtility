@@ -68,7 +68,7 @@ vrt_derived_block.vrt_block <- function(x, ...) {
       ".//Description"
     ))
 
-    if (any(!rqbn %in% band_descs)) {
+    if (!all(rqbn %in% band_descs)) {
       cli::cli_abort(
         "Band {cli::col_yellow(rqbn[!rqbn %in% band_descs])} not found"
       )
