@@ -200,9 +200,10 @@ vrt_compute.vrt_block <- function(
       )
     )
   } else if (engine == "gdalraster") {
-    # if (!x$warped) { # TODO: I'm not even sure we need this...
-    #   warp_first_error(engine)
-    # }
+    if (!x$warped) {
+      # We need this because it cannot warp therefore risky not to throw error
+      warp_first_error(engine)
+    }
     result <- call_gdalraster_mirai(
       x = x,
       outfile = outfile,
