@@ -21,7 +21,7 @@ mirai_async_result_handler <- function(
   resolved <- logical(length(jobs))
   unresolved_idx <- seq_along(jobs)
   # Continue polling for results until all jobs are resolved
-  while (any(!resolved)) {
+  while (!all(resolved)) {
     # Iterate over unresolved jobs
     for (i in unresolved_idx) {
       if (mirai::unresolved(jobs[[i]])) {
