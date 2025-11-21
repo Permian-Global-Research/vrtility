@@ -1,5 +1,3 @@
-# Unit tests for plotting helper functions ====================================
-
 test_that(".validate_plot_params works correctly", {
   skip_on_os("windows")
 
@@ -99,7 +97,7 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
   expect_true(is.function(result_cont$col_map_fn))
 
   # Test discrete data
-  discrete_data <- sample(1:5, 100, replace = TRUE)
+  discrete_data <- sample.int(5, 100, replace = TRUE)
   result_disc <- vrtility:::.create_color_mapping(
     discrete_data,
     1,
