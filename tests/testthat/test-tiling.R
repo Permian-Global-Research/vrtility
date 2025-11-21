@@ -136,7 +136,7 @@ test_that("get_tiles coverage is complete and non-overlapping (without overlap p
     y_end <- y_start + result[i, "nYSize"] - 1
 
     # Check no overlap (all should be FALSE before setting to TRUE)
-    expect_true(all(!coverage[x_start:x_end, y_start:y_end]))
+    expect_true(!any(coverage[x_start:x_end, y_start:y_end]))
 
     # Mark as covered
     coverage[x_start:x_end, y_start:y_end] <- TRUE
