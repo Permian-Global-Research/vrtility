@@ -1,6 +1,7 @@
 ## code to prepare `vrt_schema` dataset goes here
 
 schema_local <- fs::file_temp(ext = "xsd")
+# nolint: download_file
 download.file(
   "https://raw.githubusercontent.com/OSGeo/gdal/master/frmts/vrt/data/gdalvrt.xsd",
   schema_local
