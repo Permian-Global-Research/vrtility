@@ -225,18 +225,7 @@ single_band_reader <- function() {
       vrtfile <- blk$vrt_src
       inds <- methods::new(gdalraster::GDALRaster, vrtfile)
       on.exit(inds$close(), add = TRUE)
-      compute_with_py_env(
-        inds$read(
-          band = block_params[["band_n"]],
-          xoff = block_params[["nXOff"]],
-          yoff = block_params[["nYOff"]],
-          xsize = block_params[["nXSize"]],
-          ysize = block_params[["nYSize"]],
-          out_xsize = block_params[["nXSize"]],
-          out_ysize = block_params[["nYSize"]]
-        ),
-        config_options = config_options
-      )
+      blockreader(inds, block_params, config_options)
     },
     rate = purrr::rate_backoff(
       pause_base = getOption("vrt.pause.base"),
