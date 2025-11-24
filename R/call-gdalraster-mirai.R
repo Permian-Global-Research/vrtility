@@ -29,7 +29,7 @@ call_gdalraster_mirai <- function(
     rt$xs,
     rt$ys,
     rt$blksize,
-    nsplits
+    ceiling(nsplits / rt$nbands)
   ) |>
     merge(data.frame(band_n = seq_len(rt$nbands)))
 
