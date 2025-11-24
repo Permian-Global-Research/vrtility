@@ -94,14 +94,14 @@ sequential_gdalreader_band_read_write <- function(
 #' @noRd
 blockreader <- function(inds, block_params, config_options = NULL) {
   return(compute_with_py_env(
-    inds$read(
+    inds$readChunk(
       band = block_params[["band_n"]],
-      xoff = block_params[["nXOff"]],
-      yoff = block_params[["nYOff"]],
-      xsize = block_params[["nXSize"]],
-      ysize = block_params[["nYSize"]],
-      out_xsize = block_params[["nXSize"]],
-      out_ysize = block_params[["nYSize"]]
+      chunk_def = c(
+        block_params[["nXOff"]],
+        block_params[["nYOff"]],
+        block_params[["nXSize"]],
+        block_params[["nYSize"]]
+      )
     ),
     config_options = config_options
   ))
@@ -123,7 +123,6 @@ blockwriter <- function(ds, bps, data) {
     ysize = bps[["nYSize"]],
     rasterData = data
   )
-  # ds$flushCache() # I think we want this to clear  memory as we go...
   return(invisible())
 }
 
