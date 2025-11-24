@@ -90,6 +90,7 @@ vrt_stack.vrt_collection <- function(
   suppressWarnings(gdalraster::buildVRT(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
+    cl_arg = src_block_size(vrt_paths[1]),
     quiet = quiet
   ))
 
