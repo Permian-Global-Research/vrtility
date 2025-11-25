@@ -9,6 +9,10 @@
 #' each band. The default is "bilinear". "near" sampling will be used for the
 #' mask_band if provided.
 #' @param quiet logical indicating whether to suppress progress bar.
+#' @param lazy logical indicating whether to create virtual warped files (TRUE)
+#' or to materialize the warped files to disk (FALSE). When woring with remote
+#' data sources, lazy=FALSE is strongly recommended to improve performance.
+#' @inheritParams vrt_compute
 #' @rdname vrt_warp
 #' @export
 #' @details This function generates warped VRT objects types. This is
@@ -30,8 +34,30 @@ vrt_warp <- function(
   t_srs,
   te,
   tr,
-  resampling,
-  quiet
+  resampling = c(
+    "bilinear",
+    "near",
+    "cubic",
+    "cubicspline",
+    "lanczos",
+    "average",
+    "rms",
+    "mode",
+    "max",
+    "min",
+    "med",
+    "q1",
+    "q3",
+    "sum"
+  ),
+  quiet = TRUE,
+  lazy = TRUE,
+  creation_options = gdal_creation_options(
+    COMPRESS = "NONE",
+    PREDICTOR = NULL
+  ),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
 ) {
   v_assert_type(t_srs, "t_srs", "character")
   v_assert_type(te, "te", "numeric")
@@ -72,103 +98,48 @@ vrt_warp.vrt_block <- function(
     "q3",
     "sum"
   ),
-  quiet = TRUE
+  quiet = TRUE,
+  lazy = TRUE,
+  creation_options = gdal_creation_options(
+    COMPRESS = "NONE",
+    PREDICTOR = NULL
+  ),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
 ) {
   tr <- v_assert_res(tr)
   resampling <- rlang::arg_match(resampling)
 
-  mask_band <- x$mask_band_name
-  assets <- x$assets
-  dttm <- x$date_time
+  daemon_setup()
 
-  if (!is.null(mask_band)) {
-    if (is.character(mask_band)) {
-      mas_band_idx <- which(assets == mask_band)
-    } else {
-      mas_band_idx <- mask_band
-      mask_band <- assets[mas_band_idx]
-      if (is.na(mask_band)) {
-        cli::cli_abort(
-          c(
-            "!" = "The numeric band id for the image mask ({mas_band_idx})
-            does not exist."
-          )
-        )
-      }
-    }
-  } else {
-    mas_band_idx <- NULL
-  }
-
-  resamp_methods <- rep(resampling, length(assets))
-  resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
-
-  tf <- x$vrt_src
-  # browser()
-  vrtwl <- purrr::map2_chr(
-    seq_along(assets),
-    resamp_methods,
-    function(.x, .y) {
-      vrt_to_warped_vrt(
-        tf,
-        .x,
-        t_srs,
-        te,
-        tr,
-        .y,
-        s_srs = x$srs
-      )
-    }
+  warptab <- warp_setup(
+    tr = tr,
+    resampling = resampling,
+    t_srs = t_srs,
+    te = te,
+    x = x,
+    virtual = lazy,
+    item_idx = 1
   )
 
-  outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-
-  gdalraster::buildVRT(
-    outtf,
-    vrtwl,
-    cl_arg = c(
-      "-separate",
-      "-te",
-      te,
-      if (!is.null(tr)) c("-tr", tr) else NULL,
-      src_block_size(vrtwl[1])
-    ),
-    quiet = TRUE
-  )
-
-  outtf <- set_vrt_descriptions(
-    x = outtf,
-    assets,
-    as_file = TRUE
-  )
-
-  if (inherits(x, "vrt_stack")) {
-    dttm_lab <- paste0("datetime_", seq_along(x$date_time))
-  } else {
-    dttm_lab <- "datetime"
-  }
-  if (is.null(mask_band)) {
-    outtf <- set_vrt_metadata(
-      outtf,
-      keys = dttm_lab,
-      values = dttm,
-      as_file = TRUE
+  if (!lazy) {
+    w_cl_arg <- combine_warp_opts(
+      creation_options,
+      warp_options
     )
   } else {
-    outtf <- set_vrt_metadata(
-      outtf,
-      keys = c(dttm_lab, "mask_band_name"),
-      values = c(dttm, mask_band),
-      as_file = TRUE
-    )
+    w_cl_arg <- warp_options
   }
 
-  build_vrt_block(
-    outtf,
-    mask_fun = x$maskfun,
-    pix_fun = x$pixfun,
-    warped = TRUE
+  src_df_warper(
+    warptab,
+    w_cl_arg,
+    config_options,
+    quiet
   )
+
+  warped_block <- src_df_to_block(x, warptab)
+  return(warped_block)
 }
 
 
@@ -195,28 +166,58 @@ vrt_warp.vrt_collection <- function(
     "q3",
     "sum"
   ),
-  quiet = TRUE
+  quiet = TRUE,
+  lazy = TRUE,
+  creation_options = gdal_creation_options(
+    COMPRESS = "NONE",
+    PREDICTOR = NULL
+  ),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
 ) {
   v_assert_length(tr, "tr", 2)
   resampling <- rlang::arg_match(resampling)
 
   daemon_setup()
 
-  warped_blocks <- purrr::map(
+  warptab <- purrr::imap(
     x[[1]],
-    purrr::in_parallel(
-      function(.x) {
-        vrt_warp(.x, t_srs, te, tr, resampling, quiet)
-      },
-      vrt_warp = vrt_warp,
-      t_srs = t_srs,
-      te = te,
+    ~ warp_setup(
       tr = tr,
       resampling = resampling,
-      quiet = quiet
-    ),
-    .progress = !quiet
+      t_srs = t_srs,
+      te = te,
+      x = .x,
+      virtual = lazy,
+      item_idx = .y
+    )
+  ) |>
+    purrr::list_rbind()
+
+  if (!lazy) {
+    w_cl_arg <- combine_warp_opts(
+      creation_options,
+      warp_options
+    )
+  } else {
+    w_cl_arg <- warp_options
+  }
+
+  src_df_warper(
+    warptab,
+    w_cl_arg,
+    config_options,
+    quiet
   )
+
+  warptablist <- split(
+    warptab,
+    f = warptab$item_idx
+  )
+
+  warped_blocks <- purrr::map2(x[[1]], warptablist, function(xi, wt) {
+    src_df_to_block(xi, wt)
+  })
 
   build_vrt_collection(
     warped_blocks,
@@ -226,42 +227,149 @@ vrt_warp.vrt_collection <- function(
   )
 }
 
-#' Create a warped VRT from a source raster
-#' @param src character path to the source raster
-#' @param t_srs character target SRS
-#' @return character path to the warped VRT
-#' @keywords internal
-#' @noRd
-#' @details A wrapper to simplify the process of creating a warped VRT from a
-#' source raster. functionality here is deliberately limited. could expand if
-#' needed. Issue we have is with srcs with different srs. This function enables
-#' us to transform the srs right at the start of the vrt blocking process.
-vrt_to_warped_vrt <- function(
-  src,
-  band,
-  t_srs,
-  te,
-  tr = NULL,
-  resampling = "bilinear",
-  s_srs = NULL
-) {
-  tfw <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
-  call_gdal_warp(
-    src,
-    tfw,
-    t_srs,
+warp_setup <- function(tr, resampling, t_srs, te, x, virtual, item_idx) {
+  mask_band <- x$mask_band_name
+  assets <- x$assets
+
+  if (!is.null(mask_band)) {
+    if (is.character(mask_band)) {
+      mas_band_idx <- which(assets == mask_band)
+    } else {
+      mas_band_idx <- mask_band
+      mask_band <- assets[mas_band_idx]
+      if (is.na(mask_band)) {
+        cli::cli_abort(
+          c(
+            "!" = "The numeric band id for the image mask ({mas_band_idx})
+            does not exist."
+          )
+        )
+      }
+    }
+  } else {
+    mas_band_idx <- NULL
+  }
+
+  # here should we also catch byte bands and force near resampling?
+  resamp_methods <- rep(resampling, length(assets))
+  resamp_methods[mas_band_idx] <- "near" # mask band should be nearest neighbour
+
+  of <- fs::file_temp(
+    pattern = glue::glue("warpfile_{seq_along(assets)}_"),
+    tmp_dir = getOption("vrt.cache"),
+    ext = if (virtual) "vrt" else "tif"
+  )
+
+  n_assets <- length(assets)
+
+  data.frame(
+    band = seq_along(assets),
+    resampling = resamp_methods,
+    src = rep(x$vrt_src, n_assets),
+    tsrs = rep(t_srs, n_assets),
+    te = I(rep(list(as.numeric(te)), n_assets)),
+    tr = I(rep(list(as.numeric(tr)), n_assets)),
+    outtf = of,
+    item_idx = item_idx
+  )
+}
+
+
+src_df_to_block <- function(x, warpdf) {
+  outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+
+  gdalraster::buildVRT(
+    outtf,
+    warpdf$outtf,
     cl_arg = c(
-      "-b",
-      band,
-      "-r",
-      resampling,
-      "-te",
-      te,
-      if (!is.null(tr)) c("-tr", tr) else NULL,
-      src_block_size(src)
+      "-separate",
+      src_block_size(warpdf$outtf[1])
     ),
-    config_options = gdal_config_opts(),
     quiet = TRUE
   )
+
+  outtf <- set_vrt_descriptions(
+    x = outtf,
+    descriptions = x$assets,
+    as_file = TRUE
+  )
+
+  if (inherits(x, "vrt_stack")) {
+    dttm_lab <- paste0("datetime_", seq_along(x$date_time))
+  } else {
+    dttm_lab <- "datetime"
+  }
+  if (is.null(x$mask_band)) {
+    outtf <- set_vrt_metadata(
+      outtf,
+      keys = dttm_lab,
+      values = x$date_time,
+      as_file = TRUE
+    )
+  } else {
+    outtf <- set_vrt_metadata(
+      outtf,
+      keys = c(dttm_lab, "mask_band_name"),
+      values = c(x$date_time, x$mask_band),
+      as_file = TRUE
+    )
+  }
+
+  build_vrt_block(
+    outtf,
+    mask_fun = x$maskfun,
+    pix_fun = x$pixfun,
+    warped = TRUE
+  )
+}
+
+
+src_df_warper <- function(warptab, w_cl_arg, config_options, quiet) {
+  of <- purrr::pmap_chr(
+    warptab,
+    purrr::in_parallel(
+      function(band, resampling, src, tsrs, te, tr, outtf, item_idx) {
+        fs::path_ext(outtf)
+        cclia <- c(
+          w_cl_arg,
+          "-b",
+          band,
+          "-r",
+          resampling,
+          "-te",
+          te,
+          "-tr",
+          tr,
+          if (
+            "TILED=YES" %in% w_cl_arg && identical(fs::path_ext(outtf), "vrt")
+          ) {
+            src_block_size(src)
+          } else {
+            NULL
+          }
+        )
+        # browser()
+
+        compute_with_py_env(
+          call_gdal_warp(
+            src,
+            outtf,
+            tsrs,
+            cl_arg = cclia,
+            config_options = config_options,
+            quiet = TRUE
+          ),
+          config_options = config_options
+        )
+      },
+      call_gdal_warp = call_gdal_warp,
+      config_options = config_options,
+      src_block_size = src_block_size,
+      w_cl_arg = w_cl_arg,
+      compute_with_py_env = compute_with_py_env
+    ),
+    .progress = !quiet
+  )
+  return(invisible(of))
 }
