@@ -112,8 +112,8 @@ Critically, we must specify the `driver = "EOPFZARR"` argument in
 `vrt_collect()` because GDAL will, by default, attempt to read the files using
 the built-in Zarr driver, which does not fully support the EOPF-Zarr format.
 
-Since we want to continue processing this image set, we use the `recollect = TRUE` 
-argument to ensure that a new VRT collection is returned rather than file paths.
+Note the use of `lazy = FALSE` which will materialize the warped images to disk;
+this will make data access and subsequent processing more efficient.
 
 ```{r download-imgs}
 with(mirai::daemons(10), {
@@ -125,11 +125,9 @@ with(mirai::daemons(10), {
     vrt_warp(
       t_srs = trs,
       te = te,
-      tr = c(10, 10)
-    ) |>
-    vrt_compute(
-      recollect = TRUE
-    )
+      tr = c(10, 10),
+      lazy = FALSE
+    ) 
 })
 ```
 
@@ -154,11 +152,7 @@ eopf_s2_mask <- eopf_s2_chgn |>
   vrt_set_maskfun(
     mask_band = "omnicloudmask",
     mask_values = 1:3
-  ) |>
-  vrt_compute(
-    engine = "warp",
-    recollect = TRUE
-  )
+  ) 
 
 purrr::walk(
   seq_len(eopf_s2_mask$n_items),

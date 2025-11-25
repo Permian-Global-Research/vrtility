@@ -143,9 +143,10 @@ s2_median <- vrt_collect(s2copdse,
   vrt_warp(
     t_srs = attr(bbx_proj, "wkt"),
     te = bbx_proj,
-    tr = c(10, 10)
+    tr = c(10, 10),
+    lazy = FALSE
   ) |>
-  vrt_stack(lazy=FALSE) |>
+  vrt_stack() |>
   vrt_set_py_pixelfun(median_numpy()) |>
   vrt_compute(
     outfile = fs::file_temp(ext = "tif"),

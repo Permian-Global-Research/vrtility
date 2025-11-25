@@ -64,20 +64,18 @@ s2_stac <- sentinel2_stac_query(
 rstac::items_length(s2_stac)
 ```
 
-Next, let's download all of the rasters locally. This step is not always 
-necessary but, in this case, we are plotting intermediate data and we . We use 
-`with` to isolate the use of mirai daemons.
+Next, let's download all of the rasters locally by warping the collection to 
+a common projection, extent and resolution, using lazy=FALSE to write files to
+disk. The returned object in this case is a warped `vrt_collection`.
 
 ```{r pull-data}
 zurich_vrt <- vrt_collect(s2_stac) |>
   vrt_warp(
     t_srs = trs,
     te = te,
-    tr = c(10, 10)
-  ) |>
-  vrt_compute(
-    recollect = TRUE
-  )
+    tr = c(10, 10),
+    lazy = FALSE
+  ) 
 ```
 
 Now we are ready to create a cloud mask using the `vrt_create_mask` function. 

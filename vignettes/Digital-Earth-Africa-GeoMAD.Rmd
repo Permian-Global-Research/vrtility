@@ -126,10 +126,12 @@ l8l9file <- vrt_warp(
   l8l9_vrt,
   t_srs = attr(bbox_proj, "wkt"),
   te = bbox_proj,
-  tr = c(30, 30)
+  tr = c(30, 30),
+  lazy=FALSE
 ) |>
   vrt_stack() |>
-  vrt_compute(recollect=TRUE)
+  vrt_compute(engine="gdalraster", recollect=TRUE)
+  
 
 ```
 
