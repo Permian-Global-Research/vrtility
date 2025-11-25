@@ -81,7 +81,10 @@ Here is a simple example where we:
 4.  Because this set of images have more than one common spatial
     reference system (SRS) we warp the `vrt_block`s to a new
     spatially-aligned `vrt_collection` using `vrt_warp`, giving us a
-    `vrt_collection_warped` object.
+    `vrt_collection_warped` object. Note that we use the argument
+    `lazy = FALSE` to force GDAL to create the warped VRTs immediately
+    (i.e. saving to disk as tif files). For remote data sources this
+    will be (much) faster.
 
 5.  These images are then “stacked” (combined into a single VRT with
     multiple layers in each VRTRasterBand), giving us a `vrt_stack`
@@ -132,8 +135,8 @@ system.time({
       mask_values = c(0, 1, 2, 3),
       build_mask_pixfun = build_bitmask()
     ) |>
-    vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
-    vrt_stack(lazy = FALSE) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(30, 30), lazy = FALSE) |>
+    vrt_stack() |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     # vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL >= 3.12.0
     vrt_compute(
@@ -141,7 +144,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.969   0.273   7.540
+#>   1.309   0.132   5.764
 
 
 plot_raster_src(
