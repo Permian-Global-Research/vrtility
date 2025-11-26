@@ -7,7 +7,6 @@
 #' @return A VRT block object
 #' @keywords internal
 #' @noRd
-#' @export
 build_vrt_block <- function(
   x,
   maskfun = NULL,
