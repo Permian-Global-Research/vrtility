@@ -14,7 +14,7 @@ vrt_warp(
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
   config_options = gdal_config_opts()
@@ -28,7 +28,7 @@ vrt_warp(
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
   config_options = gdal_config_opts()
@@ -42,7 +42,7 @@ vrt_warp(
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
   config_options = gdal_config_opts()
@@ -67,7 +67,9 @@ mask_band if provided.}
 
 \item{lazy}{logical indicating whether to create virtual warped files (TRUE)
 or to materialize the warped files to disk (FALSE). When woring with remote
-data sources, lazy=FALSE is strongly recommended to improve performance.}
+data sources, lazy=FALSE is strongly recommended to improve performance.
+When NULL (default) the function will decide based on whether the input
+data is remote or local.}
 
 \item{creation_options}{A character vector of options to pass to the
 the gdal "engine".}
