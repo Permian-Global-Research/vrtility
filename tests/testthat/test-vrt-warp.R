@@ -52,6 +52,46 @@ vrt_warp_tests <- function() {
   expect_true(all(ds$getBlockSize(1) == c(256, 256)))
 
   ds$close()
+
+  ex_block_warp <- ex_collect[[1]][[2]] |>
+    vrt_warp(
+      t_srs = t_block$srs,
+      te = t_block$bbox,
+      tr = t_block$res,
+      quiet = FALSE,
+      lazy = FALSE
+    )
+
+  ds <- methods::new(
+    gdalraster::GDALRaster,
+    ex_block_warp$vrt_src
+  )
+  expect_true(all(
+    fs::path_ext(ds$getFileList()[2:length(ds$getFileList())]) == "tif"
+  ))
+
+  expect_true(all(ds$getBlockSize(1) == c(256, 256)))
+
+  ds$close()
+
+  ex_block_warp <- ex_collect[[1]][[2]] |>
+    vrt_warp(
+      t_srs = t_block$srs,
+      te = t_block$bbox,
+      tr = t_block$res,
+      quiet = FALSE,
+      lazy = TRUE
+    )
+
+  ds <- methods::new(
+    gdalraster::GDALRaster,
+    ex_block_warp$vrt_src
+  )
+  expect_true(all(
+    fs::path_ext(ds$getFileList()) == "vrt"
+  ))
+  expect_true(all(ds$getBlockSize(1) == c(361, 128)))
+  ds$close()
 }
 
 test_that("vrt_warp works async", {
