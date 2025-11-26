@@ -85,6 +85,7 @@ vrt_collect.character <- function(
   if (check_src) {
     assert_files_exist(x, url_possible = TRUE)
   }
+
   x <- gdal_driver_vsi_src_builder(x, vsi_prefix, driver)
   v_assert_type(
     bands,
@@ -178,7 +179,7 @@ vrt_collect.character <- function(
       as_file = TRUE
     )
 
-    build_vrt_block(tf)
+    build_vrt_block(tf, is_remote = assert_is_url(.x))
   })
 
   build_vrt_collection(
@@ -274,7 +275,7 @@ vrt_collect.doc_items <- function(
           as_file = TRUE
         )
 
-        build_vrt_block(tf)
+        build_vrt_block(tf, is_remote = TRUE)
       },
       set_vrt_descriptions = set_vrt_descriptions,
       set_vrt_metadata = set_vrt_metadata,
