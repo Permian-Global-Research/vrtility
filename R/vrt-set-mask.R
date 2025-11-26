@@ -182,7 +182,8 @@ vrt_set_maskfun.vrt_block <- function(
     vrt_to_vrt(tf), #REVRT
     maskfun = build_mask_pixfun,
     pixfun = x$pixfun,
-    warped = x$warped
+    warped = x$warped,
+    is_remote = x$is_remote
   )
 }
 

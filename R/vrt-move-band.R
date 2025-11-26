@@ -82,7 +82,8 @@ vrt_move_band.vrt_block <- function(
     out_vrt,
     pixfun = x$pixfun,
     maskfun = x$maskfun,
-    warped = x$warped
+    warped = x$warped,
+    is_remote = x$is_remote
   )
 }
 

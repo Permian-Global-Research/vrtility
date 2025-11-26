@@ -24,7 +24,12 @@ vrt_set_band_names.vrt_block <- function(x, band_names) {
   tf <- vrt_save(x)
   of <- set_vrt_descriptions(tf, band_names, as_file = TRUE)
 
-  build_vrt_block(x = of, maskfun = x$maskfun, pixfun = x$pixfun)
+  build_vrt_block(
+    x = of,
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    is_remote = x$is_remote
+  )
 }
 
 #' @export
