@@ -135,7 +135,7 @@ system.time({
       mask_values = c(0, 1, 2, 3),
       build_mask_pixfun = build_bitmask()
     ) |>
-    vrt_warp(t_srs = trs, te = te, tr = c(30, 30), lazy = FALSE) |>
+    vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
     vrt_stack() |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     # vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL >= 3.12.0
@@ -144,7 +144,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.309   0.132   5.764
+#>   1.121   0.139   5.578
 
 
 plot_raster_src(
