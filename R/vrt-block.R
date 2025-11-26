@@ -1,17 +1,19 @@
 #' constructor for vrt_block class
-#' @param x An xml_document object
+#' @param x A VRT file path
 #' @param maskfun A function of the mask function
 #' @param pixfun A function of the pixel function
 #' @param warped A logical indicating whether the VRT is warped
-#' @param ... Additional arguments not used
+#' @param is_remote A logical indicating whether the VRT is remote
+#' @return A VRT block object
 #' @keywords internal
+#' @noRd
 #' @export
 build_vrt_block <- function(
   x,
   maskfun = NULL,
   pixfun = NULL,
   warped = FALSE,
-  ...
+  is_remote = FALSE
 ) {
   # validate the vrt against the schema
   v_assert_valid_schema(x)
@@ -33,7 +35,8 @@ build_vrt_block <- function(
     mask_band_name = bt$mask_band_name,
     pixfun = pixfun,
     maskfun = maskfun,
-    warped = warped
+    warped = warped,
+    is_remote = is_remote
   )
 
   class(rvrt) <- c("vrt_block", "list")
