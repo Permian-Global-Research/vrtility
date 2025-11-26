@@ -12,6 +12,8 @@
 #' @param lazy logical indicating whether to create virtual warped files (TRUE)
 #' or to materialize the warped files to disk (FALSE). When woring with remote
 #' data sources, lazy=FALSE is strongly recommended to improve performance.
+#' When NULL (default) the function will decide based on whether the input
+#' data is remote or local.
 #' @inheritParams vrt_compute
 #' @rdname vrt_warp
 #' @export
@@ -51,7 +53,7 @@ vrt_warp <- function(
     "sum"
   ),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(
     COMPRESS = "NONE",
     PREDICTOR = NULL
@@ -99,7 +101,7 @@ vrt_warp.vrt_block <- function(
     "sum"
   ),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(
     COMPRESS = "NONE",
     PREDICTOR = NULL
@@ -111,6 +113,10 @@ vrt_warp.vrt_block <- function(
   resampling <- rlang::arg_match(resampling)
 
   daemon_setup()
+
+  if (is.null(lazy)) {
+    lazy <- !x$is_remote
+  }
 
   warptab <- warp_setup(
     tr = tr,
@@ -138,7 +144,7 @@ vrt_warp.vrt_block <- function(
     quiet
   )
 
-  warped_block <- src_df_to_block(x, warptab)
+  warped_block <- src_df_to_block(x, warptab, is_remote = x$is_remote && lazy)
   return(warped_block)
 }
 
@@ -167,7 +173,7 @@ vrt_warp.vrt_collection <- function(
     "sum"
   ),
   quiet = TRUE,
-  lazy = TRUE,
+  lazy = NULL,
   creation_options = gdal_creation_options(
     COMPRESS = "NONE",
     PREDICTOR = NULL
@@ -179,6 +185,16 @@ vrt_warp.vrt_collection <- function(
   resampling <- rlang::arg_match(resampling)
 
   daemon_setup()
+
+  any_remote <- any(purrr::map_lgl(x$vrt, function(vrt) {
+    vrt$is_remote
+  }))
+
+  if (is.null(lazy)) {
+    # TODO: note this assumed all remote if any are - generally fine. but may
+    # unecessarily force materialization in some edge cases...
+    lazy <- !any_remote
+  }
 
   warptab <- purrr::imap(
     x[[1]],
@@ -216,7 +232,7 @@ vrt_warp.vrt_collection <- function(
   )
 
   warped_blocks <- purrr::map2(x[[1]], warptablist, function(xi, wt) {
-    src_df_to_block(xi, wt)
+    src_df_to_block(xi, wt, is_remote = any_remote && lazy)
   })
 
   build_vrt_collection(
@@ -276,7 +292,7 @@ warp_setup <- function(tr, resampling, t_srs, te, x, virtual, item_idx) {
 }
 
 
-src_df_to_block <- function(x, warpdf) {
+src_df_to_block <- function(x, warpdf, is_remote = FALSE) {
   outtf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   gdalraster::buildVRT(
@@ -318,9 +334,10 @@ src_df_to_block <- function(x, warpdf) {
 
   build_vrt_block(
     outtf,
-    mask_fun = x$maskfun,
-    pix_fun = x$pixfun,
-    warped = TRUE
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    warped = TRUE,
+    is_remote = is_remote
   )
 }
 
@@ -349,7 +366,6 @@ src_df_warper <- function(warptab, w_cl_arg, config_options, quiet) {
             NULL
           }
         )
-        # browser()
 
         compute_with_py_env(
           call_gdal_warp(
