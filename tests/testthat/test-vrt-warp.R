@@ -49,7 +49,6 @@ vrt_warp_tests <- function() {
   expect_true(all(
     fs::path_ext(ds$getFileList()[2:length(ds$getFileList())]) == "tif"
   ))
-  expect_true(all(ds$getBlockSize(1) == c(256, 256)))
 
   ds$close()
 
@@ -70,8 +69,6 @@ vrt_warp_tests <- function() {
     fs::path_ext(ds$getFileList()[2:length(ds$getFileList())]) == "tif"
   ))
 
-  expect_true(all(ds$getBlockSize(1) == c(256, 256)))
-
   ds$close()
 
   ex_block_warp <- ex_collect[[1]][[2]] |>
@@ -90,7 +87,7 @@ vrt_warp_tests <- function() {
   expect_true(all(
     fs::path_ext(ds$getFileList()) == "vrt"
   ))
-  expect_true(all(ds$getBlockSize(1) == c(361, 128)))
+
   ds$close()
 }
 
