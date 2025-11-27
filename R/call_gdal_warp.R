@@ -32,8 +32,8 @@ call_gdal_warp <- function(
 combine_warp_opts <- function(
   creation_options,
   warp_opts,
-  resampling,
-  te,
+  resampling = NULL,
+  te = NULL,
   res = NULL,
   dst_nodata = NULL,
   add_args = NULL
@@ -42,33 +42,41 @@ combine_warp_opts <- function(
   opts_check(warp_opts, "-tr")
   opts_check(warp_opts, "-r")
 
-  warp_opts <- c(
+  warp_cl_args <- c(
     split_of_and_co(creation_options),
-    "-r",
-    resampling,
-    warp_opts,
-    "-te",
-    te
+    warp_opts
   )
 
+  if (!is.null(resampling)) {
+    warp_cl_args <- c(warp_cl_args, c("-r", resampling))
+  }
+
+  if (!is.null(te)) {
+    warp_cl_args <- c(
+      warp_cl_args,
+      "-te",
+      te
+    )
+  }
+
   if (!is.null(res)) {
-    warp_opts <- c(
-      warp_opts,
+    warp_cl_args <- c(
+      warp_cl_args,
       "-tr",
       res,
-      if ("-tap" %in% warp_opts) NULL else "-tap"
+      if ("-tap" %in% warp_cl_args) NULL else "-tap"
     )
   }
 
   if (!is.null(dst_nodata)) {
-    warp_opts <- c(warp_opts, "-dstnodata", dst_nodata)
+    warp_cl_args <- c(warp_cl_args, "-dstnodata", dst_nodata)
   }
 
   if (!is.null(add_args)) {
-    warp_opts <- c(warp_opts, add_args)
+    warp_cl_args <- c(warp_cl_args, add_args)
   }
 
-  return(warp_opts)
+  return(warp_cl_args)
 }
 
 

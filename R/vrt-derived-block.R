@@ -68,7 +68,7 @@ vrt_derived_block.vrt_block <- function(x, ...) {
       ".//Description"
     ))
 
-    if (any(!rqbn %in% band_descs)) {
+    if (!all(rqbn %in% band_descs)) {
       cli::cli_abort(
         "Band {cli::col_yellow(rqbn[!rqbn %in% band_descs])} not found"
       )
@@ -141,7 +141,8 @@ vrt_derived_block.vrt_block <- function(x, ...) {
     vrt_to_vrt(tf),
     maskfun = x$maskfun,
     pixfun = expr_pf,
-    warped = x$warped
+    warped = x$warped,
+    is_remote = x$is_remote
   )
 }
 

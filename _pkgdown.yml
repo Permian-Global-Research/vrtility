@@ -80,7 +80,8 @@ reference:
     desc: Helper functions for spatial operations
     contents:
       - bbox_to_projected
-      - to_wkt
+      - ogr_bbox_from_file
+      - ogr_srs_from_file
   - title: gdalraster helpers
     desc: Helper functions for GDALRasterDataset objects
     contents:

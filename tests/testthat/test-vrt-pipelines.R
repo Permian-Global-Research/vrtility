@@ -95,8 +95,6 @@ pipeline_tests <- function(v) {
     engine = "gdalraster"
   )
 
-  gdalraster::dump_open_datasets()
-
   ds <- methods::new(gdalraster::GDALRaster, exe_compwarp)
   ds$getMetadata(0, "")
   expect_true(grepl("COG", ds$infoAsJSON()))

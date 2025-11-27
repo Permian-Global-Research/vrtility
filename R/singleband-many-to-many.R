@@ -55,7 +55,7 @@ singleband_m2m.default <- function(x, ...) {
 singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
-  outfile = fs::file_temp(ext = "tif"),
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
@@ -225,18 +225,7 @@ single_band_reader <- function() {
       vrtfile <- blk$vrt_src
       inds <- methods::new(gdalraster::GDALRaster, vrtfile)
       on.exit(inds$close(), add = TRUE)
-      compute_with_py_env(
-        inds$read(
-          band = block_params[["band_n"]],
-          xoff = block_params[["nXOff"]],
-          yoff = block_params[["nYOff"]],
-          xsize = block_params[["nXSize"]],
-          ysize = block_params[["nYSize"]],
-          out_xsize = block_params[["nXSize"]],
-          out_ysize = block_params[["nYSize"]]
-        ),
-        config_options = config_options
-      )
+      blockreader(inds, block_params, config_options)
     },
     rate = purrr::rate_backoff(
       pause_base = getOption("vrt.pause.base"),

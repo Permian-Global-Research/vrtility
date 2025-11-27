@@ -100,7 +100,7 @@ multiband_reduce.default <- function(x, ...) {
 multiband_reduce.vrt_collection_warped <- function(
   x,
   reduce_fun = vrtility::geomedian(),
-  outfile = fs::file_temp(ext = "tif"),
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif"),
   config_options = gdal_config_opts(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,

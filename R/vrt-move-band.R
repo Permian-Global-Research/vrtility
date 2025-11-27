@@ -4,10 +4,8 @@
 #' @param after numeric indicating the band after which the new band should be
 #' places. Note this is based on the initial state of the band ordering. eg. do
 #' not add 1 if you are moving the band forward.
-#' @param save_dir A character string indicating the directory to save the
-#' modified VRT. Defaults to the cache directory.
 #' @export
-vrt_move_band <- function(x, band_idx, after, save_dir) {
+vrt_move_band <- function(x, band_idx, after) {
   v_assert_type(after, "after", "numeric", nullok = FALSE)
   UseMethod("vrt_move_band")
 }
@@ -26,8 +24,7 @@ vrt_move_band.default <- function(x, ...) {
 vrt_move_band.vrt_block <- function(
   x,
   band_idx,
-  after,
-  save_dir = getOption("vrt.cache")
+  after
 ) {
   if (after < 0 || after > length(x$assets) + 1) {
     cli::cli_abort(
@@ -76,7 +73,7 @@ vrt_move_band.vrt_block <- function(
     ~ xml2::xml_set_attr(.x, "band", as.character(.y))
   )
 
-  out_vrt <- fs::file_temp(tmp_dir = save_dir, ext = "vrt")
+  out_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   # Save the modified VRT XML back to the file
   xml2::write_xml(vrt_xml, out_vrt)
@@ -85,7 +82,8 @@ vrt_move_band.vrt_block <- function(
     out_vrt,
     pixfun = x$pixfun,
     maskfun = x$maskfun,
-    warped = x$warped
+    warped = x$warped,
+    is_remote = x$is_remote
   )
 }
 
@@ -94,16 +92,14 @@ vrt_move_band.vrt_block <- function(
 vrt_move_band.vrt_collection <- function(
   x,
   band_idx,
-  after,
-  save_dir = getOption("vrt.cache")
+  after
 ) {
   block_list <- purrr::map(
     x[[1]],
     ~ vrt_move_band(
       .x,
       band_idx = band_idx,
-      after = after,
-      save_dir = save_dir
+      after = after
     )
   )
   build_vrt_collection(

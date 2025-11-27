@@ -35,7 +35,7 @@ multiband_tests <- function() {
 
   # Geomedian weizfeld:
   ex_geomed_weizfeld <- multiband_reduce(
-    ex_collect_mask_warp,
+    x = ex_collect_mask_warp,
     reduce_fun = geomedian(weizfeld = TRUE)
   )
 

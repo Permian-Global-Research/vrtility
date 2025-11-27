@@ -19,7 +19,8 @@ pixel functions in time.
 
 \describe{
 \item{\code{\link{bbox_to_projected}}}{Convert a long/lat bounding box to a projected bounding box}
-\item{\code{\link{to_wkt}}}{Get a wkt string from a numeric epsg code or character such as a proj4 string}
+\item{\code{\link{ogr_bbox_from_file}}}{Get a bounding box from a vector file}
+\item{\code{\link{ogr_srs_from_file}}}{Get a spatial reference system from a vector file}
 }
 }
 

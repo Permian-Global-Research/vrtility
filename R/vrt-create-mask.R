@@ -9,9 +9,6 @@
 #' attributes: `mask_name`, `mask_description`, and `required_bands`.
 #' @param nodata_value The value to set as no data pixels
 #' (numeric, default: 0).
-#' @param cache_dir A character string specifying the directory to use for
-#' caching temporary files. Default is the value of the `vrt.cache` option.
-#' This should rarely need to be changed.
 #' @return A VRT_x object with the the new mask band added.
 #' @export
 #' @rdname vrt_create_mask
@@ -37,8 +34,7 @@ vrt_create_mask <- function(
   x,
   inbands,
   maskfun,
-  nodata_value = 0,
-  cache_dir = getOption("vrt.cache")
+  nodata_value = 0
 ) {
   UseMethod("vrt_create_mask")
 }
@@ -58,8 +54,7 @@ vrt_create_mask.vrt_block <- function(
   x,
   inbands,
   maskfun,
-  nodata_value = 0,
-  cache_dir = getOption("vrt.cache")
+  nodata_value = 0
 ) {
   v_assert_type(
     inbands,
@@ -120,9 +115,9 @@ vrt_create_mask.vrt_block <- function(
     attributes(maskfun)$mask_description
   )
 
-  virt_mask_vrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
-  mat_mask_tif <- fs::file_temp(tmp_dir = cache_dir, ext = "tif")
-  mat_mask_vrt <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  virt_mask_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  mat_mask_tif <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif")
+  mat_mask_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
   xml2::write_xml(msk_vrt_xml, virt_mask_vrt)
 
@@ -163,14 +158,15 @@ vrt_create_mask.vrt_block <- function(
   xml2::xml_add_child(vx, mat_mask_rasband, .where = last_band_index)
 
   # Write back to block
-  tf <- fs::file_temp(tmp_dir = cache_dir, ext = "vrt")
+  tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
 
   build_vrt_block(
     tf,
     maskfun = x$maskfun,
     pixfun = x$pixfun,
-    warped = x$warped
+    warped = x$warped,
+    is_remote = x$is_remote
   )
 }
 
@@ -179,8 +175,7 @@ vrt_create_mask.vrt_collection <- function(
   x,
   inbands,
   maskfun,
-  nodata_value = 0,
-  cache_dir = getOption("vrt.cache")
+  nodata_value = 0
 ) {
   blocks_with_mask <- purrr::map(
     x$vrt,
@@ -188,8 +183,7 @@ vrt_create_mask.vrt_collection <- function(
       .x,
       inbands,
       maskfun,
-      nodata_value = nodata_value,
-      cache_dir = cache_dir
+      nodata_value = nodata_value
     )
   )
 

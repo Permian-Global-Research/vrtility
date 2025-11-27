@@ -6,49 +6,22 @@
 \alias{print.vrt_stack}
 \title{Stack VRT files from a vrt_collection object}
 \usage{
-vrt_stack(x, ...)
+vrt_stack(x)
 
-\method{vrt_stack}{vrt_collection}(
-  x,
-  quiet = TRUE,
-  lazy = TRUE,
-  engine = "warp",
-  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL,
-    NUM_THREADS = 1, TILED = "NO"),
-  warp_options = gdalwarp_options(num_threads = 1),
-  config_options = gdal_config_opts(GDAL_NUM_THREADS = 1, GDAL_HTTP_MULTIPLEX = "NO"),
-  ...
-)
+\method{vrt_stack}{vrt_collection}(x)
 
 \method{print}{vrt_stack}(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, ...)
 }
 \arguments{
 \item{x}{A vrt_collection object}
 
-\item{...}{Additional arguments not used}
-
-\item{quiet}{Logical. If TRUE, suppress GDAL progress bar}
-
-\item{lazy}{If TRUE, the incoming blocks will remain virtual. if FALSE,
-vrt_compute is called and the data is materialised to disk. using FALSE is
-significantly faster for remote data sources.}
-
-\item{engine}{A character vector of the engine to use for processing the
-raster data. See details.}
-
-\item{creation_options}{A character vector of options to pass to the
-the gdal "engine".}
-
-\item{warp_options}{A character vector of options to pass to gdalwarp}
-
-\item{config_options}{A character vector of options to set in the GDAL
-environment}
-
 \item{xml}{A logical indicating whether to print the XML}
 
 \item{pixfun}{A logical indicating whether to print the pixel function}
 
 \item{maskfun}{A logical indicating whether to print the mask function}
+
+\item{...}{Additional arguments not used}
 }
 \value{
 A vrt_stack object
@@ -62,5 +35,6 @@ Print a vrt_block object
 This function stacks VRT files from a vrt_collection object into a
 single VRT file containing multiple layers for each RasterBand. The VRT
 files are stacked in the order they are provided in the vrt_collection
-object. If this is derived from a rstac object, the order should be ordered by date.
+object. If this is derived from a rstac object, the order should be ordered
+by date.
 }

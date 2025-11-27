@@ -180,35 +180,45 @@ bbox_to_projected <- function(
   return(te)
 }
 
-
-#' Convert an object to wkt.
-#' @param x The object to convert to wkt.
-#' @return A character string of the object in wkt format.
+#' Get bounding box from a spatial vector file
+#' @param x character vector. Path to a spatial vector file.
+#' @param latlon logical. Whether to return the bounding box in lat/long
+#' (EPSG:4326). Default is FALSE.
+#' @return A numeric vector of length 4 representing the bounding box ordered
+#' as: xmin, ymin, xmax, ymax.
 #' @export
 #' @rdname spatial_helpers
-to_wkt <- function(x) {
-  UseMethod("to_wkt")
-}
+ogr_bbox_from_file <- function(x, latlon = FALSE) {
+  v_assert_type(x, "x", "character")
+  assert_files_exist(x, url_possible = TRUE)
+  v_assert_type(latlon, "latlon", "logical", nullok = FALSE)
 
-#' @rdname spatial_helpers
-#' @export
-to_wkt.default <- function(x) {
-  rlang::abort(
-    "to_wkt() not implemented for class {class(x)[1]}",
-    class = "vrtility_to_wkt_not_implemented"
+  vec <- methods::new(gdalraster::GDALVector, x)
+  on.exit(vec$close())
+
+  native_crs_bbox <- vec$bbox()
+
+  if (!latlon) {
+    return(native_crs_bbox)
+  }
+  gdalraster::transform_bounds(
+    native_crs_bbox,
+    vec$getSpatialRef(),
+    "EPSG:4326"
   )
 }
 
+
+#' Get the spatial reference system (SRS) from a spatial vector file
+#' @param x character vector. Path to a spatial vector file.
+#' @return A character string representing the SRS in WKT format.
 #' @export
 #' @rdname spatial_helpers
-to_wkt.numeric <- function(x) {
-  gdalraster::epsg_to_wkt(x)
+ogr_srs_from_file <- function(x) {
+  v_assert_type(x, "x", "character")
+  assert_files_exist(x, url_possible = TRUE)
+  vec <- methods::new(gdalraster::GDALVector, x)
+  on.exit(vec$close())
+  vec$open(read_only = TRUE)
+  vec$getSpatialRef()
 }
-
-#' @export
-#' @rdname spatial_helpers
-to_wkt.character <- function(x) {
-  gdalraster::srs_to_wkt(x)
-}
-
-#TODO: we could consider extending to other crs classes in R spatial.

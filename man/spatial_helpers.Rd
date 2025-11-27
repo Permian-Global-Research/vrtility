@@ -2,10 +2,8 @@
 % Please edit documentation in R/spatial-utils.R
 \name{bbox_to_projected}
 \alias{bbox_to_projected}
-\alias{to_wkt}
-\alias{to_wkt.default}
-\alias{to_wkt.numeric}
-\alias{to_wkt.character}
+\alias{ogr_bbox_from_file}
+\alias{ogr_srs_from_file}
 \title{Project a lat/long bounding box to a generic projected coordinate system}
 \usage{
 bbox_to_projected(
@@ -17,16 +15,12 @@ bbox_to_projected(
   opts = ""
 )
 
-to_wkt(x)
+ogr_bbox_from_file(x, latlon = FALSE)
 
-\method{to_wkt}{default}(x)
-
-\method{to_wkt}{numeric}(x)
-
-\method{to_wkt}{character}(x)
+ogr_srs_from_file(x)
 }
 \arguments{
-\item{x}{The object to convert to wkt.}
+\item{x}{character vector. Path to a spatial vector file.}
 
 \item{proj_specific}{a character vector. The projection to use.
 A PROJ-readable string or an EPSG code. If NULL, a generic projection
@@ -43,13 +37,19 @@ string.}
 
 \item{opts}{a character vector. Additional proj options to pass to the
 proj string. see details for more information.}
+
+\item{latlon}{logical. Whether to return the bounding box in lat/long
+(EPSG:4326). Default is FALSE.}
 }
 \value{
 a numeric vector of length 4 representing the projected bounding box
 in the new coordinate system. Attributes include the new proj4 and wkt
 string.
 
-A character string of the object in wkt format.
+A numeric vector of length 4 representing the bounding box ordered
+as: xmin, ymin, xmax, ymax.
+
+A character string representing the SRS in WKT format.
 }
 \description{
 This function takes a lat/long bounding box and projects it to

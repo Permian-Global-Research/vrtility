@@ -150,7 +150,8 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
       vrt_to_vrt(tf),
       maskfun = x$maskfun,
       pixfun = pixfun,
-      warped = warped
+      warped = warped,
+      is_remote = x$is_remote
     )
   }
 }

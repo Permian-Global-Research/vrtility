@@ -32,27 +32,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      # Install GDAL BEFORE setup-r so R packages compile against correct version
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install gdal proj geos
+          brew upgrade proj
+
+      - name: Install system dependencies (Ubuntu devel only)
+        if: runner.os == 'Linux' && matrix.config.r == 'devel'
+        run: |
+          sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+          sudo apt-get update
+          sudo apt-get install -y gdal-bin libgdal-dev libproj-dev libgeos-dev libxml2-dev
+
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install system dependencies
+      - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
-        run: |
-          brew install gdal
-
-      - name: Install system dependencies (Ubuntu devel only)
-        if: runner.os == 'Linux' && matrix.config.r == 'devel'
-        run: |
-          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-          sudo apt-get update
-          sudo apt-get install -y libgdal-dev libgeos-dev libxml2-dev
+        run: echo "GTIFF_SRS_SOURCE=EPSG" >> $GITHUB_ENV
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            gdalraster=?source
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2

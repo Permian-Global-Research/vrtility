@@ -28,14 +28,8 @@ set_mask_numpy <- function(buffer_size = 0) {
 
   if (buffer_size > 0) {
     # assert omicloudmask is installed
-    omc <- try(
-      reticulate::import("scipy", delay_load = TRUE),
-      silent = TRUE
-    )
-
-    if (inherits(omc, "try-error")) {
-      vrtility_py_require("scipy")
-    }
+    vrtility_py_require("scipy")
+    add_py_lib_to_options("scipy")
   }
 
   glue::glue(

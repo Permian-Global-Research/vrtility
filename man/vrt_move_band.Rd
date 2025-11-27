@@ -4,7 +4,7 @@
 \alias{vrt_move_band}
 \title{Add an empty band to a VRT_x object}
 \usage{
-vrt_move_band(x, band_idx, after, save_dir)
+vrt_move_band(x, band_idx, after)
 }
 \arguments{
 \item{x}{A VRT_x object}
@@ -14,9 +14,6 @@ vrt_move_band(x, band_idx, after, save_dir)
 \item{after}{numeric indicating the band after which the new band should be
 places. Note this is based on the initial state of the band ordering. eg. do
 not add 1 if you are moving the band forward.}
-
-\item{save_dir}{A character string indicating the directory to save the
-modified VRT. Defaults to the cache directory.}
 }
 \description{
 Add an empty band to a VRT_x object

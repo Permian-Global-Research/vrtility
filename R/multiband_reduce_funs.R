@@ -259,7 +259,7 @@ xoid_generator <- function(f, distance_type, impute_na, impute_f = f) {
     result <- x[best_row, ]
 
     # Replace NA columns with their medians
-    if (any(is.na(result)) && impute_na) {
+    if (anyNA(result) && impute_na) {
       result_na_cols <- which(is.na(result))
       na_stat_impute <- impute_f(
         x[, result_na_cols, drop = FALSE]

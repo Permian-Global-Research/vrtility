@@ -144,6 +144,7 @@ src_block_size <- function(
   co_format = TRUE,
   mingdal = gdalraster::gdal_compute_version(3, 10, 0)
 ) {
+  #TODO: consider if we must force blocksizes of a multiple of 16
   b1ds <- methods::new(gdalraster::GDALRaster, src)
   on.exit(b1ds$close(), add = TRUE)
   blksize <- b1ds$getBlockSize(band)

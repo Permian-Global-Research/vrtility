@@ -108,7 +108,8 @@ tex_s2_collect <- vrt_collect(tex_s2) |>
   vrt_warp(
     t_srs = trs, # Target projection
     te = te, # Target extent
-    tr = c(30, 30) # Target resolution (30m pixels)
+    tr = c(30, 30) , # Target resolution (30m pixels)
+    lazy = FALSE
   )
 ```
 

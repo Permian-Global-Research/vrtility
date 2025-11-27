@@ -1,66 +1,32 @@
 #' Stack VRT files from a vrt_collection object
 #' @param x A vrt_collection object
-#' @param ... Additional arguments passed to \code{vrt_compute()} if needed
 #' @details This function stacks VRT files from a vrt_collection object into a
 #' single VRT file containing multiple layers for each RasterBand. The VRT
 #' files are stacked in the order they are provided in the vrt_collection
-#' object. If this is derived from a rstac object, the order should be ordered by date.
+#' object. If this is derived from a rstac object, the order should be ordered
+#' by date.
 #' @return A vrt_stack object
 #' @export
 #' @rdname vrt_stack
-vrt_stack <- function(x, ...) {
+vrt_stack <- function(x) {
   UseMethod("vrt_stack")
 }
 
 
 #' @noRd
 #' @export
-vrt_stack.default <- function(x, ...) {
+vrt_stack.default <- function(x) {
   cli::cli_abort(
     "{cli::code_highlight('vrt_stack()')} not implemented for class {class(x)[1]}"
   )
 }
 
 #' @export
-#' @param quiet Logical. If TRUE, suppress GDAL progress bar
-#' @param lazy If TRUE, the incoming blocks will remain virtual. if FALSE,
-#' vrt_compute is called and the data is materialised to disk. using FALSE is
-#' significantly faster for remote data sources.
-#' @inheritParams vrt_compute
 #' @rdname vrt_stack
 vrt_stack.vrt_collection <- function(
-  x,
-  quiet = TRUE,
-  lazy = TRUE,
-  engine = "warp",
-  creation_options = gdal_creation_options(
-    COMPRESS = "NONE",
-    PREDICTOR = NULL,
-    NUM_THREADS = 1, #"ALL_CPUS"
-    TILED = "NO"
-    # COPY_SRC_OVERVIEWS = "NO"
-  ),
-  warp_options = gdalwarp_options(num_threads = 1),
-  config_options = gdal_config_opts(
-    GDAL_NUM_THREADS = 1,
-    GDAL_HTTP_MULTIPLEX = "NO" #,
-    # GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "NO"
-  ),
-  ...
+  x
 ) {
   assert_srs_len(x)
-
-  if (!lazy) {
-    x <- vrt_compute(
-      x,
-      engine = engine,
-      recollect = TRUE,
-      creation_options = creation_options,
-      warp_options = warp_options,
-      config_options = config_options,
-      ...
-    )
-  }
 
   vrt_paths <- purrr::map_chr(
     x[[1]],
@@ -78,14 +44,15 @@ vrt_stack.vrt_collection <- function(
     vrt_filename = main_vrt,
     input_rasters = vrt_paths,
     cl_arg = src_block_size(vrt_paths[1]),
-    quiet = quiet
+    quiet = TRUE
   ))
 
   main_vrt <- set_vrt_descriptions(
     main_vrt,
     x$assets,
     as_file = TRUE
-  ) #|>
+  )
+
   main_vrt <- set_vrt_metadata(
     main_vrt,
     keys = paste0("datetime_", seq_along(x$date_time)),

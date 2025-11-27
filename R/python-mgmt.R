@@ -101,3 +101,19 @@ compute_with_py_env <- function(
     code = code
   )
 }
+
+#' @title Add additional python libraries to vrtility options
+#' @description add_py_lib_to_options adds additional python libraries to the
+#' vrtility options so that they can be loaded in mirai daemons.
+#' @param lib A character vector of python library names to add.
+#' @return Invisible
+#' @noRd
+#' @keywords internal
+add_py_lib_to_options <- function(lib) {
+  add_py_libs <- getOption("vrt.add.pylibs", character())
+  new_libs <- setdiff(lib, add_py_libs)
+  if (length(new_libs) > 0) {
+    options(vrt.add.pylibs = c(add_py_libs, new_libs))
+  }
+  invisible()
+}
