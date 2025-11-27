@@ -38,11 +38,6 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install system dependencies
-        if: runner.os == 'macOS'
-        run: |
-          brew install gdal
-
       - name: Install system dependencies (Ubuntu devel only)
         if: runner.os == 'Linux' && matrix.config.r == 'devel'
         run: |
