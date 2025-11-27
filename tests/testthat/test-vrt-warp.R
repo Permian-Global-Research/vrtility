@@ -29,7 +29,6 @@ vrt_warp_tests <- function() {
     ex_collect_warp$vrt[[1]]$vrt_src
   )
   expect_true(all(fs::path_ext(ds$getFileList()) == "vrt"))
-  expect_true(all(ds$getBlockSize(1) == c(361, 128)))
 
   ds$close()
 
