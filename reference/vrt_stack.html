@@ -56,20 +56,10 @@ Print a vrt_block object"></head><body>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_stack</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_stack</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_collection'</span></span>
-<span><span class="fu">vrt_stack</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  lazy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  engine <span class="op">=</span> <span class="st">"warp"</span>,</span>
-<span>  creation_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_creation_options</a></span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"NONE"</span>, PREDICTOR <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>    NUM_THREADS <span class="op">=</span> <span class="fl">1</span>, TILED <span class="op">=</span> <span class="st">"NO"</span><span class="op">)</span>,</span>
-<span>  warp_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdalwarp_options</a></span><span class="op">(</span>num_threads <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  config_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_opts</a></span><span class="op">(</span>GDAL_NUM_THREADS <span class="op">=</span> <span class="fl">1</span>, GDAL_HTTP_MULTIPLEX <span class="op">=</span> <span class="st">"NO"</span><span class="op">)</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
+<span><span class="fu">vrt_stack</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vrt_stack'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, xml <span class="op">=</span> <span class="cn">FALSE</span>, pixfun <span class="op">=</span> <span class="cn">FALSE</span>, maskfun <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -83,39 +73,6 @@ Print a vrt_block object"></head><body>
 <dd><p>A vrt_collection object</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments not used</p></dd>
-
-
-<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
-<dd><p>Logical. If TRUE, suppress GDAL progress bar</p></dd>
-
-
-<dt id="arg-lazy">lazy<a class="anchor" aria-label="anchor" href="#arg-lazy"></a></dt>
-<dd><p>If TRUE, the incoming blocks will remain virtual. if FALSE,
-vrt_compute is called and the data is materialised to disk. using FALSE is
-significantly faster for remote data sources.</p></dd>
-
-
-<dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
-<dd><p>A character vector of the engine to use for processing the
-raster data. See details.</p></dd>
-
-
-<dt id="arg-creation-options">creation_options<a class="anchor" aria-label="anchor" href="#arg-creation-options"></a></dt>
-<dd><p>A character vector of options to pass to the
-the gdal "engine".</p></dd>
-
-
-<dt id="arg-warp-options">warp_options<a class="anchor" aria-label="anchor" href="#arg-warp-options"></a></dt>
-<dd><p>A character vector of options to pass to gdalwarp</p></dd>
-
-
-<dt id="arg-config-options">config_options<a class="anchor" aria-label="anchor" href="#arg-config-options"></a></dt>
-<dd><p>A character vector of options to set in the GDAL
-environment</p></dd>
-
-
 <dt id="arg-xml">xml<a class="anchor" aria-label="anchor" href="#arg-xml"></a></dt>
 <dd><p>A logical indicating whether to print the XML</p></dd>
 
@@ -127,6 +84,10 @@ environment</p></dd>
 <dt id="arg-maskfun">maskfun<a class="anchor" aria-label="anchor" href="#arg-maskfun"></a></dt>
 <dd><p>A logical indicating whether to print the mask function</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments not used</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -137,7 +98,8 @@ environment</p></dd>
     <p>This function stacks VRT files from a vrt_collection object into a
 single VRT file containing multiple layers for each RasterBand. The VRT
 files are stacked in the order they are provided in the vrt_collection
-object. If this is derived from a rstac object, the order should be ordered by date.</p>
+object. If this is derived from a rstac object, the order should be ordered
+by date.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

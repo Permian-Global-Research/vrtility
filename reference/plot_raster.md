@@ -83,13 +83,13 @@ plot(x, item, ..., config_options = gdal_config_opts())
 
 - xsize:
 
-  Integer. Number of pixels in the x dimension for the output plot. If
-  `NULL`, uses the full raster width.
+  Integer. Desired width of the plotted raster in pixels. If NULL
+  (default), dimension is rescaled in line with the device size.
 
 - ysize:
 
-  Integer. Number of pixels in the y dimension for the output plot. If
-  `NULL`, uses the full raster height.
+  Integer. Desired height of the plotted raster in pixels. If NULL
+  (default), dimension is rescaled in line with the device size.
 
 - max_pixels:
 

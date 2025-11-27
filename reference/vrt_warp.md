@@ -5,7 +5,19 @@ Construct A warped VRT or warped VRT collection.
 ## Usage
 
 ``` r
-vrt_warp(x, t_srs, te, tr, resampling, quiet)
+vrt_warp(
+  x,
+  t_srs,
+  te,
+  tr,
+  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  quiet = TRUE,
+  lazy = NULL,
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
+)
 
 # S3 method for class 'vrt_block'
 vrt_warp(
@@ -15,7 +27,11 @@ vrt_warp(
   tr,
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE
+  quiet = TRUE,
+  lazy = NULL,
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
 )
 
 # S3 method for class 'vrt_collection'
@@ -26,7 +42,11 @@ vrt_warp(
   tr,
   resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
     "mode", "max", "min", "med", "q1", "q3", "sum"),
-  quiet = TRUE
+  quiet = TRUE,
+  lazy = NULL,
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_opts()
 )
 ```
 
@@ -59,6 +79,26 @@ vrt_warp(
 - quiet:
 
   logical indicating whether to suppress progress bar.
+
+- lazy:
+
+  logical indicating whether to create virtual warped files (TRUE) or to
+  materialize the warped files to disk (FALSE). When woring with remote
+  data sources, lazy=FALSE is strongly recommended to improve
+  performance. When NULL (default) the function will decide based on
+  whether the input data is remote or local.
+
+- creation_options:
+
+  A character vector of options to pass to the the gdal "engine".
+
+- warp_options:
+
+  A character vector of options to pass to gdalwarp
+
+- config_options:
+
+  A character vector of options to set in the GDAL environment
 
 ## Details
 

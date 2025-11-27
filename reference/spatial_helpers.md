@@ -16,23 +16,16 @@ bbox_to_projected(
   opts = ""
 )
 
-to_wkt(x)
+ogr_bbox_from_file(x, latlon = FALSE)
 
-# Default S3 method
-to_wkt(x)
-
-# S3 method for class 'numeric'
-to_wkt(x)
-
-# S3 method for class 'character'
-to_wkt(x)
+ogr_srs_from_file(x)
 ```
 
 ## Arguments
 
 - x:
 
-  The object to convert to wkt.
+  character vector. Path to a spatial vector file.
 
 - proj_specific:
 
@@ -58,13 +51,21 @@ to_wkt(x)
   a character vector. Additional proj options to pass to the proj
   string. see details for more information.
 
+- latlon:
+
+  logical. Whether to return the bounding box in lat/long (EPSG:4326).
+  Default is FALSE.
+
 ## Value
 
 a numeric vector of length 4 representing the projected bounding box in
 the new coordinate system. Attributes include the new proj4 and wkt
 string.
 
-A character string of the object in wkt format.
+A numeric vector of length 4 representing the bounding box ordered as:
+xmin, ymin, xmax, ymax.
+
+A character string representing the SRS in WKT format.
 
 ## Details
 

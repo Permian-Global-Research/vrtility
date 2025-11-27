@@ -16,6 +16,7 @@ vrt_collect(
   datetimes = rep("", length(x)),
   vsi_prefix = "",
   driver = "",
+  check_src = TRUE,
   ...
 )
 
@@ -79,6 +80,11 @@ c(x, ...)
   source(s). if "" is provided, the driver will be automatically
   determined by GDAL. for available drivers use
   [`gdal_raster_drivers`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
+
+- check_src:
+
+  A logical indicating whether to check that the source files exist.
+  Default is TRUE.
 
 - xml:
 

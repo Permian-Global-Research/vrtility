@@ -161,7 +161,8 @@ Helper functions for parallel processing
 Helper functions for spatial operations
 
 - [`bbox_to_projected()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
-  [`to_wkt()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
+  [`ogr_bbox_from_file()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
+  [`ogr_srs_from_file()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
   : Project a lat/long bounding box to a generic projected coordinate
   system
 

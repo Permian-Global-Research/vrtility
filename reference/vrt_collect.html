@@ -64,6 +64,7 @@
 <span>  datetimes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  vsi_prefix <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  driver <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  check_src <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -127,6 +128,11 @@ See <code><a href="https://usdaforestservice.github.io/gdalraster/reference/vsi_
 <dd><p>A character string indicating the GDAL driver to use for the
 input source(s). if "" is provided, the driver will be automatically determined by GDAL.
 for available drivers use <code><a href="gdal_options.html">gdal_raster_drivers</a></code>.</p></dd>
+
+
+<dt id="arg-check-src">check_src<a class="anchor" aria-label="anchor" href="#arg-check-src"></a></dt>
+<dd><p>A logical indicating whether to check that the source files
+exist. Default is TRUE.</p></dd>
 
 
 <dt id="arg-xml">xml<a class="anchor" aria-label="anchor" href="#arg-xml"></a></dt>

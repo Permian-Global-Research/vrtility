@@ -33,7 +33,7 @@ gdal_creation_options(
   output_format = NULL,
   COMPRESS = "DEFLATE",
   PREDICTOR = "2",
-  NUM_THREADS = 1,
+  NUM_THREADS = "ALL_CPUS",
   BIGTIFF = "IF_NEEDED",
   TILED = if (identical(output_format, "COG")) NULL else "YES",
   BLOCKXSIZE = NULL,
@@ -280,7 +280,7 @@ gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
 #>             CPL_VSIL_CURL_USE_HEAD                  GDAL_HTTP_USERPWD 
 #>                              "YES"                    "user:password" 
 gdal_creation_options(COMPRESS = "JPEG", JPEG_QUALITY = "90")
-#> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=1"         
+#> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=ALL_CPUS"  
 #> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "COPY_SRC_OVERVIEWS=YES"
 #> [7] "JPEG_QUALITY=90"       
 gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)

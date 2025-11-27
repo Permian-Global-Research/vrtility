@@ -59,13 +59,7 @@ function.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_create_mask</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">inbands</span>,</span>
-<span>  <span class="va">maskfun</span>,</span>
-<span>  nodata_value <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  cache_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"vrt.cache"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_create_mask</span><span class="op">(</span><span class="va">x</span>, <span class="va">inbands</span>, <span class="va">maskfun</span>, nodata_value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">create_omnicloudmask</span><span class="op">(</span></span>
 <span>  patch_size <span class="op">=</span> <span class="fl">1000</span>,</span>
@@ -101,12 +95,6 @@ attributes: <code>mask_name</code>, <code>mask_description</code>, and <code>req
 <dt id="arg-nodata-value">nodata_value<a class="anchor" aria-label="anchor" href="#arg-nodata-value"></a></dt>
 <dd><p>The nodata value to use in the output mask (numeric,
 default: 0).</p></dd>
-
-
-<dt id="arg-cache-dir">cache_dir<a class="anchor" aria-label="anchor" href="#arg-cache-dir"></a></dt>
-<dd><p>A character string specifying the directory to use for
-caching temporary files. Default is the value of the <code>vrt.cache</code> option.
-This should rarely need to be changed.</p></dd>
 
 
 <dt id="arg-patch-size">patch_size<a class="anchor" aria-label="anchor" href="#arg-patch-size"></a></dt>

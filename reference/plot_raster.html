@@ -45,7 +45,7 @@ process of plotting a raster file."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>plot a raster file or <code>vrt_x</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/plot-Rcpp-GDALRaster.R" class="external-link"><code>R/plot-Rcpp-GDALRaster.R</code></a>, <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/plot-raster-src.R" class="external-link"><code>R/plot-raster-src.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/plot-RcppGDALRaster.R" class="external-link"><code>R/plot-RcppGDALRaster.R</code></a>, <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/R/plot-raster-src.R" class="external-link"><code>R/plot-raster-src.R</code></a></small>
       <div class="d-none name"><code>plot_raster.Rd</code></div>
     </div>
 
@@ -134,13 +134,13 @@ process of plotting a raster file.</p>
 
 
 <dt id="arg-xsize">xsize<a class="anchor" aria-label="anchor" href="#arg-xsize"></a></dt>
-<dd><p>Integer. Number of pixels in the x dimension for the output plot.
-If <code>NULL</code>, uses the full raster width.</p></dd>
+<dd><p>Integer. Desired width of the plotted raster in pixels.
+If NULL (default), dimension is rescaled in line with the device size.</p></dd>
 
 
 <dt id="arg-ysize">ysize<a class="anchor" aria-label="anchor" href="#arg-ysize"></a></dt>
-<dd><p>Integer. Number of pixels in the y dimension for the output plot.
-If <code>NULL</code>, uses the full raster height.</p></dd>
+<dd><p>Integer. Desired height of the plotted raster in pixels.
+If NULL (default), dimension is rescaled in line with the device size.</p></dd>
 
 
 <dt id="arg-max-pixels">max_pixels<a class="anchor" aria-label="anchor" href="#arg-max-pixels"></a></dt>

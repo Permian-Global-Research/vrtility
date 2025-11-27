@@ -15,10 +15,13 @@ based pixel functions in time.
 
   Convert a long/lat bounding box to a projected bounding box
 
-- [`to_wkt`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md):
+- [`ogr_bbox_from_file`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md):
 
-  Get a wkt string from a numeric epsg code or character such as a proj4
-  string
+  Get a bounding box from a vector file
+
+- [`ogr_srs_from_file`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md):
+
+  Get a spatial reference system from a vector file
 
 ## STAC helpers
 

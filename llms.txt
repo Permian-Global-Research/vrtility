@@ -69,7 +69,10 @@ Here is a simple example where we:
 4.  Because this set of images have more than one common spatial
     reference system (SRS) we warp the `vrt_block`s to a new
     spatially-aligned `vrt_collection` using `vrt_warp`, giving us a
-    `vrt_collection_warped` object.
+    `vrt_collection_warped` object. Note that we use the argument
+    `lazy = FALSE` to force GDAL to create the warped VRTs immediately
+    (i.e. saving to disk as tif files). For remote data sources this
+    will be (much) faster.
 
 5.  These images are then “stacked” (combined into a single VRT with
     multiple layers in each VRTRasterBand), giving us a `vrt_stack`
@@ -121,7 +124,7 @@ system.time({
       build_mask_pixfun = build_bitmask()
     ) |>
     vrt_warp(t_srs = trs, te = te, tr = c(30, 30)) |>
-    vrt_stack(lazy = FALSE) |>
+    vrt_stack() |>
     vrt_set_py_pixelfun(pixfun = median_numpy()) |>
     # vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL >= 3.12.0
     vrt_compute(
@@ -129,7 +132,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.969   0.273   7.540
+#>   1.121   0.139   5.578
 
 
 plot_raster_src(
@@ -381,7 +384,8 @@ Helper functions for parallel processing
 Helper functions for spatial operations
 
 - [`bbox_to_projected()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
-  [`to_wkt()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
+  [`ogr_bbox_from_file()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
+  [`ogr_srs_from_file()`](https://permian-global-research.github.io/vrtility/reference/spatial_helpers.md)
   : Project a lat/long bounding box to a generic projected coordinate
   system
 

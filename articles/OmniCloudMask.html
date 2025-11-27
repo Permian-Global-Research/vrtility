@@ -118,20 +118,18 @@ both the OmniCloudMask and the standard Sentinel-2 scene classsification
 <span><span class="co"># number of items:</span></span>
 <span><span class="fu">rstac</span><span class="fu">::</span><span class="fu"><a href="https://brazil-data-cube.github.io/rstac/reference/items_functions.html" class="external-link">items_length</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 9</span></span></code></pre></div>
-<p>Next, let’s download all of the rasters locally. This step is not
-always necessary but, in this case, we are plotting intermediate data
-and we . We use <code>with</code> to isolate the use of mirai
-daemons.</p>
+<p>Next, let’s download all of the rasters locally by warping the
+collection to a common projection, extent and resolution, using
+lazy=FALSE to write files to disk. The returned object in this case is a
+warped <code>vrt_collection</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zurich_vrt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">s2_stac</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span></span>
 <span>    t_srs <span class="op">=</span> <span class="va">trs</span>,</span>
 <span>    te <span class="op">=</span> <span class="va">te</span>,</span>
-<span>    tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
-<span>    recollect <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>    tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>    lazy <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> </span></code></pre></div>
 <p>Now we are ready to create a cloud mask using the
 <code>vrt_create_mask</code> function. This function requires two main
 arguments: <code>inbands</code> and <code>maskfun</code>.</p>

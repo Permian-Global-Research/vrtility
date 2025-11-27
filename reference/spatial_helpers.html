@@ -68,16 +68,9 @@ coordinate system suitable for the AOI.</p>
 <span>  opts <span class="op">=</span> <span class="st">""</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">to_wkt</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu">ogr_bbox_from_file</span><span class="op">(</span><span class="va">x</span>, latlon <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Default S3 method</span></span>
-<span><span class="fu">to_wkt</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for class 'numeric'</span></span>
-<span><span class="fu">to_wkt</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for class 'character'</span></span>
-<span><span class="fu">to_wkt</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">ogr_srs_from_file</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -85,7 +78,7 @@ coordinate system suitable for the AOI.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>The object to convert to wkt.</p></dd>
+<dd><p>character vector. Path to a spatial vector file.</p></dd>
 
 
 <dt id="arg-proj-specific">proj_specific<a class="anchor" aria-label="anchor" href="#arg-proj-specific"></a></dt>
@@ -113,13 +106,20 @@ string.</p></dd>
 <dd><p>a character vector. Additional proj options to pass to the
 proj string. see details for more information.</p></dd>
 
+
+<dt id="arg-latlon">latlon<a class="anchor" aria-label="anchor" href="#arg-latlon"></a></dt>
+<dd><p>logical. Whether to return the bounding box in lat/long
+(EPSG:4326). Default is FALSE.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a numeric vector of length 4 representing the projected bounding box
 in the new coordinate system. Attributes include the new proj4 and wkt
 string.</p>
-<p>A character string of the object in wkt format.</p>
+<p>A numeric vector of length 4 representing the bounding box ordered
+as: xmin, ymin, xmax, ymax.</p>
+<p>A character string representing the SRS in WKT format.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

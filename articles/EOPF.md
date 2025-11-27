@@ -105,9 +105,9 @@ Critically, we must specify the `driver = "EOPFZARR"` argument in
 because GDAL will, by default, attempt to read the files using the
 built-in Zarr driver, which does not fully support the EOPF-Zarr format.
 
-Since we want to continue processing this image set, we use the
-`recollect = TRUE` argument to ensure that a new VRT collection is
-returned rather than file paths.
+Note the use of `lazy = FALSE` which will materialize the warped images
+to disk; this will make data access and subsequent processing more
+efficient.
 
 ``` r
 with(mirai::daemons(10), {
@@ -119,11 +119,9 @@ with(mirai::daemons(10), {
     vrt_warp(
       t_srs = trs,
       te = te,
-      tr = c(10, 10)
-    ) |>
-    vrt_compute(
-      recollect = TRUE
-    )
+      tr = c(10, 10),
+      lazy = FALSE
+    ) 
 })
 ```
 
@@ -149,11 +147,7 @@ eopf_s2_mask <- eopf_s2_chgn |>
   vrt_set_maskfun(
     mask_band = "omnicloudmask",
     mask_values = 1:3
-  ) |>
-  vrt_compute(
-    engine = "warp",
-    recollect = TRUE
-  )
+  ) 
 
 purrr::walk(
   seq_len(eopf_s2_mask$n_items),
@@ -239,7 +233,7 @@ print(exptest, pixfun = TRUE)
 #> 
 #>  VRT SRS: 
 #> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
-#> Bounding Box: -18980 -22270 18980 22310
+#> Bounding Box: -18973.07 -22261.98 18976.93 22308.02
 #> Pixel res: 10, 10
 #> Assets: ndvi, ndti, evi, vgnirbi
 #> No Data Value(s): NaN, NaN, NaN, NaN

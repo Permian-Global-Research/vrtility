@@ -67,7 +67,7 @@
 <span></span>
 <span><span class="fu">geomean_numpy</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">quantile_numpy</span><span class="op">(</span><span class="va">q</span><span class="op">)</span></span>
+<span><span class="fu">quantile_numpy</span><span class="op">(</span><span class="va">q</span>, use_fastnanquantile <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mean_db_numpy</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -93,6 +93,14 @@ NULL, the pixel function is set for all bands.</p></dd>
 <dd><p>Probability of the quantile to compute. Values must be between 0 and 1
 inclusive.</p></dd>
 
+
+<dt id="arg-use-fastnanquantile">use_fastnanquantile<a class="anchor" aria-label="anchor" href="#arg-use-fastnanquantile"></a></dt>
+<dd><p>Logical indicating whether to use the
+<code>fastnanquantile</code> library for calculating the quantile. This is generally
+faster than the standard numpy implementation, especially for large arrays.
+However, it requires the <code>fastnanquantile</code> library to be installed in the
+Python environment (This is handled automatically). Default is TRUE.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -109,7 +117,10 @@ mean of the input arrays. Use cases of this are at present unclear to me.
 If you have thoughts or references please let me know.</p>
 <p><code>quantile_numpy</code> is a pixel function that calculates the quantile
 of the input arrays for a given probability. This could be useful where
-the median fails to filter cloudy or shadowy images effectively.</p>
+the median fails to filter cloudy pixels effectively. The defauly numpy
+nanquantile function is very slow and does not support masked arrays.
+Therefore, it is typically much faster to use the fastnanquantile library
+which uses numba to increase performance.</p>
 <p><code>mean_db_numpy</code> is a pixel function that calculates the mean of
 the input arrays and then converts to decibels. This is useful for
 calculating the mean of radar raw/linear backscatter values, for example.</p>

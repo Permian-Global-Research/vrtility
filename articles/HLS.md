@@ -76,6 +76,7 @@ hlssl_stac <- hls_stac_query(
   assets = c( 
     "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B10", "B11", "Fmask")
 )
+#> GET request failed, attempting to POST request
 print(hlssl_stac)
 #> ###Items
 #> - features (6 item(s)):
@@ -278,9 +279,10 @@ band_level_median <- vrt_warp(
   t_srs = trs,
   te = te,
   tr = c(30, 30),
-  resampling = "bilinear"
+  resampling = "bilinear",
+  lazy=FALSE
 ) |>
-  vrt_stack(lazy=FALSE) |>
+  vrt_stack() |>
   vrt_set_py_pixelfun(pixfun = median_numpy()) |>
   vrt_compute(fs::file_temp(ext = ".tif"),
     engine = "gdalraster"

@@ -102,7 +102,7 @@
 <li><p>Define a bounding box and search a STAC catalog for Sentinel-2 data</p></li>
 <li><p>Create a <code>vrt_collection</code> object - essentially a list of individual VRTs (each making up one image) which we refer to as <code>vrt_block</code>s in this package.</p></li>
 <li><p>Then, we apply the mask using pixel functions. This simply modifies the XML of the VRT “blocks”.</p></li>
-<li><p>Because this set of images have more than one common spatial reference system (SRS) we warp the <code>vrt_block</code>s to a new spatially-aligned <code>vrt_collection</code> using <code>vrt_warp</code>, giving us a <code>vrt_collection_warped</code> object.</p></li>
+<li><p>Because this set of images have more than one common spatial reference system (SRS) we warp the <code>vrt_block</code>s to a new spatially-aligned <code>vrt_collection</code> using <code>vrt_warp</code>, giving us a <code>vrt_collection_warped</code> object. Note that we use the argument <code>lazy = FALSE</code> to force GDAL to create the warped VRTs immediately (i.e. saving to disk as tif files). For remote data sources this will be (much) faster.</p></li>
 <li><p>These images are then “stacked” (combined into a single VRT with multiple layers in each VRTRasterBand), giving us a <code>vrt_stack</code> object.</p></li>
 <li><p>A median pixel function is then added to the <code>vrt_stack</code>.</p></li>
 <li><p>Finally, we calculate the median composite using <code>vrt_compute</code> with the <code>gdalraster</code> engine to write the output which, in combination with the mirai package processes the data in parallel across bands and image tiles.</p></li>
@@ -146,7 +146,7 @@
 <span>      build_mask_pixfun <span class="op">=</span> <span class="fu"><a href="reference/vrt_set_maskfun.html">build_bitmask</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_warp.html">vrt_warp</a></span><span class="op">(</span>t_srs <span class="op">=</span> <span class="va">trs</span>, te <span class="op">=</span> <span class="va">te</span>, tr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span>lazy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="reference/vrt_set_py_pixelfun.html">median_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co"># vrt_set_gdal_pixelfun(pixfun = "median") # if using GDAL &gt;= 3.12.0</span></span>
 <span>    <span class="fu"><a href="reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
@@ -154,7 +154,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   1.969   0.273   7.540</span></span>
+<span><span class="co">#&gt;   1.121   0.139   5.578</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>

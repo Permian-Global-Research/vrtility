@@ -19,7 +19,7 @@ mean_numpy()
 
 geomean_numpy()
 
-quantile_numpy(q)
+quantile_numpy(q, use_fastnanquantile = TRUE)
 
 mean_db_numpy()
 ```
@@ -44,6 +44,14 @@ mean_db_numpy()
   Probability of the quantile to compute. Values must be between 0 and 1
   inclusive.
 
+- use_fastnanquantile:
+
+  Logical indicating whether to use the `fastnanquantile` library for
+  calculating the quantile. This is generally faster than the standard
+  numpy implementation, especially for large arrays. However, it
+  requires the `fastnanquantile` library to be installed in the Python
+  environment (This is handled automatically). Default is TRUE.
+
 ## Value
 
 character of the python function
@@ -62,7 +70,10 @@ you have thoughts or references please let me know.
 
 `quantile_numpy` is a pixel function that calculates the quantile of the
 input arrays for a given probability. This could be useful where the
-median fails to filter cloudy or shadowy images effectively.
+median fails to filter cloudy pixels effectively. The defauly numpy
+nanquantile function is very slow and does not support masked arrays.
+Therefore, it is typically much faster to use the fastnanquantile
+library which uses numba to increase performance.
 
 `mean_db_numpy` is a pixel function that calculates the mean of the
 input arrays and then converts to decibels. This is useful for
