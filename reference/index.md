@@ -87,7 +87,7 @@ filtering.
 
 - [`singleband_m2m()`](https://permian-global-research.github.io/vrtility/reference/singleband-many-to-many.md)
   [`hampel_filter()`](https://permian-global-research.github.io/vrtility/reference/singleband-many-to-many.md)
-  : Image processing along a time series.
+  : Temporal filtering and smoothing for raster time series
 
 ## GDAL Configuration
 

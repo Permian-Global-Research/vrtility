@@ -1,8 +1,9 @@
-# Image processing along a time series.
+# Temporal filtering and smoothing for raster time series
 
-`singleband_m2m` can be used to filter raster time series' or apply
-smoothing operations. These functions work on a single band at a time.
-composite of a warped VRT collection.
+Apply temporal operations to each pixel's time series in a warped VRT
+collection. This function processes each band independently, applying a
+user-defined function across the temporal dimension (e.g., filtering
+outliers, smoothing, gap-filling).
 
 `hampel_filter` is used tocreate a function to filter band-level
 outliers in time-series using the Hampel filter. to be provided to
@@ -29,43 +30,50 @@ hampel_filter(k = 1L, t0 = 3, impute_na = FALSE)
 
 - x:
 
-  A vrt_collection_warped object.
+  A `vrt_collection_warped` object. All images must be aligned to the
+  same grid (use
+  [`vrt_warp()`](https://permian-global-research.github.io/vrtility/reference/vrt_warp.md)
+  first).
 
 - m2m_fun:
 
-  A function to apply to the data. This function should take a matrix as
-  input and return a matrix as output. The function should be vectorized
-  over the rows of the matrix, where each row represents a time and
-  columns represent pixels. calcualtions are done at the band level.
+  A function that operates on time series data. The function receives a
+  matrix where rows represent time steps and columns represent pixels,
+  and must return a matrix of the same dimensions. See `hampel_filter`
+  for an example. Calculations are performed independently for each
+  band.
 
 - outfile:
 
-  The output file path.
+  Output file path(s). Can be a single path (used as template) or a
+  vector of paths (one per time step). Defaults to temporary files.
 
 - config_options:
 
-  A named character vector of GDAL configuration options.
+  A named character vector of GDAL configuration options. See
+  [`gdal_config_opts()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
 
 - creation_options:
 
-  A named character vector of GDAL creation options.
+  A named character vector of GDAL creation options for output files.
+  See
+  [`gdal_creation_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
 
 - quiet:
 
-  Logical indicating whether to suppress the progress bar.
+  Logical. If `FALSE`, displays a progress bar during processing.
 
 - nsplits:
 
-  The number of splits to use for the tiling. If NULL, the function will
-  automatically determine the number of splits based on the dimensions
-  of the input data, available memory and the number of active mirai
-  daemons. see details
+  Integer specifying the number of spatial tiles to process. If `NULL`
+  (default), automatically determines optimal tiling based on input
+  dimensions, available memory, and number of parallel workers.
 
 - recollect:
 
-  A logical indicating whether to return the output as a vrt_block or
-  vrt_collection object. default is FALSE and the output is a character
-  string of the output file path.
+  Logical. If `TRUE`, returns a `vrt_collection` object containing the
+  processed images. If `FALSE` (default), returns a character vector of
+  output file paths.
 
 - k:
 
@@ -84,14 +92,52 @@ hampel_filter(k = 1L, t0 = 3, impute_na = FALSE)
 
 ## Value
 
-A character vector of the output file path.
+If `recollect = FALSE`, a character vector of output file paths (one per
+time step). If `recollect = TRUE`, a `vrt_collection` object.
 
 A function to be used with `singleband_m2m()` to remove outliers from a
 raster time series.
 
 ## Details
 
-We have a lot TODO: here...
+### Processing Model
+
+`singleband_m2m()` materializes the virtual raster collection by:
+
+1.  **Spatial tiling**: Divides the spatial extent into tiles for
+    efficient memory usage
+
+2.  **Band-wise processing**: For each band and tile, extracts the
+    complete time series (all images)
+
+3.  **Temporal operations**: Applies `m2m_fun` to the time series matrix
+    (rows = time, cols = pixels)
+
+4.  **Output writing**: Writes filtered results to disk as GeoTIFF files
+
+### Common Use Cases
+
+- **Outlier removal**: Remove cloud contamination or sensor artifacts
+  using `hampel_filter()`
+
+- **Temporal smoothing**: Apply moving average or median filters
+
+- **Gap filling**: Interpolate missing values in time series
+
+- **Temporal compositing**: Create median/mean composites while
+  preserving all time steps
+
+### Performance Considerations
+
+- Processing is parallelized if `mirai` daemons are active (see
+  `daemons`[mirai::mirai](https://mirai.r-lib.org/reference/mirai.html)).
+
+- Automatic tiling balances memory usage against I/O overhead
+
+- Each output image retains original metadata (timestamps, band
+  descriptions)
+
+- Use `recollect = TRUE` to chain with additional VRT operations
 
 (details from the `pracma::hampel`) The ‘median absolute deviation’
 computation is done in the (-k...k) vicinity of each point at least k
@@ -108,3 +154,20 @@ values are removed from the data before applying the filter. If
 `impute_na` is `TRUE`, the function will impute NA values using the
 nearest prior non-NA value. If `impute_na` is `FALSE`, NA values will be
 returned in their original positions.
+
+## See also
+
+`hampel_filter()` for outlier detection,
+[`vrt_warp()`](https://permian-global-research.github.io/vrtility/reference/vrt_warp.md)
+to prepare aligned collections,
+[`vrt_derived_block()`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md)
+for band math before filtering
+
+## Examples
+
+``` r
+if (FALSE) { # interactive()
+#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
+# number of items:
+}
+```
