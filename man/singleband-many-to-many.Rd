@@ -3,7 +3,7 @@
 \name{singleband_m2m}
 \alias{singleband_m2m}
 \alias{hampel_filter}
-\title{Image processing along a time series.}
+\title{Temporal filtering and smoothing for raster time series}
 \usage{
 singleband_m2m(
   x,
@@ -19,29 +19,32 @@ singleband_m2m(
 hampel_filter(k = 1L, t0 = 3, impute_na = FALSE)
 }
 \arguments{
-\item{x}{A vrt_collection_warped object.}
+\item{x}{A \code{vrt_collection_warped} object. All images must be aligned to the
+same grid (use \code{\link[=vrt_warp]{vrt_warp()}} first).}
 
-\item{m2m_fun}{A function to apply to the data. This function should take a
-matrix as input and return a matrix as output. The function should be
-vectorized over the rows of the matrix, where each row represents a
-time and columns represent pixels. calcualtions are done at the band level.}
+\item{m2m_fun}{A function that operates on time series data. The function
+receives a matrix where rows represent time steps and columns represent
+pixels, and must return a matrix of the same dimensions. See \code{hampel_filter}
+for an example. Calculations are performed independently for each band.}
 
-\item{outfile}{The output file path.}
+\item{outfile}{Output file path(s). Can be a single path (used as template)
+or a vector of paths (one per time step). Defaults to temporary files.}
 
-\item{config_options}{A named character vector of GDAL configuration options.}
+\item{config_options}{A named character vector of GDAL configuration options.
+See \code{gdal_config_opts()}.}
 
-\item{creation_options}{A named character vector of GDAL creation options.}
+\item{creation_options}{A named character vector of GDAL creation options for
+output files. See \code{gdal_creation_options()}.}
 
-\item{quiet}{Logical indicating whether to suppress the progress bar.}
+\item{quiet}{Logical. If \code{FALSE}, displays a progress bar during processing.}
 
-\item{nsplits}{The number of splits to use for the tiling. If NULL, the
-function will automatically determine the number of splits based on the
-dimensions of the input data, available memory and the number of active
-mirai daemons. see details}
+\item{nsplits}{Integer specifying the number of spatial tiles to process. If
+\code{NULL} (default), automatically determines optimal tiling based on input
+dimensions, available memory, and number of parallel workers.}
 
-\item{recollect}{A logical indicating whether to return the output as a
-vrt_block or vrt_collection object. default is FALSE and the output is a
-character string of the output file path.}
+\item{recollect}{Logical. If \code{TRUE}, returns a \code{vrt_collection} object
+containing the processed images. If \code{FALSE} (default), returns a character
+vector of output file paths.}
 
 \item{k}{The number of neighboring points to consider on each side of the
 current point. window length 2*k+1 in indices.}
@@ -53,22 +56,57 @@ the function will impute NA values using the nearest prior non-NA value. If
 \code{FALSE}, NA values will be returned in their original positions.}
 }
 \value{
-A character vector of the output file path.
+If \code{recollect = FALSE}, a character vector of output file paths (one
+per time step). If \code{recollect = TRUE}, a \code{vrt_collection} object.
 
 A function to be used with \code{singleband_m2m()} to remove outliers
 from a raster time series.
 }
 \description{
-\code{singleband_m2m} can be used to filter raster time series' or
-apply smoothing operations. These functions work on a single band at a time.
-composite of a warped VRT collection.
+Apply temporal operations to each pixel's time series in a
+warped VRT collection. This function processes each band independently,
+applying a user-defined function across the temporal dimension (e.g.,
+filtering outliers, smoothing, gap-filling).
 
 \code{hampel_filter} is used tocreate a function to filter band-level
 outliers in time-series using the Hampel filter. to be provided to
 \code{singleband_m2m()}.
 }
 \details{
-We have a lot TODO: here...
+\subsection{Processing Model}{
+
+\code{singleband_m2m()} materializes the virtual raster collection by:
+\enumerate{
+\item \strong{Spatial tiling}: Divides the spatial extent into tiles for efficient
+memory usage
+\item \strong{Band-wise processing}: For each band and tile, extracts the complete
+time series (all images)
+\item \strong{Temporal operations}: Applies \code{m2m_fun} to the time series matrix
+(rows = time, cols = pixels)
+\item \strong{Output writing}: Writes filtered results to disk as GeoTIFF files
+}
+}
+
+\subsection{Common Use Cases}{
+\itemize{
+\item \strong{Outlier removal}: Remove cloud contamination or sensor artifacts using
+\code{\link[=hampel_filter]{hampel_filter()}}
+\item \strong{Temporal smoothing}: Apply moving average or median filters
+\item \strong{Gap filling}: Interpolate missing values in time series
+\item \strong{Temporal compositing}: Create median/mean composites while preserving
+all time steps
+}
+}
+
+\subsection{Performance Considerations}{
+\itemize{
+\item Processing is parallelized if \code{mirai} daemons are active (see
+\code{daemons}\link[mirai:mirai]{mirai::mirai}).
+\item Automatic tiling balances memory usage against I/O overhead
+\item Each output image retains original metadata (timestamps, band descriptions)
+\item Use \code{recollect = TRUE} to chain with additional VRT operations
+}
+}
 
 (details from the \code{pracma::hampel}) The ‘median absolute deviation’ computation is
 done in the (-k...k) vicinity of each point at least k steps away from the
@@ -85,4 +123,14 @@ are removed from the data before applying the filter. If \code{impute_na} is
 \code{TRUE}, the function will impute NA values using the nearest prior non-NA
 value. If \code{impute_na} is \code{FALSE}, NA values will be returned in their
 original positions.
+}
+\examples{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
+# number of items:
+\dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[=hampel_filter]{hampel_filter()}} for outlier detection, \code{\link[=vrt_warp]{vrt_warp()}} to prepare
+aligned collections, \code{\link[=vrt_derived_block]{vrt_derived_block()}} for band math before filtering
 }
