@@ -237,7 +237,7 @@ vrt_compute.vrt_block <- function(
     result,
     config_opts = config_options,
     band_descriptions = x$assets,
-    datetimes = x$date_time
+    datetimes = unique(x$date_time)
   )
 }
 
