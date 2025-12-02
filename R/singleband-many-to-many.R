@@ -91,7 +91,7 @@
 #'   ) |>
 #'   vrt_warp(t_srs = trs, te = te, tr = c(30, 30))
 #'
-#' Apply Hampel filter to remove outliers
+#' # Apply Hampel filter to remove outliers
 #' filtered <- collection |>
 #'   singleband_m2m(
 #'     m2m_fun = hampel_filter(k = 3L, t0 = 0, impute_na = TRUE),
@@ -102,7 +102,7 @@
 #'   plot(filtered, item = 10, bands = c(3, 2, 1), main = "Hampel Filtered")
 #' })
 #'
-#' Custom temporal function: 5-image moving median
+#' # Custom temporal function: 5-image moving median
 #' moving_mean <- function(x, width = 5) {
 #'   n_time <- nrow(x)
 #'   n_pixels <- ncol(x)
