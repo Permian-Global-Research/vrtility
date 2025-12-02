@@ -62,79 +62,77 @@
 #'
 #' @examplesIf interactive()
 #' #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
-#` mirai::daemons(4)
-#`
-#` bbox <- gdalraster::bbox_from_wkt(
-#`   wkt = "POINT (144.3 -7.6)",
-#`   extend_x = 0.05,
-#`   extend_y = 0.05
-#` )
-#`
-#` te <- bbox_to_projected(bbox)
-#` trs <- attr(te, "wkt")
-#`
-#` s2_stac <- hls_stac_query(
-#`   bbox = bbox,
-#`   start_date = "2023-01-01",
-#`   end_date = "2024-12-31",
-#`   max_cloud_cover = 40,
-#`   assets = c("B02", "B03", "B04", "Fmask")
-#` )
+#' mirai::daemons(4)
+#'
+#' bbox <- gdalraster::bbox_from_wkt(
+#'   wkt = "POINT (144.3 -7.6)",
+#'   extend_x = 0.05,
+#'   extend_y = 0.05
+#' )
+#'
+#' te <- bbox_to_projected(bbox)
+#' trs <- attr(te, "wkt")
+#'
+#' s2_stac <- hls_stac_query(
+#'   bbox = bbox,
+#'   start_date = "2023-01-01",
+#'   end_date = "2024-12-31",
+#'   max_cloud_cover = 40,
+#'   assets = c("B02", "B03", "B04", "Fmask")
+#' )
 #' # number of items:
-#` length(s2_stac$features)
-#`
-#` collection <- vrt_collect(s2_stac) |>
-#`   vrt_set_maskfun(
-#`     mask_band = "Fmask",
-#`     mask_values = c(0, 1, 2, 3),
-#`     build_mask_pixfun = build_bitmask()
-#`   ) |>
-#`   vrt_warp(t_srs = trs, te = te, tr = c(30, 30))
-#`
-# Apply Hampel filter to remove outliers
-#` filtered <- collection |>
-#`   singleband_m2m(
-#`     m2m_fun = hampel_filter(k = 3L, t0 = 0, impute_na = TRUE),
-#`     recollect = TRUE
-#`   )
-#` withr::with_par(list(mfrow = c(2, 1)), {
-#`   plot(collection, item = 10, bands = c(3, 2, 1), main = "Original")
-#`   plot(filtered, item = 10, bands = c(3, 2, 1), main = "Hampel Filtered")
-#` })
-#`
-#` #'
-#` # Custom temporal function: 5-image moving median
-#` moving_mean <- function(x, width = 5) {
-#`   n_time <- nrow(x)
-#`   n_pixels <- ncol(x)
-#`
-#`   # Pre-allocate result matrix
-#`   result <- matrix(NA_real_, nrow = n_time, ncol = n_pixels)
-#`
-#`   # Calculate half-window size for centering
-#`   half_width <- floor(width / 2)
-#`
-#`   # For each time step where we can compute a full window
-#`   for (t in (half_width + 1):(n_time - half_width)) {
-#`     window_idx <- (t - half_width):(t + half_width)
-#`     result[t, ] <- colMeans(x[window_idx, , drop = FALSE], na.rm = TRUE)
-#`   }
-#`
-#`   return(result)
-#` }
-#`
-#`   smoothed <- singleband_m2m(
-#`     collection,
-#`     m2m_fun = moving_mean,
-#`     recollect = TRUE
-#`   )
-#`
-#`
-#` withr::with_par(list(mfrow = c(1, 2)), {
-#`   plot(collection, item = 10, bands = c(3, 2, 1), main = "Original")
-#`   plot(smoothed, item = 10, bands = c(3, 2, 1), main = "5-Image Moving Mean")
-#` })
-
+#' length(s2_stac$features)
+#'
+#' collection <- vrt_collect(s2_stac) |>
+#'   vrt_set_maskfun(
+#'     mask_band = "Fmask",
+#'     mask_values = c(0, 1, 2, 3),
+#'     build_mask_pixfun = build_bitmask()
+#'   ) |>
+#'   vrt_warp(t_srs = trs, te = te, tr = c(30, 30))
+#'
+#' Apply Hampel filter to remove outliers
+#' filtered <- collection |>
+#'   singleband_m2m(
+#'     m2m_fun = hampel_filter(k = 3L, t0 = 0, impute_na = TRUE),
+#'     recollect = TRUE
+#'   )
+#' withr::with_par(list(mfrow = c(2, 1)), {
+#'   plot(collection, item = 10, bands = c(3, 2, 1), main = "Original")
+#'   plot(filtered, item = 10, bands = c(3, 2, 1), main = "Hampel Filtered")
+#' })
+#'
+#' Custom temporal function: 5-image moving median
+#' moving_mean <- function(x, width = 5) {
+#'   n_time <- nrow(x)
+#'   n_pixels <- ncol(x)
+#'
+#'   # Pre-allocate result matrix
+#'   result <- matrix(NA_real_, nrow = n_time, ncol = n_pixels)
+#'
+#'   # Calculate half-window size for centering
+#'   half_width <- floor(width / 2)
+#'
+#'   # For each time step where we can compute a full window
+#'   for (t in (half_width + 1):(n_time - half_width)) {
+#'     window_idx <- (t - half_width):(t + half_width)
+#'     result[t, ] <- colMeans(x[window_idx, , drop = FALSE], na.rm = TRUE)
+#'   }
+#'
+#'   return(result)
+#' }
+#'
+#'   smoothed <- singleband_m2m(
+#'     collection,
+#'     m2m_fun = moving_mean,
+#'     recollect = TRUE
+#'   )
+#'
+#'
+#' withr::with_par(list(mfrow = c(1, 2)), {
+#'   plot(collection, item = 10, bands = c(3, 2, 1), main = "Original")
+#'   plot(smoothed, item = 10, bands = c(3, 2, 1), main = "5-Image Moving Mean")
+#' })
 #' @rdname singleband-many-to-many
 #' @export
 singleband_m2m <- function(
