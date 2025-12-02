@@ -289,8 +289,8 @@ gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 #> [7] "UNIFIED_SRC_NODATA=NO"
 set_gdal_config(gdal_config_opts())
 gcm <- set_gdal_cache_max(0.05)
-#> ℹ GDAL_CACHEMAX set to 799.779 MiB; to change this use
+#> ℹ GDAL_CACHEMAX set to 799.729 MiB; to change this use
 #>   vrtility::set_gdal_cache_max()
 print(gcm)
-#> 799.779 MiB
+#> 799.729 MiB
 ```

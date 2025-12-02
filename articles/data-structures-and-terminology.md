@@ -17,10 +17,10 @@ package’s VRT-based pipelines. Figure 1 provides a visual overview of
 these data structures and their relationships. which are discussed in
 detail below.
 
-![Figure 1: Core data structures in vrtility: \`vrt_block\`,
-\`vrt_collection\`, and \`vrt_stack\`. Red, green, and blue lines
-represent raster bands; black boxes represent VRT files; t\* labels
-indicate discrete epochs (time steps).](figure/data-concepts.svg)
+![Figure 1: Core data structures in vrtility: vrt_block, vrt_collection,
+and vrt_stack. Red, green, and blue lines represent raster bands; black
+boxes represent VRT files; t\* labels indicate discrete epochs (time
+steps).](figure/data-concepts.png)
 
 Figure 1: Core data structures in vrtility: `vrt_block`,
 `vrt_collection`, and `vrt_stack`. Red, green, and blue lines represent
