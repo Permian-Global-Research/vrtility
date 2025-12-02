@@ -25,9 +25,10 @@ virtual rasters at different levels of organization: **`vrt_block`**, **`vrt_col
 Figure 1 provides a visual overview of these data structures and their relationships.
 which are discussed in detail below.
 
-```{r data-concepts-figure, echo=FALSE, out.width="100%", fig.cap="Figure 1: Core data structures in vrtility: `vrt_block`, `vrt_collection`, and `vrt_stack`. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)."}
-knitr::include_graphics("figure/data-concepts.svg")
-```
+<div class="figure" style="text-align: center">
+  <img src="figure/data-concepts.png" alt="Figure 1: Core data structures in vrtility: vrt_block, vrt_collection, and vrt_stack. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)." style="width: 100%;" />
+  <p class="caption">Figure 1: Core data structures in vrtility: <code>vrt_block</code>, <code>vrt_collection</code>, and <code>vrt_stack</code>. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps).</p>
+</div>
 
 There is considerable jargon in the GIS world regarding multidimensional raster 
 data. The term "data cube" is commonly used for spatiotemporal rasters, but we 
