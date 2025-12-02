@@ -4,8 +4,12 @@ test_that("vrt_derived_block works", {
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files) |>
+    vrt_set_maskfun(
+      mask_band = "SCL",
+      mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
+    ) |>
     vrt_set_scale(scale_value = 0.0001, offset_value = -0.1, band_idx = 1:4)
-  t_block <- ex_collect[[1]][[1]]
+  t_block <- ex_collect[[1]][[2]]
 
   ex_ndvi <- vrt_derived_block(
     ex_collect,
@@ -20,7 +24,8 @@ test_that("vrt_derived_block works", {
     te = t_block$bbox,
     tr = t_block$res,
     outfile = fs::file_temp(ext = ".tif"),
-    engine = "warp"
+    engine = "warp",
+    resampling = "bilinear"
   )
 
   expect_true(all(file.exists(ex_ndvifiles)))
@@ -45,4 +50,9 @@ test_that("vrt_derived_block works", {
   expect_true(all(unique_vals %in% c(0, NA) | is.na(unique_vals)))
 
   expect_identical(dszt$getNoDataValue(1), NaN)
+
+  skip_on_os("windows")
+  vdiffr::expect_doppelganger(
+    plot(ex_ndvi, item = 3)
+  )
 })
