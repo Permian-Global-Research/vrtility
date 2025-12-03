@@ -262,6 +262,7 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
 
 test_that("bitmask results are the same with both implementations", {
+  skip_if(isFALSE(check_muparser()), "muparser not available")
   vals_mp <- bitmask_test_vals(use_muparser = TRUE)
   vals_py <- bitmask_test_vals(use_muparser = FALSE)
 
