@@ -191,14 +191,18 @@ vrt_set_gdal_pixelfun.vrt_collection <- function(
 }
 
 
-set_gdal_pixfun_xml <- function(band_xml, pixfun, pf_arg_vals) {
+set_gdal_pixfun_xml <- function(band_xml, pixfun, pf_arg_vals = list()) {
   check_for_pixel_fun(band_xml)
   xml2::xml_set_attr(band_xml, "subClass", "VRTDerivedRasterBand")
   xml2::xml_add_child(band_xml, "PixelFunctionType", pixfun)
   if (length(pf_arg_vals) > 0) {
     pf_args <- xml2::xml_add_child(band_xml, "PixelFunctionArguments")
     purrr::iwalk(pf_arg_vals, function(val, name) {
-      xml2::xml_set_attr(pf_args, name, val)
+      if (name == "expression") {
+        xml2::xml_set_attr(pf_args, name, xml2::xml_cdata(val)) # perhaps not needed
+      } else {
+        xml2::xml_set_attr(pf_args, name, val)
+      }
     })
   }
 }

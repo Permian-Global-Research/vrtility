@@ -7,7 +7,8 @@ withr::local_options(
   list(
     vrt.pause.base = 1,
     vrt.pause.cap = 1,
-    vrt.max.times = 1
+    vrt.max.times = 1,
+    vrtility.use_muparser = FALSE
   ),
   .local_envir = teardown_env()
 )

@@ -41,7 +41,6 @@
 #' @section VRT pixel functions:
 #' \describe{
 #' \item{\code{\link{vrt_set_py_pixelfun}}}{Set a pixel function for a vrt stack object}
-#' \item{\code{\link{set_mask_numpy}}}{A pixel function to apply a bitmask}
 #' \item{\code{\link{build_intmask}}}{A pixel function to build a mask from a mask band where the mask values are integers}
 #' \item{\code{\link{build_bitmask}}}{A pixel function to build a mask from a mask band where the mask values are bit positions}
 #' \item{\code{\link{median_numpy}}}{A pixel function to compute the median}
@@ -100,7 +99,8 @@ vrt_opts_set <- function() {
     vrt.percent.ram = 60,
     vrt.pause.base = 1,
     vrt.pause.cap = 10,
-    vrt.max.times = 3
+    vrt.max.times = 3,
+    vrtility.use_muparser = FALSE
   )
 
   toset <- !(names(op_vrtility) %in% names(op))

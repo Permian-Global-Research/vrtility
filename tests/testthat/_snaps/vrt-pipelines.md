@@ -170,7 +170,7 @@
                         raster_ysize, buf_radius, gt, **kwargs):
           mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
           mask = np.isin(in_ar[0], mask_vals)
-          out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+          out_ar[:] = np.where(mask, 0, 1)
     Output
       
       
@@ -443,7 +443,7 @@
                         raster_ysize, buf_radius, gt, **kwargs):
           mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
           mask = np.isin(in_ar[0], mask_vals)
-          out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+          out_ar[:] = np.where(mask, 0, 1)
     Output
       
       

@@ -1,17 +1,21 @@
 #' Masking functions VRT pixel functions.
-#' @param buffer_size A buffer size to apply to the mask (numeric, default: 0). A buffer
+#' @param buffer_size A buffer size to apply to the mask (numeric, default: 0).
+#' A buffer
 #' size > 0 will dilate the mask by the specified number of pixels.
 #' This can be useful to remove edge effects around clouds.
 #' If a buffer size > 0 is specified, the `scipy` python library will
 #' automatically be installed.
-#' @export
-#' @details `set_mask_numpy` simply applies a given mask where values of 0 are
-#' assumed to have nodata and values > 0 (typically 255) contain valid data.
-#' It is the only provided function for the `set_mask_pixfun` argument in
-#' `vrt_set_maskfun()`. Alternatively a custom function could be provided if,
-#' for example a user wishes to buffer the mask.
+#' @param use_muparser Logical. If `TRUE` and GDAL is built with muparser
+#' support (GDAL >= 3.11.4), uses muparser expression instead of Python.
+#' @noRd
+#' @keywords internal
+#' @details `set_mask` simply applies a given mask where values of 0 are
+#' assumed to have nodata and values > 0  contain valid data.
 #' @rdname vrt_set_maskfun
-set_mask_numpy <- function(buffer_size = 0) {
+set_mask <- function(
+  buffer_size = 0,
+  use_muparser = getOption("vrtility.use_muparser", FALSE)
+) {
   v_assert_type(
     buffer_size,
     "buffer_size",
@@ -26,57 +30,123 @@ set_mask_numpy <- function(buffer_size = 0) {
     Inf
   )
 
+  if (buffer_size == 0 && check_muparser() && use_muparser) {
+    return(set_mask_muparser())
+  }
+
   if (buffer_size > 0) {
     # assert omicloudmask is installed
     vrtility_py_require("scipy")
     add_py_lib_to_options("scipy")
   }
 
-  glue::glue(
+  return(set_mask_python(buffer_size))
+}
+
+#' @details `set_mask_muparser` provides a muparser expression for simple masking
+#' where mask values of 0 indicate nodata and values > 0 indicate valid data.
+#' This is faster than the Python version when buffering is not needed, and
+#' doesn't require Python dependencies.
+#' @noRd
+#' @keywords internal
+set_mask_muparser <- function() {
+  e <- "{bands[2]} != 0 ? {bands[1]} : NODATA"
+  class(e) <- c("muparser_expression", class(e))
+  return(e)
+}
+
+#' @param buffer_size A buffer size to apply to the mask (numeric, default: 0). A buffer
+#' size > 0 will dilate the mask by the specified number of pixels.
+#' This can be useful to remove edge effects around clouds.
+#' If a buffer size > 0 is specified, the `scipy` python library will
+#' automatically be installed.
+#' @details `set_mask_python` provides a Python pixel function for masking
+#' where mask values of 0 indicate nodata and values > 0 indicate valid data.
+#' This function also supports buffering of the mask using a specified buffer
+#' size.
+#' @noRd
+#' @keywords internal
+set_mask_python <- function(buffer_size) {
+  pf <- glue::glue(
     "
 import numpy as np
 
 def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
-                  raster_ysize, buf_radius, gt, **kwargs):          
+                  raster_ysize, buf_radius, gt, **kwargs):
     valid_vals =  [int(x) for x in kwargs['valid_values'].decode().split(',')]
     no_data_val = int(kwargs['no_data_value'])
     buffer_size = {buffer_size}
-    
+
     if buffer_size > 0:
         from scipy import ndimage
         # Create mask (True = nodata)
         mask = in_ar[1] == 0
-        
+
         # Buffer the mask
         structure = ndimage.generate_binary_structure(2, 2)  # 8-connectivity
         buffered_mask = ndimage.binary_dilation(mask, structure=structure, iterations=buffer_size)
-        
+
         # Apply buffered mask
         out_ar[:] = np.where(buffered_mask, no_data_val, in_ar[0])
     else:
-        # Original behavior - no buffering
+        # no buffering
         out_ar[:] = np.where(in_ar[1] > 0, in_ar[0], no_data_val)
 "
   )
+  class(pf) <- c("python_pixel_function", class(pf))
+  return(pf)
 }
 
 
 #' @details `build_intmask` provides an integer mask function that can be used
 #' to mask out pixels based on a band containing true integer/numeric values.
 #' This would be appropriate for the Sentinel 2A SCL band, for example.
+#' @param use_muparser Logical. If `TRUE` and GDAL >= 3.12, uses muparser
+#' expression instead of Python. Default is to auto-detect based on GDAL version.
 #' @export
 #' @rdname vrt_set_maskfun
-build_intmask <- function() {
-  glue::glue(
+build_intmask <- function(
+  use_muparser = getOption("vrtility.use_muparser", FALSE)
+) {
+  if (is.null(use_muparser)) {
+    use_muparser <- check_muparser()
+  }
+
+  if (use_muparser) {
+    return(build_intmask_muparser())
+  }
+
+  return(build_intmask_python())
+}
+
+build_intmask_python <- function() {
+  pf <- glue::glue(
     "
 import numpy as np
 def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                   raster_ysize, buf_radius, gt, **kwargs):
     mask_vals =  [int(x) for x in kwargs['mask_values'].decode().split(',')]
     mask = np.isin(in_ar[0], mask_vals)
-    out_ar[:] = np.where(mask, 0, 1)  # Set invalid pixels to 0
+    out_ar[:] = np.where(mask, 0, 1)
 "
   )
+  class(pf) <- c("python_pixel_function", class(pf))
+  return(pf)
+}
+
+
+#' @details `build_intmask_muparser` provides a muparser expression template for
+#' integer masking where specified values indicate invalid data (set to 0 in mask).
+#' Returns a glue template that will be filled with mask_values later.
+#' @noRd
+#' @keywords internal
+build_intmask_muparser <- function() {
+  # Return a glue template that will be filled with mask_values
+  # The expression checks if B1 equals any mask value
+  expr <- "({paste0('B1==', mask_values, collapse = ' || ')}) ? 0 : 1"
+
+  class(expr) <- c("muparser_expression", class(expr))
+  return(expr)
 }
 
 
@@ -84,11 +154,31 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 #' be used to mask out pixels based on a true bit mask. This function should be
 #' used where bitwise operations are required. e.g. for HLS data, the "Fmask"
 #' band requires bitwise operations to extract the mask values.
+#' @param use_muparser Logical. If `TRUE` and GDAL >= 3.12, uses muparser
+#' expression instead of Python. Default is to auto-detect based on GDAL version.
 #' @export
 #' @rdname vrt_set_maskfun
-build_bitmask <- function() {
-  glue::glue(
-    "
+build_bitmask <- function(
+  use_muparser = getOption("vrtility.use_muparser", FALSE)
+) {
+  if (is.null(use_muparser)) {
+    use_muparser <- check_muparser()
+  }
+
+  if (use_muparser) {
+    return(build_bitmask_muparser())
+  }
+  return(build_bitmask_python())
+}
+
+#' @details `build_bitmask_python` provides a Python pixel function for bitwise
+#' masking where specified bit positions indicate invalid data.
+#' @noRd
+#' @keywords internal
+build_bitmask_python <- function() {
+  pf <- glue::glue(
+    glue::glue(
+      "
 import numpy as np
 def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                   raster_ysize, buf_radius, gt, **kwargs):
@@ -98,7 +188,28 @@ def build_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
         mask |= np.bitwise_and(in_ar[0], np.left_shift(1, bit)) > 0
     out_ar[:] = np.where(mask, 0, 1)
 "
+    )
   )
+  class(pf) <- c("python_pixel_function", class(pf))
+  return(pf)
+}
+
+#' @details `build_bitmask_muparser` provides a muparser expression template for
+#' bitwise masking where specified bit positions indicate invalid data.
+#' Returns a glue template that will be filled with mask_values later.
+#' @noRd
+#' @keywords internal
+build_bitmask_muparser <- function() {
+  # Return a glue template that will be filled with mask_values
+  # The expression checks if any specified bits are set
+  # For each bit: (B1 & (1 << bit)) > 0
+  # Need to wrap paste0 call properly and ensure parentheses are correct
+  expr <- "{paste0(
+  '(fmod(B1, ', 2^(mask_values + 1), ') >= ', 2^mask_values, ')',
+  collapse = ' || '
+)} ? 0 : 1"
+  class(expr) <- c("muparser_expression", class(expr))
+  return(expr)
 }
 
 # NOTE: we use 1 not 255 as a valid data value in the mask because HLS data uses
