@@ -53,6 +53,7 @@ test_that("vrt_derived_block works", {
 
   skip_on_os("windows")
   vdiffr::expect_doppelganger(
+    "derived ndvi plot",
     plot(ex_ndvi, item = 3)
   )
 })
