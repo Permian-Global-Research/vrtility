@@ -115,7 +115,10 @@ build_intmask <- function(
   )
 
   if (use_muparser) {
-    use_muparser <- check_muparser("3.11.4")
+    if (!check_muparser("3.11.4")) {
+      muparser_mask_warn("build_intmask")
+      return(build_intmask_python())
+    }
     return(build_intmask_muparser())
   }
 
