@@ -277,3 +277,32 @@ test_that("bitmask results are the same with both implementations", {
   expect_equal(vals_mp$no_mask, vals_py$no_mask)
   expect_equal(vals_mp$mask_bit, vals_py$mask_bit)
 })
+
+
+test_that("muparser warning messages are correct", {
+  skip_if(check_muparser(), "muparser is available, cannot test warnings")
+
+  withr::with_options(
+    list(vrtility.use_muparser = TRUE),
+    {
+      expect_warning(
+        build_bitmask(),
+        class = "muparser_not_available_error",
+        regexp = "Cannot use muparser for `build_bitmask`."
+      )
+
+      expect_s3_class(set_mask(buffer_size = 0), "python_pixel_function")
+
+      skip_if(
+        gdalraster::gdal_version_num() >=
+          gdalraster::gdal_compute_version(3, 11, 4),
+        "GDAL version is sufficient for muparser, cannot test warnings"
+      )
+      expect_warning(
+        build_intmask(),
+        class = "muparser_not_available_error",
+        regexp = "Cannot use muparser for `build_intmask`."
+      )
+    }
+  )
+})
