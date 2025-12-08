@@ -184,11 +184,20 @@ bbox_to_projected <- function(
 #' @param x character vector. Path to a spatial vector file.
 #' @param latlon logical. Whether to return the bounding box in lat/long
 #' (EPSG:4326). Default is FALSE.
+#' @param extend_x numeric. Amount to extend the bounding box in the x
+#' direction (both min and max).
+#' @param extend_y numeric. Amount to extend the bounding box in the y
+#' direction (both min and max).
 #' @return A numeric vector of length 4 representing the bounding box ordered
 #' as: xmin, ymin, xmax, ymax.
 #' @export
 #' @rdname spatial_helpers
-ogr_bbox_from_file <- function(x, latlon = FALSE) {
+ogr_bbox_from_file <- function(
+  x,
+  latlon = FALSE,
+  extend_x = NULL,
+  extend_y = NULL
+) {
   v_assert_type(x, "x", "character")
   assert_files_exist(x, url_possible = TRUE)
   v_assert_type(latlon, "latlon", "logical", nullok = FALSE)
@@ -199,13 +208,44 @@ ogr_bbox_from_file <- function(x, latlon = FALSE) {
   native_crs_bbox <- vec$bbox()
 
   if (!latlon) {
-    return(native_crs_bbox)
+    return(extend_bbox(native_crs_bbox, extend_x, extend_y))
   }
-  gdalraster::transform_bounds(
-    native_crs_bbox,
-    vec$getSpatialRef(),
-    "EPSG:4326"
+
+  extend_bbox(
+    gdalraster::transform_bounds(
+      native_crs_bbox,
+      vec$getSpatialRef(),
+      "EPSG:4326"
+    ),
+    extend_x,
+    extend_y
   )
+}
+
+#' Extend a bounding box by specified amounts in x and y directions
+#' @param bbox A numeric vector of length 4 representing a bounding box
+#' @param extend_x numeric. Amount to extend the bounding box in the x
+#' direction (both min and max).
+#' @param extend_y numeric. Amount to extend the bounding box in the y
+#' direction (both min and max).
+#' @return A numeric vector of length 4 representing the extended bounding box
+#' @noRd
+#' @keywords internal
+extend_bbox <- function(bbox, extend_x = NULL, extend_y = NULL) {
+  v_assert_type(bbox, "bbox", "numeric")
+  v_assert_length(bbox, "bbox", 4)
+  v_assert_type(extend_x, "extend_x", "numeric", nullok = TRUE)
+  v_assert_length(extend_x, "extend_x", 1, nullok = TRUE)
+  v_assert_type(extend_y, "extend_y", "numeric", nullok = TRUE)
+  v_assert_length(extend_y, "extend_y", 1, nullok = TRUE)
+
+  if (!is.null(extend_x)) {
+    bbox[c(1, 3)] <- bbox[c(1, 3)] + c(-extend_x, extend_x)
+  }
+  if (!is.null(extend_y)) {
+    bbox[c(2, 4)] <- bbox[c(2, 4)] + c(-extend_y, extend_y)
+  }
+  return(bbox)
 }
 
 
