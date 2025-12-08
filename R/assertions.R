@@ -285,3 +285,15 @@ v_asset_hls_catalog <- function(stac_source, collection) {
     }
   }
 }
+
+
+muparser_mask_warn <- function(func) {
+  cli::cli_warn(
+    c(
+      "!" = "GDAL muparser support not available and/or GDAL version is < 3.12.0. ",
+      "i" = "Cannot use muparser for `{func}`.",
+      ">" = "Using Python implementation instead."
+    ),
+    class = "muparser_not_available_error"
+  )
+}
