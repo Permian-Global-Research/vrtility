@@ -98,6 +98,10 @@ test_that("vrt_set_maskfun works with muparser", {
 
 test_that("muparser maskfuns are returning as expexted", {
   skip_if(isFALSE(check_muparser()), "muparser not available")
+  skip_if(
+    gdalraster::gdal_version_num() < gdalraster::gdal_compute_version(3, 12, 0),
+    "GDAL version too low for muparser fmod"
+  )
   bb_mp <- withr::with_options(
     list(vrtility.use_muparser = TRUE),
     build_bitmask()
@@ -263,6 +267,10 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
 test_that("bitmask results are the same with both implementations", {
   skip_if(isFALSE(check_muparser()), "muparser not available")
+  skip_if(
+    gdalraster::gdal_version_num() < gdalraster::gdal_compute_version(3, 12, 0),
+    "GDAL version too low for muparser fmod"
+  )
   vals_mp <- bitmask_test_vals(use_muparser = TRUE)
   vals_py <- bitmask_test_vals(use_muparser = FALSE)
 
