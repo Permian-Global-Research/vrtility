@@ -6,7 +6,7 @@
 #' If a buffer size > 0 is specified, the `scipy` python library will
 #' automatically be installed.
 #' @param use_muparser Logical. If `TRUE` and GDAL is built with muparser
-#' support (GDAL >= 3.11.4), uses muparser expression instead of Python.
+#' support (GDAL >= 3.12.0), uses muparser expression instead of Python.
 #' @noRd
 #' @keywords internal
 #' @details `set_mask` simply applies a given mask where values of 0 are
@@ -30,7 +30,7 @@ set_mask <- function(
     Inf
   )
 
-  if (buffer_size == 0 && check_muparser() && use_muparser) {
+  if (buffer_size == 0 && check_muparser("3.12.0") && use_muparser) {
     return(set_mask_muparser())
   }
 
@@ -107,11 +107,15 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 build_intmask <- function(
   use_muparser = getOption("vrtility.use_muparser", FALSE)
 ) {
-  if (is.null(use_muparser)) {
-    use_muparser <- check_muparser()
-  }
+  v_assert_type(
+    use_muparser,
+    "use_muparser",
+    "logical",
+    nullok = FALSE
+  )
 
   if (use_muparser) {
+    use_muparser <- check_muparser("3.11.4")
     return(build_intmask_muparser())
   }
 
@@ -171,23 +175,10 @@ build_bitmask <- function(
   }
 
   if (!check_muparser()) {
-    rlang::warn(
-      "GDAL muparser support not available. Cannot use muparser for `build_bitmask`.
-        Using Python implementation instead.",
-      class = "muparser_not_available_error"
-    )
+    muparser_mask_warn("build_bitmask")
     return(build_bitmask_python())
   }
-  if (
-    gdalraster::gdal_version_num() < gdalraster::gdal_compute_version(3, 12, 0)
-  ) {
-    rlang::warn(
-      "GDAL version must be >= 3.12.0 to use muparser for `build_bitmask`. 
-        Using Python implementation instead.",
-      class = "muparser_version_too_low_error"
-    )
-    return(build_bitmask_python())
-  }
+
   return(build_bitmask_muparser())
 }
 
