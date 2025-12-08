@@ -37,7 +37,6 @@ set_mask <- function(
   if (buffer_size > 0) {
     # assert omicloudmask is installed
     vrtility_py_require("scipy")
-    add_py_lib_to_options("scipy")
   }
 
   return(set_mask_python(buffer_size))

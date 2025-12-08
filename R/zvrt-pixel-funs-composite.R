@@ -98,7 +98,6 @@ quantile_numpy <- function(q, use_fastnanquantile = TRUE) {
 
   if (use_fastnanquantile) {
     vrtility_py_require("fastnanquantile")
-    add_py_lib_to_options("fastnanquantile")
   }
 
   glue::glue(
