@@ -154,20 +154,41 @@ build_intmask_muparser <- function() {
 #' used where bitwise operations are required. e.g. for HLS data, the "Fmask"
 #' band requires bitwise operations to extract the mask values.
 #' @param use_muparser Logical. If `TRUE` and GDAL >= 3.12, uses muparser
-#' expression instead of Python. Default is to auto-detect based on GDAL version.
 #' @export
 #' @rdname vrt_set_maskfun
 build_bitmask <- function(
   use_muparser = getOption("vrtility.use_muparser", FALSE)
 ) {
-  if (is.null(use_muparser)) {
-    use_muparser <- check_muparser()
+  v_assert_type(
+    use_muparser,
+    "use_muparser",
+    "logical",
+    nullok = FALSE
+  )
+
+  if (!use_muparser) {
+    return(build_bitmask_python())
   }
 
-  if (use_muparser) {
-    return(build_bitmask_muparser())
+  if (!check_muparser()) {
+    rlang::warn(
+      "GDAL muparser support not available. Cannot use muparser for `build_bitmask`.
+        Using Python implementation instead.",
+      class = "muparser_not_available_error"
+    )
+    return(build_bitmask_python())
   }
-  return(build_bitmask_python())
+  if (
+    gdalraster::gdal_version_num() < gdalraster::gdal_compute_version(3, 12, 0)
+  ) {
+    rlang::warn(
+      "GDAL version must be >= 3.12.0 to use muparser for `build_bitmask`. 
+        Using Python implementation instead.",
+      class = "muparser_version_too_low_error"
+    )
+    return(build_bitmask_python())
+  }
+  return(build_bitmask_muparser())
 }
 
 #' @details `build_bitmask_python` provides a Python pixel function for bitwise

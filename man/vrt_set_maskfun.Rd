@@ -61,8 +61,7 @@ automatically be installed and Python will be used (muparser cannot do buffering
 \item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
 the VRT block.}
 
-\item{use_muparser}{Logical. If \code{TRUE} and GDAL >= 3.12, uses muparser
-expression instead of Python. Default is to auto-detect based on GDAL version.}
+\item{use_muparser}{Logical. If \code{TRUE} and GDAL >= 3.12, uses muparser}
 }
 \value{
 A VRT block with the mask band set.
