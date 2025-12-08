@@ -58,7 +58,7 @@ set_gdal_cache_max(mem_fraction = 0.1)
 
 gdal_raster_drivers(shortname = FALSE)
 
-check_muparser()
+check_muparser(gdal_version = "3.11.4")
 }
 \arguments{
 \item{VSI_CACHE}{Should the Virtual File System (VSI) cache be used?}
@@ -145,6 +145,8 @@ UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
 
 \item{shortname}{Logical indicating whether to return the short names of the
 drivers (default is FALSE)}
+
+\item{gdal_version}{Minimum GDAL version to check alongside muparser support}
 }
 \value{
 Character vector of options
@@ -178,7 +180,9 @@ set the GDAL_CACHEMAX option as a fraction of the total RAM on your system.
 
 check_muparser can be used to check if the installed gdal version was built
 with muparser support; muparser is required for derived bands using
-\code{\link{vrt_derived_block}}.
+\code{\link{vrt_derived_block}} or if \code{options("vrtility.use_muparser")} is
+set to TRUE when using \code{\link{vrt_set_maskfun}} with muparser-based
+masks.
 }
 \examples{
 gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")

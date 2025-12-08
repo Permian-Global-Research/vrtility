@@ -311,15 +311,20 @@ check_blosc <- function() {
   return("blosc" %in% strsplit(zarr_compressors, ",")[[1]])
 }
 
-
+#' @param gdal_version Minimum GDAL version to check alongside muparser support
 #' @return TRUE if muparser is available, FALSE otherwise
 #' @export
 #' @rdname gdal_options
 #' @details
 #' check_muparser can be used to check if the installed gdal version was built
 #' with muparser support; muparser is required for derived bands using
-#' \code{\link{vrt_derived_block}}.
-check_muparser <- function() {
+#' \code{\link{vrt_derived_block}} or if `options("vrtility.use_muparser")` is
+#' set to TRUE when using \code{\link{vrt_set_maskfun}} with muparser-based
+#' masks.
+check_muparser <- function(gdal_version = "3.11.4") {
+  if (!gdal_version_check(gdal_version)) {
+    return(FALSE)
+  }
   vrt_expr_dialects <- gdalraster::gdal_get_driver_md(
     "VRT",
     "ExpressionDialects"
@@ -328,6 +333,33 @@ check_muparser <- function() {
     return(FALSE)
   }
   return("muparser" %in% strsplit(vrt_expr_dialects, ",")[[1]])
+}
+
+#' Check GDAL version against a specified version
+#' @param against A character string specifying the version to check against in
+#' the format "MAJOR.MINOR.PATCH", e.g. "3.12.0"
+#' @return TRUE if the installed GDAL version is greater than or equal to
+#' the specified version, FALSE otherwise
+#' @noRd
+#' @keywords internal
+gdal_version_check <- function(against = "3.12.0") {
+  v_assert_type(against, "against", "character", nullok = FALSE)
+  against_num <- as.numeric(strsplit(against, "\\.")[[1]])
+  if (length(against_num) != 3 || anyNA(against_num)) {
+    cli::cli_abort(
+      c(
+        "!" = "`against` must be in the format
+        'MAJOR.MINOR.PATCH', e.g. '3.12.0'."
+      )
+    )
+  }
+
+  gdalraster::gdal_version_num() >=
+    gdalraster::gdal_compute_version(
+      maj = against_num[1],
+      min = against_num[2],
+      rev = against_num[3]
+    )
 }
 
 
