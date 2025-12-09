@@ -16,7 +16,7 @@ bbox_to_projected(
   opts = ""
 )
 
-ogr_bbox_from_file(x, latlon = FALSE)
+ogr_bbox_from_file(x, latlon = FALSE, extend_x = NULL, extend_y = NULL)
 
 ogr_srs_from_file(x)
 ```
@@ -55,6 +55,16 @@ ogr_srs_from_file(x)
 
   logical. Whether to return the bounding box in lat/long (EPSG:4326).
   Default is FALSE.
+
+- extend_x:
+
+  numeric. Amount to extend the bounding box in the x direction (both
+  min and max).
+
+- extend_y:
+
+  numeric. Amount to extend the bounding box in the y direction (both
+  min and max).
 
 ## Value
 

@@ -2,8 +2,6 @@
 
 Set mask band of a VRT collection
 
-Masking functions VRT pixel functions.
-
 ## Usage
 
 ``` r
@@ -11,9 +9,9 @@ vrt_set_maskfun(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun,
-  set_mask_pixfun,
-  drop_mask_band
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
+  drop_mask_band = TRUE
 )
 
 # S3 method for class 'vrt_block'
@@ -21,8 +19,8 @@ vrt_set_maskfun(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun = vrtility::build_intmask(),
-  set_mask_pixfun = vrtility::set_mask_numpy(),
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
   drop_mask_band = TRUE
 )
 
@@ -31,16 +29,14 @@ vrt_set_maskfun(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun = vrtility::build_intmask(),
-  set_mask_pixfun = vrtility::set_mask_numpy(),
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
   drop_mask_band = TRUE
 )
 
-set_mask_numpy(buffer_size = 0)
+build_intmask(use_muparser = getOption("vrtility.use_muparser", FALSE))
 
-build_intmask()
-
-build_bitmask()
+build_bitmask(use_muparser = getOption("vrtility.use_muparser", FALSE))
 ```
 
 ## Arguments
@@ -59,18 +55,12 @@ build_bitmask()
 
 - build_mask_pixfun:
 
-  A character string of the Python code to build the mask. Provided
-  functions include `build_intmask()` and `build_bitmask()`. See
-  details.
-
-- set_mask_pixfun:
-
-  A character string of the Python code to set the mask. Provided
-  functions include `set_mask_numpy()`. See details.
-
-- drop_mask_band:
-
-  Logical. If TRUE, the mask band will be removed from the VRT block.
+  A character string of the Python code or muparser expression to build
+  the mask. If `NULL` (default), automatically uses `build_intmask()`
+  which will choose muparser if the option `vrtility.use_muparser` is
+  `TRUE` with no buffering, otherwise a Python based implementation is
+  used. Provided functions include `build_intmask` and `build_bitmask`.
+  See details.
 
 - buffer_size:
 
@@ -78,7 +68,15 @@ build_bitmask()
   size \> 0 will dilate the mask by the specified number of pixels. This
   can be useful to remove edge effects around clouds. If a buffer size
   \> 0 is specified, the `scipy` python library will automatically be
-  installed.
+  installed and Python will be used (muparser cannot do buffering).
+
+- drop_mask_band:
+
+  Logical. If TRUE, the mask band will be removed from the VRT block.
+
+- use_muparser:
+
+  Logical. If `TRUE` and GDAL \>= 3.12, uses muparser
 
 ## Value
 
@@ -94,15 +92,13 @@ the `build_bitmask()` function should be used. For integer-based
 masking, where the mask band is provided as a single band with integer
 values, the `build_intmask()` function should be used.
 
-The `set_mask_pixfun` function is used to apply the mask to the other
-bands. In general `set_mask_numpy()` should be used, although a custom
-function can be provided.
+By default (when `build_mask_pixfun = NULL`), the function automatically
+selects the most efficient implementation:
 
-`set_mask_numpy` simply applies a given mask where values of 0 are
-assumed to have nodata and values \> 0 (typically 255) contain valid
-data. It is the only provided function for the `set_mask_pixfun`
-argument in `vrt_set_maskfun()`. Alternatively a custom function could
-be provided if, for example a user wishes to buffer the mask.
+- GDAL \>= 3.12 with no buffering: Uses muparser expressions (fastest,
+  no Python)
+
+- GDAL \< 3.12 or buffering needed: Uses Python/NumPy
 
 `build_intmask` provides an integer mask function that can be used to
 mask out pixels based on a band containing true integer/numeric values.
@@ -119,10 +115,38 @@ be used where bitwise operations are required. e.g. for HLS data, the
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)
+
+# Auto-selects muparser or Python based on GDAL version
 ex_collect |>
   vrt_set_maskfun(
     mask_band = "SCL",
     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+    drop_mask_band = FALSE)
+#> → <VRT Collection>
+#> Mask Function: [hidden]
+#>   run print(x, maskfun = TRUE) to view
+#> 
+#>  VRT SRS: 
+#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
+#> 
+#>  PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
+#> 
+#>  PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+#> 
+#> 
+#> Bounding Box: NA
+#> Pixel res: 19.9923198138287, 19.9923198138287
+#> Start Date: NA
+#> End Date: NA
+#> Number of Items: 5
+#> Assets: B02, B03, B04, B08, SCL
+
+# Force Python implementation
+ex_collect |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+    build_mask_pixfun = build_intmask(),
     drop_mask_band = FALSE)
 #> → <VRT Collection>
 #> Mask Function: [hidden]

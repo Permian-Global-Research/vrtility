@@ -56,7 +56,7 @@ set_gdal_cache_max(mem_fraction = 0.1)
 
 gdal_raster_drivers(shortname = FALSE)
 
-check_muparser()
+check_muparser(gdal_version = "3.11.4")
 ```
 
 ## Arguments
@@ -216,6 +216,10 @@ check_muparser()
   Logical indicating whether to return the short names of the drivers
   (default is FALSE)
 
+- gdal_version:
+
+  Minimum GDAL version to check alongside muparser support
+
 ## Value
 
 Character vector of options
@@ -249,7 +253,10 @@ fraction of the total RAM on your system.
 check_muparser can be used to check if the installed gdal version was
 built with muparser support; muparser is required for derived bands
 using
-[`vrt_derived_block`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md).
+[`vrt_derived_block`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md)
+or if `options("vrtility.use_muparser")` is set to TRUE when using
+[`vrt_set_maskfun`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md)
+with muparser-based masks.
 
 ## See also
 
@@ -289,8 +296,8 @@ gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 #> [7] "UNIFIED_SRC_NODATA=NO"
 set_gdal_config(gdal_config_opts())
 gcm <- set_gdal_cache_max(0.05)
-#> ℹ GDAL_CACHEMAX set to 799.729 MiB; to change this use
+#> ℹ GDAL_CACHEMAX set to 799.779 MiB; to change this use
 #>   vrtility::set_gdal_cache_max()
 print(gcm)
-#> 799.729 MiB
+#> 799.779 MiB
 ```

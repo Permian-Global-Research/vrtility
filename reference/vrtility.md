@@ -105,10 +105,6 @@ based pixel functions in time.
 
   Set a pixel function for a vrt stack object
 
-- [`set_mask_numpy`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md):
-
-  A pixel function to apply a bitmask
-
 - [`build_intmask`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md):
 
   A pixel function to build a mask from a mask band where the mask

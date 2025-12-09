@@ -261,7 +261,6 @@ Functions for pixel-wise operations on VRT rasters
 Functions for creating and applying image masks
 
 - [`vrt_set_maskfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md)
-  [`set_mask_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md)
   [`build_intmask()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md)
   [`build_bitmask()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md)
   : Set mask band of a VRT collection

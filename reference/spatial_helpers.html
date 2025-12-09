@@ -11,7 +11,7 @@ coordinate system suitable for the AOI."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,7 +69,7 @@ coordinate system suitable for the AOI.</p>
 <span>  opts <span class="op">=</span> <span class="st">""</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ogr_bbox_from_file</span><span class="op">(</span><span class="va">x</span>, latlon <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu">ogr_bbox_from_file</span><span class="op">(</span><span class="va">x</span>, latlon <span class="op">=</span> <span class="cn">FALSE</span>, extend_x <span class="op">=</span> <span class="cn">NULL</span>, extend_y <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ogr_srs_from_file</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -111,6 +111,16 @@ proj string. see details for more information.</p></dd>
 <dt id="arg-latlon">latlon<a class="anchor" aria-label="anchor" href="#arg-latlon"></a></dt>
 <dd><p>logical. Whether to return the bounding box in lat/long
 (EPSG:4326). Default is FALSE.</p></dd>
+
+
+<dt id="arg-extend-x">extend_x<a class="anchor" aria-label="anchor" href="#arg-extend-x"></a></dt>
+<dd><p>numeric. Amount to extend the bounding box in the x
+direction (both min and max).</p></dd>
+
+
+<dt id="arg-extend-y">extend_y<a class="anchor" aria-label="anchor" href="#arg-extend-y"></a></dt>
+<dd><p>numeric. Amount to extend the bounding box in the y
+direction (both min and max).</p></dd>
 
 </dl></div>
     <div class="section level2">
