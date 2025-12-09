@@ -15,7 +15,7 @@ bbox_to_projected(
   opts = ""
 )
 
-ogr_bbox_from_file(x, latlon = FALSE)
+ogr_bbox_from_file(x, latlon = FALSE, extend_x = NULL, extend_y = NULL)
 
 ogr_srs_from_file(x)
 }
@@ -40,6 +40,12 @@ proj string. see details for more information.}
 
 \item{latlon}{logical. Whether to return the bounding box in lat/long
 (EPSG:4326). Default is FALSE.}
+
+\item{extend_x}{numeric. Amount to extend the bounding box in the x
+direction (both min and max).}
+
+\item{extend_y}{numeric. Amount to extend the bounding box in the y
+direction (both min and max).}
 }
 \value{
 a numeric vector of length 4 representing the projected bounding box

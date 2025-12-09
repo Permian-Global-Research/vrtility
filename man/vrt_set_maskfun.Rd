@@ -4,7 +4,6 @@
 \alias{vrt_set_maskfun}
 \alias{vrt_set_maskfun.vrt_block}
 \alias{vrt_set_maskfun.vrt_collection}
-\alias{set_mask_numpy}
 \alias{build_intmask}
 \alias{build_bitmask}
 \title{Set mask band of a VRT collection}
@@ -13,17 +12,17 @@ vrt_set_maskfun(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun,
-  set_mask_pixfun,
-  drop_mask_band
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
+  drop_mask_band = TRUE
 )
 
 \method{vrt_set_maskfun}{vrt_block}(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun = vrtility::build_intmask(),
-  set_mask_pixfun = vrtility::set_mask_numpy(),
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
   drop_mask_band = TRUE
 )
 
@@ -31,16 +30,14 @@ vrt_set_maskfun(
   x,
   mask_band,
   mask_values,
-  build_mask_pixfun = vrtility::build_intmask(),
-  set_mask_pixfun = vrtility::set_mask_numpy(),
+  build_mask_pixfun = NULL,
+  buffer_size = 0,
   drop_mask_band = TRUE
 )
 
-set_mask_numpy(buffer_size = 0)
+build_intmask(use_muparser = getOption("vrtility.use_muparser", FALSE))
 
-build_intmask()
-
-build_bitmask()
+build_bitmask(use_muparser = getOption("vrtility.use_muparser", FALSE))
 }
 \arguments{
 \item{x}{A VRT collection}
@@ -49,22 +46,22 @@ build_bitmask()
 
 \item{mask_values}{A numeric vector of integer or bit values to be masked.}
 
-\item{build_mask_pixfun}{A character string of the Python code to build the
-mask. Provided functions include \code{\link[=build_intmask]{build_intmask()}} and \code{\link[=build_bitmask]{build_bitmask()}}.
-See details.}
-
-\item{set_mask_pixfun}{A character string of the Python code to set the mask.
-Provided functions include \code{\link[=set_mask_numpy]{set_mask_numpy()}}. See
-details.}
-
-\item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
-the VRT block.}
+\item{build_mask_pixfun}{A character string of the Python code or muparser
+expression to build the mask. If \code{NULL} (default), automatically uses
+\code{\link[=build_intmask]{build_intmask()}} which will choose muparser if the option \code{vrtility.use_muparser}
+is \code{TRUE} with no buffering, otherwise a Python based implementation is used.
+Provided functions include \code{build_intmask} and \code{build_bitmask}. See details.}
 
 \item{buffer_size}{A buffer size to apply to the mask (numeric, default: 0). A buffer
 size > 0 will dilate the mask by the specified number of pixels.
 This can be useful to remove edge effects around clouds.
 If a buffer size > 0 is specified, the \code{scipy} python library will
-automatically be installed.}
+automatically be installed and Python will be used (muparser cannot do buffering).}
+
+\item{drop_mask_band}{Logical. If TRUE, the mask band will be removed from
+the VRT block.}
+
+\item{use_muparser}{Logical. If \code{TRUE} and GDAL >= 3.12, uses muparser}
 }
 \value{
 A VRT block with the mask band set.
@@ -73,8 +70,6 @@ A VRT collection with the mask band set.
 }
 \description{
 Set mask band of a VRT collection
-
-Masking functions VRT pixel functions.
 }
 \details{
 The \code{build_mask_pixfun} function is used to build the mask band. Where the
@@ -83,15 +78,12 @@ mask band is a true bitmask and bit-wise operations are required, the
 the mask band is provided as a single band with integer values, the
 \code{\link[=build_intmask]{build_intmask()}} function should be used.
 
-The \code{set_mask_pixfun} function is used to apply the mask to the other bands.
-In general \code{\link[=set_mask_numpy]{set_mask_numpy()}} should be used, although a custom function can
-be provided.
-
-\code{set_mask_numpy} simply applies a given mask where values of 0 are
-assumed to have nodata and values > 0 (typically 255) contain valid data.
-It is the only provided function for the \code{set_mask_pixfun} argument in
-\code{vrt_set_maskfun()}. Alternatively a custom function could be provided if,
-for example a user wishes to buffer the mask.
+By default (when \code{build_mask_pixfun = NULL}), the function automatically
+selects the most efficient implementation:
+\itemize{
+\item GDAL >= 3.12 with no buffering: Uses muparser expressions (fastest, no Python)
+\item GDAL < 3.12 or buffering needed: Uses Python/NumPy
+}
 
 \code{build_intmask} provides an integer mask function that can be used
 to mask out pixels based on a band containing true integer/numeric values.
@@ -106,10 +98,20 @@ band requires bitwise operations to extract the mask values.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)
+
+# Auto-selects muparser or Python based on GDAL version
 ex_collect |>
   vrt_set_maskfun(
     mask_band = "SCL",
     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+    drop_mask_band = FALSE)
+
+# Force Python implementation
+ex_collect |>
+  vrt_set_maskfun(
+    mask_band = "SCL",
+    mask_values = c(0, 1, 2, 3, 8, 9, 10, 11),
+    build_mask_pixfun = build_intmask(),
     drop_mask_band = FALSE)
 
 }

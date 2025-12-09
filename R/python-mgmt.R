@@ -18,6 +18,7 @@ vrtility_py_require <- function(
   exclude_newer = NULL,
   action = c("add", "remove", "set")
 ) {
+  add_py_lib_to_options(packages)
   reticulate::py_require(
     packages = packages,
     python_version = python_version,

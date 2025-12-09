@@ -163,7 +163,7 @@ assert_files_exist <- function(x, url_possible = FALSE) {
 assert_is_url <- function(path) {
   # Original pattern for standard URLs and VSI paths
   standard_pattern <- paste0(
-    "^(http|https|ftp|ftps|s3|gs)://",
+    "(http|https|ftp|ftps|s3|gs)://",
     "|vsicurl|vsis3|vsigs|vsiaz|vsioss|vsiswift"
   )
   # This will throw an error if the URL is invalid
@@ -284,4 +284,16 @@ v_asset_hls_catalog <- function(stac_source, collection) {
       ))
     }
   }
+}
+
+
+muparser_mask_warn <- function(func) {
+  cli::cli_warn(
+    c(
+      "!" = "GDAL muparser support not available and/or GDAL version is < 3.12.0. ",
+      "i" = "Cannot use muparser for `{func}`.",
+      ">" = "Using Python implementation instead."
+    ),
+    class = "muparser_not_available_error"
+  )
 }

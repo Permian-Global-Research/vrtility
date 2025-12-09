@@ -12,6 +12,13 @@
     Output
       [1] -111.15605   44.12164 -109.83054   45.11839
 
+---
+
+    Code
+      bbox_extended
+    Output
+      [1] -111.25605   43.92164 -109.73054   45.31839
+
 # ogr_srs_from_file works
 
     Code
