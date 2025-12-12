@@ -331,18 +331,13 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' within singleband_m2m() when used in parallel.
 #' @noRd
 #' @keywords internal
-single_band_reader <- function() {
-  purrr::insistently(
-    function(blk, block_params, config_options) {
-      vrtfile <- blk$vrt_src
-      inds <- methods::new(gdalraster::GDALRaster, vrtfile)
-      on.exit(inds$close(), add = TRUE)
-      blockreader(inds, block_params, config_options)
-    },
-    rate = purrr::rate_backoff(
-      pause_base = getOption("vrt.pause.base"),
-      pause_cap = getOption("vrt.pause.cap"),
-      max_times = getOption("vrt.max.times")
-    )
-  )
+single_band_reader <- function(blk, block_params, config_options) {
+  vrtfile <- blk$vrt_src
+  #TODO: would the following be better for mirai?
+  # if (!exists("inds")) {
+  #   inds <<- methods::new(gdalraster::GDALRaster, vrt_file) # nolint
+  # }
+  inds <- methods::new(gdalraster::GDALRaster, vrtfile)
+  on.exit(inds$close(), add = TRUE)
+  blockreader(inds, block_params, config_options)
 }
