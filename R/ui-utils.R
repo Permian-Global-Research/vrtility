@@ -189,3 +189,30 @@ opts_check <- function(x, o) {
     )
   }
 }
+
+
+fastnanquantile_msg <- function() {
+  cat(
+    cli::rule(
+      center = "NOTE",
+      line_col = "#64b1f0"
+    )
+  )
+
+  cli::cli_inform(
+    c(
+      "i" = "Using 'fastnanquantile' for quantile calculation",
+      "!" = "When using {cli::code_highlight('vrt_compute()')}, 
+      it is strongly advised to:",
+      "*" = "use the {cli::style_bold('warp')} engine",
+      "*" = "use sequential processing ({cli::style_bold(\"DONT'T\")} use 
+      mirai daemons)"
+    )
+  )
+
+  cat(
+    cli::rule(
+      line_col = "#64b1f0"
+    )
+  )
+}
