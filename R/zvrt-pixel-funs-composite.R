@@ -89,7 +89,11 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
 #' the median fails to filter cloudy pixels effectively. The defauly numpy
 #' nanquantile function is very slow and does not support masked arrays.
 #' Therefore, it is typically much faster to use the fastnanquantile library
-#' which uses numba to increase performance.
+#' which uses numba to increase performance. However, this library has some
+#' limitations around multi-threading in certain contexts. Therefore, when
+#' using this pixel function with `vrt_compute()`, it is strongly advised to
+#' use the `warp` engine and to avoid using mirai daemons (i.e. use
+#' sequential processing).
 #' @rdname vrt_set_py_pixelfun
 #' @export
 quantile_numpy <- function(q, use_fastnanquantile = TRUE) {
@@ -98,6 +102,8 @@ quantile_numpy <- function(q, use_fastnanquantile = TRUE) {
 
   if (use_fastnanquantile) {
     vrtility_py_require("fastnanquantile")
+
+    fastnanquantile_msg()
   }
 
   glue::glue(
@@ -122,13 +128,14 @@ def pixfun(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize, raster_ysize, 
     with warnings.catch_warnings():
       warnings.simplefilter('ignore', category=RuntimeWarning)
       {if (use_fastnanquantile) {
-        glue::glue('out_ar[:] = fnq.nanquantile(stacked, {q}, axis=0)')
+        glue::glue('result = fnq.nanquantile(stacked, {q}, axis=0)')
 
       } else {
-        glue::glue('out_ar[:] = np.nanquantile(stacked, {q}, axis=0)')
+        glue::glue('result = np.nanquantile(stacked, {q}, axis=0)')
 
       }}
-      out_ar[np.isnan(out_ar)] = no_data_val
+      result[np.isnan(result)] = no_data_val
+      out_ar[:] = result
 "
   )
 }
