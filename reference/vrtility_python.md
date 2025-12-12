@@ -78,7 +78,7 @@ compute_with_py_env(code, config_options = NULL)
 
   A named character vector of configuration options to set in the
   environment before executing the code. eg. generated from
-  [`gdal_config_opts`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
+  [`gdal_config_options`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
 
 ## Value
 

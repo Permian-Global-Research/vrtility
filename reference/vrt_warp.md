@@ -16,7 +16,7 @@ vrt_warp(
   lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 )
 
 # S3 method for class 'vrt_block'
@@ -31,7 +31,7 @@ vrt_warp(
   lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 )
 
 # S3 method for class 'vrt_collection'
@@ -46,7 +46,7 @@ vrt_warp(
   lazy = NULL,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 )
 ```
 

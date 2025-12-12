@@ -59,16 +59,16 @@ plot_raster_src(
 )
 
 # S3 method for class 'vrt_block'
-plot(x, ..., config_options = gdal_config_opts())
+plot(x, ..., config_options = gdal_config_options())
 
 # S3 method for class 'vrt_stack'
-plot(x, ..., config_options = gdal_config_opts())
+plot(x, ..., config_options = gdal_config_options())
 
 # S3 method for class 'vrt_stack_warped'
-plot(x, ..., config_options = gdal_config_opts())
+plot(x, ..., config_options = gdal_config_options())
 
 # S3 method for class 'vrt_collection'
-plot(x, item, ..., config_options = gdal_config_opts())
+plot(x, item, ..., config_options = gdal_config_options())
 ```
 
 ## Arguments

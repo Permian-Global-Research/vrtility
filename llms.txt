@@ -1,48 +1,50 @@
 # vrtility [![vrtility logo](reference/figures/vrtility_hex.png)](https://permian-global-research.github.io/vrtility/)
 
-vrtility is an R package that aims to make the best use of
+vrtility is an R package that makes efficient use of
 [GDAL](https://gdal.org/en/stable/index.html)’s
-[VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) capabilities
-for efficient processing of large raster datasets - mainly with Earth
-Observation (EO) in mind. vrtility uses the VRT format to access awesome
-features such as pixel functions but also harnesses the VRT data
-structure to facilitate complex image processing tasks such as
-multi-band compositing and time series filtering.
+[VRT](https://gdal.org/en/stable/drivers/raster/vrt.html) (Virtual
+Raster) capabilities for processing large raster datasets, with a focus
+on Earth Observation (EO) applications. The package leverages VRT pixel
+functions and harnesses the VRT data structure to facilitate complex
+image processing tasks such as multi-band compositing and time series
+filtering.
 
 > \[!NOTE\] This package is under active development and is likely to
 > change. Contributions and suggestions are still very welcome!
 
 ## Features
 
-- Modular design: We’re basically creating remote sensing pipelines
-  using nested VRTs. This allows for the easy addition of new pixel and
-  masking functions. but could easily be adapted for deriving spectral
-  indices or calculating complex time series functions. All powered by
+- **Modular design**: Creates remote sensing pipelines using nested
+  VRTs, allowing easy addition of new pixel and masking functions. Can
+  be adapted for deriving spectral indices or calculating complex time
+  series functions. All powered by
   [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
 
-- vrtility enables the use of GDAL VRT python and built-in (C++) pixel
-  functions. The python [numpy](https://numpy.org/)-based pixel
-  functions can be used to apply cloud masks and summarise pixel values
-  (e.g. median) from multiple images (i.e create a composite image). All
-  python environment and package management is handled by
-  [{reticulate}](https://rstudio.github.io/reticulate/). Built-In GDAL
-  pixel functions vary depending on the GDAL version, but are highly
-  performant - recent GDAL versions even support
-  [expressions](https://mirai.r-lib.org/index.html) for more complex
-  operations.
+- **Python and C++ pixel functions**: Enables use of both GDAL VRT
+  Python and built-in (C++) pixel functions. Python
+  [numpy](https://numpy.org/)-based pixel functions can apply cloud
+  masks and summarize pixel values (e.g., median) from multiple images
+  to create composite images. Python environment and package management
+  is handled by [{reticulate}](https://rstudio.github.io/reticulate/).
+  Built-in GDAL pixel functions are highly performant and vary by GDAL
+  version—recent versions support [muparser
+  expressions](https://gdal.org/en/latest/drivers/raster/vrt.html#using-derived-bands-with-pixel-functions-in-c)
+  (3.11.4+) and median compositing (3.12.0+), for example.
 
-- Efficient parallel processing using
-  [{mirai}](https://mirai.r-lib.org/index.html)
+- **Efficient parallel processing**: Uses
+  [{mirai}](https://mirai.r-lib.org/index.html) for asynchronous,
+  multi-core processing.
 
-- Advanced compositing methods that maintain spectral consistency, such
-  as the geometric median and medoid.
+- **Advanced multi-band compositing methods**: Maintain spectral
+  consistency using methods such as the geometric median and medoid.
 
-- Time series filtering functions to improve temporal consistency and
-  reduce noise.
+- **Time series filtering**: Improve temporal consistency and reduce
+  noise in multi-temporal datasets.
 
-- on-the-fly cloud mask filtering using pixel functions. Ability to use
+- **Cloud masking**: Apply cloud mask filtering using pixel functions,
+  including support for
   [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask)
-  cloud/shadow masking, embedded within the vrt pipeline.
+  cloud/shadow masking embedded within VRT pipelines.
 
 ## Installation
 
@@ -55,35 +57,31 @@ pak::pkg_install("Permian-Global-Research/vrtility")
 
 ## Example
 
-Here is a simple example where we:
+This example demonstrates the creation of a cloud-masked median
+composite from Sentinel-2 data:
 
-1.  Define a bounding box and search a STAC catalog for Sentinel-2 data
+1.  Define a bounding box and search a STAC catalog for Sentinel-2 data.
 
-2.  Create a `vrt_collection` object - essentially a list of individual
-    VRTs (each making up one image) which we refer to as `vrt_block`s in
-    this package.
+2.  Create a `vrt_collection` object — a list of individual VRTs
+    (referred to as `vrt_block`s), with each representing one image.
 
-3.  Then, we apply the mask using pixel functions. This simply modifies
-    the XML of the VRT “blocks”.
+3.  Apply cloud masking using pixel functions, which modifies the XML of
+    each VRT block.
 
-4.  Because this set of images have more than one common spatial
-    reference system (SRS) we warp the `vrt_block`s to a new
-    spatially-aligned `vrt_collection` using `vrt_warp`, giving us a
-    `vrt_collection_warped` object. Note that we use the argument
-    `lazy = FALSE` to force GDAL to create the warped VRTs immediately
-    (i.e. saving to disk as tif files). For remote data sources this
-    will be (much) faster.
+4.  Warp the `vrt_block`s to a common spatial reference system (SRS)
+    using `vrt_warp`, creating a spatially-aligned
+    `vrt_collection_warped` object. Note: For remote data sources,
+    warping with `lazy = FALSE` (the default) forces GDAL to materialize
+    the warped VRTs immediately, which is typically much faster.
 
-5.  These images are then “stacked” (combined into a single VRT with
-    multiple layers in each VRTRasterBand), giving us a `vrt_stack`
-    object.
+5.  Stack the images (combine into a single VRT with multiple layers per
+    band), creating a `vrt_stack` object.
 
-6.  A median pixel function is then added to the `vrt_stack`.
+6.  Add a median pixel function to the `vrt_stack`.
 
-7.  Finally, we calculate the median composite using `vrt_compute` with
-    the `gdalraster` engine to write the output which, in combination
-    with the mirai package processes the data in parallel across bands
-    and image tiles.
+7.  Compute the median composite using `vrt_compute` with the
+    `gdalraster` engine, which processes the data in parallel across
+    bands and image blocks using mirai daemons.
 
 ``` r
 library(vrtility)
@@ -132,7 +130,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.121   0.139   5.578
+#>   1.140   0.133   5.843
 
 
 plot_raster_src(
@@ -145,28 +143,22 @@ plot_raster_src(
 
 ## Asynchronous download/processing
 
-{vrtility} uses {mirai}, alongside {purrr} to manage asynchronous
-parallel processing. By setting `mirai::daemons(n)` before running the
-vrt pipeline, we can often improve performance, depending on the speed
-of the server holding the data. In order to use asynchronous processing,
-in the `vrt_compute` function, we must set `engine = "gdalraster"` or we
-can use `engine = "warp"` if we are computing a `vrt_collection`
-(multiple discrete images). It is strongly recommended to use
-multi-processing, especially for multi-band reduction methods
-(i.e. `multiband_reduce`).
+vrtility uses {mirai} to manage asynchronous parallel processing. Set
+`mirai::daemons(n)` before running VRT pipelines to improve performance,
+particularly when working with remote data sources.
 
 ## Direct file access for on-disk or remote rasters
 
-We can also directly access raster files (or indeed remote files as
-urls) too, as shown here with this example dataset - note that the
-inputs have multiple spatial reference systems and therefore we need to
-warp them (as in the above example) before stacking or applying any
-reduction-type function.
+vrtility can directly access local raster files or remote URLs. The
+example below demonstrates this with a sample dataset. Note that inputs
+with multiple spatial reference systems must be warped (as in the
+previous example) before stacking or applying reduction functions.
 
-In this example, we create a `medoid` composite from the warped
-collection. Using medoid or other multi-band pixel functions
-(e.g. `geomedian`) can be extremely powerful but requires more compute
-than band-wise pixel functions.
+This example creates a medoid composite from the warped collection.
+Multi-band pixel functions like medoid and geometric median
+(`geomedian`) are extremely powerful for maintaining spectral
+consistency but require more computation than band-wise functions (using
+mirai daemons here is recommended).
 
 ``` r
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
@@ -315,7 +307,7 @@ filtering.
 
 GDAL configuration and setup functions
 
-- [`gdal_config_opts()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
+- [`gdal_config_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`gdal_creation_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`gdalwarp_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`set_gdal_config()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)

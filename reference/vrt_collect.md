@@ -10,7 +10,7 @@ vrt_collect(x, ...)
 # S3 method for class 'character'
 vrt_collect(
   x,
-  config_opts = gdal_config_opts(),
+  config_opts = gdal_config_options(),
   bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
@@ -23,7 +23,7 @@ vrt_collect(
 # S3 method for class 'doc_items'
 vrt_collect(
   x,
-  config_opts = gdal_config_opts(),
+  config_opts = gdal_config_options(),
   vsi_prefix = "",
   driver = "",
   ...

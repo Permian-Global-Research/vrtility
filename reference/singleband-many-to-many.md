@@ -51,7 +51,7 @@ hampel_filter(k = 1L, t0 = 3, impute_na = FALSE)
 - config_options:
 
   A named character vector of GDAL configuration options. See
-  [`gdal_config_opts()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
+  [`gdal_config_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md).
 
 - creation_options:
 

@@ -92,7 +92,7 @@ filtering.
 
 GDAL configuration and setup functions
 
-- [`gdal_config_opts()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
+- [`gdal_config_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`gdal_creation_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`gdalwarp_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
   [`set_gdal_config()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)

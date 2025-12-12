@@ -119,7 +119,7 @@ engine to process the data in parallel across bands and image tiles.
 ``` r
 # Download the data and process
 s2_median <- vrt_collect(s2copdse,
-  gdal_config_opts(
+  gdal_config_options(
     AWS_VIRTUAL_HOSTING = "FALSE",
     AWS_ACCESS_KEY_ID = Sys.getenv("CDSE_ACCESS_KEY"),
     AWS_SECRET_ACCESS_KEY = Sys.getenv("CDSE_SECRET_KEY"),

@@ -8,7 +8,7 @@ other things)
 ## Usage
 
 ``` r
-gdal_config_opts(
+gdal_config_options(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
@@ -271,7 +271,7 @@ Drivers](https://gdal.org/en/stable/drivers/raster/index.html#raster-drivers)
 ## Examples
 
 ``` r
-gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
+gdal_config_options(GDAL_HTTP_USERPWD = "user:password")
 #>                          VSI_CACHE                     VSI_CACHE_SIZE 
 #>                             "TRUE"                        "268435456" 
 #>                   GDAL_NUM_THREADS       GDAL_DISABLE_READDIR_ON_OPEN 
@@ -294,7 +294,7 @@ gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 #> [1] "-multi"                "-wm"                   "50%"                  
 #> [4] "-wo"                   "NUM_THREADS=4"         "-wo"                  
 #> [7] "UNIFIED_SRC_NODATA=NO"
-set_gdal_config(gdal_config_opts())
+set_gdal_config(gdal_config_options())
 gcm <- set_gdal_cache_max(0.05)
 #> ℹ GDAL_CACHEMAX set to 799.779 MiB; to change this use
 #>   vrtility::set_gdal_cache_max()

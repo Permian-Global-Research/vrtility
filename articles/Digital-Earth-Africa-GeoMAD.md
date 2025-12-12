@@ -93,7 +93,7 @@ access the Digital Earth Africa data from the S3 bucket.
 ``` r
 l8l9_vrt <- vrt_collect(
   l8l9_query,
-  gdal_config_opts(
+  gdal_config_options(
     AWS_NO_SIGN_REQUEST = "YES",
     AWS_S3_ENDPOINT = "s3.af-south-1.amazonaws.com"
   )
