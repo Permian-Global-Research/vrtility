@@ -20,14 +20,18 @@ async_gdalreader_band_read_write <- function(
     function(...) {
       # Extract block parameters correctly from the 1-row dataframe
       block_params <- rlang::list2(...)
-      inds <- methods::new(gdalraster::GDALRaster, vrt_file)
-      on.exit(inds$close())
-      band_data <- blockreader(
+
+      if (!exists("inds")) {
+        inds <<- methods::new(gdalraster::GDALRaster, vrt_file) # nolint
+      }
+      # apparently no need to close inds
+
+      # we do not close the dataset here otherwise we have issues.
+      blockreader(
         inds,
         block_params,
         config_options = config_options
       )
-      return(band_data)
     },
     vrt_file = vrt_file,
     blockreader = blockreader,
@@ -64,13 +68,13 @@ sequential_gdalreader_band_read_write <- function(
   quiet,
   config_options
 ) {
+  inds <- methods::new(gdalraster::GDALRaster, vrt_file)
+  on.exit(inds$close())
   purrr::pwalk(
     blocks,
     function(...) {
       # Extract block parameters correctly from the 1-row dataframe
       block_params <- rlang::list2(...)
-      inds <- methods::new(gdalraster::GDALRaster, vrt_file)
-      on.exit(inds$close())
       # Read and combine bands
       band_data <- blockreader(
         inds,
@@ -93,7 +97,7 @@ sequential_gdalreader_band_read_write <- function(
 #' @keywords internal
 #' @noRd
 blockreader <- function(inds, block_params, config_options = NULL) {
-  return(compute_with_py_env(
+  compute_with_py_env(
     inds$readChunk(
       band = block_params[["band_n"]],
       chunk_def = c(
@@ -104,7 +108,7 @@ blockreader <- function(inds, block_params, config_options = NULL) {
       )
     ),
     config_options = config_options
-  ))
+  )
 }
 #' @title Block writer function
 #' @description Writes a block of data to a GDALRaster dataset.
@@ -308,7 +312,7 @@ async_gdalreader_singleband_m2m_read_write <- function(
       ))
     },
     vrt_collection = vrt_collection,
-    sb_reader_fun = single_band_reader(),
+    sb_reader_fun = single_band_reader,
     compute_with_py_env = compute_with_py_env,
     m2m_fun = m2m_fun,
     matrix_to_rowlist = matrix_to_rowlist,
@@ -355,7 +359,7 @@ sequential_gdalreader_singleband_m2m_read_write <- function(
       block_params <- rlang::dots_list(...)
       band_data <- purrr::map(
         vrt_collection[[1]],
-        ~ single_band_reader()(.x, block_params, config_options)
+        ~ single_band_reader(.x, block_params, config_options)
       )
 
       bdm <- do.call(rbind, band_data)
