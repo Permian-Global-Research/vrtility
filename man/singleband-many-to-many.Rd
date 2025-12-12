@@ -31,7 +31,7 @@ for an example. Calculations are performed independently for each band.}
 or a vector of paths (one per time step). Defaults to temporary files.}
 
 \item{config_options}{A named character vector of GDAL configuration options.
-See \code{gdal_config_opts()}.}
+See \code{gdal_config_options()}.}
 
 \item{creation_options}{A named character vector of GDAL creation options for
 output files. See \code{gdal_creation_options()}.}

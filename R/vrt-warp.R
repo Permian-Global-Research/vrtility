@@ -59,7 +59,7 @@ vrt_warp <- function(
     PREDICTOR = NULL
   ),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   v_assert_type(t_srs, "t_srs", "character")
   v_assert_type(te, "te", "numeric")
@@ -107,7 +107,7 @@ vrt_warp.vrt_block <- function(
     PREDICTOR = NULL
   ),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   tr <- v_assert_res(tr)
   resampling <- rlang::arg_match(resampling)
@@ -179,7 +179,7 @@ vrt_warp.vrt_collection <- function(
     PREDICTOR = NULL
   ),
   warp_options = gdalwarp_options(),
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   v_assert_length(tr, "tr", 2)
   resampling <- rlang::arg_match(resampling)

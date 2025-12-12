@@ -1,5 +1,5 @@
-test_that("gdal_config_opts returns named vector with expected keys", {
-  cfg <- gdal_config_opts()
+test_that("gdal_config_options returns named vector with expected keys", {
+  cfg <- gdal_config_options()
   expect_true(is.character(cfg))
   expect_true(length(cfg) > 0)
   expect_true(all(

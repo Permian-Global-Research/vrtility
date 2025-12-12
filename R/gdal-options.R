@@ -33,8 +33,8 @@
 #' improve performance but, from our limited testing they either have no or
 #' a negative impact on performance.
 #' @examples
-#' gdal_config_opts(GDAL_HTTP_USERPWD = "user:password")
-gdal_config_opts <- function(
+#' gdal_config_options(GDAL_HTTP_USERPWD = "user:password")
+gdal_config_options <- function(
   VSI_CACHE = "TRUE",
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
@@ -180,7 +180,7 @@ gdalwarp_options <- function(
 #' @export
 #' @rdname gdal_options
 #' @examples
-#' set_gdal_config(gdal_config_opts())
+#' set_gdal_config(gdal_config_options())
 set_gdal_config <- function(x, scope = c("gdalraster", "sys")) {
   scope <- rlang::arg_match(scope)
   # Store original values

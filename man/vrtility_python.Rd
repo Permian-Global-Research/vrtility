@@ -53,7 +53,7 @@ provided ones. Packages and the Python version can be set independently.
 
 \item{config_options}{A named character vector of configuration options to
 set in the environment before executing the code. eg. generated from
-\code{\link{gdal_config_opts}}}
+\code{\link{gdal_config_options}}}
 }
 \value{
 Invisible

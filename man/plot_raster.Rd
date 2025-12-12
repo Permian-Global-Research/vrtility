@@ -59,13 +59,13 @@ plot_raster_src(
   ...
 )
 
-\method{plot}{vrt_block}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_block}(x, ..., config_options = gdal_config_options())
 
-\method{plot}{vrt_stack}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_stack}(x, ..., config_options = gdal_config_options())
 
-\method{plot}{vrt_stack_warped}(x, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_stack_warped}(x, ..., config_options = gdal_config_options())
 
-\method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_opts())
+\method{plot}{vrt_collection}(x, item, ..., config_options = gdal_config_options())
 }
 \arguments{
 \item{x}{A path to a raster file}

@@ -139,7 +139,7 @@ vrt_create_mask.vrt_block <- function(
         res = x$res,
         dst_nodata = nodata_value
       ),
-      config_options = gdal_config_opts(),
+      config_options = gdal_config_options(),
       quiet = TRUE
     )
   })
