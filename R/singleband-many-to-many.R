@@ -13,7 +13,7 @@
 #' @param outfile Output file path(s). Can be a single path (used as template)
 #' or a vector of paths (one per time step). Defaults to temporary files.
 #' @param config_options A named character vector of GDAL configuration options.
-#' See \code{gdal_config_opts()}.
+#' See \code{gdal_config_options()}.
 #' @param creation_options A named character vector of GDAL creation options for
 #' output files. See \code{gdal_creation_options()}.
 #' @param quiet Logical. If `FALSE`, displays a progress bar during processing.
@@ -168,7 +168,7 @@ singleband_m2m.vrt_collection_warped <- function(
   x,
   m2m_fun = hampel_filter(k = 1L, t0 = 0, impute_na = FALSE),
   outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "tif"),
-  config_options = gdal_config_opts(),
+  config_options = gdal_config_options(),
   creation_options = gdal_creation_options(),
   quiet = TRUE,
   nsplits = NULL,
@@ -331,18 +331,13 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' within singleband_m2m() when used in parallel.
 #' @noRd
 #' @keywords internal
-single_band_reader <- function() {
-  purrr::insistently(
-    function(blk, block_params, config_options) {
-      vrtfile <- blk$vrt_src
-      inds <- methods::new(gdalraster::GDALRaster, vrtfile)
-      on.exit(inds$close(), add = TRUE)
-      blockreader(inds, block_params, config_options)
-    },
-    rate = purrr::rate_backoff(
-      pause_base = getOption("vrt.pause.base"),
-      pause_cap = getOption("vrt.pause.cap"),
-      max_times = getOption("vrt.max.times")
-    )
-  )
+single_band_reader <- function(blk, block_params, config_options) {
+  vrtfile <- blk$vrt_src
+  #TODO: would the following be better for mirai?
+  # if (!exists("inds")) {
+  #   inds <<- methods::new(gdalraster::GDALRaster, vrt_file) # nolint
+  # }
+  inds <- methods::new(gdalraster::GDALRaster, vrtfile)
+  on.exit(inds$close(), add = TRUE)
+  blockreader(inds, block_params, config_options)
 }

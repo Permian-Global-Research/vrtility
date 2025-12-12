@@ -67,7 +67,11 @@ of the input arrays for a given probability. This could be useful where
 the median fails to filter cloudy pixels effectively. The defauly numpy
 nanquantile function is very slow and does not support masked arrays.
 Therefore, it is typically much faster to use the fastnanquantile library
-which uses numba to increase performance.
+which uses numba to increase performance. However, this library has some
+limitations around multi-threading in certain contexts. Therefore, when
+using this pixel function with \code{vrt_compute()}, it is strongly advised to
+use the \code{warp} engine and to avoid using mirai daemons (i.e. use
+sequential processing).
 
 \code{mean_db_numpy} is a pixel function that calculates the mean of
 the input arrays and then converts to decibels. This is useful for

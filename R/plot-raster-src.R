@@ -128,7 +128,7 @@ plot_raster_src <- function(
 plot.vrt_block <- function(
   x,
   ...,
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
@@ -141,7 +141,7 @@ plot.vrt_block <- function(
 plot.vrt_stack <- function(
   x,
   ...,
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   if (!inherits(x, "vrt_stack_warped")) {
     cli::cli_inform(
@@ -161,7 +161,7 @@ plot.vrt_stack <- function(
 plot.vrt_stack_warped <- function(
   x,
   ...,
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   NextMethod()
 }
@@ -173,7 +173,7 @@ plot.vrt_collection <- function(
   x,
   item,
   ...,
-  config_options = gdal_config_opts()
+  config_options = gdal_config_options()
 ) {
   x <- x[[1]][[item]]
   plot(x, ..., config_options = config_options)

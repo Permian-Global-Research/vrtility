@@ -49,7 +49,7 @@ reference:
   - title: GDAL Configuration
     desc: GDAL configuration and setup functions
     contents:
-      - gdal_config_opts
+      - gdal_config_options
       - set_gdal_config
       - gdal_creation_options
       - gdalwarp_options

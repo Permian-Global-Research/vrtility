@@ -23,7 +23,7 @@ test_that("save_vrt works", {
   ds1 <- methods::new(gdalraster::GDALRaster, saved_file)
   withr::defer(if (ds1$isOpen()) ds1$close())
   r1 <- compute_with_py_env({
-    set_gdal_config(gdal_config_opts())
+    set_gdal_config(gdal_config_options())
     gdalraster::read_ds(ds1)
   })
   expect_type(r1, "integer")
@@ -45,7 +45,7 @@ test_that("save_vrt works", {
   expect_s4_class(ds2, "Rcpp_GDALRaster")
 
   r2 <- compute_with_py_env({
-    set_gdal_config(gdal_config_opts())
+    set_gdal_config(gdal_config_options())
     gdalraster::read_ds(ds2)
   })
   expect_type(r2, "integer")

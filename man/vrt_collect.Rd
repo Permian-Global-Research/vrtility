@@ -13,7 +13,7 @@ vrt_collect(x, ...)
 
 \method{vrt_collect}{character}(
   x,
-  config_opts = gdal_config_opts(),
+  config_opts = gdal_config_options(),
   bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
@@ -25,7 +25,7 @@ vrt_collect(x, ...)
 
 \method{vrt_collect}{doc_items}(
   x,
-  config_opts = gdal_config_opts(),
+  config_opts = gdal_config_options(),
   vsi_prefix = "",
   driver = "",
   ...
