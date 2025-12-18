@@ -210,8 +210,9 @@ create_output_raster <- function(rt, outfile, creation_options, x) {
   set_desc_scale_offset(x, ds, rt)
 
   # Set datetime metadata if available
-  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
-    set_dttm_metadata(ds, x$date_time)
+  if (all(nzchar(x$date_time))) {
+    medtime <- if (length(x$date_time) > 1) TRUE else FALSE
+    set_dttm_metadata(ds, x$date_time, .median = medtime)
   }
 
   return(ds)
