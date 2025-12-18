@@ -17,6 +17,7 @@ benchmark.R
 /air.toml
 /.lintr
 /.vscode/
+/.claude/
 
 /example-data/*
 docs
