@@ -183,3 +183,36 @@ read_src_metadata <- function(src) {
     purrr::map_chr(mtd_name_splt, function(x) x[1])
   )
 }
+
+#' Create and initialize output raster for reduction operations
+#' @param rt Raster template parameters from raster_template_params()
+#' @param outfile Output file path
+#' @param creation_options GDAL creation options
+#' @param x VRT collection object (for metadata)
+#' @return Open GDALRaster dataset (caller must close)
+#' @keywords internal
+#' @noRd
+create_output_raster <- function(rt, outfile, creation_options, x) {
+  # Create output raster from template
+  nr <- suppressMessages(gdalraster::rasterFromRaster(
+    rt$vrt_template,
+    normalizePath(outfile, mustWork = FALSE),
+    fmt = "GTiff",
+    init = rt$nodataval,
+    options = creation_options,
+    dtName = rt$data_type
+  ))
+
+  # Open for writing
+  ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
+
+  # Set band descriptions, scale, and offset
+  set_desc_scale_offset(x, ds, rt)
+
+  # Set datetime metadata if available
+  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
+    set_dttm_metadata(ds, x$date_time)
+  }
+
+  return(ds)
+}
