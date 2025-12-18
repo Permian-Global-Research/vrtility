@@ -83,8 +83,7 @@ print(l8l9_query)
 #>   - 6d21f993-74bc-52d3-bafa-96164e7bce86
 #>   - cb7d0c9d-bc36-538b-a67d-930999cbf3c9
 #> - assets: SR_B2, SR_B3, SR_B4, SR_B5
-#> - item's fields: 
-#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
+#> - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
 ## Collecting the data

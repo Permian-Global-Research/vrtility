@@ -31,13 +31,16 @@ v_assert_type <- function(
   }
 }
 
-v_assert_length <- function(x, name, length, nullok = TRUE) {
+v_assert_length <- function(x, name, leng, nullok = TRUE) {
   if (nullok && is.null(x)) {
     return()
   }
-  if (rlang::is_true(length(x) != length)) {
+  if (rlang::is_true(length(x) != leng)) {
     cli::cli_abort(
-      "{name} must have length {length}",
+      c(
+        "{name} must have length {leng}",
+        "i" = "Got value with length {length(x)}: {.val {utils::head(x, 3)}}{if (length(x) > 3) '...' else ''}"
+      ),
       class = "vrtility_length_error"
     )
   }
@@ -49,7 +52,10 @@ v_assert_length_gt <- function(x, name, length, nullok = TRUE) {
   }
   if (rlang::is_true(length(x) <= length)) {
     cli::cli_abort(
-      "{name} must have length greater than {length}",
+      c(
+        "{name} must have length greater than {length}",
+        "i" = "Got value with length {length(x)}"
+      ),
       class = "vrtility_length_error"
     )
   }

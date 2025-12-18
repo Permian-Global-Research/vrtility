@@ -86,7 +86,6 @@ hlssl_stac <- hls_stac_query(
   assets = c( 
     "B01", "B02", "B03", "B04", "B05", "B06", "B07", "B09", "B10", "B11", "Fmask")
 )
-#> GET request failed, attempting to POST request
 print(hlssl_stac)
 #> ###Items
 #> - features (6 item(s)):
@@ -97,8 +96,7 @@ print(hlssl_stac)
 #>   - HLS.L30.T55MBM.2023337T003219.v2.0
 #>   - HLS.L30.T54MZS.2023337T003219.v2.0
 #> - assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask
-#> - item's fields: 
-#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
+#> - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
 And now we will query the HLS Sentinel-2 collection using the same parameters.
@@ -126,10 +124,8 @@ print(hlsss_stac)
 #>   - HLS.S30.T55MBM.2023319T004701.v2.0
 #>   - HLS.S30.T55MBM.2023364T004709.v2.0
 #>   - HLS.S30.T54MZS.2023364T004709.v2.0
-#> - assets: 
-#> B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B8A, Fmask
-#> - item's fields: 
-#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
+#> - assets: B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B8A, Fmask
+#> - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
 In order to download the data we need to set up our Earthdata credentials. The 

@@ -203,35 +203,20 @@ singleband_m2m.vrt_collection_warped <- function(
   ) |>
     merge(data.frame(band_n = seq_len(rt$nbands)))
 
-  # Initialize output raster
-  dttm_vec <- purrr::imap_chr(
-    unname(x[[1]]),
-    function(.x, .y) {
-      if (nchar(.x$date_time) > 0) .x$date_time else as.character(.y)
-    }
-  )
-  uniq_pths <- unique_fp(dttm_vec, outfile)
+  # Initialize output rasters (one per time step)
+  uniq_pths <- unique_fp(x$date_time, outfile)
 
+  # Create output rasters for each time step
+  # browser()
   ds_list <- purrr::map2(
     uniq_pths,
-    dttm_vec,
-    function(.x, .y) {
-      nr <- suppressMessages(gdalraster::rasterFromRaster(
-        rt$vrt_template,
-        normalizePath(.x, mustWork = FALSE),
-        fmt = "GTiff",
-        init = rt$nodataval,
-        options = creation_options,
-        dtName = rt$data_type
-      ))
-      ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
-      set_desc_scale_offset(x, ds, rt)
-      if (nzchar(.y)) {
-        set_dttm_metadata(nr, .y, .median = FALSE)
-      }
-
-      return(ds)
-    }
+    x[[1]],
+    ~ create_output_raster(
+      rt = rt,
+      outfile = .x,
+      creation_options = creation_options,
+      x = .y
+    )
   )
 
   on.exit(

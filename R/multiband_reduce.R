@@ -134,25 +134,9 @@ multiband_reduce.vrt_collection_warped <- function(
     nsplits
   )
 
-  # Initialize output raster
-  # TODO: this raster creation is duplicated here and in singleband-many-to-many
-  # and call-gdalraster-mirai -> refactor at some point.
-  nr <- suppressMessages(gdalraster::rasterFromRaster(
-    rt$vrt_template,
-    normalizePath(outfile, mustWork = FALSE),
-    fmt = "GTiff",
-    init = rt$nodataval,
-    options = creation_options,
-    dtName = rt$data_type
-  ))
-
-  ds <- methods::new(gdalraster::GDALRaster, nr, read_only = FALSE)
+  # Initialize output raster using consolidated helper
+  ds <- create_output_raster(rt, outfile, creation_options, x)
   on.exit(ds$close(), add = TRUE)
-  set_desc_scale_offset(x, ds, rt)
-
-  if (length(x$date_time) > 1 && all(nzchar(x$date_time))) {
-    x$date_time <- set_dttm_metadata(ds, x$date_time)
-  }
 
   if (mirai::daemons_set()) {
     async_gdalreader_multiband_reduce_read_write(
