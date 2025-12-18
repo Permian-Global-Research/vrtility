@@ -496,6 +496,9 @@ stac_coverage_filter <- function(items, bbox, min_coverage = 0.5) {
 }
 
 
+# Memory cache for MPC tokens (package environment)
+.mpc_token_cache <- new.env(parent = emptyenv())
+
 #' Sign STAC items retrieved from the Microsoft Planetary Computer (MPC)
 #'
 #' @param items A STACItemCollection.
@@ -510,10 +513,11 @@ stac_coverage_filter <- function(items, bbox, min_coverage = 0.5) {
 #' collocate the workload on the Azure West Europe region.
 #'
 #' Unlike the `rstac::items_sign_planetary_computer` function, this function
-#' caches collection-level signing tokens for 45 minutes to avoid repeated
-#' requests for the same collection within a short time period. This can avoid
-#' 429 (permission denied) errors when signing many items from the same
-#' collection.
+#' caches collection-level signing tokens both in memory and on disk for 45
+#' minutes to avoid repeated requests for the same collection within a short
+#' time period. This can avoid 429 (permission denied) errors when signing
+#' many items from the same collection. Memory cache provides faster access
+#' for same-session requests.
 #'
 #' @returns A STACItemCollection object with signed assets url.
 #'
@@ -533,10 +537,11 @@ sign_mpc_items <- function(
 
   token_cache_file <- set_token_cache(collection)
 
-  reuse_token <- is_token_valid(token_cache_file)
+  # Check both memory and file cache
+  token_result <- is_token_valid(collection, token_cache_file)
 
   collection_token <- read_token(
-    reuse_token,
+    token_result,
     collection,
     subscription_key,
     token_cache_file
@@ -567,12 +572,29 @@ set_token_cache <- function(collection) {
   )
 }
 
-#' Check if an MPC token is still valid and if it exists
+#' Check if an MPC token is still valid (memory cache first, then file cache)
+#' @param collection Collection name
 #' @param token_cache_file A character string of the cache file path
-#' @return A logical indicating whether the token is valid
+#' @return List with is_valid (logical) and token (if valid)
 #' @noRd
 #' @keywords internal
-is_token_valid <- function(token_cache_file) {
+is_token_valid <- function(collection, token_cache_file) {
+  # Check memory cache first (fastest)
+  if (exists(collection, envir = .mpc_token_cache, inherits = FALSE)) {
+    collection_token <- get(collection, envir = .mpc_token_cache)
+
+    token_age <- lubridate::ymd_hms(Sys.time(), tz = Sys.timezone()) -
+      lubridate::ymd_hms(collection_token$`msft:expiry`, tz = "UTC")
+
+    if (token_age < 0) {
+      return(list(is_valid = TRUE, token = collection_token))
+    } else {
+      # Remove expired token from memory
+      rm(list = collection, envir = .mpc_token_cache)
+    }
+  }
+
+  # Check file cache
   if (fs::file_exists(token_cache_file)) {
     collection_token <- readRDS(token_cache_file)
 
@@ -580,17 +602,17 @@ is_token_valid <- function(token_cache_file) {
       lubridate::ymd_hms(collection_token$`msft:expiry`, tz = "UTC")
 
     if (token_age < 0) {
-      return(TRUE)
-    } else {
-      return(FALSE)
+      # Load into memory cache for next time
+      assign(collection, collection_token, envir = .mpc_token_cache)
+      return(list(is_valid = TRUE, token = collection_token))
     }
-  } else {
-    return(FALSE)
   }
+
+  return(list(is_valid = FALSE, token = NULL))
 }
 
 #' Read or request a new MPC token
-#' @param reuse_token A logical indicating whether to reuse the token
+#' @param token_result Result from is_token_valid()
 #' @param collection A character string of the collection name
 #' @param subscription_key A subscription key associated with your MPC account
 #' @param token_cache_file A character string of the cache file path
@@ -598,43 +620,44 @@ is_token_valid <- function(token_cache_file) {
 #' @noRd
 #' @keywords internal
 read_token <- function(
-  reuse_token,
+  token_result,
   collection,
   subscription_key,
   token_cache_file
 ) {
-  if (!reuse_token) {
-    collection_sign_url <- paste0(
-      "https://planetarycomputer.microsoft.com/api/sas/v1/token/",
-      collection
-    )
-
-    if (is.na(subscription_key)) {
-      header_fun <- function(x) {
-        httr2::req_headers(x, Accept = "application/json")
-      }
-    } else {
-      header_fun <- function(x) {
-        httr2::req_headers(
-          x,
-          Accept = "application/json",
-          "Ocp-Apim-Subscription-Key" = subscription_key
-        )
-      }
-    }
-
-    collection_token <- httr2::request(collection_sign_url) |>
-      header_fun() |>
-      httr2::req_perform() |>
-      httr2::resp_body_json()
-
-    saveRDS(
-      collection_token,
-      file = token_cache_file
-    )
-  } else {
-    collection_token <- readRDS(token_cache_file)
+  if (token_result$is_valid) {
+    return(token_result$token)
   }
+
+  # Request new token
+  collection_sign_url <- paste0(
+    "https://planetarycomputer.microsoft.com/api/sas/v1/token/",
+    collection
+  )
+
+  if (is.na(subscription_key)) {
+    header_fun <- function(x) {
+      httr2::req_headers(x, Accept = "application/json")
+    }
+  } else {
+    header_fun <- function(x) {
+      httr2::req_headers(
+        x,
+        Accept = "application/json",
+        "Ocp-Apim-Subscription-Key" = subscription_key
+      )
+    }
+  }
+
+  collection_token <- httr2::request(collection_sign_url) |>
+    header_fun() |>
+    httr2::req_perform() |>
+    httr2::resp_body_json()
+
+  # Save to both file and memory cache
+  saveRDS(collection_token, file = token_cache_file)
+  assign(collection, collection_token, envir = .mpc_token_cache)
+
   return(collection_token)
 }
 
