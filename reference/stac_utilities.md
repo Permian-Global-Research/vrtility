@@ -205,10 +205,12 @@ collocate the workload on the Azure West Europe region.
 
 Unlike the
 [`rstac::items_sign_planetary_computer`](https://brazil-data-cube.github.io/rstac/reference/items_sign_planetary_computer.html)
-function, this function caches collection-level signing tokens for 45
-minutes to avoid repeated requests for the same collection within a
-short time period. This can avoid 429 (permission denied) errors when
-signing many items from the same collection.
+function, this function caches collection-level signing tokens both in
+memory and on disk for 45 minutes to avoid repeated requests for the
+same collection within a short time period. This can avoid 429
+(permission denied) errors when signing many items from the same
+collection. Memory cache provides faster access for same-session
+requests.
 
 The `stac_drop_duplicates` function removes duplicate items from a STAC
 item collection. Duplicates are identified based on identical bounding

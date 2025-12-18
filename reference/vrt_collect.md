@@ -71,7 +71,7 @@ c(x, ...)
 
   A character string indicating the VSI prefix to use for the VRT
   sources. Defaults to `"/vsicurl/"`. See
-  [`vsi_get_fs_prefixes`](https://usdaforestservice.github.io/gdalraster/reference/vsi_get_fs_prefixes.html)
+  [`vsi_get_fs_prefixes`](https://firelab.github.io/gdalraster/reference/vsi_get_fs_prefixes.html)
   for available options.
 
 - driver:

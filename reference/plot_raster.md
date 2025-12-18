@@ -1,7 +1,7 @@
 # plot a raster file or `vrt_x` object
 
 A wrapper around
-[`gdalraster::plot_raster`](https://usdaforestservice.github.io/gdalraster/reference/plot_raster.html)
+[`gdalraster::plot_raster`](https://firelab.github.io/gdalraster/reference/plot_raster.html)
 that simplifies the process of plotting a raster file.
 
 ## Usage

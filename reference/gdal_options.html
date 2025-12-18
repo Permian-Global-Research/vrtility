@@ -11,7 +11,7 @@ performance, control caching, and manage HTTP requests (among other things)"></h
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -295,7 +295,7 @@ a negative impact on performance.</p>
 <p>output_format, equaivalent to <code>-of</code> from the gdaltranslate or gdalwarp CLIs.
 If NULL, then the output format will be inferred from the file extension.</p>
 <p>set_gdal_cache_max is a very thin wrapper around
-<code><a href="https://usdaforestservice.github.io/gdalraster/reference/set_cache_max.html" class="external-link">set_cache_max</a></code> that allows you to conveniently
+<code><a href="https://firelab.github.io/gdalraster/reference/set_cache_max.html" class="external-link">set_cache_max</a></code> that allows you to conveniently
 set the GDAL_CACHEMAX option as a fraction of the total RAM on your system.</p>
 <p>check_muparser can be used to check if the installed gdal version was built
 with muparser support; muparser is required for derived bands using
@@ -337,10 +337,10 @@ masks.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7] "UNIFIED_SRC_NODATA=NO"</span>
 <span class="r-in"><span><span class="fu">set_gdal_config</span><span class="op">(</span><span class="fu">gdal_config_options</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">gcm</span> <span class="op">&lt;-</span> <span class="fu">set_gdal_cache_max</span><span class="op">(</span><span class="fl">0.05</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> GDAL_CACHEMAX set to 799.779 MiB; to change this use</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> GDAL_CACHEMAX set to 799.729 MiB; to change this use</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   vrtility::<span style="font-weight: bold;">set_gdal_cache_max</span><span style="color: #D7AF00;">()</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gcm</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 799.779 MiB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 799.729 MiB</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

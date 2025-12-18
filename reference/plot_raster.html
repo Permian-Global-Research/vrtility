@@ -9,7 +9,7 @@ process of plotting a raster file."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@ process of plotting a raster file."></head><body>
     </div>
 
     <div class="ref-description section level2">
-    <p>A wrapper around <code><a href="https://usdaforestservice.github.io/gdalraster/reference/plot_raster.html" class="external-link">gdalraster::plot_raster</a></code> that simplifies the
+    <p>A wrapper around <code><a href="https://firelab.github.io/gdalraster/reference/plot_raster.html" class="external-link">gdalraster::plot_raster</a></code> that simplifies the
 process of plotting a raster file.</p>
     </div>
 
@@ -274,7 +274,7 @@ overall contrast.</p></li>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">s2_imgs</span> <span class="op">&lt;-</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/dir_ls.html" class="external-link">dir_ls</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"s2-data"</span>, package <span class="op">=</span> <span class="st">"vrtility"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="fu">gdalraster</span><span class="fu">::</span><span class="va"><a href="https://usdaforestservice.github.io/gdalraster/reference/GDALRaster-class.html" class="external-link">GDALRaster</a></span>, <span class="va">s2_imgs</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="fu">gdalraster</span><span class="fu">::</span><span class="va"><a href="https://firelab.github.io/gdalraster/reference/GDALRaster-class.html" class="external-link">GDALRaster</a></span>, <span class="va">s2_imgs</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">ds</span>,</span></span>

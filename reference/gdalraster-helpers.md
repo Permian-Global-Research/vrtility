@@ -52,7 +52,7 @@ GDALRasterDataset object
 ## Details
 
 If `data` has been generated from
-[`read_ds`](https://usdaforestservice.github.io/gdalraster/reference/read_ds.html)
+[`read_ds`](https://firelab.github.io/gdalraster/reference/read_ds.html)
 it will include a `gis` attribute containing the necessary spatial
 metadata. If this is the case, the spatial parameters are automatically
 extracted from the `gis` attribute.

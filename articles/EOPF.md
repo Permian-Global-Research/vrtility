@@ -223,7 +223,7 @@ exptest <- vrt_derived_block(
 print(exptest, pixfun = TRUE)
 #> → <VRT Block>
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> Pixel Function:
 #> ndvi ~ ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + (B04_10m * 0.0001 + -0.1))                                               
 #> ndti ~ ((B04_10m * 0.0001 + -0.1) - (B03_10m * 0.0001 + -0.1))/((B04_10m * 0.0001 + -0.1) + (B03_10m * 0.0001 + -0.1))                                               
@@ -237,7 +237,7 @@ print(exptest, pixfun = TRUE)
 #> Pixel res: 10, 10
 #> Assets: ndvi, ndti, evi, vgnirbi
 #> No Data Value(s): NaN, NaN, NaN, NaN
-#> Date Time: 2025-06-21 UTC
+#> Date Time: 2025-06-21 22:21:41 UTC
 
 x <- vrt_compute(
   exptest,

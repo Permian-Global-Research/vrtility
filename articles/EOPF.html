@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,7 +132,7 @@ retrieve images with adequate coverage of our area of interest.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://usdaforestservice.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
+<span><span class="va">bbox</span> <span class="op">&lt;-</span> <span class="fu">gdalraster</span><span class="fu">::</span><span class="fu"><a href="https://firelab.github.io/gdalraster/reference/bbox_from_wkt.html" class="external-link">bbox_from_wkt</a></span><span class="op">(</span></span>
 <span>  wkt <span class="op">=</span> <span class="st">"POINT (12.56 55.67)"</span>,</span>
 <span>  extend_x <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  extend_y <span class="op">=</span> <span class="fl">0.2</span></span>
@@ -273,7 +273,7 @@ the results:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">exptest</span>, pixfun <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; → &lt;VRT Block&gt;</span></span>
 <span><span class="co">#&gt; VRT XML: [hidden]</span></span>
-<span><span class="co">#&gt;   run print(x, xml = TRUE) to view</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; Pixel Function:</span></span>
 <span><span class="co">#&gt; ndvi ~ ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + (B04_10m * 0.0001 + -0.1))                                               </span></span>
 <span><span class="co">#&gt; ndti ~ ((B04_10m * 0.0001 + -0.1) - (B03_10m * 0.0001 + -0.1))/((B04_10m * 0.0001 + -0.1) + (B03_10m * 0.0001 + -0.1))                                               </span></span>
@@ -287,7 +287,7 @@ the results:</p>
 <span><span class="co">#&gt; Pixel res: 10, 10</span></span>
 <span><span class="co">#&gt; Assets: ndvi, ndti, evi, vgnirbi</span></span>
 <span><span class="co">#&gt; No Data Value(s): NaN, NaN, NaN, NaN</span></span>
-<span><span class="co">#&gt; Date Time: 2025-06-21 UTC</span></span>
+<span><span class="co">#&gt; Date Time: 2025-06-21 22:21:41 UTC</span></span>
 <span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span></span>
 <span>  <span class="va">exptest</span>,</span>

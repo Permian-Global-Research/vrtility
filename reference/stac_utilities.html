@@ -11,7 +11,7 @@ convenience for common tasks."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -248,10 +248,11 @@ https://github.com/microsoft/PlanetaryComputer/issues/457. A key is not
 required for data access and a more reliable way to ensure access is to
 collocate the workload on the Azure West Europe region.</p>
 <p>Unlike the <code><a href="https://brazil-data-cube.github.io/rstac/reference/items_sign_planetary_computer.html" class="external-link">rstac::items_sign_planetary_computer</a></code> function, this function
-caches collection-level signing tokens for 45 minutes to avoid repeated
-requests for the same collection within a short time period. This can avoid
-429 (permission denied) errors when signing many items from the same
-collection.</p>
+caches collection-level signing tokens both in memory and on disk for 45
+minutes to avoid repeated requests for the same collection within a short
+time period. This can avoid 429 (permission denied) errors when signing
+many items from the same collection. Memory cache provides faster access
+for same-session requests.</p>
 <p>The <code>stac_drop_duplicates</code> function removes duplicate items from a STAC item
 collection. Duplicates are identified based on identical bounding boxes (
 with a precision of 4 decimal places), datetime properties and platform.

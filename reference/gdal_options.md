@@ -246,7 +246,7 @@ CLIs. If NULL, then the output format will be inferred from the file
 extension.
 
 set_gdal_cache_max is a very thin wrapper around
-[`set_cache_max`](https://usdaforestservice.github.io/gdalraster/reference/set_cache_max.html)
+[`set_cache_max`](https://firelab.github.io/gdalraster/reference/set_cache_max.html)
 that allows you to conveniently set the GDAL_CACHEMAX option as a
 fraction of the total RAM on your system.
 
@@ -296,8 +296,8 @@ gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 #> [7] "UNIFIED_SRC_NODATA=NO"
 set_gdal_config(gdal_config_options())
 gcm <- set_gdal_cache_max(0.05)
-#> ℹ GDAL_CACHEMAX set to 799.779 MiB; to change this use
+#> ℹ GDAL_CACHEMAX set to 799.729 MiB; to change this use
 #>   vrtility::set_gdal_cache_max()
 print(gcm)
-#> 799.779 MiB
+#> 799.729 MiB
 ```
