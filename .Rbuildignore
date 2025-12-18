@@ -17,6 +17,7 @@
 ^benchmark.R$
 ^LICENSE\.md$
 ^\.vscode$
+^\.claude$
 ^air.toml$
 ^.lintr$
 ^example-data$
