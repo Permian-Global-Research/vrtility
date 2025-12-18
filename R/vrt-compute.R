@@ -161,13 +161,16 @@ vrt_compute.vrt_block <- function(
   dst_nodata = NULL,
   recollect = FALSE
 ) {
-  v_assert_length(te, "te", 4)
-  v_assert_length(tr, "tr", 2)
-  v_assert_type(outfile, "outfile", "character")
-  v_assert_type(t_srs, "t_srs", "character")
-  v_assert_type(warp_options, "warp_options", "character")
-  v_assert_type(creation_options, "creation_options", "character")
-  v_assert_type(config_options, "config_options", "character")
+  # Specific validations for vrt_block (already validated in generic)
+  validate_compute_args(
+    outfile = outfile,
+    t_srs = t_srs,
+    te = te,
+    tr = tr,
+    warp_options = warp_options,
+    creation_options = creation_options,
+    config_options = config_options
+  )
 
   resampling <- rlang::arg_match(resampling)
   engine <- rlang::arg_match(engine)
@@ -435,7 +438,16 @@ vrt_compute.vrt_collection <- function(
   if (any(missing(t_srs), missing(te), missing(tr))) {
     missing_args_error("vrt_collection")
   }
-  v_assert_length(tr, "tr", 2)
+  # Validate once before processing collection
+  validate_compute_args(
+    outfile = outfile,
+    t_srs = t_srs,
+    te = te,
+    tr = tr,
+    warp_options = warp_options,
+    creation_options = creation_options,
+    config_options = config_options
+  )
   engine <- rlang::arg_match(engine)
 
   uniq_pths <- purrr::imap_chr(
@@ -497,6 +509,38 @@ vrt_compute.vrt_collection <- function(
     band_descriptions = x$assets,
     datetimes = x$date_time
   )
+}
+
+
+#' Validate common vrt_compute arguments
+#' @noRd
+#' @keywords internal
+validate_compute_args <- function(
+  outfile,
+  t_srs = NULL,
+  te = NULL,
+  tr = NULL,
+  warp_options,
+  creation_options,
+  config_options
+) {
+  v_assert_type(outfile, "outfile", "character")
+
+  if (!is.null(t_srs)) {
+    v_assert_type(t_srs, "t_srs", "character")
+  }
+  if (!is.null(te)) {
+    v_assert_length(te, "te", 4)
+  }
+  if (!is.null(tr)) {
+    v_assert_length(tr, "tr", 2)
+  }
+
+  v_assert_type(warp_options, "warp_options", "character")
+  v_assert_type(creation_options, "creation_options", "character")
+  v_assert_type(config_options, "config_options", "character")
+
+  invisible()
 }
 
 #' Set datetime metadata on a gdalraster object
