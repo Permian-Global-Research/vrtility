@@ -583,7 +583,6 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
   } else {
     ds <- ras
   }
-  # browser()
 
   ds$setMetadataItem(
     0,
