@@ -10,7 +10,7 @@
 #' mask_band if provided.
 #' @param quiet logical indicating whether to suppress progress bar.
 #' @param lazy logical indicating whether to create virtual warped files (TRUE)
-#' or to materialize the warped files to disk (FALSE). When woring with remote
+#' or to materialize the warped files to disk (FALSE). When working with remote
 #' data sources, lazy=FALSE is strongly recommended to improve performance.
 #' When NULL (default) the function will decide based on whether the input
 #' data is remote or local.
@@ -20,7 +20,7 @@
 #' @details This function generates warped VRT objects types. This is
 #' particularly useful when we want to create a vrt_stack but our input images
 #' span multiple spatial reference systems. In such a situation, before warping
-#' our input data we must align with our desired oputput grid.
+#' our input data we must align with our desired output grid.
 #' @examples
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #' ex_collect <- vrt_collect(s2files)
@@ -70,9 +70,9 @@ vrt_warp <- function(
 
 #' @noRd
 #' @export
-vrt_collect.default <- function(x, ...) {
+vrt_warp.default <- function(x, ...) {
   cli::cli_abort(
-    "{cli::code_highlight('vrt_collect()')}
+    "{cli::code_highlight('vrt_warp()')}
     not implemented for class {class(x)[1]}"
   )
 }
