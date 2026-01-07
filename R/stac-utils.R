@@ -429,6 +429,11 @@ sentinel1_stac_query <- function(
 stac_cloud_filter <- function(items, max_cloud_cover) {
   v_assert_type(items, "items", "doc_items")
   v_assert_type(max_cloud_cover, "max_cloud_cover", "numeric")
+
+  if (rlang::is_empty(items$features)) {
+    return(items)
+  }
+
   items |>
     rstac::items_filter(
       filter_fn = function(x) x$properties$`eo:cloud_cover` < max_cloud_cover
@@ -451,6 +456,11 @@ stac_orbit_filter <- function(
   orbit_state = c("descending", "ascending")
 ) {
   rlang::arg_match(orbit_state, multiple = TRUE)
+
+  if (rlang::is_empty(items$features)) {
+    return(items)
+  }
+
   items |>
     rstac::items_filter(
       filter_fn = function(x) {
