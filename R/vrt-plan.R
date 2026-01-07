@@ -7,7 +7,6 @@
 #' creation step that [vrt_collect()] performs.
 #'
 #' @param x A `doc_items` object from rstac.
-#' @param config_options A named character vector of GDAL configuration options.
 #' @param vsi_prefix Character string specifying the GDAL virtual file system
 #' prefix (e.g., "/vsicurl/", "/vsis3/"). Default is empty string which lets
 #' rstac determine the appropriate prefix.
@@ -63,11 +62,10 @@
 #' @rdname vrt_plan
 #' @export
 vrt_plan <- function(
-    x,
-    config_options = gdal_config_options(),
-    vsi_prefix = "",
-    driver = "",
-    ...
+  x,
+  vsi_prefix = "",
+  driver = "",
+  ...
 ) {
   UseMethod("vrt_plan")
 }
@@ -86,13 +84,12 @@ vrt_plan.default <- function(x, ...) {
 #' @rdname vrt_plan
 #' @export
 vrt_plan.doc_items <- function(
-    x,
-    config_options = gdal_config_options(),
-    vsi_prefix = "",
-    driver = "",
-    ...
+  x,
+  vsi_prefix = "",
+  driver = "",
+  ...
 ) {
-  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_options)
+  gdal_vrt_collect_arg_checks(vsi_prefix, driver)
 
   # Extract asset names, sorted numerically if possible
   assets <- rstac::items_assets(x)[order(as.numeric(gsub(
@@ -138,8 +135,7 @@ vrt_plan.doc_items <- function(
     assets = assets,
     date_time = date_times,
     vsi_prefix = vsi_prefix,
-    driver = driver,
-    config_options = config_options
+    driver = driver
   )
 }
 
@@ -148,12 +144,11 @@ vrt_plan.doc_items <- function(
 #' @keywords internal
 #' @noRd
 build_vrt_plan <- function(
-    sources,
-    assets,
-    date_time,
-    vsi_prefix,
-    driver,
-    config_options
+  sources,
+  assets,
+  date_time,
+  vsi_prefix,
+  driver
 ) {
   plan <- list(
     sources = sources,
@@ -161,8 +156,7 @@ build_vrt_plan <- function(
     date_time = date_time,
     n_items = length(sources),
     vsi_prefix = vsi_prefix,
-    driver = driver,
-    config_options = config_options
+    driver = driver
   )
 
   class(plan) <- c("vrt_plan", "list")
