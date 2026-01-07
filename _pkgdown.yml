@@ -9,6 +9,7 @@ reference:
     desc: Core functions for Virtual Raster management
     contents:
       - vrt_collect
+      - vrt_plan
       - vrt_warp
       - vrt_stack
       - vrt_compute
