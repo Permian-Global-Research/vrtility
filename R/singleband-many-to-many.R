@@ -251,7 +251,7 @@ singleband_m2m.vrt_collection_warped <- function(
 
   vrt_collect(
     uniq_pths,
-    config_opts = config_options,
+    config_options = config_options,
     band_descriptions = x$assets,
     datetimes = x$date_time
   )
