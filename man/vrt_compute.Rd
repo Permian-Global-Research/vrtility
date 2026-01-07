@@ -183,7 +183,7 @@ Generate a composite raster from (virtual) raster sources.
 }
 \details{
 The \code{resampling} default is "near", which should be chosen in vrt_warp has
-already been used but "bilinear" may be prefereable where the input data is
+already been used but "bilinear" may be preferable where the input data
 has not yet been virtually aligned/resampled.
 
 The choice of \code{engine} will depend on the nature of the computation being

@@ -13,7 +13,7 @@ vrt_collect(x, ...)
 
 \method{vrt_collect}{character}(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
@@ -25,7 +25,7 @@ vrt_collect(x, ...)
 
 \method{vrt_collect}{doc_items}(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   vsi_prefix = "",
   driver = "",
   ...
@@ -44,7 +44,7 @@ vrt_collect(x, ...)
 concatenate to \code{x}. Otherwise, additional arguments to pass to the method or
 unused.}
 
-\item{config_opts}{A named character vector of GDAL configuration options.}
+\item{config_options}{A named character vector of GDAL configuration options.}
 
 \item{bands}{A numeric vector of band indices to include in the VRT
 collection}
@@ -81,7 +81,7 @@ Construct the base VRT object for composing VRT pipelines.
 }
 \details{
 The main way to create a vrt_collection object, which forms
-the basis of the vrrt-based pipelines in vrtility is using a doc_items
+the basis of the vrt-based pipelines in vrtility is using a doc_items
 object from the \code{rstac} package. For more info on how to create a doc_items
 object see \code{\link[=stac_query]{stac_query()}}. To build a vrt_stack object a
 vrt_collection is required first. The vrt_collection object is essentially a

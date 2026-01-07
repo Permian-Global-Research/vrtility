@@ -66,7 +66,7 @@ mask_band if provided.}
 \item{quiet}{logical indicating whether to suppress progress bar.}
 
 \item{lazy}{logical indicating whether to create virtual warped files (TRUE)
-or to materialize the warped files to disk (FALSE). When woring with remote
+or to materialize the warped files to disk (FALSE). When working with remote
 data sources, lazy=FALSE is strongly recommended to improve performance.
 When NULL (default) the function will decide based on whether the input
 data is remote or local.}
@@ -86,7 +86,7 @@ Construct A warped VRT or warped VRT collection.
 This function generates warped VRT objects types. This is
 particularly useful when we want to create a vrt_stack but our input images
 span multiple spatial reference systems. In such a situation, before warping
-our input data we must align with our desired oputput grid.
+our input data we must align with our desired output grid.
 }
 \examples{
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
