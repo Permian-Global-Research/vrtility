@@ -109,8 +109,8 @@ vrt_set_py_pixelfun.vrt_collection <- function(
     x$vrt,
     ~ vrt_set_py_pixelfun(
       .x,
-      pixfun = vrtility::median_numpy(),
-      band_idx = NULL
+      pixfun = pixfun,
+      band_idx = band_idx
     )
   )
 
@@ -122,7 +122,7 @@ vrt_set_py_pixelfun.vrt_collection <- function(
   build_vrt_collection(
     blocks_with_py_pf,
     maskfun = x$maskfun,
-    pixfun = x$pixfun,
+    pixfun = pixfun,
     warped = warped
   )
 }
