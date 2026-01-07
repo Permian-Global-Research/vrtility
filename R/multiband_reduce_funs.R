@@ -1,31 +1,34 @@
 #' @param nstart Number of times the algorithm is ran over all the data set.
-#' only used if `weizfeld = FALSE`.
-#' @param gamma Value (positive) of the constant controling the descent steps
-#' see details in \code{\link[Gmedian]{Gmedian}}. Only used if
+#' Only used if `weizfeld = FALSE`.
+#' @param gamma Value (positive) of the constant controlling the descent steps.
+#' See details in \code{\link[Gmedian]{Gmedian}}. Only used if
 #' `weizfeld = FALSE`.
 #' @param alpha Rate of decrease of the descent steps (see details). Should
-#' satisfy \eqn{1/2< alpha <= 1}. Only used if `weizfeld = FALSE`.
-#' @param epsilon Numerical tolerance. By defaut set to 1e-08.
+#' satisfy \eqn{1/2 < alpha <= 1}. Only used if `weizfeld = FALSE`.
+#' @param epsilon Numerical tolerance. By default set to 1e-08.
 #' @param weizfeld Logical. If TRUE, the Weiszfeld algorithm is used to
 #' calculate the geometric median - see \code{\link[Gmedian]{Weiszfeld}}. If
 #' FALSE (the default), the Gmedian algorithm is used,
 #' see \code{\link[Gmedian]{Gmedian}}. The Gmedian algorithm is faster and
 #' intrinsically handles missing values.
-#' @param nitermax Maximum number of iterations. By default set to 100. only
+#' @param nitermax Maximum number of iterations. By default set to 100. Only
 #' used if `weizfeld = TRUE`.
-#' @param impute_na Logical. If TRUE, missing values are replaced with the
-#' an appropriate band-level statistic - in the case of geomedian this is only
+#' @param impute_na Logical. If TRUE, missing values are replaced with an
+#' appropriate band-level statistic - in the case of geomedian this is only
 #' relevant when `weizfeld = TRUE` - in such a case the Gmedian algorithm is
-#' used to estimate bands with NA values.  For medoid the column/band median
+#' used to estimate bands with NA values. For medoid the column/band median
 #' is used; for `quantoid` this will be the requested quantile
-#' probabilioty of the column. If FALSE, missing values are not
-#' replaced. which may result in NA values in the output for multiple bands.
+#' probability of the column. If FALSE, missing values are not
+#' replaced, which may result in NA values in the output for multiple bands.
 #' @details The `geomedian` enables the use of \code{\link[Gmedian]{Gmedian}}
 #' and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
 #' multiband raster. When `Weiszfeld` is set to FALSE,
 #' \code{\link[Gmedian]{Gmedian}} is used. For the Gmedian algorithm,
 #' the matrix column medians are used as initial values rather than the first
 #' row of the matrix.
+#' @return A function that can be passed to `multiband_reduce()` as
+#' the `reduce_fun` argument. When called with a matrix, returns a numeric
+#' vector of length equal to the number of bands (columns).
 #' @rdname multiband_reduce
 #' @export
 geomedian <- function(
