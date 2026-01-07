@@ -64,7 +64,10 @@ vrt_set_maskfun <- function(
 #' @export
 vrt_set_maskfun.default <- function(x, ...) {
   cli::cli_abort(
-    "{cli::code_highlight('vrt_set_maskfun()')} not implemented for class {class(x)[1]}"
+    c(
+      "!" = "{.fn vrt_set_maskfun} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    )
   )
 }
 
@@ -305,9 +308,8 @@ check_mask_band <- function(x, mb) {
   if (!mb %in% x$assets) {
     cli::cli_abort(
       c(
-        "Could not find band named: {mb}",
-        "i" = "Available bands: ",
-        ">" = (paste(x$assets, collapse = ", "))
+        "!" = "Could not find band named: {.val {mb}}.",
+        "i" = "Available bands: {.val {x$assets}}"
       )
     )
   }

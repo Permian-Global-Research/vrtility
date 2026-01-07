@@ -27,8 +27,10 @@ vrt_derived_block <- function(x, ...) {
 #' @export
 vrt_derived_block.default <- function(x, ...) {
   cli::cli_abort(
-    "{cli::code_highlight('vrt_derived_block()')}
-    not implemented for class {class(x)[1]}"
+    c(
+      "!" = "{.fn vrt_derived_block} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    )
   )
 }
 
@@ -70,7 +72,10 @@ vrt_derived_block.vrt_block <- function(x, ...) {
 
     if (!all(rqbn %in% band_descs)) {
       cli::cli_abort(
-        "Band {cli::col_yellow(rqbn[!rqbn %in% band_descs])} not found"
+        c(
+          "!" = "Band {.val {rqbn[!rqbn %in% band_descs]}} not found.",
+          "i" = "Available bands: {.val {band_descs}}"
+        )
       )
     }
 

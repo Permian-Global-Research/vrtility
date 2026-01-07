@@ -44,7 +44,10 @@ vrt_create_mask <- function(
 #' @export
 vrt_create_mask.default <- function(x, ...) {
   cli::cli_abort(
-    "The vrt_create_mask method is not implemented for class {class(x)}",
+    c(
+      "!" = "{.fn vrt_create_mask} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    ),
     class = "vrtility_type_error"
   )
 }
@@ -74,8 +77,8 @@ vrt_create_mask.vrt_block <- function(
   if (!all(names(inbands) %in% attributes(maskfun)$required_bands)) {
     cli::cli_inform(
       c(
-        "The following bands are required by the {get_called_function_name(maskfun)} but are not 
-      provided: {setdiff(attributes(maskfun)$required_bands, names(inbands))}"
+        "!" = "The following bands are required by {.fn {get_called_function_name(maskfun)}} but are not provided:",
+        "x" = "{.val {setdiff(attributes(maskfun)$required_bands, names(inbands))}}"
       ),
       class = "vrtility_maskfun_error"
     )

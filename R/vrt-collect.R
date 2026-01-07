@@ -62,8 +62,10 @@ vrt_collect <- function(
 #' @export
 vrt_collect.default <- function(x, ...) {
   cli::cli_abort(
-    "{cli::code_highlight('vrt_collect()')}
-    not implemented for class {class(x)[1]}"
+    c(
+      "!" = "{.fn vrt_collect} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls doc_items} object from {.pkg rstac} or a character vector of file paths is required."
+    )
   )
 }
 

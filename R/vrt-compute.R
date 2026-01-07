@@ -123,7 +123,12 @@ vrt_compute <- function(
 #' @noRd
 #' @export
 vrt_compute.default <- function(x, ...) {
-  cli::cli_abort(c("vrt_compute() not implemented for class {class(x)[1]}"))
+  cli::cli_abort(
+    c(
+      "!" = "{.fn vrt_compute} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block}, {.cls vrt_stack}, or {.cls vrt_collection} object is required."
+    )
+  )
 }
 
 #' @export
@@ -602,8 +607,8 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
 missing_args_error <- function(x_class) {
   cli::cli_abort(
     c(
-      "The following arguments are required for a `{x_class}` object:",
-      ">" = (paste(c("`t_srs`", "`te`", "`tr`"), collapse = ", "))
+      "!" = "The following arguments are required for a {.cls {x_class}} object:",
+      ">" = "{.arg t_srs}, {.arg te}, {.arg tr}"
     )
   )
 }
@@ -612,8 +617,8 @@ missing_args_error <- function(x_class) {
 warp_first_error <- function(engine) {
   cli::cli_abort(
     c(
-      "The `{engine}` engine should only be used with warped VRTs",
-      "i" = "Use `vrt_warp on the collection before`vrt_stack` or vrt_compute`"
+      "!" = "The {.val {engine}} engine should only be used with warped VRTs.",
+      "i" = "Use {.fn vrt_warp} on the collection before {.fn vrt_stack} or {.fn vrt_compute}."
     )
   )
 }
