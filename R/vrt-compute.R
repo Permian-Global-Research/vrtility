@@ -34,7 +34,7 @@
 #' @rdname vrt_compute
 #' @details
 #' The `resampling` default is "near", which should be chosen in vrt_warp has
-#' already been used but "bilinear" may be prefereable where the input data is
+#' already been used but "bilinear" may be preferable where the input data
 #' has not yet been virtually aligned/resampled.
 #'
 #' The choice of `engine` will depend on the nature of the computation being
@@ -238,7 +238,7 @@ vrt_compute.vrt_block <- function(
 
   vrt_collect(
     result,
-    config_opts = config_options,
+    config_options = config_options,
     band_descriptions = x$assets,
     datetimes = unique(x$date_time)
   )
@@ -505,7 +505,7 @@ vrt_compute.vrt_collection <- function(
 
   vrt_collect(
     result,
-    config_opts = config_options,
+    config_options = config_options,
     band_descriptions = x$assets,
     datetimes = x$date_time
   )
