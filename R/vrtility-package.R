@@ -77,7 +77,11 @@
 "_PACKAGE"
 
 
+# Package-level cache environment
+.vrtility_cache <- new.env(parent = emptyenv())
+
 .onLoad <- function(libname, pkgname) {
+
   # TODO: do we still need this? Check latest reticulate advice.
   if (is.na(Sys.getenv("RETICULATE_USE_MANAGED_VENV", unset = NA))) {
     Sys.setenv(RETICULATE_USE_MANAGED_VENV = "yes")
@@ -88,6 +92,20 @@
 
   check_gdal_and_warn()
   set_gdal_cache_max()
+
+  # Cache the VRT schema for validation (avoids repeated XML parsing)
+  .vrtility_cache$vrt_schema <- xml2::read_xml(vrtility::vrt_xml_schema)
+}
+
+#' Get the cached VRT schema
+#' @return The cached VRT schema xml_document object
+#' @keywords internal
+#' @noRd
+get_cached_vrt_schema <- function() {
+  if (is.null(.vrtility_cache$vrt_schema)) {
+    .vrtility_cache$vrt_schema <- xml2::read_xml(vrtility::vrt_xml_schema)
+  }
+  .vrtility_cache$vrt_schema
 }
 
 #' onload max RAM allocation options

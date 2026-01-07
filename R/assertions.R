@@ -66,7 +66,7 @@ v_assert_valid_schema <- function(x) {
     fs::file_exists(x),
     "fs::file_exists(x)"
   )
-  val_result <- xml2::xml_validate(xml2::read_xml(x), vrt_schema())
+  val_result <- xml2::xml_validate(xml2::read_xml(x), get_cached_vrt_schema())
   if (!val_result) {
     error_msgs <- attr(val_result, "errors")
 
