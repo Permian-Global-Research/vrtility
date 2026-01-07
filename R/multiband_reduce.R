@@ -1,30 +1,62 @@
 #' @title Image composite reductions that require all bands.
 #' @description `multiband_reduce` can be used to create composite reductions
-#' that require all band values, such as tyhe geometric median or medoid.
+#' that require all band values, such as the geometric median or medoid
 #' composite of a warped VRT collection.
 #' @param x A vrt_collection_warped object.
 #' @param reduce_fun A function to apply to the data. This function should take
 #' a single argument, a matrix where the columns represent the bands of a cell
 #' within a raster stack and the rows represent the time series of that cell.
 #' The function should return a vector of the same length as the number of
-#' bands. See  details.
+#' bands. See details.
 #' @param outfile The output file path.
 #' @param config_options A named character vector of GDAL configuration options.
 #' @param creation_options A named character vector of GDAL creation options.
 #' @param quiet Logical indicating whether to suppress the progress bar.
-#' @param nsplits The number of splits to use for the tiling. If NULL, the
-#' function will automatically determine the number of splits based on the
-#' dimensions of the input data, available memory and the number of active
-#' mirai daemons. see details
+#' @param nsplits The number of splits to use for tiling. If NULL (the default),
+#' the function automatically determines the number of splits based on the
+#' dimensions of the input data, available memory, and the number of active
+#' mirai daemons. Increasing `nsplits` reduces memory usage per tile but
+#' increases I/O overhead. For large datasets or memory-constrained systems,
+#' consider setting this explicitly.
 #' @param recollect A logical indicating whether to return the output as a
-#' vrt_block or vrt_collection object. default is FALSE and the output is a
+#' vrt_block or vrt_collection object. Default is FALSE and the output is a
 #' character string of the output file path.
-#' @return A character vector of the output file path.
+#' @return A character string of the output file path, or if `recollect = TRUE`,
+#' a vrt_block object.
 #' @details
-#' We have a lot TODO: info on the reduce_fun options and nsplits etc...
+#' ## Reducer Functions
+#'
+#' The `reduce_fun` parameter accepts a function that processes a matrix of
+#' band values across time. Built-in reducer functions include:
+#'
+#' - **[geomedian()]**: Geometric median - synthetic, spectrally consistent,
+#'   outlier-robust.
+#' - **[medoid()]**: Nearest observation to band medians - real pixel values.
+#' - **[geomedoid()]**: Nearest observation to geometric median - combines
+#'   outlier robustness with real values.
+#' - **[quantoid()]**: Nearest observation to specified quantile - for cases
+#'   where median is insufficient.
+#'
+#' See individual function documentation for algorithm details and parameters.
+#'
+#' ## Custom Reducer Functions
+#'
+#' Custom functions must accept a matrix (rows = observations, columns = bands)
+#' and return a numeric vector of length equal to the number of bands:
+#'
+#' ```
+#' my_reducer <- function(x) colMeans(x, na.rm = TRUE)
+#' multiband_reduce(warped_collection, reduce_fun = my_reducer)
+#' ```
+#'
+#' ## Parallel Processing
+#'
+#' When mirai daemons are active (`mirai::daemons(n)`), processing is
+#' automatically parallelized across tiles. Without active daemons, processing
+#' is sequential.
 #' @rdname multiband_reduce
 #' @examples
-#' mirai::daemons(3)
+#' # mirai::daemons(3) # recommended, expecially for larger datasets.
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #'
 #' ex_collect <- vrt_collect(s2files)
@@ -44,7 +76,7 @@
 #'   )
 #'
 #' # create plots of each of the methods to compare.
-#' par(mar = c(0, 0, 1, 0))
+#'
 #' purrr::iwalk(
 #'     list(
 #'       geomedian = geomedian(),
@@ -174,7 +206,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   vrt_collect(
     outfile,
-    config_opts = config_options,
+    config_options = config_options,
     band_descriptions = x$assets,
     datetimes = x$date_time
   )

@@ -20,15 +20,22 @@
 #' is used; for `quantoid` this will be the requested quantile
 #' probability of the column. If FALSE, missing values are not
 #' replaced, which may result in NA values in the output for multiple bands.
-#' @details The `geomedian` enables the use of \code{\link[Gmedian]{Gmedian}}
-#' and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
-#' multiband raster. When `Weiszfeld` is set to FALSE,
-#' \code{\link[Gmedian]{Gmedian}} is used. For the Gmedian algorithm,
-#' the matrix column medians are used as initial values rather than the first
-#' row of the matrix.
-#' @return A function that can be passed to `multiband_reduce()` as
-#' the `reduce_fun` argument. When called with a matrix, returns a numeric
-#' vector of length equal to the number of bands (columns).
+#' @details
+#' ## geomedian
+#'
+#' Calculates the geometric (spatial) median across all bands. The geometric
+#' median is the point minimizing the sum of Euclidean distances to all
+#' observations - a multivariate generalization of the median that ensures
+#' spectral consistency across bands. Unlike band-by-band medians, the result
+#' is a synthetic pixel that may not exist in the original data but is robust
+#' to outliers (e.g., clouds, shadows).
+#'
+#' Two algorithms are available via the `weizfeld` parameter:
+#' - `weizfeld = FALSE` (default): Uses \code{\link[Gmedian]{Gmedian}}, a
+#'   stochastic gradient descent algorithm that handles NA values intrinsically.
+#' - `weizfeld = TRUE`: Uses \code{\link[Gmedian]{Weiszfeld}}, an iterative
+#'   algorithm that requires complete cases. When `impute_na = TRUE`, NA bands
+#'   are filled using Gmedian estimates.
 #' @rdname multiband_reduce
 #' @export
 geomedian <- function(
@@ -79,13 +86,24 @@ geomedian <- function(
 }
 
 
-#' @param distance_type The type of distance metric to use. See
-#' \code{\link[Rfast]{dista}} for a full description of options.
-#' @details The `medoid` function  uses \code{\link[Rfast]{dista}} to compute
-#' the distance between the band-level medians and the values for each pixel. It
-#' then selects the pixel with the minimum distance as the medoid. The returned
-#' band pixel values are spectrally consistent and observed rather than
-#' synthetic.
+#' @param distance_type The type of distance metric to use. Default is
+#' "euclidean". See \code{\link[Rfast]{dista}} for all available metrics.
+#'
+#' @details
+#' ## medoid
+#'
+#' Selects the observation (row) closest to the band-level medians. Unlike
+#' geomedian, this returns actual observed pixel values rather than synthetic
+#' statistics, preserving spectral authenticity - useful when real sensor
+#' measurements are required.
+#'
+#' The algorithm:
+#' 1. Computes the median for each band (column)
+#' 2. Calculates distances from each observation to this median vector
+#' 3. Returns the observation with minimum distance
+#'
+#' When `impute_na = TRUE`, any NA values in the selected observation are
+#' replaced with the band median.
 #' @rdname multiband_reduce
 #' @export
 medoid <- function(
@@ -124,9 +142,18 @@ medoid <- function(
   )
 }
 
-#' @param probability The probability of the quantile to use. Default is 0.4.
-#' @details The quantoid is equivalent to the medoid but uses a specified
-#' quantile value for calculating the distances.
+#' @param probability The quantile probability to use (0-1). Default is 0.4.
+#'
+#' @details
+#' ## quantoid
+#'
+#' Like medoid, but uses a specified quantile instead of the median for
+#' distance calculations. Useful when median filtering is insufficient - for
+#' example, a lower quantile (e.g., 0.2-0.4) can better reject bright outliers
+#' like clouds by biasing toward darker observations.
+#'
+#' Requires the WGCNA package. When `impute_na = TRUE`, NA values in the
+#' selected observation are replaced with the band quantile.
 #' @export
 #' @rdname multiband_reduce
 quantoid <- function(
@@ -177,13 +204,18 @@ quantoid <- function(
   )
 }
 
-#' @details The `geomedoid` function combines the `geomedian` and `medoid` - it
-#' first calculates the geometric median across all bands and then uses this
-#' to determine the nearest pixel value to the geometric median. As the
-#' geometric median has greater resilience to outliers than the band-level
-#' median, this function may selct a medoid value that is less likely to contian
-#' clouds or other outliers. The returned band pixel values are spectrally
-#' consistent.
+#' @details
+#' ## geomedoid
+#'
+#' Combines geomedian and medoid approaches: calculates the geometric median
+#' first, then selects the nearest observed pixel to that synthetic point.
+#' This provides:
+#' - **Outlier robustness** from the geometric median calculation
+#' - **Real pixel values** from the medoid selection
+#'
+#' More robust to outliers (clouds, shadows) than medoid alone because the
+#' target point is a geometric median rather than band-by-band medians. When
+#' `impute_na = TRUE`, NA values are filled using geomedian estimates.
 #' @export
 #' @rdname multiband_reduce
 geomedoid <- function(
