@@ -517,7 +517,11 @@ c.vrt_collection <- function(x, ...) {
 #' internal gdal vrt_collect argument checks
 #' @noRd
 #' @keywords internal
-gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_options) {
+gdal_vrt_collect_arg_checks <- function(
+  vsi_prefix,
+  driver,
+  config_options = NULL
+) {
   rlang::arg_match(
     vsi_prefix,
     c("", gdalraster::vsi_get_fs_prefixes()),
@@ -529,6 +533,13 @@ gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_options) {
     check_blosc()
   }
 
-  v_assert_is_named(config_options, "config_options")
-  v_assert_type(config_options, "config_options", "character", multiple = TRUE)
+  if (!is.null(names(config_options))) {
+    v_assert_is_named(config_options, "config_options")
+    v_assert_type(
+      config_options,
+      "config_options",
+      "character",
+      multiple = TRUE
+    )
+  }
 }
