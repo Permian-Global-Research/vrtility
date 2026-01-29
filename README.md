@@ -6,10 +6,20 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Permian-Global-Research/vrtility/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/Permian-Global-Research/vrtility/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Permian-Global-Research/vrtility?branch=main)
+[![Version](https://img.shields.io/github/r-package/v/Permian-Global-Research/vrtility)](https://github.com/Permian-Global-Research/vrtility)
+[![Github
+stars](https://img.shields.io/github/stars/Permian-Global-Research/vrtility?style=social)](https://github.com/Permian-Global-Research/vrtility/stargazers)
+[![GitHub
+Issues](https://img.shields.io/github/issues/Permian-Global-Research/vrtility)](https://github.com/Permian-Global-Research/vrtility/issues)
+[![License:
+Apache](https://img.shields.io/github/license/Permian-Global-Research/vrtility)](https://www.apache.org/licenses/LICENSE-2.0)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/vrtility)](https://cran.r-project.org/package=vrtility)
+
 <!-- badges: end -->
 
 vrtility is an R package that makes efficient use of
@@ -20,9 +30,6 @@ on Earth Observation (EO) applications. The package leverages VRT pixel
 functions and harnesses the VRT data structure to facilitate complex
 image processing tasks such as multi-band compositing and time series
 filtering.
-
-> [!NOTE]
-> This package is under active development and is likely to change. Contributions and suggestions are still very welcome!
 
 ## Features
 
@@ -142,7 +149,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.091   0.164   5.718
+#>   1.143   0.155   5.686
 
 
 plot_raster_src(
