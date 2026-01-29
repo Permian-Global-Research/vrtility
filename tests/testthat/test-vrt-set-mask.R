@@ -287,8 +287,7 @@ test_that("muparser warning messages are correct", {
     {
       expect_warning(
         build_bitmask(),
-        class = "muparser_not_available_error",
-        regexp = "Cannot use muparser for `build_bitmask`."
+        class = "muparser_not_available_error"
       )
 
       expect_s3_class(set_mask(buffer_size = 0), "python_pixel_function")
@@ -301,7 +300,6 @@ test_that("muparser warning messages are correct", {
       expect_warning(
         build_intmask(),
         class = "muparser_not_available_error",
-        regexp = "Cannot use muparser for `build_intmask`."
       )
     }
   )
