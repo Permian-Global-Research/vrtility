@@ -9,9 +9,6 @@ functions and harnesses the VRT data structure to facilitate complex
 image processing tasks such as multi-band compositing and time series
 filtering.
 
-> \[!NOTE\] This package is under active development and is likely to
-> change. Contributions and suggestions are still very welcome!
-
 ## Features
 
 - **Modular design**: Creates remote sensing pipelines using nested
@@ -130,7 +127,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.091   0.164   5.718
+#>   1.143   0.155   5.686
 
 
 plot_raster_src(
