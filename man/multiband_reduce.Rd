@@ -228,7 +228,7 @@ target point is a geometric median rather than band-by-band medians. When
 }
 }
 \examples{
-mirai::daemons(3)
+# mirai::daemons(3) # recommended, expecially for larger datasets.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)
@@ -248,7 +248,7 @@ coll_masked <- ex_collect |>
   )
 
 # create plots of each of the methods to compare.
-par(mar = c(0, 0, 1, 0))
+
 purrr::iwalk(
     list(
       geomedian = geomedian(),

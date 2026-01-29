@@ -4,6 +4,7 @@
 \alias{vrt_warp}
 \alias{vrt_warp.vrt_block}
 \alias{vrt_warp.vrt_collection}
+\alias{vrt_warp.vrt_plan}
 \title{Construct A warped VRT or warped VRT collection.}
 \usage{
 vrt_warp(
@@ -43,6 +44,20 @@ vrt_warp(
     "mode", "max", "min", "med", "q1", "q3", "sum"),
   quiet = TRUE,
   lazy = NULL,
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_options()
+)
+
+\method{vrt_warp}{vrt_plan}(
+  x,
+  t_srs,
+  te,
+  tr,
+  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  quiet = TRUE,
+  lazy = FALSE,
   creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
   warp_options = gdalwarp_options(),
   config_options = gdal_config_options()
