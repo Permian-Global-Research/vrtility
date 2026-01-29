@@ -69,7 +69,7 @@ function.</p>
 <span>  inference_dtype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bfloat16"</span>, <span class="st">"float32"</span><span class="op">)</span>,</span>
 <span>  inference_device <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nodata_value <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  model_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"3.0"</span>, <span class="st">"2.0"</span>, <span class="st">"1.0"</span><span class="op">)</span></span>
+<span>  model_version <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,8 +125,9 @@ selection is based on availability: "cuda" &gt; "mps" &gt; "cpu".</p></dd>
 
 
 <dt id="arg-model-version">model_version<a class="anchor" aria-label="anchor" href="#arg-model-version"></a></dt>
-<dd><p>The version of the OmniCloudMask model to use
-(character, default: "3.0"). Options include "3.0", "2.0", and "1.0".</p></dd>
+<dd><p>The version of the OmniCloudMask model to use; options
+include "4.0", "3.0", "2.0", and "1.0". If <code>NULL</code>, the latest version will be
+used (character, default: <code>NULL</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

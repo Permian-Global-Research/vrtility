@@ -10,14 +10,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/Permian-Global-Research/vrtility/blob/main/DESCRIPTION)
 
-Graham H (2025). *vrtility: R package for efficient raster processing
+Graham H (2026). *vrtility: R package for efficient raster processing
 using GDAL VRTs*. R package version 0.2.3,
 <https://permian-global-research.github.io/vrtility/>.
 
     @Manual{,
       title = {vrtility: R package for efficient raster processing using GDAL VRTs},
       author = {Hugh Graham},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.2.3},
       url = {https://permian-global-research.github.io/vrtility/},
     }

@@ -9,6 +9,8 @@ Core functions for Virtual Raster management
   [`c(`*`<vrt_block>`*`)`](https://permian-global-research.github.io/vrtility/reference/vrt_collect.md)
   [`c(`*`<vrt_collection>`*`)`](https://permian-global-research.github.io/vrtility/reference/vrt_collect.md)
   : Construct the base VRT object for composing VRT pipelines.
+- [`vrt_plan()`](https://permian-global-research.github.io/vrtility/reference/vrt_plan.md)
+  : Create a VRT execution plan from STAC items
 - [`vrt_warp()`](https://permian-global-research.github.io/vrtility/reference/vrt_warp.md)
   : Construct A warped VRT or warped VRT collection.
 - [`vrt_stack()`](https://permian-global-research.github.io/vrtility/reference/vrt_stack.md)

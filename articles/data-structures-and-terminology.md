@@ -4,7 +4,7 @@
 library(vrtility)
 #> ✔ Using GDAL version 3.8.4
 #> ℹ GDAL_CACHEMAX set to 1.562 GiB; to change this use
-#>   vrtility::set_gdal_cache_max()
+#>   `vrtility::set_gdal_cache_max()`.
 ```
 
 ## Overview

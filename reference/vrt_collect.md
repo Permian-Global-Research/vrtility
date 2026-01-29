@@ -10,7 +10,7 @@ vrt_collect(x, ...)
 # S3 method for class 'character'
 vrt_collect(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
@@ -23,7 +23,7 @@ vrt_collect(
 # S3 method for class 'doc_items'
 vrt_collect(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   vsi_prefix = "",
   driver = "",
   ...
@@ -51,7 +51,7 @@ c(x, ...)
   to `x`. Otherwise, additional arguments to pass to the method or
   unused.
 
-- config_opts:
+- config_options:
 
   A named character vector of GDAL configuration options.
 
@@ -110,9 +110,8 @@ A vrt_collection object.
 ## Details
 
 The main way to create a vrt_collection object, which forms the basis of
-the vrrt-based pipelines in vrtility is using a doc_items object from
-the `rstac` package. For more info on how to create a doc_items object
-see
+the vrt-based pipelines in vrtility is using a doc_items object from the
+`rstac` package. For more info on how to create a doc_items object see
 [`stac_query()`](https://permian-global-research.github.io/vrtility/reference/stac_utilities.md).
 To build a vrt_stack object a vrt_collection is required first. The
 vrt_collection object is essentially a list of VRT files. At this stage

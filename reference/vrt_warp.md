@@ -48,6 +48,21 @@ vrt_warp(
   warp_options = gdalwarp_options(),
   config_options = gdal_config_options()
 )
+
+# S3 method for class 'vrt_plan'
+vrt_warp(
+  x,
+  t_srs,
+  te,
+  tr,
+  resampling = c("bilinear", "near", "cubic", "cubicspline", "lanczos", "average", "rms",
+    "mode", "max", "min", "med", "q1", "q3", "sum"),
+  quiet = TRUE,
+  lazy = FALSE,
+  creation_options = gdal_creation_options(COMPRESS = "NONE", PREDICTOR = NULL),
+  warp_options = gdalwarp_options(),
+  config_options = gdal_config_options()
+)
 ```
 
 ## Arguments
@@ -83,7 +98,7 @@ vrt_warp(
 - lazy:
 
   logical indicating whether to create virtual warped files (TRUE) or to
-  materialize the warped files to disk (FALSE). When woring with remote
+  materialize the warped files to disk (FALSE). When working with remote
   data sources, lazy=FALSE is strongly recommended to improve
   performance. When NULL (default) the function will decide based on
   whether the input data is remote or local.
@@ -105,7 +120,7 @@ vrt_warp(
 This function generates warped VRT objects types. This is particularly
 useful when we want to create a vrt_stack but our input images span
 multiple spatial reference systems. In such a situation, before warping
-our input data we must align with our desired oputput grid.
+our input data we must align with our desired output grid.
 
 ## Examples
 

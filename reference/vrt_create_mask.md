@@ -17,7 +17,7 @@ create_omnicloudmask(
   inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
   nodata_value = 0,
-  model_version = c("3.0", "2.0", "1.0")
+  model_version = NULL
 )
 ```
 
@@ -70,8 +70,9 @@ create_omnicloudmask(
 
 - model_version:
 
-  The version of the OmniCloudMask model to use (character, default:
-  "3.0"). Options include "3.0", "2.0", and "1.0".
+  The version of the OmniCloudMask model to use; options include "4.0",
+  "3.0", "2.0", and "1.0". If `NULL`, the latest version will be used
+  (character, default: `NULL`).
 
 ## Value
 

@@ -1,7 +1,7 @@
 # Image composite reductions that require all bands.
 
 `multiband_reduce` can be used to create composite reductions that
-require all band values, such as tyhe geometric median or medoid.
+require all band values, such as the geometric median or medoid
 composite of a warped VRT collection.
 
 ## Usage
@@ -90,15 +90,17 @@ geomedoid(
 
 - nsplits:
 
-  The number of splits to use for the tiling. If NULL, the function will
-  automatically determine the number of splits based on the dimensions
-  of the input data, available memory and the number of active mirai
-  daemons. see details
+  The number of splits to use for tiling. If NULL (the default), the
+  function automatically determines the number of splits based on the
+  dimensions of the input data, available memory, and the number of
+  active mirai daemons. Increasing `nsplits` reduces memory usage per
+  tile but increases I/O overhead. For large datasets or
+  memory-constrained systems, consider setting this explicitly.
 
 - recollect:
 
   A logical indicating whether to return the output as a vrt_block or
-  vrt_collection object. default is FALSE and the output is a character
+  vrt_collection object. Default is FALSE and the output is a character
   string of the output file path.
 
 - weizfeld:
@@ -112,88 +114,158 @@ geomedoid(
 
 - nitermax:
 
-  Maximum number of iterations. By default set to 100. only used if
+  Maximum number of iterations. By default set to 100. Only used if
   `weizfeld = TRUE`.
 
 - nstart:
 
-  Number of times the algorithm is ran over all the data set. only used
+  Number of times the algorithm is ran over all the data set. Only used
   if `weizfeld = FALSE`.
 
 - gamma:
 
-  Value (positive) of the constant controling the descent steps see
+  Value (positive) of the constant controlling the descent steps. See
   details in [`Gmedian`](https://rdrr.io/pkg/Gmedian/man/Gmedian.html).
   Only used if `weizfeld = FALSE`.
 
 - alpha:
 
   Rate of decrease of the descent steps (see details). Should satisfy
-  \\1/2\< alpha \<= 1\\. Only used if `weizfeld = FALSE`.
+  \\1/2 \< alpha \<= 1\\. Only used if `weizfeld = FALSE`.
 
 - epsilon:
 
-  Numerical tolerance. By defaut set to 1e-08.
+  Numerical tolerance. By default set to 1e-08.
 
 - impute_na:
 
-  Logical. If TRUE, missing values are replaced with the an appropriate
+  Logical. If TRUE, missing values are replaced with an appropriate
   band-level statistic - in the case of geomedian this is only relevant
   when `weizfeld = TRUE` - in such a case the Gmedian algorithm is used
   to estimate bands with NA values. For medoid the column/band median is
-  used; for `quantoid` this will be the requested quantile probabilioty
-  of the column. If FALSE, missing values are not replaced. which may
+  used; for `quantoid` this will be the requested quantile probability
+  of the column. If FALSE, missing values are not replaced, which may
   result in NA values in the output for multiple bands.
 
 - distance_type:
 
-  The type of distance metric to use. See
-  [`dista`](https://rdrr.io/pkg/Rfast/man/dista.html) for a full
-  description of options.
+  The type of distance metric to use. Default is "euclidean". See
+  [`dista`](https://rdrr.io/pkg/Rfast/man/dista.html) for all available
+  metrics.
 
 - probability:
 
-  The probability of the quantile to use. Default is 0.4.
+  The quantile probability to use (0-1). Default is 0.4.
 
 ## Value
 
-A character vector of the output file path.
+A character string of the output file path, or if `recollect = TRUE`, a
+vrt_block object.
 
 ## Details
 
-We have a lot TODO: info on the reduce_fun options and nsplits etc...
+### Reducer Functions
 
-The `geomedian` enables the use of
-[`Gmedian`](https://rdrr.io/pkg/Gmedian/man/Gmedian.html) and
-[`Weiszfeld`](https://rdrr.io/pkg/Gmedian/man/Weiszfeld.html) to
-calculate the geometric median of a multiband raster. When `Weiszfeld`
-is set to FALSE,
-[`Gmedian`](https://rdrr.io/pkg/Gmedian/man/Gmedian.html) is used. For
-the Gmedian algorithm, the matrix column medians are used as initial
-values rather than the first row of the matrix.
+The `reduce_fun` parameter accepts a function that processes a matrix of
+band values across time. Built-in reducer functions include:
 
-The `medoid` function uses
-[`dista`](https://rdrr.io/pkg/Rfast/man/dista.html) to compute the
-distance between the band-level medians and the values for each pixel.
-It then selects the pixel with the minimum distance as the medoid. The
-returned band pixel values are spectrally consistent and observed rather
-than synthetic.
+- **`geomedian()`**: Geometric median - synthetic, spectrally
+  consistent, outlier-robust.
 
-The quantoid is equivalent to the medoid but uses a specified quantile
-value for calculating the distances.
+- **`medoid()`**: Nearest observation to band medians - real pixel
+  values.
 
-The `geomedoid` function combines the `geomedian` and `medoid` - it
-first calculates the geometric median across all bands and then uses
-this to determine the nearest pixel value to the geometric median. As
-the geometric median has greater resilience to outliers than the
-band-level median, this function may selct a medoid value that is less
-likely to contian clouds or other outliers. The returned band pixel
-values are spectrally consistent.
+- **`geomedoid()`**: Nearest observation to geometric median - combines
+  outlier robustness with real values.
+
+- **`quantoid()`**: Nearest observation to specified quantile - for
+  cases where median is insufficient.
+
+See individual function documentation for algorithm details and
+parameters.
+
+### Custom Reducer Functions
+
+Custom functions must accept a matrix (rows = observations, columns =
+bands) and return a numeric vector of length equal to the number of
+bands:
+
+    my_reducer <- function(x) colMeans(x, na.rm = TRUE)
+    multiband_reduce(warped_collection, reduce_fun = my_reducer)
+
+### Parallel Processing
+
+When mirai daemons are active (`mirai::daemons(n)`), processing is
+automatically parallelized across tiles. Without active daemons,
+processing is sequential.
+
+### geomedian
+
+Calculates the geometric (spatial) median across all bands. The
+geometric median is the point minimizing the sum of Euclidean distances
+to all observations - a multivariate generalization of the median that
+ensures spectral consistency across bands. Unlike band-by-band medians,
+the result is a synthetic pixel that may not exist in the original data
+but is robust to outliers (e.g., clouds, shadows).
+
+Two algorithms are available via the `weizfeld` parameter:
+
+- `weizfeld = FALSE` (default): Uses
+  [`Gmedian`](https://rdrr.io/pkg/Gmedian/man/Gmedian.html), a
+  stochastic gradient descent algorithm that handles NA values
+  intrinsically.
+
+- `weizfeld = TRUE`: Uses
+  [`Weiszfeld`](https://rdrr.io/pkg/Gmedian/man/Weiszfeld.html), an
+  iterative algorithm that requires complete cases. When
+  `impute_na = TRUE`, NA bands are filled using Gmedian estimates.
+
+### medoid
+
+Selects the observation (row) closest to the band-level medians. Unlike
+geomedian, this returns actual observed pixel values rather than
+synthetic statistics, preserving spectral authenticity - useful when
+real sensor measurements are required.
+
+The algorithm:
+
+1.  Computes the median for each band (column)
+
+2.  Calculates distances from each observation to this median vector
+
+3.  Returns the observation with minimum distance
+
+When `impute_na = TRUE`, any NA values in the selected observation are
+replaced with the band median.
+
+### quantoid
+
+Like medoid, but uses a specified quantile instead of the median for
+distance calculations. Useful when median filtering is insufficient -
+for example, a lower quantile (e.g., 0.2-0.4) can better reject bright
+outliers like clouds by biasing toward darker observations.
+
+Requires the WGCNA package. When `impute_na = TRUE`, NA values in the
+selected observation are replaced with the band quantile.
+
+### geomedoid
+
+Combines geomedian and medoid approaches: calculates the geometric
+median first, then selects the nearest observed pixel to that synthetic
+point. This provides:
+
+- **Outlier robustness** from the geometric median calculation
+
+- **Real pixel values** from the medoid selection
+
+More robust to outliers (clouds, shadows) than medoid alone because the
+target point is a geometric median rather than band-by-band medians.
+When `impute_na = TRUE`, NA values are filled using geomedian estimates.
 
 ## Examples
 
 ``` r
-mirai::daemons(3)
+# mirai::daemons(3) # recommended, expecially for larger datasets.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)
@@ -213,7 +285,7 @@ coll_masked <- ex_collect |>
   )
 
 # create plots of each of the methods to compare.
-par(mar = c(0, 0, 1, 0))
+
 purrr::iwalk(
     list(
       geomedian = geomedian(),

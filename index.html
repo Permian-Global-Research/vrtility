@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R package for efficient raster processing using GDAL VRTs">
-<meta name="description" content="R package for efficient raster processing with GDAL VRTs.">
-<meta property="og:description" content="R package for efficient raster processing with GDAL VRTs.">
+<meta name="description" content="Leverages GDAL Virtual Raster (VRT) capabilities to build efficient raster processing pipelines for Earth Observation applications. Uses a modular design based on nested VRTs to enable complex image processing tasks including cloud masking, multi-temporal compositing (median, quantile, geometric, medoid), and time series filtering. Supports both Python/NumPy and GDAL muparser-based pixel functions. Integrates with SpatioTemporal Asset Catalog (STAC) APIs for cloud-native workflows and uses mirai for parallel processing. Powered by gdalraster.">
+<meta property="og:description" content="Leverages GDAL Virtual Raster (VRT) capabilities to build efficient raster processing pipelines for Earth Observation applications. Uses a modular design based on nested VRTs to enable complex image processing tasks including cloud masking, multi-temporal compositing (median, quantile, geometric, medoid), and time series filtering. Supports both Python/NumPy and GDAL muparser-based pixel functions. Integrates with SpatioTemporal Asset Catalog (STAC) APIs for cloud-native workflows and uses mirai for parallel processing. Powered by gdalraster.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -79,7 +79,7 @@
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
-<li><p><strong>Modular design</strong>: Creates remote sensing pipelines using nested VRTs, allowing easy addition of new pixel and masking functions. Can be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://usdaforestservice.github.io/gdalraster/index.html" class="external-link">{gdalraster}</a>.</p></li>
+<li><p><strong>Modular design</strong>: Creates remote sensing pipelines using nested VRTs, allowing easy addition of new pixel and masking functions. Can be adapted for deriving spectral indices or calculating complex time series functions. All powered by <a href="https://firelab.github.io/gdalraster/" class="external-link">{gdalraster}</a>.</p></li>
 <li><p><strong>Python and C++ pixel functions</strong>: Enables use of both GDAL VRT Python and built-in (C++) pixel functions. Python <a href="https://numpy.org/" class="external-link">numpy</a>-based pixel functions can apply cloud masks and summarize pixel values (e.g., median) from multiple images to create composite images. Python environment and package management is handled by <a href="https://rstudio.github.io/reticulate/" class="external-link">{reticulate}</a>. Built-in GDAL pixel functions are highly performant and vary by GDAL version—recent versions support <a href="https://gdal.org/en/latest/drivers/raster/vrt.html#using-derived-bands-with-pixel-functions-in-c" class="external-link">muparser expressions</a> (3.11.4+) and median compositing (3.12.0+), for example.</p></li>
 <li><p><strong>Efficient parallel processing</strong>: Uses <a href="https://mirai.r-lib.org/index.html" class="external-link">{mirai}</a> for asynchronous, multi-core processing.</p></li>
 <li><p><strong>Advanced multi-band compositing methods</strong>: Maintain spectral consistency using methods such as the geometric median and medoid.</p></li>
@@ -112,7 +112,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ✔ Using GDAL version 3.12.0</span></span>
 <span><span class="co">#&gt; ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use</span></span>
-<span><span class="co">#&gt;   vrtility::set_gdal_cache_max()</span></span>
+<span><span class="co">#&gt;   `vrtility::set_gdal_cache_max()`.</span></span>
 <span><span class="co">#  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun</span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/mirai-mgmt.html">daemons_load_vrtility</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -155,7 +155,7 @@
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   1.140   0.133   5.843</span></span>
+<span><span class="co">#&gt;   1.091   0.164   5.718</span></span>
 <span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span></span>

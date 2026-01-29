@@ -18,7 +18,7 @@ filtering.
   VRTs, allowing easy addition of new pixel and masking functions. Can
   be adapted for deriving spectral indices or calculating complex time
   series functions. All powered by
-  [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
+  [{gdalraster}](https://firelab.github.io/gdalraster/).
 
 - **Python and C++ pixel functions**: Enables use of both GDAL VRT
   Python and built-in (C++) pixel functions. Python
@@ -87,7 +87,7 @@ composite from Sentinel-2 data:
 library(vrtility)
 #> ✔ Using GDAL version 3.12.0
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
-#>   vrtility::set_gdal_cache_max()
+#>   `vrtility::set_gdal_cache_max()`.
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
 mirai::daemons(8)
 daemons_load_vrtility()
@@ -130,7 +130,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.140   0.133   5.843
+#>   1.091   0.164   5.718
 
 
 plot_raster_src(

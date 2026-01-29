@@ -96,6 +96,21 @@
 <span>  creation_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_creation_options</a></span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"NONE"</span>, PREDICTOR <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
 <span>  warp_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdalwarp_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  config_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_options</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'vrt_plan'</span></span>
+<span><span class="fu">vrt_warp</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">t_srs</span>,</span>
+<span>  <span class="va">te</span>,</span>
+<span>  <span class="va">tr</span>,</span>
+<span>  resampling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bilinear"</span>, <span class="st">"near"</span>, <span class="st">"cubic"</span>, <span class="st">"cubicspline"</span>, <span class="st">"lanczos"</span>, <span class="st">"average"</span>, <span class="st">"rms"</span>,</span>
+<span>    <span class="st">"mode"</span>, <span class="st">"max"</span>, <span class="st">"min"</span>, <span class="st">"med"</span>, <span class="st">"q1"</span>, <span class="st">"q3"</span>, <span class="st">"sum"</span><span class="op">)</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  lazy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  creation_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_creation_options</a></span><span class="op">(</span>COMPRESS <span class="op">=</span> <span class="st">"NONE"</span>, PREDICTOR <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,</span>
+<span>  warp_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdalwarp_options</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  config_options <span class="op">=</span> <span class="fu"><a href="gdal_options.html">gdal_config_options</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -133,7 +148,7 @@ mask_band if provided.</p></dd>
 
 <dt id="arg-lazy">lazy<a class="anchor" aria-label="anchor" href="#arg-lazy"></a></dt>
 <dd><p>logical indicating whether to create virtual warped files (TRUE)
-or to materialize the warped files to disk (FALSE). When woring with remote
+or to materialize the warped files to disk (FALSE). When working with remote
 data sources, lazy=FALSE is strongly recommended to improve performance.
 When NULL (default) the function will decide based on whether the input
 data is remote or local.</p></dd>
@@ -158,7 +173,7 @@ environment</p></dd>
     <p>This function generates warped VRT objects types. This is
 particularly useful when we want to create a vrt_stack but our input images
 span multiple spatial reference systems. In such a situation, before warping
-our input data we must align with our desired oputput grid.</p>
+our input data we must align with our desired output grid.</p>
     </div>
 
     <div class="section level2">

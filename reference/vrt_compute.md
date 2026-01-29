@@ -215,8 +215,8 @@ TRUE, a vrt_block or vrt_collection object.
 ## Details
 
 The `resampling` default is "near", which should be chosen in vrt_warp
-has already been used but "bilinear" may be prefereable where the input
-data is has not yet been virtually aligned/resampled.
+has already been used but "bilinear" may be preferable where the input
+data has not yet been virtually aligned/resampled.
 
 The choice of `engine` will depend on the nature of the computation
 being carried out. In the majority of cases warping is preferred,
