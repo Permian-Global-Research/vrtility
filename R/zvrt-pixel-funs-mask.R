@@ -252,8 +252,9 @@ build_bitmask_muparser <- function() {
 #' selection is based on availability: "cuda" > "mps" > "cpu".
 #' @param nodata_value The nodata value to use in the output mask (numeric,
 #' default: 0).
-#' @param model_version The version of the OmniCloudMask model to use
-#' (character, default: "3.0"). Options include "3.0", "2.0", and "1.0".
+#' @param model_version The version of the OmniCloudMask model to use; options
+#' include "4.0", "3.0", "2.0", and "1.0". If `NULL`, the latest version will be
+#' used (character, default: `NULL`).
 #' @return A Python function that can be used as a pixel function in a VRT
 #' raster. The function will apply the OmniCloudMask model to the specified
 #' bands and create a cloud mask.
@@ -268,16 +269,15 @@ create_omnicloudmask <- function(
   inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
   nodata_value = 0,
-  model_version = c("3.0", "2.0", "1.0")
+  model_version = NULL
 ) {
   # assert omicloudmask is installed
-  omc <- try(
-    reticulate::import("omnicloudmask", delay_load = TRUE),
-    silent = TRUE
-  )
-
-  if (inherits(omc, "try-error")) {
+  if (!reticulate::py_module_available("omnicloudmask")) {
     vrtility_py_require("omnicloudmask")
+  }
+
+  if (!reticulate::py_module_available("fastai")) {
+    vrtility_py_require("fastai")
   }
 
   # assert args
@@ -339,7 +339,14 @@ create_omnicloudmask <- function(
 
   inference_dtype <- rlang::arg_match(inference_dtype)
 
-  model_version <- rlang::arg_match(model_version)
+  if (!is.null(model_version)) {
+    model_version <- rlang::arg_match(
+      model_version,
+      c("4.0", "3.0", "2.0", "1.0")
+    )
+  } else {
+    model_version <- "None"
+  }
 
   pyfun <- glue::glue(
     "
