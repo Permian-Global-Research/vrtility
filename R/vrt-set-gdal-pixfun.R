@@ -68,9 +68,8 @@ vrt_set_gdal_pixelfun <- function(
 vrt_set_gdal_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
-      "!" = "{cli::code_highlight('vrt_set_gdal_pixelfun()')}
-    not implemented for class {class(x)[1]}",
-      "i" = "x must be a vrt_stack object."
+      "!" = "{.fn vrt_set_gdal_pixelfun} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "{.arg x} must be a {.cls vrt_stack} object."
     )
   )
 }
@@ -115,8 +114,7 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
     if (!all(band_idx %in% seq_along(bands))) {
       cli::cli_abort(
         c(
-          "x" = "`band_idx` must be a vector of integers
-        between 1 and {length(bands)}"
+          "!" = "{.arg band_idx} must be a vector of integers between 1 and {length(bands)}."
         )
       )
     }

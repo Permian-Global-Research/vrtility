@@ -15,7 +15,10 @@ vrt_move_band <- function(x, band_idx, after) {
 #' @export
 vrt_move_band.default <- function(x, ...) {
   cli::cli_abort(
-    "The vrt_move_band method is not implemented for class {class(x)}",
+    c(
+      "!" = "{.fn vrt_move_band} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    ),
     class = "vrtility_type_error"
   )
 }
@@ -29,8 +32,7 @@ vrt_move_band.vrt_block <- function(
   if (after < 0 || after > length(x$assets) + 1) {
     cli::cli_abort(
       c(
-        "x" = "For the provided vrt object, which has {length(x$assets)} band{?s},
-      The `after` argument must be between 0 and {length(x$assets) + 1}."
+        "!" = "For the provided VRT object with {length(x$assets)} band{?s}, {.arg after} must be between 0 and {length(x$assets) + 1}."
       ),
       class = "vrtility_after_error"
     )
@@ -39,8 +41,7 @@ vrt_move_band.vrt_block <- function(
   if (band_idx < 1 || band_idx > length(x$assets) || band_idx == after) {
     cli::cli_abort(
       c(
-        "x" = "For the provided vrt object, which has {length(x$assets)} band{?s},
-      The `band_idx` argument must be between 1 and {length(x$assets)} and not equal to `after``."
+        "!" = "For the provided VRT object with {length(x$assets)} band{?s}, {.arg band_idx} must be between 1 and {length(x$assets)} and not equal to {.arg after}."
       ),
       class = "vrtility_band_error"
     )

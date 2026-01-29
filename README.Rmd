@@ -42,7 +42,7 @@ filtering.
   nested VRTs, allowing easy addition of new pixel and
   masking functions. Can be adapted for deriving spectral indices
   or calculating complex time series functions. All powered by 
-  [{gdalraster}](https://usdaforestservice.github.io/gdalraster/index.html).
+  [{gdalraster}](https://firelab.github.io/gdalraster/).
 
 - **Python and C++ pixel functions**: Enables use of both GDAL VRT Python and built-in (C++) pixel functions. 
   Python [numpy](https://numpy.org/)-based pixel functions can apply

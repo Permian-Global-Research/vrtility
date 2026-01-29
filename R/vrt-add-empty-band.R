@@ -17,7 +17,10 @@ vrt_add_empty_band <- function(x, after, description, scale_value) {
 #' @export
 vrt_add_empty_band.default <- function(x, ...) {
   cli::cli_abort(
-    "The vrt_add_empty_band method is not implemented for class {class(x)}",
+    c(
+      "!" = "{.fn vrt_add_empty_band} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    ),
     class = "vrtility_type_error"
   )
 }
@@ -33,8 +36,7 @@ vrt_add_empty_band.vrt_block <- function(
   if (after < 0 || after > length(x$assets) + 1) {
     cli::cli_abort(
       c(
-        "x" = "For the provided vrt object, which has {length(x$assets)} band{?s},
-      The `after` argument must be between 0 and {length(x$assets) + 1}."
+        "!" = "For the provided VRT object with {length(x$assets)} band{?s}, {.arg after} must be between 0 and {length(x$assets) + 1}."
       ),
       class = "vrtility_after_error"
     )

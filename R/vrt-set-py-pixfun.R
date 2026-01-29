@@ -15,9 +15,8 @@ vrt_set_py_pixelfun <- function(x, pixfun, band_idx) {
 vrt_set_py_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
-      "!" = "{cli::code_highlight('vrt_set_py_pixelfun()')}
-    not implemented for class {class(x)[1]}",
-      "i" = "x must be a vrt_stack object."
+      "!" = "{.fn vrt_set_py_pixelfun} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "{.arg x} must be a {.cls vrt_stack} object."
     )
   )
 }
@@ -50,8 +49,7 @@ vrt_set_py_pixelfun.vrt_block <- function(
     if (!all(band_idx %in% seq_along(bands))) {
       cli::cli_abort(
         c(
-          "x" = "`band_idx` must be a vector of integers
-        between 1 and {length(bands)}"
+          "!" = "{.arg band_idx} must be a vector of integers between 1 and {length(bands)}."
         )
       )
     }
@@ -109,8 +107,8 @@ vrt_set_py_pixelfun.vrt_collection <- function(
     x$vrt,
     ~ vrt_set_py_pixelfun(
       .x,
-      pixfun = vrtility::median_numpy(),
-      band_idx = NULL
+      pixfun = pixfun,
+      band_idx = band_idx
     )
   )
 
@@ -122,7 +120,7 @@ vrt_set_py_pixelfun.vrt_collection <- function(
   build_vrt_collection(
     blocks_with_py_pf,
     maskfun = x$maskfun,
-    pixfun = x$pixfun,
+    pixfun = pixfun,
     warped = warped
   )
 }

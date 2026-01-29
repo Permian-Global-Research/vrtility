@@ -25,7 +25,7 @@ v_assert_type <- function(
 
   if (!rlang::is_true(rlang::inherits_any(x, type))) {
     cli::cli_abort(
-      "The '{name}' argument must be a {type}",
+      "The {.arg {name}} argument must be a {.cls {type}}.",
       class = "vrtility_type_error"
     )
   }
@@ -38,7 +38,7 @@ v_assert_length <- function(x, name, leng, nullok = TRUE) {
   if (rlang::is_true(length(x) != leng)) {
     cli::cli_abort(
       c(
-        "{name} must have length {leng}",
+        "{.arg {name}} must have length {leng}.",
         "i" = "Got value with length {length(x)}: {.val {utils::head(x, 3)}}{if (length(x) > 3) '...' else ''}"
       ),
       class = "vrtility_length_error"
@@ -53,8 +53,8 @@ v_assert_length_gt <- function(x, name, length, nullok = TRUE) {
   if (rlang::is_true(length(x) <= length)) {
     cli::cli_abort(
       c(
-        "{name} must have length greater than {length}",
-        "i" = "Got value with length {length(x)}"
+        "{.arg {name}} must have length greater than {length}.",
+        "i" = "Got value with length {length(x)}."
       ),
       class = "vrtility_length_error"
     )
@@ -66,7 +66,7 @@ v_assert_valid_schema <- function(x) {
     fs::file_exists(x),
     "fs::file_exists(x)"
   )
-  val_result <- xml2::xml_validate(xml2::read_xml(x), vrt_schema())
+  val_result <- xml2::xml_validate(xml2::read_xml(x), get_cached_vrt_schema())
   if (!val_result) {
     error_msgs <- attr(val_result, "errors")
 
@@ -83,7 +83,7 @@ v_assert_valid_schema <- function(x) {
 v_assert_true <- function(x, name) {
   if (!x) {
     cli::cli_abort(
-      "'{name}' must be TRUE",
+      "{.code {name}} must be {.val TRUE}.",
       class = "vrtility_true_error"
     )
   }
@@ -96,7 +96,7 @@ v_assert_res <- function(x) {
   }
   if (length(x) != 2) {
     cli::cli_abort(
-      "tr must have length 1 or 2",
+      "{.arg tr} must have length 1 or 2.",
       class = "vrtility_length_error"
     )
   }
@@ -107,8 +107,8 @@ v_assert_within_range <- function(x, name, lwr, upr) {
   if (any(x < lwr) || any(x > upr)) {
     cli::cli_abort(
       c(
-        "{name} must be within the range {lwr} to {upr}",
-        "i" = "The value(s) {x} are outside of the range."
+        "{.arg {name}} must be within the range {lwr} to {upr}.",
+        "i" = "The value(s) {.val {x}} are outside of the range."
       ),
       class = "vrtility_range_error"
     )
@@ -120,9 +120,8 @@ assert_srs_len <- function(x) {
   if (length(x$srs) > 1) {
     cli::cli_abort(
       c(
-        "The {class(x)[1]} has {length(x$srs)} spatial reference systems but 
-        must have a single projection.",
-        "i" = "use `vrt_warp()` to unify the projection of the {class(x)[1]}."
+        "!" = "The {.cls {class(x)[1]}} has {length(x$srs)} spatial reference systems but must have a single projection.",
+        "i" = "Use {.fn vrt_warp} to unify the projection of the {.cls {class(x)[1]}}."
       )
     )
   }
@@ -181,7 +180,7 @@ v_assert_is_named <- function(x, name) {
   named <- rlang::is_named2(x)
   if (!named) {
     cli::cli_abort(
-      "'{name}' must be a named vector",
+      "{.arg {name}} must be a named vector.",
       class = "vrtility_named_error"
     )
   }
@@ -192,10 +191,8 @@ v_assert_create_mask_fun_attrs <- function(x, name) {
     if (!attr_name %in% names(attributes(x))) {
       cli::cli_abort(
         c(
-          "The provided mask function {name} does not have the required 
-          attribute '{attr_name}'.",
-          "i" = "Ensure that the mask function is created with the correct 
-          attributes."
+          "!" = "The provided mask function {.arg {name}} does not have the required attribute {.val {attr_name}}.",
+          "i" = "Ensure that the mask function is created with the correct attributes."
         ),
         class = "vrtility_maskcreator_fun_error"
       )
@@ -212,8 +209,8 @@ v_assert_mask_names_match <- function(inbands, maskfun) {
   if (!all(names(inbands) %in% attributes(maskfun)$required_bands)) {
     cli::cli_abort(
       c(
-        "The following bands are required by the {attributes(maskfun)$mask_name} but are not 
-      provided: {setdiff(attributes(maskfun)$required_bands, names(inbands))}"
+        "!" = "The following bands are required by {.val {attributes(maskfun)$mask_name}} but are not provided:",
+        "x" = "{.val {setdiff(attributes(maskfun)$required_bands, names(inbands))}}"
       ),
       class = "vrtility_maskfun_error"
     )
@@ -265,8 +262,7 @@ v_assert_muparser <- function() {
   if (!check_muparser()) {
     cli::cli_abort(c(
       "!" = "muparser is not available.",
-      "i" = "GDAL built with muparser support is required for
-      `vrt_derived_block()`."
+      "i" = "GDAL built with muparser support is required for {.fn vrt_derived_block}."
     ))
   }
 }
@@ -296,8 +292,8 @@ v_asset_hls_catalog <- function(stac_source, collection) {
 muparser_mask_warn <- function(func) {
   cli::cli_warn(
     c(
-      "!" = "GDAL muparser support not available and/or GDAL version is < 3.12.0. ",
-      "i" = "Cannot use muparser for `{func}`.",
+      "!" = "GDAL muparser support not available and/or GDAL version is < 3.12.0.",
+      "i" = "Cannot use muparser for {.fn {func}}.",
       ">" = "Using Python implementation instead."
     ),
     class = "muparser_not_available_error"

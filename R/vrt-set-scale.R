@@ -33,7 +33,10 @@ vrt_set_scale <- function(x, scale_value, offset_value, band_idx) {
 #' @export
 vrt_set_scale.default <- function(x, ...) {
   cli::cli_abort(
-    "The vrt_set_scale method is not implemented for class {class(x)}",
+    c(
+      "!" = "{.fn vrt_set_scale} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls vrt_block} or {.cls vrt_collection} object is required."
+    ),
     class = "vrtility_type_error"
   )
 }

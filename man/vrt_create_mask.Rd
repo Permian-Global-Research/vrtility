@@ -15,7 +15,7 @@ create_omnicloudmask(
   inference_dtype = c("bfloat16", "float32"),
   inference_device = NULL,
   nodata_value = 0,
-  model_version = c("3.0", "2.0", "1.0")
+  model_version = NULL
 )
 }
 \arguments{
@@ -48,8 +48,9 @@ function will automatically select the best available device (character,
 default: \code{NULL}). Options include "cpu", "cuda", "mps", etc. The order of
 selection is based on availability: "cuda" > "mps" > "cpu".}
 
-\item{model_version}{The version of the OmniCloudMask model to use
-(character, default: "3.0"). Options include "3.0", "2.0", and "1.0".}
+\item{model_version}{The version of the OmniCloudMask model to use; options
+include "4.0", "3.0", "2.0", and "1.0". If \code{NULL}, the latest version will be
+used (character, default: \code{NULL}).}
 }
 \value{
 A VRT_x object with the the new mask band added.

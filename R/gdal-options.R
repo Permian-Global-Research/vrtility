@@ -270,9 +270,7 @@ set_gdal_cache_max <- function(mem_fraction = 0.1) {
   gdalraster::set_cache_max(as.numeric(cache_max_val))
   cli::cli_inform(
     c(
-      "i" = "GDAL_CACHEMAX set to {cache_max_val};
-      to change this use
-      {cli::code_highlight('vrtility::set_gdal_cache_max()')}"
+      "i" = "GDAL_CACHEMAX set to {cache_max_val}; to change this use {.fn vrtility::set_gdal_cache_max}."
     ),
     class = "packageStartupMessage"
   )
@@ -348,8 +346,7 @@ gdal_version_check <- function(against = "3.12.0") {
   if (length(against_num) != 3 || anyNA(against_num)) {
     cli::cli_abort(
       c(
-        "!" = "`against` must be in the format
-        'MAJOR.MINOR.PATCH', e.g. '3.12.0'."
+        "!" = "{.arg against} must be in the format {.val MAJOR.MINOR.PATCH}, e.g. {.val 3.12.0}."
       )
     )
   }
@@ -390,10 +387,8 @@ check_output_format <- function(fmt) {
   if (fmt == "MEM") {
     cli::cli_abort(
       c(
-        "Unfortunately the MEM format is not natively supported - because
-    of the need to serialize rasters from asynchronous processes.",
-        "i" = "If you have any suggestions on how to implement this, please
-    open an issue on GitHub."
+        "!" = "The {.val MEM} format is not natively supported due to the need to serialize rasters from asynchronous processes.",
+        "i" = "If you have any suggestions on how to implement this, please open an issue on GitHub."
       ),
       class = "unsupported_gdal_format_error"
     )

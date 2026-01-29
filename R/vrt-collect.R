@@ -4,7 +4,7 @@
 #' collection
 #' @param band_descriptions A character vector of band descriptions.
 #' @param datetimes A character vector of datetimes.
-#' @param config_opts A named character vector of GDAL configuration options.
+#' @param config_options A named character vector of GDAL configuration options.
 #' @param vsi_prefix A character string indicating the VSI prefix to use for
 #' the VRT sources. Defaults to `"/vsicurl/"`.
 #' See \code{\link[gdalraster]{vsi_get_fs_prefixes}} for available options.
@@ -17,7 +17,7 @@
 #' @rdname vrt_collect
 #' @export
 #' @details The main way to create a vrt_collection object, which forms
-#' the basis of the vrrt-based pipelines in vrtility is using a doc_items
+#' the basis of the vrt-based pipelines in vrtility is using a doc_items
 #' object from the `rstac` package. For more info on how to create a doc_items
 #' object see [stac_query()]. To build a vrt_stack object a
 #' vrt_collection is required first. The vrt_collection object is essentially a
@@ -62,8 +62,10 @@ vrt_collect <- function(
 #' @export
 vrt_collect.default <- function(x, ...) {
   cli::cli_abort(
-    "{cli::code_highlight('vrt_collect()')}
-    not implemented for class {class(x)[1]}"
+    c(
+      "!" = "{.fn vrt_collect} is not implemented for class {.cls {class(x)[1]}}.",
+      "i" = "A {.cls doc_items} object from {.pkg rstac} or a character vector of file paths is required."
+    )
   )
 }
 
@@ -72,7 +74,7 @@ vrt_collect.default <- function(x, ...) {
 #' @export
 vrt_collect.character <- function(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   bands = NULL,
   band_descriptions = NULL,
   datetimes = rep("", length(x)),
@@ -81,7 +83,7 @@ vrt_collect.character <- function(
   check_src = TRUE,
   ...
 ) {
-  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
+  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_options)
   if (check_src) {
     assert_files_exist(x, url_possible = TRUE)
   }
@@ -104,7 +106,7 @@ vrt_collect.character <- function(
   v_assert_type(datetimes, "datetimes", "character", nullok = TRUE)
   v_assert_length(datetimes, "datetimes", length(x), nullok = TRUE)
 
-  orig_config <- set_gdal_config(config_opts)
+  orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
 
   if (!is.null(bands)) {
@@ -191,14 +193,14 @@ vrt_collect.character <- function(
 #' @export
 vrt_collect.doc_items <- function(
   x,
-  config_opts = gdal_config_options(),
+  config_options = gdal_config_options(),
   vsi_prefix = "",
   driver = "",
   ...
 ) {
-  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_opts)
-  daemon_setup(config_opts)
-  orig_config <- set_gdal_config(config_opts)
+  gdal_vrt_collect_arg_checks(vsi_prefix, driver, config_options)
+  daemon_setup(config_options)
+  orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
 
   assets <- rstac::items_assets(x)[order(as.numeric(gsub(
@@ -304,26 +306,36 @@ build_vrt_collection <- function(
     return(x[[1]])
   }
 
-  dateorder <- purrr::map_vec(x, ~ lubridate::as_datetime(.x$date_time)) |>
-    order()
+  # Extract all properties in a single pass
+  props <- purrr::map(x, function(.x) {
+    list(
+      date_time = .x$date_time,
+      srs = .x$srs,
+      assets = .x$assets,
+      mask_band_name = .x$mask_band_name,
+      bbox = .x$bbox,
+      res = .x$res
+    )
+  })
 
+  # Order by datetime
+  datetimes <- purrr::map_chr(props, "date_time")
+  dateorder <- order(lubridate::as_datetime(datetimes))
   x <- x[dateorder]
+  props <- props[dateorder]
+  sd <- datetimes[dateorder]
 
-  # Extract all properties in a single pass to avoid multiple iterations
-  uniq_crs <- unique(purrr::map_chr(x, function(.x) .x$srs))
-  sd <- purrr::map_chr(x, function(.x) .x$date_time)
-  uniq_assets <- unique(unlist(
-    purrr::map(x, function(.x) .x$assets),
-    use.names = FALSE
-  ))
-  mask_band_name <- unique(purrr::map_chr(x, function(.x) .x$mask_band_name))
+  # Extract unique values from pre-computed properties
+  uniq_crs <- unique(purrr::map_chr(props, "srs"))
+  uniq_assets <- unique(unlist(purrr::map(props, "assets"), use.names = FALSE))
+  mask_band_name <- unique(purrr::map_chr(props, "mask_band_name"))
 
-  # Only compute bbox and res if needed
+  # Only compute bbox if single CRS
   if (length(uniq_crs) > 1) {
     bbox_all <- NA
     bbox <- NA
   } else {
-    bbox_all <- purrr::map(x, function(.x) .x$bbox)
+    bbox_all <- purrr::map(props, "bbox")
     bbox <- purrr::reduce(
       bbox_all,
       function(.x, .y) {
@@ -337,7 +349,7 @@ build_vrt_collection <- function(
     )
   }
 
-  all_res <- purrr::map(x, function(.x) .x$res)
+  all_res <- purrr::map(props, "res")
   min_res <- purrr::reduce(
     all_res,
     function(.x, .y) {
@@ -505,7 +517,11 @@ c.vrt_collection <- function(x, ...) {
 #' internal gdal vrt_collect argument checks
 #' @noRd
 #' @keywords internal
-gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_opts) {
+gdal_vrt_collect_arg_checks <- function(
+  vsi_prefix,
+  driver,
+  config_options = NULL
+) {
   rlang::arg_match(
     vsi_prefix,
     c("", gdalraster::vsi_get_fs_prefixes()),
@@ -517,6 +533,13 @@ gdal_vrt_collect_arg_checks <- function(vsi_prefix, driver, config_opts) {
     check_blosc()
   }
 
-  v_assert_is_named(config_opts, "config_opts")
-  v_assert_type(config_opts, "config_opts", "character", multiple = TRUE)
+  if (!is.null(names(config_options))) {
+    v_assert_is_named(config_options, "config_options")
+    v_assert_type(
+      config_options,
+      "config_options",
+      "character",
+      multiple = TRUE
+    )
+  }
 }

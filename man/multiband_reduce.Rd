@@ -65,7 +65,7 @@ geomedoid(
 a single argument, a matrix where the columns represent the bands of a cell
 within a raster stack and the rows represent the time series of that cell.
 The function should return a vector of the same length as the number of
-bands. See  details.}
+bands. See details.}
 
 \item{outfile}{The output file path.}
 
@@ -75,13 +75,15 @@ bands. See  details.}
 
 \item{quiet}{Logical indicating whether to suppress the progress bar.}
 
-\item{nsplits}{The number of splits to use for the tiling. If NULL, the
-function will automatically determine the number of splits based on the
-dimensions of the input data, available memory and the number of active
-mirai daemons. see details}
+\item{nsplits}{The number of splits to use for tiling. If NULL (the default),
+the function automatically determines the number of splits based on the
+dimensions of the input data, available memory, and the number of active
+mirai daemons. Increasing \code{nsplits} reduces memory usage per tile but
+increases I/O overhead. For large datasets or memory-constrained systems,
+consider setting this explicitly.}
 
 \item{recollect}{A logical indicating whether to return the output as a
-vrt_block or vrt_collection object. default is FALSE and the output is a
+vrt_block or vrt_collection object. Default is FALSE and the output is a
 character string of the output file path.}
 
 \item{weizfeld}{Logical. If TRUE, the Weiszfeld algorithm is used to
@@ -90,71 +92,143 @@ FALSE (the default), the Gmedian algorithm is used,
 see \code{\link[Gmedian]{Gmedian}}. The Gmedian algorithm is faster and
 intrinsically handles missing values.}
 
-\item{nitermax}{Maximum number of iterations. By default set to 100. only
+\item{nitermax}{Maximum number of iterations. By default set to 100. Only
 used if \code{weizfeld = TRUE}.}
 
 \item{nstart}{Number of times the algorithm is ran over all the data set.
-only used if \code{weizfeld = FALSE}.}
+Only used if \code{weizfeld = FALSE}.}
 
-\item{gamma}{Value (positive) of the constant controling the descent steps
-see details in \code{\link[Gmedian]{Gmedian}}. Only used if
+\item{gamma}{Value (positive) of the constant controlling the descent steps.
+See details in \code{\link[Gmedian]{Gmedian}}. Only used if
 \code{weizfeld = FALSE}.}
 
 \item{alpha}{Rate of decrease of the descent steps (see details). Should
-satisfy \eqn{1/2< alpha <= 1}. Only used if \code{weizfeld = FALSE}.}
+satisfy \eqn{1/2 < alpha <= 1}. Only used if \code{weizfeld = FALSE}.}
 
-\item{epsilon}{Numerical tolerance. By defaut set to 1e-08.}
+\item{epsilon}{Numerical tolerance. By default set to 1e-08.}
 
-\item{impute_na}{Logical. If TRUE, missing values are replaced with the
-an appropriate band-level statistic - in the case of geomedian this is only
+\item{impute_na}{Logical. If TRUE, missing values are replaced with an
+appropriate band-level statistic - in the case of geomedian this is only
 relevant when \code{weizfeld = TRUE} - in such a case the Gmedian algorithm is
-used to estimate bands with NA values.  For medoid the column/band median
+used to estimate bands with NA values. For medoid the column/band median
 is used; for \code{quantoid} this will be the requested quantile
-probabilioty of the column. If FALSE, missing values are not
-replaced. which may result in NA values in the output for multiple bands.}
+probability of the column. If FALSE, missing values are not
+replaced, which may result in NA values in the output for multiple bands.}
 
-\item{distance_type}{The type of distance metric to use. See
-\code{\link[Rfast]{dista}} for a full description of options.}
+\item{distance_type}{The type of distance metric to use. Default is
+"euclidean". See \code{\link[Rfast]{dista}} for all available metrics.}
 
-\item{probability}{The probability of the quantile to use. Default is 0.4.}
+\item{probability}{The quantile probability to use (0-1). Default is 0.4.}
 }
 \value{
-A character vector of the output file path.
+A character string of the output file path, or if \code{recollect = TRUE},
+a vrt_block object.
 }
 \description{
 \code{multiband_reduce} can be used to create composite reductions
-that require all band values, such as tyhe geometric median or medoid.
+that require all band values, such as the geometric median or medoid
 composite of a warped VRT collection.
 }
 \details{
-We have a lot TODO: info on the reduce_fun options and nsplits etc...
+\subsection{Reducer Functions}{
 
-The \code{geomedian} enables the use of \code{\link[Gmedian]{Gmedian}}
-and \code{\link[Gmedian]{Weiszfeld}} to calculate the geometric median of a
-multiband raster. When \code{Weiszfeld} is set to FALSE,
-\code{\link[Gmedian]{Gmedian}} is used. For the Gmedian algorithm,
-the matrix column medians are used as initial values rather than the first
-row of the matrix.
+The \code{reduce_fun} parameter accepts a function that processes a matrix of
+band values across time. Built-in reducer functions include:
+\itemize{
+\item \strong{\code{\link[=geomedian]{geomedian()}}}: Geometric median - synthetic, spectrally consistent,
+outlier-robust.
+\item \strong{\code{\link[=medoid]{medoid()}}}: Nearest observation to band medians - real pixel values.
+\item \strong{\code{\link[=geomedoid]{geomedoid()}}}: Nearest observation to geometric median - combines
+outlier robustness with real values.
+\item \strong{\code{\link[=quantoid]{quantoid()}}}: Nearest observation to specified quantile - for cases
+where median is insufficient.
+}
 
-The \code{medoid} function  uses \code{\link[Rfast]{dista}} to compute
-the distance between the band-level medians and the values for each pixel. It
-then selects the pixel with the minimum distance as the medoid. The returned
-band pixel values are spectrally consistent and observed rather than
-synthetic.
+See individual function documentation for algorithm details and parameters.
+}
 
-The quantoid is equivalent to the medoid but uses a specified
-quantile value for calculating the distances.
+\subsection{Custom Reducer Functions}{
 
-The \code{geomedoid} function combines the \code{geomedian} and \code{medoid} - it
-first calculates the geometric median across all bands and then uses this
-to determine the nearest pixel value to the geometric median. As the
-geometric median has greater resilience to outliers than the band-level
-median, this function may selct a medoid value that is less likely to contian
-clouds or other outliers. The returned band pixel values are spectrally
-consistent.
+Custom functions must accept a matrix (rows = observations, columns = bands)
+and return a numeric vector of length equal to the number of bands:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{my_reducer <- function(x) colMeans(x, na.rm = TRUE)
+multiband_reduce(warped_collection, reduce_fun = my_reducer)
+}\if{html}{\out{</div>}}
+}
+
+\subsection{Parallel Processing}{
+
+When mirai daemons are active (\code{mirai::daemons(n)}), processing is
+automatically parallelized across tiles. Without active daemons, processing
+is sequential.
+}
+
+\subsection{geomedian}{
+
+Calculates the geometric (spatial) median across all bands. The geometric
+median is the point minimizing the sum of Euclidean distances to all
+observations - a multivariate generalization of the median that ensures
+spectral consistency across bands. Unlike band-by-band medians, the result
+is a synthetic pixel that may not exist in the original data but is robust
+to outliers (e.g., clouds, shadows).
+
+Two algorithms are available via the \code{weizfeld} parameter:
+\itemize{
+\item \code{weizfeld = FALSE} (default): Uses \code{\link[Gmedian]{Gmedian}}, a
+stochastic gradient descent algorithm that handles NA values intrinsically.
+\item \code{weizfeld = TRUE}: Uses \code{\link[Gmedian]{Weiszfeld}}, an iterative
+algorithm that requires complete cases. When \code{impute_na = TRUE}, NA bands
+are filled using Gmedian estimates.
+}
+}
+
+\subsection{medoid}{
+
+Selects the observation (row) closest to the band-level medians. Unlike
+geomedian, this returns actual observed pixel values rather than synthetic
+statistics, preserving spectral authenticity - useful when real sensor
+measurements are required.
+
+The algorithm:
+\enumerate{
+\item Computes the median for each band (column)
+\item Calculates distances from each observation to this median vector
+\item Returns the observation with minimum distance
+}
+
+When \code{impute_na = TRUE}, any NA values in the selected observation are
+replaced with the band median.
+}
+
+\subsection{quantoid}{
+
+Like medoid, but uses a specified quantile instead of the median for
+distance calculations. Useful when median filtering is insufficient - for
+example, a lower quantile (e.g., 0.2-0.4) can better reject bright outliers
+like clouds by biasing toward darker observations.
+
+Requires the WGCNA package. When \code{impute_na = TRUE}, NA values in the
+selected observation are replaced with the band quantile.
+}
+
+\subsection{geomedoid}{
+
+Combines geomedian and medoid approaches: calculates the geometric median
+first, then selects the nearest observed pixel to that synthetic point.
+This provides:
+\itemize{
+\item \strong{Outlier robustness} from the geometric median calculation
+\item \strong{Real pixel values} from the medoid selection
+}
+
+More robust to outliers (clouds, shadows) than medoid alone because the
+target point is a geometric median rather than band-by-band medians. When
+\code{impute_na = TRUE}, NA values are filled using geomedian estimates.
+}
 }
 \examples{
-mirai::daemons(3)
+# mirai::daemons(3) # recommended, expecially for larger datasets.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)
@@ -174,7 +248,7 @@ coll_masked <- ex_collect |>
   )
 
 # create plots of each of the methods to compare.
-par(mar = c(0, 0, 1, 0))
+
 purrr::iwalk(
     list(
       geomedian = geomedian(),

@@ -69,7 +69,7 @@ daemons_load_vrtility <- function(py_pkgs = "numpy", ...) {
     invisible(evw[])
   } else {
     cli::cli_alert_warning(
-      "No mirai daemons are running - cannot load vrtility python environment."
+      "No {.pkg mirai} daemons are running - cannot load {.pkg vrtility} Python environment."
     )
   }
   return(invisible())
