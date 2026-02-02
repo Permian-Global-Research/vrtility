@@ -100,7 +100,14 @@ call_gdalraster_mirai <- function(
     gdalraster::translate(
       outfile,
       cogfile,
-      cl_arg = c("-of", "COG"),
+      cl_arg = c(
+        "-of",
+        "COG",
+        as.character(rbind(
+          "-co",
+          create_opts$opts
+        ))
+      ),
       quiet = quiet
     )
     return(normalizePath(cogfile))
