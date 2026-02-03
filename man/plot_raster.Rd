@@ -99,8 +99,7 @@ For RGB plots, should be length 6: c(min_r, min_g, min_b, max_r, max_g, max_b).}
 \item{minmax_pct_cut}{Numeric vector of length 2. Percentile cutoff values
 for color scaling (e.g., c(2, 98) for 2nd and 98th percentiles).}
 
-\item{col}{a character vector of colors to use when plotting a single band.
-for example when sea presents as very dark.}
+\item{col}{a character vector of colors to use when plotting a single band.}
 
 \item{pixel_fn}{Function to apply to pixel values before plotting.}
 
