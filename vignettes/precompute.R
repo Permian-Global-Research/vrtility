@@ -14,6 +14,9 @@ prerender_it("HLS.Rmd")
 prerender_it("Digital-Earth-Africa-GeoMAD.Rmd")
 
 prerender_it("OmniCloudMask.Rmd")
-prerender_it("EOPF.Rmd")
+
+prerender_it("landsat.Rmd")
+
+# prerender_it("EOPF.Rmd")
 
 prerender_it("ndvi-timeseries.Rmd")
