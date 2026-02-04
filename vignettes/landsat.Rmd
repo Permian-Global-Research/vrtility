@@ -1,8 +1,8 @@
 ---
-title: "EOPF Sentinel-2 Level-2A"
+title: "Landsat Collection 2 Level-2"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{EOPF Sentinel-2 Level-2A}
+  %\VignetteIndexEntry{Landsat Collection 2 Level-2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,16 +10,9 @@ vignette: >
 
 
 
-This vignette demonstrates a modern workflow for processing Sentinel-2 
-Level-2A data from the EOPF (Earth Observation Processing Framework) STAC API.
+This vignette demonstrates a modern workflow for processing Landsat Collection 2 
+Level-2 data from the Microsoft Planetary Computer (MPC) STAC API.
 
-The Earth Observation data landscape is rapidly evolving, with EOPF positioning 
-itself as a key component of this transformation. There is a strong industry 
-movement towards adopting Zarr, a modern cloud-native data format designed for 
-efficient storage and access of large multi-dimensional arrays. While the 
-tooling ecosystem around Zarr and EOPF-Zarr specifically is still maturing, 
-this vignette provides a practical example of working with these data formats 
-using the `vrtility` package.
 
 This vignette also demonstrates contemporary approaches to cloud-masking
 and image compositing using [OmniCloudMask](https://github.com/DPIRD-DMA/OmniCloudMask) 
@@ -39,21 +32,17 @@ without requiring intermediate file storage.
 
 ## Prerequisites
 
-This workflow requires specific system dependencies that may need additional setup:
-
-1. **EOPFZARR GDAL Plugin**: You'll need to build and install the 
-[EOPFZARR plugin](https://github.com/EOPF-Sample-Service/GDAL-ZARR-EOPF) to read 
-EOPF-Zarr formatted data.
-
-2. **muparser Support**: Your GDAL installation must include muparser support 
+**GDAL muparser Support**: Your GDAL installation must include muparser support 
 for derived band calculations. You can verify this by running: `vrtility::check_muparser()`.
+This is typically included in most GDAL installations, but is not yet bundled
+with many binary versions of gdalraster (on Windows, macOS, etc).
 
-## Query the EOPF STAC API
+## Query the MPC STAC API
 
 This example demonstrates the standard workflow for discovering and filtering 
 satellite imagery through a STAC (SpatioTemporal Asset Catalog) API. We'll 
-query the EOPF STAC collection and apply filters to obtain the specific 
-datasets we need.
+query the MPC STAC catalog for the landsat-c2-l2 collection and apply filters to 
+obtain the specific assets we need.
 
 The process involves:
 1. Querying the STAC collection for available imagery
@@ -77,20 +66,23 @@ bbox <- gdalraster::bbox_from_wkt(
 te <- bbox_to_projected(bbox)
 trs <- attr(te, "wkt")
 
-eopf_s2 <- stac_query(
+mpc_landsat <- stac_query(
   bbox = bbox,
-  stac_source = "https://stac.core.eopf.eodc.eu/",
-  collection = "sentinel-2-l2a",
+  stac_source = "https://planetarycomputer.microsoft.com/api/stac/v1/",
+  collection = "landsat-c2-l2",
   start_date = "2025-05-01",
   end_date = "2025-07-30"
 )
 
-eopf_filter <- rstac::assets_select(
-  eopf_s2,
-  asset_names = c("B02_10m", "B03_10m", "B04_10m", "B08_10m")
+landsat_filter <- rstac::assets_select(
+  mpc_landsat,
+  asset_names = c("blue", "green", "red", "nir08")
 ) |>
-  stac_cloud_filter(max_cloud_cover = 30) |>
-  stac_coverage_filter(bbox, min_coverage = 0.5)
+  stac_cloud_filter(max_cloud_cover = 20) |> 
+  stac_coverage_filter(
+    bbox = bbox,
+    min_coverage = 0.9
+  )
 ```
 
 ## Download and warp the images
@@ -100,28 +92,40 @@ processes within an isolated set of mirai daemons. Note that we call `mirai::dae
 within the `with()` function to ensure that the daemons are properly cleaned up
 after use.
 
-Critically, we must specify the `driver = "EOPFZARR"` argument in 
-`vrt_collect()` because GDAL will, by default, attempt to read the files using
-the built-in Zarr driver, which does not fully support the EOPF-Zarr format.
+Note the use of `vrt_plan()` which is an alternative to `vrt_collect()` that allows
+for deferred execution of the VRT creation and warping steps. This simply
+skips the initial creation of asset-level VRTs and therefore slightly speeds up
+the overall process - if you are interested in viewing or inspecting the individual
+asset VRTs, you should use `vrt_collect()` instead.
 
-Note the use of `lazy = FALSE` which will materialize the warped images to disk;
-this will make data access and subsequent processing more efficient.
+We then use `vrt_move_band()` to reorder the bands so that the Near-Infrared (NIR) band
+follows the RGB bands, which is a common convention for visualizing multispectral imagery. On occasion the ordering of bands in the STAC assets may not align with typical expectations.
 
 
 ``` r
 with(mirai::daemons(10), {
-  eopf_s2_chgn <- vrt_collect(
-    eopf_filter,
-    vsi_prefix = "/vsicurl/",
-    driver = "EOPFZARR"
+  landsat_chgn <- vrt_plan(
+    landsat_filter
   ) |>
     vrt_warp(
       t_srs = trs,
       te = te,
-      tr = c(10, 10),
-      lazy = FALSE
-    ) 
+      tr = c(30, 30)
+    ) |> 
+      vrt_move_band(band_idx = 1, after = 4)  # Move nir band to end
 })
+
+print(landsat_chgn)
+#> → <VRT Collection>
+#> 
+#>  VRT SRS: 
+#> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+#> Bounding Box: -18973.07 -22271.98 18976.93 22308.02
+#> Pixel res: 30, 30
+#> Start Date: 2025-05-05 10:13:31 UTC
+#> End Date: 2025-07-01 10:07:41 UTC
+#> Number of Items: 6
+#> Assets: blue, green, red, nir08
 ```
 
 ## Cloud masking 
@@ -135,10 +139,11 @@ Note that we use `recollect = TRUE` to return a new VRT collection that
 references the newly created cloud-masked GeoTIFF files, allowing us to continue 
 working with the data in a virtualized format for subsequent processing steps.
 
+We then apply appropriate scaling to the Landsat Level-2 surface reflectance -  see the [USGS docs](https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products)
 
 
 ``` r
-eopf_s2_mask <- eopf_s2_chgn |>
+landsat_mask <- landsat_chgn |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
     maskfun = create_omnicloudmask()
@@ -146,11 +151,12 @@ eopf_s2_mask <- eopf_s2_chgn |>
   vrt_set_maskfun(
     mask_band = "omnicloudmask",
     mask_values = 1:3
-  ) 
+  ) |>        
+    vrt_set_scale(scale_value = 0.0000275, offset_value = -0.2) 
 
 purrr::walk(
-  seq_len(eopf_s2_mask$n_items),
-  ~ plot(eopf_s2_mask, item = .x, c(3, 2, 1), na_col = "#ffa928")
+  seq_len(landsat_mask$n_items),
+  ~ plot(landsat_mask, item = .x, c(3, 2, 1), na_col = "#ffa928")
 )
 ```
 
@@ -172,16 +178,16 @@ significantly improving processing speed for this computationally intensive oper
 
 ``` r
 with(mirai::daemons(10), {
-  eopf_s2_median <- multiband_reduce(
-    eopf_s2_mask,
+  landsat_median <- multiband_reduce(
+    landsat_mask,
     reduce_fun = geomedian(),
     outfile = fs::file_temp(ext = ".tif"),
     recollect = TRUE
-  )
+  )  
 })
 
 plot(
-  eopf_s2_median,
+  landsat_median,
   c(3, 2, 1),
   na_col = "#ffa928"
 )
@@ -208,11 +214,11 @@ In this example, we'll calculate several useful indices and visualize the result
 
 ``` r
 exptest <- vrt_derived_block(
-  eopf_s2_median,
-  ndvi ~ (B08_10m - B04_10m) / (B08_10m + B04_10m),
-  ndti ~ (B04_10m - B03_10m) / (B04_10m + B03_10m),
-  evi ~ 2.5 * (B08_10m - B04_10m) / (B08_10m + 6 * B04_10m - 7.5 * B02_10m + 1),
-  vgnirbi ~ (B03_10m - B08_10m) / (B03_10m + B08_10m)
+  landsat_median,
+  ndvi ~ (nir08 - red) / (nir08 + red),
+  ndti ~ (red - green) / (red + green),
+  evi2 ~ 2.5 * (nir08 - red) / (nir08 + 2.4 * red + 1),
+  vgnirbi ~ (green - nir08) / (green + nir08)
 )
 
 print(exptest, pixfun = TRUE)
@@ -220,19 +226,19 @@ print(exptest, pixfun = TRUE)
 #> VRT XML: [hidden]
 #>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
 #> Pixel Function:
-#> ndvi ~ ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + (B04_10m * 0.0001 + -0.1))                                               
-#> ndti ~ ((B04_10m * 0.0001 + -0.1) - (B03_10m * 0.0001 + -0.1))/((B04_10m * 0.0001 + -0.1) + (B03_10m * 0.0001 + -0.1))                                               
-#> evi ~ 2.5 * ((B08_10m * 0.0001 + -0.1) - (B04_10m * 0.0001 + -0.1))/((B08_10m * 0.0001 + -0.1) + 6 * (B04_10m * 0.0001 + -0.1) - 7.5 * (B02_10m * 0.0001 + -0.1) + 1)
-#> vgnirbi ~ ((B03_10m * 0.0001 + -0.1) - (B08_10m * 0.0001 + -0.1))/((B03_10m * 0.0001 + -0.1) + (B08_10m * 0.0001 + -0.1))
+#> ndvi ~ ((nir08 * 0.0000275 + -0.2) - (red * 0.0000275 + -0.2))/((nir08 * 0.0000275 + -0.2) + (red * 0.0000275 + -0.2))                
+#> ndti ~ ((red * 0.0000275 + -0.2) - (green * 0.0000275 + -0.2))/((red * 0.0000275 + -0.2) + (green * 0.0000275 + -0.2))                
+#> evi2 ~ 2.5 * ((nir08 * 0.0000275 + -0.2) - (red * 0.0000275 + -0.2))/((nir08 * 0.0000275 + -0.2) + 2.4 * (red * 0.0000275 + -0.2) + 1)
+#> vgnirbi ~ ((green * 0.0000275 + -0.2) - (nir08 * 0.0000275 + -0.2))/((green * 0.0000275 + -0.2) + (nir08 * 0.0000275 + -0.2))
 #> 
 #> 
 #>  VRT SRS: 
 #> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
-#> Bounding Box: -18973.07 -22261.98 18976.93 22308.02
-#> Pixel res: 10, 10
-#> Assets: ndvi, ndti, evi, vgnirbi
+#> Bounding Box: -18973.07 -22271.98 18976.93 22308.02
+#> Pixel res: 30, 30
+#> Assets: ndvi, ndti, evi2, vgnirbi
 #> No Data Value(s): NaN, NaN, NaN, NaN
-#> Date Time: 2025-06-21 22:21:41 UTC
+#> Date Time: 2025-06-06 10:13:37 UTC
 
 x <- vrt_compute(
   exptest,
@@ -245,7 +251,7 @@ purrr::walk(
   ~ plot_raster_src(
     x,
     band = .x,
-    minmax_def = if (.x == 3) c(-1, 1) else NULL,
+    minmax_def = if (.x == 1) c(-1, 1) else NULL,
     col = grDevices::hcl.colors(10, "Inferno")
   )
 )

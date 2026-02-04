@@ -1,3 +1,5 @@
 *.html
 *.R
 !precompute.R
+
+/.quarto/
