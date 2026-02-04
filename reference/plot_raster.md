@@ -126,8 +126,7 @@ plot(x, item, ..., config_options = gdal_config_options())
 
 - col:
 
-  a character vector of colors to use when plotting a single band. for
-  example when sea presents as very dark.
+  a character vector of colors to use when plotting a single band.
 
 - pixel_fn:
 

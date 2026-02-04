@@ -396,10 +396,10 @@ Helper functions for GDALRasterDataset objects
   Terminology](https://permian-global-research.github.io/vrtility/articles/data-structures-and-terminology.md):
 - [Digital Earth Africa
   GeoMAD](https://permian-global-research.github.io/vrtility/articles/Digital-Earth-Africa-GeoMAD.md):
-- [EOPF Sentinel-2
-  Level-2A](https://permian-global-research.github.io/vrtility/articles/EOPF.md):
 - [Harmonized Landsat
   Sentinel-2](https://permian-global-research.github.io/vrtility/articles/HLS.md):
+- [Landsat Collection 2
+  Level-2](https://permian-global-research.github.io/vrtility/articles/landsat.md):
 - [Creating NDVI Time Series from HLS
   Data](https://permian-global-research.github.io/vrtility/articles/ndvi-timeseries.md):
 - [OmniCloudMask](https://permian-global-research.github.io/vrtility/articles/OmniCloudMask.md):

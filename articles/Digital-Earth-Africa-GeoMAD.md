@@ -77,7 +77,8 @@ print(l8l9_query)
 #>   - 6d21f993-74bc-52d3-bafa-96164e7bce86
 #>   - cb7d0c9d-bc36-538b-a67d-930999cbf3c9
 #> - assets: SR_B2, SR_B3, SR_B4, SR_B5
-#> - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
+#> - item's fields: 
+#> assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type
 ```
 
 ## Collecting the data
@@ -103,7 +104,8 @@ print(l8l9_vrt)
 #> 
 #>  VRT SRS: 
 #> PROJCS["WGS 84 / NSIDC EASE-Grid 2.0 Global",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Cylindrical_Equal_Area"],PARAMETER["standard_parallel_1",30],PARAMETER["central_meridian",0],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","6933"]]
-#> Bounding Box: 4416000 -2112000 4512000 -1920000
+#> Bounding Box: 4416000 -2112000 4512000
+#> -1920000
 #> Pixel res: 30, 30
 #> Start Date: 2024-01-01 UTC
 #> End Date: 2024-01-01 UTC

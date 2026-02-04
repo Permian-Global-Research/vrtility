@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,8 +36,8 @@
 <li><a class="dropdown-item" href="../articles/cdse-sentinel-2.html">Copernicus Data Space Ecosystem Sentinel-2</a></li>
     <li><a class="dropdown-item" href="../articles/data-structures-and-terminology.html">Data Structures and Terminology</a></li>
     <li><a class="dropdown-item" href="../articles/Digital-Earth-Africa-GeoMAD.html">Digital Earth Africa GeoMAD</a></li>
-    <li><a class="dropdown-item" href="../articles/EOPF.html">EOPF Sentinel-2 Level-2A</a></li>
     <li><a class="dropdown-item" href="../articles/HLS.html">Harmonized Landsat Sentinel-2</a></li>
+    <li><a class="dropdown-item" href="../articles/landsat.html">Landsat Collection 2 Level-2</a></li>
     <li><a class="dropdown-item" href="../articles/ndvi-timeseries.html">Creating NDVI Time Series from HLS Data</a></li>
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
@@ -157,8 +157,10 @@ images, only 6 had less than 35% cloud cover.</p>
 <span><span class="co">#&gt;   - HLS.L30.T54MZS.2023065T003210.v2.0</span></span>
 <span><span class="co">#&gt;   - HLS.L30.T55MBM.2023337T003219.v2.0</span></span>
 <span><span class="co">#&gt;   - HLS.L30.T54MZS.2023337T003219.v2.0</span></span>
-<span><span class="co">#&gt; - assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask</span></span>
-<span><span class="co">#&gt; - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type</span></span></code></pre></div>
+<span><span class="co">#&gt; - assets: </span></span>
+<span><span class="co">#&gt; B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask</span></span>
+<span><span class="co">#&gt; - item's fields: </span></span>
+<span><span class="co">#&gt; assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type</span></span></code></pre></div>
 <p>And now we will query the HLS Sentinel-2 collection using the same
 parameters. Again we can see that &lt; 10% of images have less than 35%
 cloud cover.</p>
@@ -182,8 +184,10 @@ cloud cover.</p>
 <span><span class="co">#&gt;   - HLS.S30.T55MBM.2023319T004701.v2.0</span></span>
 <span><span class="co">#&gt;   - HLS.S30.T55MBM.2023364T004709.v2.0</span></span>
 <span><span class="co">#&gt;   - HLS.S30.T54MZS.2023364T004709.v2.0</span></span>
-<span><span class="co">#&gt; - assets: B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B8A, Fmask</span></span>
-<span><span class="co">#&gt; - item's fields: assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type</span></span></code></pre></div>
+<span><span class="co">#&gt; - assets: </span></span>
+<span><span class="co">#&gt; B01, B02, B03, B04, B05, B06, B07, B08, B09, B10, B11, B12, B8A, Fmask</span></span>
+<span><span class="co">#&gt; - item's fields: </span></span>
+<span><span class="co">#&gt; assets, bbox, collection, geometry, id, links, properties, stac_extensions, stac_version, type</span></span></code></pre></div>
 <p>In order to download the data we need to set up our Earthdata
 credentials. The simplest way to do this is with the <a href="https://boettiger-lab.github.io/earthdatalogin/" class="external-link">earthdatalogin</a>
 package. But, because we are using asynchronous mirai daemons, we need
@@ -214,7 +218,8 @@ the subsequent parts of the workflow.</p>
 <span><span class="co">#&gt; Start Date: 2023-01-17 00:32:26 UTC</span></span>
 <span><span class="co">#&gt; End Date: 2023-12-03 00:32:19 UTC</span></span>
 <span><span class="co">#&gt; Number of Items: 6</span></span>
-<span><span class="co">#&gt; Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask</span></span>
+<span><span class="co">#&gt; Assets: B01, B02, B03, B04, B05, B06, B07,</span></span>
+<span><span class="co">#&gt; B09, B10, B11, Fmask</span></span>
 <span></span>
 <span><span class="va">hls_ss_col</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_collect.html">vrt_collect</a></span><span class="op">(</span><span class="va">hlsss_stac</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hls_ss_col</span><span class="op">)</span></span>
@@ -229,7 +234,8 @@ the subsequent parts of the workflow.</p>
 <span><span class="co">#&gt; Start Date: 2023-01-29 00:49:07 UTC</span></span>
 <span><span class="co">#&gt; End Date: 2023-12-30 00:49:10 UTC</span></span>
 <span><span class="co">#&gt; Number of Items: 8</span></span>
-<span><span class="co">#&gt; Assets: B01, B02, B03, B04, B05, B06, B07, B08, B8A, B09, B10, B11, B12, Fmask</span></span></code></pre></div>
+<span><span class="co">#&gt; Assets: B01, B02, B03, B04, B05, B06, B07,</span></span>
+<span><span class="co">#&gt; B08, B8A, B09, B10, B11, B12, Fmask</span></span></code></pre></div>
 <p>The print method for vrt_collection objects gives us a high level
 overview of the imagery we will download. Our collections contain images
 with two different SRS. We can also see that the number of bands differs
@@ -311,7 +317,8 @@ across all bands.</p>
 <span><span class="co">#&gt; Start Date: 2023-01-17 00:32:26 UTC</span></span>
 <span><span class="co">#&gt; End Date: 2023-12-30 00:49:10 UTC</span></span>
 <span><span class="co">#&gt; Number of Items: 14</span></span>
-<span><span class="co">#&gt; Assets: A, B, G, R, RE1, RE2, RE3, N, N2, WV, C, S1, S2, T1, T2</span></span></code></pre></div>
+<span><span class="co">#&gt; Assets: A, B, G, R, RE1, RE2, RE3, N, N2, WV,</span></span>
+<span><span class="co">#&gt; C, S1, S2, T1, T2</span></span></code></pre></div>
 <p>Now we want to “reduce” the imagery collection to a single composite
 image. The typical approach would be to use the band-level median which
 we can achieve easily first creating a virtual warped raster collection
