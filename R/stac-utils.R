@@ -356,7 +356,7 @@ hls_stac_query <- function(
   collection = c("hls2-s30", "hls2-l30", "HLSS30_2.0", "HLSL30_2.0")
 ) {
   stac_source <- rlang::arg_match(stac_source)
-  v_asset_hls_catalog(stac_source, collection[1])
+  v_assert_hls_catalog(stac_source, collection[1])
 
   stac_its <- stac_query(
     bbox = bbox,
@@ -370,6 +370,8 @@ hls_stac_query <- function(
   if (!is.null(max_cloud_cover)) {
     stac_its <- stac_cloud_filter(stac_its, max_cloud_cover)
   }
+
+  stac_its
 }
 
 
