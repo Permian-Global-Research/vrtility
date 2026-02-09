@@ -131,9 +131,10 @@
 .vrtility_cache <- new.env(parent = emptyenv())
 
 .onLoad <- function(libname, pkgname) {
+  # Declare Python dependency (does NOT trigger Python initialization).
   # For numba compatibility e.g. for fastnanquantile;
   # track this issue: https://github.com/numba/numba/issues/10263
-  vrtility_py_require("numpy<2.4.0")
+  reticulate::py_require("numpy<2.4.0")
   cache_init_checks()
   vrt_opts_set()
 

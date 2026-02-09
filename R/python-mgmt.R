@@ -62,14 +62,19 @@ set_py_env_vals <- function() {
 #' \code{\link{gdal_config_options}}
 #' @export
 #' @rdname vrtility_python
-#' @examples
+#' @examplesIf reticulate::py_available()
 #' compute_with_py_env(print("Hello World"))
 compute_with_py_env <- function(
   code,
   config_options = NULL
 ) {
-  # First, ensure we have the correct paths
+
+  # Lazily initialize Python env info on first use
   py_bin <- getOption("vrt.py_executable", default = NA)
+  if (is.na(py_bin)) {
+    set_py_env_vals()
+    py_bin <- getOption("vrt.py_executable", default = NA)
+  }
 
   if (is.na(py_bin)) {
     cli::cli_abort(c(
