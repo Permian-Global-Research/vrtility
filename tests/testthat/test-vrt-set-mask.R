@@ -73,6 +73,7 @@ intmask_test_vals <- function(use_muparser) {
 
 
 test_that("vrt_set_maskfun works without muparser", {
+  skip_if_not(reticulate::py_available(), "Python not available")
   vals <- intmask_test_vals(use_muparser = FALSE)
   ex_nm <- vals$no_mask
   ex_0b <- vals$mask_0buff
@@ -85,6 +86,7 @@ test_that("vrt_set_maskfun works without muparser", {
 })
 
 test_that("vrt_set_maskfun works with muparser", {
+  skip_if_not(reticulate::py_available(), "Python not available")
   skip_if(isFALSE(check_muparser()), "muparser not available")
   vals <- intmask_test_vals(use_muparser = TRUE)
   ex_nm <- vals$no_mask
@@ -266,6 +268,7 @@ def bitmask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 
 
 test_that("bitmask results are the same with both implementations", {
+  skip_if_not(reticulate::py_available(), "Python not available")
   skip_if(isFALSE(check_muparser()), "muparser not available")
   skip_if(
     gdalraster::gdal_version_num() < gdalraster::gdal_compute_version(3, 12, 0),

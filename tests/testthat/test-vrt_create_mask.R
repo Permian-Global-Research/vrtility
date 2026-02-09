@@ -1,7 +1,8 @@
 test_that("vrt_create_mask works", {
   # for some reason matplotlib build fails on GHA on macOS
   testthat::skip_on_os("mac")
-  # testthat::skip_on_cran()
+  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_module_available("omnicloudmask"), "omnicloudmask not available")
 
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
