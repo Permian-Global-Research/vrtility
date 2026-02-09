@@ -60,7 +60,7 @@ vrt_cache_set <- function(dir) {
 #' fresh. If the cache directory is set to `tempdir()` then the function will
 #' warn you that this is a bad idea and will not proceed.
 vrt_cache_destroy <- function() {
-  dir <- options("vrt.cache")
+  dir <- getOption("vrt.cache")
   if (is_temp_dir(dir)) {
     cli::cli_warn(
       c(
