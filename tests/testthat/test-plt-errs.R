@@ -10,34 +10,34 @@ test_that("input validation works correctly", {
   # Test invalid band specifications
   expect_error(
     plot(ds, bands = c(1, 2)),
-    "bands argument must be of length 1 or 3"
+    "must be of length 1 or 3"
   )
 
   expect_error(
     plot(ds, bands = c(1, 2, 3, 4)),
-    "bands argument must be of length 1 or 3"
+    "must be of length 1 or 3"
   )
 
   expect_error(
     plot(ds, bands = character(0)),
-    "bands argument must be of length 1 or 3"
+    "must be of length 1 or 3"
   )
 
   # Test invalid color specifications
   expect_error(
     plot(ds, bands = 1, col = 123),
-    "'col' must be a character string"
+    "must be a character vector"
   )
 
   expect_error(
     plot(ds, bands = 1, col = list("red", "blue")),
-    "'col' must be a character string"
+    "must be a character vector"
   )
 
   # Test that NULL bands gets default message
   expect_message(
     plot(ds, bands = NULL),
-    "bands argument is NULL, defaulting to band 1"
+    "defaulting to band 1"
   )
 })
 
@@ -65,7 +65,7 @@ test_that("max_pixels constraint works correctly", {
   # Test that max_pixels produces warning and downsampling
   expect_warning(
     plot(ds, bands = 1, max_pixels = 100),
-    "'xsize \\* ysize' exceeds 'max_pixels', downsampling applied"
+    "exceeds.*max_pixels.*downsampling"
   )
 
   # Test that reasonable max_pixels doesn't produce warning
@@ -121,7 +121,7 @@ test_that("legend edge cases are handled", {
   # Test legend with RGB produces message
   expect_message(
     plot(ds, bands = c(1, 2, 3), legend = TRUE),
-    "legend is not supported for RGB plot"
+    "not supported for RGB"
   )
 
   # Test legend with very small plot
@@ -155,14 +155,14 @@ test_that("pixel function handling works", {
   # Test invalid pixel function
   expect_error(
     plot(ds, bands = 1, pixel_fn = "not_a_function"),
-    "'pixel_fn' must be a function"
+    "must be a function"
   )
 
   # Test pixel function that returns complex (should error)
   complex_fn <- function(x) complex(real = x, imaginary = x)
   expect_error(
     plot(ds, bands = 1, pixel_fn = complex_fn),
-    "specify 'pixel_fn' when plotting complex data types"
+    "pixel_fn.*complex data types"
   )
 })
 
