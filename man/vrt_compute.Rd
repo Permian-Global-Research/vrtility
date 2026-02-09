@@ -164,7 +164,7 @@ validity.}
 \item{quiet}{A logical indicating whether to suppress output}
 
 \item{apply_scale}{A logical indicating whether to apply scale values
-existing the in file metadata.}
+existing in the file metadata.}
 
 \item{dst_nodata}{A numeric value of the nodata value to use for the
 output raster. If NULL, gdal will decide. This is usually only required if
@@ -187,8 +187,8 @@ already been used but "bilinear" may be preferable where the input data
 has not yet been virtually aligned/resampled.
 
 The choice of \code{engine} will depend on the nature of the computation being
-carried out. In the majority of cases warping is preferred, especically when
-we are not processing the entirity of the input dataset (as is usually the
+carried out. In the majority of cases warping is preferred, especially when
+we are not processing the entirety of the input dataset (as is usually the
 case when working with online data sources).
 }
 \examples{

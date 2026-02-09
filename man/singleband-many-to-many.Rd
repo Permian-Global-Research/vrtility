@@ -68,7 +68,7 @@ warped VRT collection. This function processes each band independently,
 applying a user-defined function across the temporal dimension (e.g.,
 filtering outliers, smoothing, gap-filling).
 
-\code{hampel_filter} is used tocreate a function to filter band-level
+\code{hampel_filter} is used to create a function to filter band-level
 outliers in time-series using the Hampel filter. to be provided to
 \code{singleband_m2m()}.
 }
