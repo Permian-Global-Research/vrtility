@@ -137,7 +137,7 @@ test_that("RGB plotting rejects legend correctly", {
   # Should produce a message when trying to use legend with RGB
   expect_message(
     plot(ds, bands = c(1, 2, 3), legend = TRUE),
-    "legend is not supported for RGB plot"
+    "not supported for RGB"
   )
 })
 

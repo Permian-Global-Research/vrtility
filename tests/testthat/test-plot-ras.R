@@ -31,7 +31,7 @@ test_that(".validate_plot_params works correctly", {
       max_pixels = 1000,
       col = NULL
     ),
-    "bands argument is NULL, defaulting to band 1"
+    "defaulting to band 1"
   )
   expect_equal(result_null$bands, 1)
 
@@ -42,13 +42,13 @@ test_that(".validate_plot_params works correctly", {
       max_pixels = 1000,
       col = NULL
     ),
-    "bands argument must be of length 1 or 3"
+    "must be of length 1 or 3"
   )
 
   # Test invalid color type
   expect_error(
     vrtility:::.validate_plot_params(bands = 1, max_pixels = 1000, col = 123),
-    "'col' must be a character string"
+    "must be a character vector"
   )
 })
 
@@ -73,7 +73,7 @@ test_that(".setup_plot_dimensions works correctly", {
   # Test max_pixels constraint
   expect_warning(
     result_warn <- vrtility:::.setup_plot_dimensions(ds, 1000, 1000, 100),
-    "'xsize \\* ysize' exceeds 'max_pixels', downsampling applied"
+    "exceeds.*max_pixels.*downsampling"
   )
   expect_true(result_warn$xsize * result_warn$ysize <= 100)
 })
@@ -408,19 +408,19 @@ test_that("plotting functions handle errors gracefully", {
   # Test invalid band count
   expect_error(
     plot(ds, bands = c(1, 2)),
-    "bands argument must be of length 1 or 3"
+    "must be of length 1 or 3"
   )
 
   # Test legend with RGB
   expect_message(
     plot(ds, bands = c(1, 2, 3), legend = TRUE),
-    "legend is not supported for RGB plot"
+    "not supported for RGB"
   )
 
   # Test invalid color specification
   expect_error(
     plot(ds, bands = 1, col = 123),
-    "'col' must be a character string"
+    "must be a character vector"
   )
 })
 
@@ -510,6 +510,6 @@ test_that("plotting handles edge cases", {
   # Test with max_pixels constraint
   expect_warning(
     plot(ds, bands = 1, max_pixels = 100, main = "Max Pixels Test"),
-    "'xsize \\* ysize' exceeds 'max_pixels', downsampling applied"
+    "exceeds.*max_pixels.*downsampling"
   )
 })
