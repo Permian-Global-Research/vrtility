@@ -575,9 +575,10 @@ sign_mpc_items <- function(
 #' @noRd
 #' @keywords internal
 set_token_cache <- function(collection) {
-  fs::dir_create(rappdirs::user_cache_dir("vrtility"))
+  pkg_cache <- tools::R_user_dir("vrtility", which = "cache")
+  fs::dir_create(pkg_cache)
   fs::path(
-    rappdirs::user_cache_dir("vrtility"),
+    pkg_cache,
     paste0(collection, "_mpc_token.rds")
   )
 }

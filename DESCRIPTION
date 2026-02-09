@@ -1,5 +1,5 @@
 Package: vrtility
-Title: R package for efficient raster processing using GDAL VRTs
+Title: Efficient Raster Processing Pipelines Using GDAL Virtual Rasters
 Version: 0.3.2
 Authors@R: 
     person("Hugh", "Graham", , "hugh.graham@permianglobal.com", role = c("aut", "cre"),
@@ -19,7 +19,7 @@ BugReports: https://github.com/Permian-Global-Research/vrtility/issues
 Depends: 
     R (>= 4.2.0)
 Imports: 
-    carrier (>= 0.1.1.9000),
+    carrier (>= 0.1.2),
     cli,
     fs,
     gdalraster (>= 2.3.0),
@@ -31,10 +31,9 @@ Imports:
     memuse,
     methods,
     mirai (>= 2.4.0),
-    purrr (>= 1.0.4.9000),
-    rappdirs,
+    purrr (>= 1.2.0),
     Rcpp,
-    reticulate (>= 1.42.0.9000),
+    reticulate (>= 1.43.0),
     Rfast,
     rlang,
     rstac (>= 1.0.1),

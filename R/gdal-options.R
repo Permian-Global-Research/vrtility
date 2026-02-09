@@ -45,7 +45,10 @@ gdal_config_options <- function(
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-  GDAL_HTTP_COOKIEFILE = "~/.cookies.txt",
+  GDAL_HTTP_COOKIEFILE = fs::path(
+    tools::R_user_dir("vrtility", which = "cache"),
+    "gdal_cookies.txt"
+  ),
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
@@ -54,6 +57,7 @@ gdal_config_options <- function(
   CPL_VSIL_CURL_CHUNK_SIZE = NULL,
   ...
 ) {
+  fs::dir_create(fs::path_dir(GDAL_HTTP_COOKIEFILE))
   unlist(c(as.list(rlang::current_env()), rlang::dots_list(...)))
 }
 
@@ -73,7 +77,7 @@ gdal_config_options <- function(
 #' @rdname gdal_options
 #' @export
 #' @details
-#' output_format, equaivalent to `-of` from the gdaltranslate or gdalwarp CLIs.
+#' output_format, equivalent to `-of` from the gdaltranslate or gdalwarp CLIs.
 #' If NULL, then the output format will be inferred from the file extension.
 #' @seealso
 #' \href{https://gdal.org/en/stable/drivers/raster/index.html#raster-drivers}{GDAL Raster Drivers}
@@ -140,11 +144,11 @@ gdal_creation_options <- function(
 #' @param warp_memory Memory to use for warping equivalent to -wm on the CLI
 #' @param num_threads Number of threads to use for warping equivalent to -wo
 #' NUM_THREADS on the CLI. "ALL_CPUS" (the default) will use all available CPUs,
-#' alternartively an integer can be supplied - or NULL to use a single threaded
+#' alternatively an integer can be supplied - or NULL to use a single threaded
 #' process.
 #' @param unified_src_nodata Unified source nodata option equivalent to -wo
 #' UNIFIED_SRC_NODATA on the CLI. Can be "NO", "YES" or "PARTIAL". Default is
-#' "NO" (as was the deafault for earlier versions of GDAL).
+#' "NO" (as was the default for earlier versions of GDAL).
 #' @return Character vector of options
 #' @rdname gdal_options
 #' @export
