@@ -1,6 +1,8 @@
 ---
 title: "Landsat Collection 2 Level-2"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Landsat Collection 2 Level-2}
   %\VignetteEngine{knitr::rmarkdown}

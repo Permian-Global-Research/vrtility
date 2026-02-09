@@ -1,6 +1,8 @@
 ---
 title: "Digital Earth Africa GeoMAD"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Digital Earth Africa GeoMAD}
   %\VignetteEngine{knitr::rmarkdown}

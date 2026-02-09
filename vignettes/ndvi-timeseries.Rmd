@@ -1,6 +1,8 @@
 ---
 title: "Creating NDVI Time Series from HLS Data"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Creating NDVI Time Series from HLS Data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -197,4 +199,4 @@ gif_file <- gifski::save_gif(
 )
 ```
 
-<img src="figure/ndvi_timeseries.gif" width="100%" />
+<img src="https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/ndvi_timeseries.gif" width="100%" />

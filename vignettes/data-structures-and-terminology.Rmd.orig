@@ -9,10 +9,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-
-
-``` r
+```{r setup}
 library(vrtility)
 ```
 
@@ -24,7 +28,7 @@ Figure 1 provides a visual overview of these data structures and their relations
 which are discussed in detail below.
 
 <div class="figure" style="text-align: center">
-  <img src="https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/data-concepts.png" alt="Figure 1: Core data structures in vrtility: vrt_block, vrt_collection, and vrt_stack. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)." style="width: 100%;" />
+  <img src="figure/data-concepts.png" alt="Figure 1: Core data structures in vrtility: vrt_block, vrt_collection, and vrt_stack. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)." style="width: 100%;" />
   <p class="caption">Figure 1: Core data structures in vrtility: <code>vrt_block</code>, <code>vrt_collection</code>, and <code>vrt_stack</code>. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps).</p>
 </div>
 
@@ -61,8 +65,7 @@ bands. It is the fundamental unit in vrtility's pipeline system.
 
 - Stores optional mask and pixel functions
 
-
-``` r
+```{r vrt-block-example}
 # Load example Sentinel-2 data
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
@@ -78,17 +81,6 @@ single_block <- ex_collect[[1]][[1]]
 
 # Print the block to see its structure
 print(single_block)
-#> → <VRT Block>
-#> VRT XML: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> Bounding Box: 289813.58 88876.43 297031.04 95714.02
-#> Pixel res: 19.9929669011164, 19.9929669011164
-#> Assets: B02, B03, B04, B08, SCL
-#> No Data Value(s): 0, 0, 0, 0, 0
-#> Date Time: 2020-01-01 10:15:30 UTC
 ```
 
 A `vrt_block` contains:
@@ -136,54 +128,16 @@ a time series of observations over the same geographic area.
 
 - Inherits from `vrt_block`, so supports the same operations
 
-
-``` r
+```{r vrt-collection-example}
 # Print collection summary
 print(ex_collect)
-#> → <VRT Collection>
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#>  PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
-#> 
-#>  PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
-#> Bounding Box: NA
-#> Pixel res: 19.9923198138287, 19.9923198138287
-#> Start Date: 2020-01-01 10:15:30 UTC
-#> End Date: 2020-05-01 10:15:30 UTC
-#> Number of Items: 5
-#> Assets: B02, B03, B04, B08, SCL
 
 # A collection is a list of blocks
 length(ex_collect[[1]])
-#> [1] 5
 
 # Access individual blocks
 print(ex_collect[[1]][[1]]) # First time step
-#> → <VRT Block>
-#> VRT XML: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> Bounding Box: 289813.58 88876.43 297031.04 95714.02
-#> Pixel res: 19.9929669011164, 19.9929669011164
-#> Assets: B02, B03, B04, B08, SCL
-#> No Data Value(s): 0, 0, 0, 0, 0
-#> Date Time: 2020-01-01 10:15:30 UTC
 print(ex_collect[[1]][[2]]) # Second time step
-#> → <VRT Block>
-#> VRT XML: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
-#> Bounding Box: 460436.9 5615438.2 467554.2 5622175.6
-#> Pixel res: 19.9923198138287, 19.9923198138287
-#> Assets: B02, B03, B04, B08, SCL
-#> No Data Value(s): 0, 0, 0, 0, 0
-#> Date Time: 2020-02-01 10:15:30 UTC
 ```
 
 A `vrt_collection` extends `vrt_block` with:
@@ -199,8 +153,7 @@ A `vrt_collection` extends `vrt_block` with:
 Note that when we print the warped collection, we see that the collections 
 bounding box is returned rather than NA, indicating that the collection has been
 warped to a common grid.
-
-``` r
+```{r collection-workflow}
 # 2. Apply transformations (masking, scaling)
 ex_masked <- ex_collect |>
   vrt_set_maskfun(
@@ -218,18 +171,6 @@ ex_warped <- vrt_warp(
 )
 
 print(ex_warped)
-#> → <VRT Collection>
-#> Mask Function: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, maskfun = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> Bounding Box: 289813.58 88876.43 297031.04 95714.02
-#> Pixel res: 19.9929669011164, 19.9929669011164
-#> Start Date: 2020-01-01 10:15:30 UTC
-#> End Date: 2020-05-01 10:15:30 UTC
-#> Number of Items: 5
-#> Assets: B02, B03, B04, B08
 
 # 4. Compute or stack for further processing
 ```
@@ -263,26 +204,12 @@ only be done at the band-level only, not across bands as in `multiband_reduce()`
 
 - Single VRT file representing the entire time series
 
-
-``` r
+```{r vrt-stack-example}
 # Stack a warped collection
 ex_stack <- vrt_stack(ex_warped)
 
 # Print stack info
 print(ex_stack)
-#> → VRT STACK
-#> VRT XML: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
-#> Mask Function: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, maskfun = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> Bounding Box: 289813.58 88876.43 297031.04 95714.02
-#> Start Date: 2020-01-01 10:15:30 UTC
-#> End Date: 2020-05-01 10:15:30 UTC
-#> Number of Items: 5
-#> Assets: B02, B03, B04, B08
 
 # A stack consolidates all time steps into bands
 # If collection had 4 dates × 3 bands = 12 bands in stack
@@ -304,8 +231,7 @@ example shows how to apply a temporal median function across the stacked bands,
 returning a new `vrt_block` with median values for each original band.
 
 
-
-``` r
+```{r stack-operations}
 # Apply temporal median
 tblock <- ex_collect[[1]][[1]]
 median_composite <- ex_stack |>
@@ -318,17 +244,6 @@ median_composite <- ex_stack |>
   )
 
 print(median_composite)
-#> → <VRT Block>
-#> VRT XML: [hidden]
-#>   run ]8;;x-r-help:base::printprint]8;;(x, xml = TRUE) to view
-#> 
-#>  VRT SRS: 
-#> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> Bounding Box: 289798.06 88868.74 297035.51 95726.33
-#> Pixel res: 19.9929669011164, 19.9929669011164
-#> Assets: B02, B03, B04, B08
-#> No Data Value(s): 0, 0, 0, 0
-#> Date Time: 2020-03-01 UTC
 ```
 
 ## Class Hierarchy

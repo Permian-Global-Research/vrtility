@@ -1,6 +1,8 @@
 ---
 title: "Copernicus Data Space Ecosystem Sentinel-2"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Copernicus Data Space Ecosystem Sentinel-2}
   %\VignetteEngine{knitr::rmarkdown}

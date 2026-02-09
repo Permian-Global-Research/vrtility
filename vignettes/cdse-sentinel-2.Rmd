@@ -1,6 +1,8 @@
 ---
 title: "Copernicus Data Space Ecosystem Sentinel-2"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Copernicus Data Space Ecosystem Sentinel-2}
   %\VignetteEngine{knitr::rmarkdown}
@@ -55,6 +57,9 @@ CDSE API.
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.12.1
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
+#>   `]8;;x-r-help:vrtility::set_gdal_cache_maxvrtility::set_gdal_cache_max]8;;()`.
 
 # only use 2 daemons!
 mirai::daemons(2)
@@ -161,11 +166,11 @@ Finally, let's plot the NIR band on its own and then the RGB composite.
 plot_raster_src(s2_median, bands = 4)
 ```
 
-![](figure/s2-plots-1.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-1.png)
 
 ``` r
 
 plot_raster_src(s2_median, bands = c(3, 2, 1))
 ```
 
-![](figure/s2-plots-2.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-2.png)
