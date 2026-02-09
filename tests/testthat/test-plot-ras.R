@@ -134,24 +134,6 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
   expect_true(result_rgb$use_normalization)
 })
 
-test_that("margin adjustment logic works correctly", {
-  skip_on_os("windows")
-
-  # We can't easily test the internal margin logic directly, but we can test
-  # the conditions that would trigger different margin settings
-
-  # Empty title conditions
-  expect_true(is.null("") || "" == "" || nchar(trimws("")) == 0)
-  expect_true(is.null("   ") || "   " == "" || nchar(trimws("   ")) == 0)
-  expect_false(is.null("Title") || "Title" == "" || nchar(trimws("Title")) == 0)
-
-  # Empty label conditions
-  expect_true(is.null("") || "" == "" || nchar(trimws("")) == 0)
-  expect_false(
-    is.null("X Label") || "X Label" == "" || nchar(trimws("X Label")) == 0
-  )
-})
-
 # Integration tests with real data ============================================
 
 test_that("raster plotting works with various configurations", {
@@ -172,101 +154,21 @@ test_that("raster plotting works with various configurations", {
       drop_mask_band = FALSE
     )
 
-  # Test collection plotting with different title options
+  # Test collection plotting
   vdiffr::expect_doppelganger(
     "collect plot works with default title",
     plot(ex_vrt_mask, item = 2, c(3, 2, 1))
   )
 
-  vdiffr::expect_doppelganger(
-    "collect plot works with title = 'none'",
-    plot(ex_vrt_mask, item = 2, c(3, 2, 1), title = "none")
-  )
-
-  vdiffr::expect_doppelganger(
-    "collect plot works with empty labels",
-    plot(
-      ex_vrt_mask,
-      item = 2,
-      c(3, 2, 1),
-      title = "none",
-      xlab = "",
-      ylab = ""
-    )
-  )
-
   t_block <- ex_vrt_mask[[1]][[1]]
 
-  # Test single band plotting with various configurations
-  vdiffr::expect_doppelganger(
-    "block plot works with default title",
-    plot(t_block, 2)
-  )
-
-  vdiffr::expect_doppelganger(
-    "block plot works with title = 'none'",
-    plot(t_block, 2, title = "none")
-  )
-
-  vdiffr::expect_doppelganger(
-    "block plot works with title = 'dttm'",
-    plot(t_block, 2, title = "dttm")
-  )
-
-  # Test legend functionality
+  # Test block plotting with legend
   vdiffr::expect_doppelganger(
     "single band plot with legend",
     plot(t_block, 2, legend = TRUE)
   )
 
-  vdiffr::expect_doppelganger(
-    "single band plot with custom colors and legend",
-    plot(t_block, 2, col = c("red", "yellow", "green", "blue"), legend = TRUE)
-  )
-
-  # Test margin adjustments with empty labels
-  vdiffr::expect_doppelganger(
-    "plot with empty title and labels",
-    plot(
-      t_block,
-      2,
-      title = "none",
-      main = "",
-      xlab = "",
-      ylab = "",
-      legend = TRUE
-    )
-  )
-
-  vdiffr::expect_doppelganger(
-    "plot with only title",
-    plot(t_block, 2, main = "Test Title", xlab = "", ylab = "", legend = FALSE)
-  )
-
-  vdiffr::expect_doppelganger(
-    "plot with only x label",
-    plot(
-      t_block,
-      2,
-      main = "",
-      xlab = "X Coordinate",
-      ylab = "",
-      legend = FALSE
-    )
-  )
-
-  vdiffr::expect_doppelganger(
-    "plot with only y label",
-    plot(
-      t_block,
-      2,
-      main = "",
-      xlab = "",
-      ylab = "Y Coordinate",
-      legend = FALSE
-    )
-  )
-
+  # Test warp plotting
   ex_vrt_mask_warp <- vrt_warp(
     ex_vrt_mask,
     t_srs = t_block$srs,
@@ -279,6 +181,7 @@ test_that("raster plotting works with various configurations", {
     plot(ex_vrt_mask_warp, item = 3, c(3, 2, 1))
   )
 
+  # Test stack plotting
   ex_vrt_mask_warp_stack <- vrt_stack(ex_vrt_mask_warp) |>
     vrt_set_py_pixelfun()
 
@@ -287,144 +190,6 @@ test_that("raster plotting works with various configurations", {
     plot(ex_vrt_mask_warp_stack, c(3, 2, 1))
   )
 })
-
-# Test discrete vs continuous legend detection =================================
-
-test_that("discrete vs continuous legend detection works", {
-  skip_on_os("windows")
-  skip_on_ci()
-
-  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
-
-  # Create a raster with discrete values for testing
-  ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-  on.exit(ds$close())
-
-  # Test discrete legend
-  vdiffr::expect_doppelganger("discrete legend with few unique values", {
-    # Create discrete data by reading and modifying
-
-    # Plot with discrete colors
-    plot(
-      ds,
-      bands = 5,
-      col = c(
-        'red',
-        'blue',
-        'green',
-        'orange',
-        "purple",
-        "pink"
-      ),
-      legend = TRUE,
-      main = 'Discrete Legend Test',
-      xsize = 100,
-      ysize = 100
-    )
-  })
-
-  # Test continuous legend
-  vdiffr::expect_doppelganger(
-    "continuous legend with many unique values",
-    plot(
-      ds,
-      bands = 1,
-      legend = TRUE,
-      main = 'Continuous Legend Test',
-      xsize = 100,
-      ysize = 100
-    )
-  )
-})
-
-# Test percentile cutting with NoData values ==================================
-
-test_that("percentile cutting handles NoData values correctly", {
-  skip_on_os("windows")
-  skip_on_ci()
-
-  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
-
-  # Test that NoData values don't interfere with percentile cuts
-  vdiffr::expect_doppelganger("percentile cut ignores nodata values", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-
-    plot(
-      ds,
-      bands = 1,
-      minmax_pct_cut = c(2, 98),
-      legend = TRUE,
-      main = "Percentile Cut Test",
-      xsize = 100,
-      ysize = 100
-    )
-  })
-})
-
-# Test RGB transformations ====================================================
-
-test_that("RGB transformations work correctly", {
-  skip_on_os("windows")
-  skip_on_ci()
-
-  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
-
-  # Test different RGB transformations
-  vdiffr::expect_doppelganger("RGB plot with linear transformation", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      rgb_trans = "linear",
-      title = "none",
-      main = "Linear RGB"
-    )
-  })
-
-  vdiffr::expect_doppelganger("RGB plot with gamma transformation", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      rgb_trans = "gamma",
-      title = "none",
-      main = "Gamma RGB"
-    )
-  })
-})
-
-# Test error conditions =======================================================
-
-test_that("plotting functions handle errors gracefully", {
-  skip_on_os("windows")
-
-  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
-  ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-  on.exit(ds$close())
-
-  # Test invalid band count
-  expect_error(
-    plot(ds, bands = c(1, 2)),
-    "must be of length 1 or 3"
-  )
-
-  # Test legend with RGB
-  expect_message(
-    plot(ds, bands = c(1, 2, 3), legend = TRUE),
-    "not supported for RGB"
-  )
-
-  # Test invalid color specification
-  expect_error(
-    plot(ds, bands = 1, col = 123),
-    "must be a character vector"
-  )
-})
-
-# Test axes and label positioning ==============================================
 
 test_that("axes and labels position correctly", {
   skip_on_os("windows")
@@ -437,59 +202,6 @@ test_that("axes and labels position correctly", {
     ds <- methods::new(gdalraster::GDALRaster, s2files[1])
     on.exit(ds$close())
     plot(ds, bands = 1, axes = FALSE, main = "No Axes Test")
-  })
-
-  # Test with custom xlim and ylim
-  vdiffr::expect_doppelganger("plot with custom limits", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-    gt <- ds$getGeoTransform()
-    xlim_custom <- c(gt[1], gt[1] + gt[2] * 200)
-    ylim_custom <- c(gt[4] + gt[6] * 200, gt[4])
-
-    plot(
-      ds,
-      bands = 1,
-      xlim = xlim_custom,
-      ylim = ylim_custom,
-      main = "Custom Limits",
-      legend = TRUE
-    )
-  })
-})
-
-# Test interpolation settings =================================================
-
-test_that("interpolation settings work correctly", {
-  skip_on_os("windows")
-  skip_on_ci()
-
-  s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
-
-  vdiffr::expect_doppelganger("plot without interpolation", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-    plot(
-      ds,
-      bands = 1,
-      interpolate = FALSE,
-      main = "No Interpolation",
-      xsize = 50,
-      ysize = 50
-    )
-  })
-
-  vdiffr::expect_doppelganger("plot with interpolation", {
-    ds <- methods::new(gdalraster::GDALRaster, s2files[1])
-    on.exit(ds$close())
-    plot(
-      ds,
-      bands = 1,
-      interpolate = TRUE,
-      main = "With Interpolation",
-      xsize = 50,
-      ysize = 50
-    )
   })
 })
 

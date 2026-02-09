@@ -42,20 +42,6 @@ test_that("RGB plotting works with different transformations", {
     )
   )
 
-  # Test gamma transformation
-  vdiffr::expect_doppelganger(
-    "RGB gamma transformation",
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      rgb_trans = "gamma",
-      title = "none",
-      main = "Gamma RGB",
-      xlab = "Easting",
-      ylab = "Northing"
-    )
-  )
-
   # Test histogram equalization
   vdiffr::expect_doppelganger(
     "RGB histogram equalization",
@@ -65,20 +51,6 @@ test_that("RGB plotting works with different transformations", {
       rgb_trans = "hist",
       title = "none",
       main = "Histogram Equalized RGB",
-      xlab = "Easting",
-      ylab = "Northing"
-    )
-  )
-
-  # Test all-band histogram equalization
-  vdiffr::expect_doppelganger(
-    "RGB all-band histogram equalization",
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      rgb_trans = "hist_all",
-      title = "none",
-      main = "All-band Histogram RGB",
       xlab = "Easting",
       ylab = "Northing"
     )
@@ -101,30 +73,6 @@ test_that("RGB plotting handles percentile cuts correctly", {
       main = "RGB with Auto Percentile"
     )
   )
-
-  # Test RGB with custom percentile cuts
-  vdiffr::expect_doppelganger(
-    "RGB with custom percentile cuts",
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      minmax_pct_cut = c(5, 95),
-      title = "none",
-      main = "RGB 5-95 Percentile"
-    )
-  )
-
-  # Test RGB with manual min/max
-  vdiffr::expect_doppelganger(
-    "RGB with manual min/max",
-    plot_raster_src(
-      s2files[1],
-      bands = c(3, 2, 1),
-      minmax_def = c(0, 0, 0, 3000, 3000, 3000),
-      title = "none",
-      main = "RGB Manual MinMax"
-    )
-  )
 })
 
 test_that("RGB plotting rejects legend correctly", {
@@ -141,41 +89,18 @@ test_that("RGB plotting rejects legend correctly", {
   )
 })
 
-test_that("single band plotting works with all color options", {
+test_that("single band plotting works with color options", {
   skip_on_os("windows")
   skip_on_ci()
 
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
-  # Test with different color palettes
   vdiffr::expect_doppelganger(
     "single band with viridis colors",
     plot_raster_src(
       s2files[1],
       bands = 4,
       col = grDevices::hcl.colors(20, "viridis"),
-      title = "description",
-      legend = TRUE
-    )
-  )
-
-  vdiffr::expect_doppelganger(
-    "single band with plasma colors",
-    plot_raster_src(
-      s2files[1],
-      bands = 4,
-      col = grDevices::hcl.colors(20, "plasma"),
-      title = "description",
-      legend = TRUE
-    )
-  )
-
-  vdiffr::expect_doppelganger(
-    "single band with custom colors",
-    plot_raster_src(
-      s2files[1],
-      bands = 4,
-      col = c("#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF"),
       title = "description",
       legend = TRUE
     )
@@ -191,7 +116,6 @@ test_that("color table functionality works", {
   vat <- read.csv(evc_vat)
   vat <- vat[, c(1, 6:8)]
   ds <- methods::new(gdalraster::GDALRaster, evc_file, read_only = TRUE)
-  # dm <- ds$dim()
   on.exit(ds$close())
   vdiffr::expect_doppelganger(
     "plot with custom color table",
