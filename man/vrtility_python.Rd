@@ -77,5 +77,7 @@ some non-standard way. In general it is easier to use
 \code{vrtility_py_require} which will automatically set the necessary options.
 }
 \examples{
+\dontshow{if (reticulate::py_available()) withAutoprint(\{ # examplesIf}
 compute_with_py_env(print("Hello World"))
+\dontshow{\}) # examplesIf}
 }
