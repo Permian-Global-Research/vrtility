@@ -380,7 +380,6 @@ def create_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
 "
   )
 
-  # TODO: maybe this should just be a class?
   attr(pyfun, "mask_name") <- "create_omnicloudmask"
   attr(pyfun, "mask_description") <- "omnicloudmask"
   attr(pyfun, "required_bands") <- c("red", "green", "nir")

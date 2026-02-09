@@ -270,7 +270,7 @@ matrix_to_rowlist <- function(x) {
 }
 
 
-#' @description `hampel_filter` is used tocreate a function to filter band-level
+#' @description `hampel_filter` is used to create a function to filter band-level
 #' outliers in time-series using the Hampel filter. to be provided to
 #' `singleband_m2m()`.
 #' @param k The number of neighboring points to consider on each side of the
@@ -317,10 +317,6 @@ hampel_filter <- function(k = 1L, t0 = 3, impute_na = FALSE) {
 #' @keywords internal
 single_band_reader <- function(blk, block_params, config_options) {
   vrtfile <- blk$vrt_src
-  #TODO: would the following be better for mirai?
-  # if (!exists("inds")) {
-  #   inds <<- methods::new(gdalraster::GDALRaster, vrt_file) # nolint
-  # }
   inds <- methods::new(gdalraster::GDALRaster, vrtfile)
   on.exit(inds$close(), add = TRUE)
   blockreader(inds, block_params, config_options)

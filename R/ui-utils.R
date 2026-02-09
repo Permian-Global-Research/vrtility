@@ -40,7 +40,7 @@ nice_menu <- function(
 
   selected <- as.integer(selected)
   if (selected %in% c(0, quit)) {
-    cli::cli_abort("Quiting...", call = NULL)
+    cli::cli_abort("Quitting...", call = NULL)
   }
   selected
 }
@@ -171,7 +171,6 @@ xml_printer <- function(x) {
 
 
 crs_printer <- function(x) {
-  #TODO: add srs_find_epsg and friends when I get the dev gdalraster installed.
   cli::style_bold("\n VRT SRS: \n") |>
     cli::col_yellow() |>
     cat()
@@ -192,11 +191,9 @@ opts_check <- function(x, o) {
 
 
 fastnanquantile_msg <- function() {
-  cat(
-    cli::rule(
-      center = "NOTE",
-      line_col = "#64b1f0"
-    )
+  cli::rule(
+    center = "NOTE",
+    line_col = "#64b1f0"
   )
 
   cli::cli_inform(
@@ -210,9 +207,7 @@ fastnanquantile_msg <- function() {
     )
   )
 
-  cat(
-    cli::rule(
-      line_col = "#64b1f0"
-    )
+  cli::rule(
+    line_col = "#64b1f0"
   )
 }

@@ -42,7 +42,7 @@ validate_bbox <- function(bbox, check_latlong = TRUE) {
 
 #' Project a lat/long bounding box to a generic projected coordinate system
 #' @description This function takes a lat/long bounding box and projects it to
-#' either a prescibed projected coordinate system or a generic projected
+#' either a prescribed projected coordinate system or a generic projected
 #' coordinate system suitable for the AOI.
 #' @param x numeric vector of length 4 representing a bounding box (in lat/long)
 #' @param proj_specific a character vector. The projection to use.

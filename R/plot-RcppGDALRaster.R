@@ -636,7 +636,6 @@ plot.Rcpp_GDALRaster <- function(
   mar = c(0, 0, 0, 0),
   ...
 ) {
-  # browser()
   # get adjusted raster dims:
   if (is.null(xsize) && is.null(ysize)) {
     dims <- raster_dims_scale_by_device(x)

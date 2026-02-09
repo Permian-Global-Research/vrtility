@@ -127,8 +127,6 @@ build_vrt_stack <- function(
     warped = warped
   )
 
-  gdr$close()
-
   if (warped) {
     warped <- "vrt_stack_warped"
   } else {
