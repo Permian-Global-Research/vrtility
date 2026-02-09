@@ -5,12 +5,12 @@ test_that("python can be installed", {
 })
 
 test_that("python env can be located", {
-  expect_true(fs::file_exists(Sys.getenv("VRTILITY_PY_EXECUTABLE")))
-  expect_gte(as.numeric(Sys.getenv("VRTILITY_PY_VERSION_MAJOR")), 3)
-  expect_gte(as.numeric(Sys.getenv("VRTILITY_PY_VERSION_MINOR")), 0)
+  expect_true(fs::file_exists(getOption("vrt.py_executable")))
+  expect_gte(as.numeric(getOption("vrt.py_version_major")), 3)
+  expect_gte(as.numeric(getOption("vrt.py_version_minor")), 0)
 })
 
 test_that("python version parses correctly", {
-  expect_type(as.numeric(Sys.getenv("VRTILITY_PY_VERSION_MINOR")), "double")
-  expect_false(is.na(as.numeric(Sys.getenv("VRTILITY_PY_VERSION_MINOR"))))
+  expect_type(as.numeric(getOption("vrt.py_version_minor")), "double")
+  expect_false(is.na(as.numeric(getOption("vrt.py_version_minor"))))
 })
