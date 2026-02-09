@@ -9,7 +9,7 @@ call_gdal_warp <- function(
   config_options,
   quiet = TRUE
 ) {
-  v_assert_true(fs::file_exists(src_files), "src_files")
+  v_assert_true(fs::file_exists(extract_vrt_path(src_files)), "src_files")
 
   orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config))
