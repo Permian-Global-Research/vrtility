@@ -1,6 +1,7 @@
 #' set the band names for a vrt_x object
 #' @param x A vrt_block, vrt_stack, or vrt_collection object
 #' @param band_names A character vector of the band names
+#' @return A modified object of the same class as `x` with band names set.
 #' @export
 vrt_set_band_names <- function(x, band_names) {
   UseMethod("vrt_set_band_names")

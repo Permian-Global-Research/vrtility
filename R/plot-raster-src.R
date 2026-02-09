@@ -27,6 +27,7 @@
 #'   s2_imgs[3],
 #'   bands = c(3, 2, 1),
 #' )
+#' @return `NULL` invisibly. Called for its side effect of creating a plot.
 #' @export
 plot_raster_src <- function(
   x,

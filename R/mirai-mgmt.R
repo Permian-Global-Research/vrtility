@@ -4,6 +4,11 @@
 #' @rdname mirai-mgmt
 #' @details
 #' `n_daemons()` returns the number of mirai daemons running.
+#'
+#' `daemons_load_vrtility()` loads the vrtility Python environment
+#' on all mirai daemons. Called for its side effect; returns `NULL` invisibly.
+#' @return For `n_daemons()`, an integer indicating the number of active
+#' mirai daemon connections. For `daemons_load_vrtility()`, `NULL` invisibly.
 #' @export
 n_daemons <- function() {
   mirai::status()$connections
