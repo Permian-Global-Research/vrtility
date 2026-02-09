@@ -268,20 +268,20 @@ v_assert_muparser <- function() {
 }
 
 
-v_asset_hls_catalog <- function(stac_source, collection) {
+v_assert_hls_catalog <- function(stac_source, collection) {
   if (stac_source == "https://planetarycomputer.microsoft.com/api/stac/v1/") {
-    collection <- if (!collection %in% c("hls2-s30", "hls2-l30")) {
+    if (!collection %in% c("hls2-s30", "hls2-l30")) {
       cli::cli_abort(c(
         "When using the Planetary Computer STAC source,",
-        "the HLS collection must be specified as one of 
+        "the HLS collection must be specified as one of
         {.val hls2-s30} or {.val hls2-l30}"
       ))
     }
   } else {
-    collection <- if (!collection %in% c("HLSS30_2.0", "HLSL30_2.0")) {
+    if (!collection %in% c("HLSS30_2.0", "HLSL30_2.0")) {
       cli::cli_abort(c(
         "When using the NASA EARTHDATA STAC source,",
-        "the HLS collection must be specified as one of 
+        "the HLS collection must be specified as one of
         {.val HLSS30_2.0} or {.val HLSL30_2.0}"
       ))
     }
@@ -296,6 +296,6 @@ muparser_mask_warn <- function(func) {
       "i" = "Cannot use muparser for {.fn {func}}.",
       ">" = "Using Python implementation instead."
     ),
-    class = "muparser_not_available_error"
+    class = "muparser_not_available_warning"
   )
 }
