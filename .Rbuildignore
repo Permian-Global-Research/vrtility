@@ -30,3 +30,4 @@
 ^doc$
 ^Meta$
 ^benchmarks$
+^\.Rmd\.orig$
