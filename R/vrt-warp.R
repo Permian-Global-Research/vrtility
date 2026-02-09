@@ -355,7 +355,6 @@ vrt_warp.vrt_plan <- function(
           item_idx = item_idx,
           byte_band_idx = byte_band_idx
         )
-        # browser()
 
         src_df_warper(
           warptab,
@@ -463,7 +462,6 @@ warp_setup <- function(
   )
 
   n_assets <- length(assets)
-  # browser()
 
   if (is.null(x$bbox) || is.null(x$srs)) {
     gdr <- methods::new(gdalraster::GDALRaster, x$vrt_src, read_only = TRUE)
