@@ -207,7 +207,6 @@ singleband_m2m.vrt_collection_warped <- function(
   uniq_pths <- unique_fp(x$date_time, outfile)
 
   # Create output rasters for each time step
-  # browser()
   ds_list <- purrr::map2(
     uniq_pths,
     x[[1]],

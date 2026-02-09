@@ -356,43 +356,11 @@ vrt_warp.vrt_plan <- function(
           byte_band_idx = byte_band_idx
         )
 
-        # Execute warps for this item
-        purrr::pmap_chr(
+        src_df_warper(
           warptab,
-          function(band, resampling, src, tsrs, te, tr, outtf, item_idx) {
-            cclia <- c(
-              w_cl_arg,
-              "-b",
-              band,
-              "-r",
-              resampling,
-              "-te",
-              te,
-              "-tr",
-              tr,
-              if (
-                "TILED=YES" %in%
-                  w_cl_arg &&
-                  identical(fs::path_ext(outtf), "vrt")
-              ) {
-                src_block_size(src)
-              } else {
-                NULL
-              }
-            )
-
-            compute_with_py_env(
-              call_gdal_warp(
-                src,
-                outtf,
-                tsrs,
-                cl_arg = cclia,
-                config_options = config_options,
-                quiet = TRUE
-              ),
-              config_options = config_options
-            )
-          }
+          w_cl_arg,
+          config_options,
+          quiet = quiet
         )
 
         # Convert to vrt_block
@@ -413,7 +381,9 @@ vrt_warp.vrt_plan <- function(
       te = te,
       lazy = lazy,
       w_cl_arg = w_cl_arg,
-      config_options = x$config_options
+      config_options = x$config_options,
+      quiet = quiet,
+      src_df_warper = src_df_warper
     )
   )
 
@@ -493,6 +463,19 @@ warp_setup <- function(
 
   n_assets <- length(assets)
 
+  if (is.null(x$bbox) || is.null(x$srs)) {
+    gdr <- methods::new(gdalraster::GDALRaster, x$vrt_src, read_only = TRUE)
+    on.exit(gdr$close(), add = TRUE)
+    x$bbox <- gdr$bbox()
+    x$srs <- gdr$getProjection()
+  }
+
+  projwin <- glue::glue_collapse(
+    c(x$bbox[1], x$bbox[4], x$bbox[3], x$bbox[2]),
+    sep = ","
+  )
+  projwin_srs <- x$srs
+
   data.frame(
     band = seq_along(assets),
     resampling = resamp_methods,
@@ -501,7 +484,9 @@ warp_setup <- function(
     te = I(rep(list(as.numeric(te)), n_assets)),
     tr = I(rep(list(as.numeric(tr)), n_assets)),
     outtf = of,
-    item_idx = item_idx
+    item_idx = item_idx,
+    projwin = rep(projwin, n_assets),
+    projwin_srs = rep(projwin_srs, n_assets)
   )
 }
 
@@ -560,7 +545,18 @@ src_df_warper <- function(warptab, w_cl_arg, config_options, quiet) {
   of <- purrr::pmap_chr(
     warptab,
     purrr::in_parallel(
-      function(band, resampling, src, tsrs, te, tr, outtf, item_idx) {
+      function(
+        band,
+        resampling,
+        src,
+        tsrs,
+        te,
+        tr,
+        outtf,
+        item_idx,
+        projwin,
+        projwin_srs
+      ) {
         fs::path_ext(outtf)
         cclia <- c(
           w_cl_arg,
@@ -581,9 +577,13 @@ src_df_warper <- function(warptab, w_cl_arg, config_options, quiet) {
           }
         )
 
+        projwin_src <- glue::glue(
+          "vrt://{src}?projwin={projwin}&projwin_srs={projwin_srs}"
+        )
+
         compute_with_py_env(
           call_gdal_warp(
-            src,
+            projwin_src,
             outtf,
             tsrs,
             cl_arg = cclia,
