@@ -11,6 +11,9 @@ vrt_set_band_names(x, band_names)
 
 \item{band_names}{A character vector of the band names}
 }
+\value{
+A modified object of the same class as \code{x} with band names set.
+}
 \description{
 set the band names for a vrt_x object
 }

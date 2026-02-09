@@ -18,6 +18,10 @@ object. Default is 0.}
 \item{band_idx}{numeric; the target band position(s) to set the scale value
 for. If NULL, The scale_value will be set for all bands.}
 }
+\value{
+A modified object of the same class as \code{x} with scale and offset
+values set.
+}
 \description{
 Set the Scale XML tag for a VRT_x object. This information is
 preserved in derived VRT and GeoTIFF files.

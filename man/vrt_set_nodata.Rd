@@ -24,6 +24,9 @@ object. defaults to the same as \code{nodatavalue}.}
 \item{band_idx}{numeric; the target band position(s) to set the NoData value
 for. If NULL, The nodatavalue will be set for all bands.}
 }
+\value{
+A modified object of the same class as \code{x} with the NoData value set.
+}
 \description{
 Set the NoData value for a VRT_x object. This information is
 preserved in derived VRT and GeoTIFF files.

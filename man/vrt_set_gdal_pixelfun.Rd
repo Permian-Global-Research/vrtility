@@ -28,6 +28,10 @@ NaN. Defaults to FALSE. Sometimes useful if the pixel functions ignore the
 NoData value. see https://github.com/OSGeo/gdal/issues/4746. If you use this
 you will probably need to specify the '-srcnodata' option on compute.}
 }
+\value{
+A modified object of the same class as \code{x} with the GDAL pixel
+function set.
+}
 \description{
 Set built-in GDAL pixel functions of a VRT stack object
 }
