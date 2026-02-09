@@ -131,10 +131,6 @@
 .vrtility_cache <- new.env(parent = emptyenv())
 
 .onLoad <- function(libname, pkgname) {
-  # TODO: do we still need this? Check latest reticulate advice.
-  if (is.na(Sys.getenv("RETICULATE_USE_MANAGED_VENV", unset = NA))) {
-    Sys.setenv(RETICULATE_USE_MANAGED_VENV = "yes")
-  }
   # For numba compatibility e.g. for fastnanquantile;
   # track this issue: https://github.com/numba/numba/issues/10263
   vrtility_py_require("numpy<2.4.0")
