@@ -5,17 +5,17 @@
 .validate_plot_params <- function(bands, max_pixels, col) {
   # Device capabilities check
   if (isTRUE((grDevices::dev.capabilities()$rasterImage == "no"))) {
-    message("device does not support 'rasterImage()'")
+    cli::cli_inform("Device does not support {.fn rasterImage}.")
     return(list(valid = FALSE))
   }
 
   # Bands validation
   if (!is.null(bands)) {
     if (!(length(bands) %in% c(1, 3))) {
-      stop("bands argument must be of length 1 or 3", call. = FALSE)
+      cli::cli_abort("{.arg bands} must be of length 1 or 3.")
     }
   } else {
-    message("bands argument is NULL, defaulting to band 1")
+    cli::cli_inform("{.arg bands} is {.val NULL}, defaulting to band 1.")
     bands <- 1
   }
 
@@ -27,9 +27,8 @@
   # Color validation and setup
   if (!is.null(col)) {
     if (!is.character(col)) {
-      stop(
-        "'col' must be a character string see grDevices::col2rgb()",
-        call. = FALSE
+      cli::cli_abort(
+        "{.arg col} must be a character vector, see {.fn grDevices::col2rgb}."
       )
     }
   } else {
@@ -73,9 +72,8 @@
     ovr_ratio <- sqrt((xsize * ysize) / max_pixels)
     xsize <- trunc(xsize / ovr_ratio)
     ysize <- trunc(ysize / ovr_ratio)
-    warning(
-      "'xsize * ysize' exceeds 'max_pixels', downsampling applied",
-      call. = FALSE
+    cli::cli_warn(
+      "{.code xsize * ysize} exceeds {.arg max_pixels}, downsampling applied."
     )
   }
 
@@ -143,14 +141,14 @@
   # Apply pixel function if provided
   if (!is.null(pixel_fn)) {
     if (!is.function(pixel_fn)) {
-      stop("'pixel_fn' must be a function", call. = FALSE)
+      cli::cli_abort("{.arg pixel_fn} must be a function.")
     }
     data_in <- pixel_fn(data_in)
   }
 
   # Check for complex data
   if (typeof(data_in) == "complex") {
-    stop("specify 'pixel_fn' when plotting complex data types", call. = FALSE)
+    cli::cli_abort("Specify {.arg pixel_fn} when plotting complex data types.")
   }
 
   return(list(
@@ -739,7 +737,7 @@ plot.Rcpp_GDALRaster <- function(
 
   # 10. Disable legend for RGB plots
   if (legend && nbands != 1) {
-    message("legend is not supported for RGB plot")
+    cli::cli_inform("Legend is not supported for RGB plots.")
     legend <- FALSE
   }
 
