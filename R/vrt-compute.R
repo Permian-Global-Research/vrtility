@@ -567,7 +567,7 @@ set_dttm_metadata <- function(ras, dttm, .median = TRUE) {
   }
 
   if (.median) {
-    lubdttm <- median(lubdttm, na.rm = TRUE) |>
+    lubdttm <- stats::median(lubdttm, na.rm = TRUE) |>
       lubridate::as_date()
     dttm <- glue::glue("median date: {as.character(lubdttm)}")
   } else {

@@ -510,7 +510,7 @@
       leg_lab <- "No Data"
       text_y <- (legend_y_start + legend_y_end) / 2
     } else {
-      if (is(unique_values, "integer")) {
+      if (methods::is(unique_values, "integer")) {
         leg_lab <- formatC(rev(unique_values), format = "d")
       } else {
         # Auto-determine digits for discrete values if not specified

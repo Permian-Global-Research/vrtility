@@ -32,7 +32,7 @@ histeq_trans <- function(r) {
 
     if (length(valid_data) > 0) {
       # Create ECDF for this band using all valid data
-      band_ecdf <- ecdf(valid_data)
+      band_ecdf <- stats::ecdf(valid_data)
 
       # Apply histogram equalization
       band_arrays[,, band] <- band_ecdf(band_data)
@@ -48,7 +48,7 @@ histeq_trans <- function(r) {
 hist_all_trans <- function(r) {
   attribs <- attributes(r)
   # Create ECDF for this band using all valid data
-  rgb_ecdf <- ecdf(r)
+  rgb_ecdf <- stats::ecdf(r)
 
   r <- rgb_ecdf(r)
   attributes(r) <- attribs

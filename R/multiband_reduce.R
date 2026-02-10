@@ -201,7 +201,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   if (length(x$date_time) > 1) {
     lubdttm <- lubridate::as_datetime(x$date_time)
-    x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+    x$date_time <- as.character(stats::median(lubdttm, na.rm = TRUE))
   }
 
   vrt_collect(
