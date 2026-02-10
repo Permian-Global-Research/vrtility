@@ -12,9 +12,9 @@ filtering.
 ## Features
 
 - **Modular design**: Creates remote sensing pipelines using nested
-  VRTs, allowing easy addition of new pixel and masking functions. Can
-  be adapted for deriving spectral indices or calculating complex time
-  series functions. All powered by
+  VRTs, allowing the addition of new pixel and masking functions. Can be
+  used for deriving spectral indices or calculating complex time series
+  functions. All powered by
   [{gdalraster}](https://firelab.github.io/gdalraster/).
 
 - **Python and C++ pixel functions**: Enables use of both GDAL VRT
@@ -82,7 +82,7 @@ composite from Sentinel-2 data:
 
 ``` r
 library(vrtility)
-#> ✔ Using GDAL version 3.12.0
+#> ✔ Using GDAL version 3.12.1
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
 #>   `vrtility::set_gdal_cache_max()`.
 #  Set up asynchronous workers to parallelise vrt_collect and vrt_set_maskfun
@@ -127,7 +127,7 @@ system.time({
     )
 })
 #>    user  system elapsed 
-#>   1.143   0.155   5.686
+#>   1.126   0.101   6.392
 
 
 plot_raster_src(
