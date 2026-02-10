@@ -13,7 +13,6 @@ create_omnicloudmask(
   patch_overlap = 300,
   batch_size = 1,
   inference_dtype = c("bfloat16", "float32"),
-  inference_device = NULL,
   nodata_value = 0,
   model_version = NULL
 )
@@ -40,13 +39,8 @@ default: 0).}
 \item{batch_size}{The batch size to use for prediction (numeric default: 1).}
 
 \item{inference_dtype}{The data type to use for inference. Options include
-"bfloat16" and "float32" (character, default: "bfloat16"). using "bfloat16"
+"bfloat16" and "float32" (character, default: "bfloat16"). Using "bfloat16"
 should be faster if supported by the hardware.}
-
-\item{inference_device}{The device to use for inference. If \code{NULL}, the
-function will automatically select the best available device (character,
-default: \code{NULL}). Options include "cpu", "cuda", "mps", etc. The order of
-selection is based on availability: "cuda" > "mps" > "cpu".}
 
 \item{model_version}{The version of the OmniCloudMask model to use; options
 include "4.0", "3.0", "2.0", and "1.0". If \code{NULL}, the latest version will be
