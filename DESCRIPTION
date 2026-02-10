@@ -1,6 +1,6 @@
 Package: vrtility
 Title: Efficient Raster Processing Pipelines Using GDAL Virtual Rasters
-Version: 0.3.2
+Version: 0.3.3
 Authors@R: 
     person("Hugh", "Graham", , "hugh.graham@permianglobal.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9451-5010"))
