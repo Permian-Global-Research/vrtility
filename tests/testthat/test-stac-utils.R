@@ -35,12 +35,12 @@ create_mock_stac_items <- function(n = 3, collection = "test-collection") {
 
 test_that("format_stac_date formats dates correctly", {
   expect_equal(
-    vrtility:::format_stac_date("2023-01-15"),
+    format_stac_date("2023-01-15"),
     "2023-01-15T00:00:00Z"
   )
 
   expect_equal(
-    vrtility:::format_stac_date("2023-01-15T12:30:45"),
+    format_stac_date("2023-01-15T12:30:45"),
     "2023-01-15T12:30:45Z"
   )
 })
@@ -60,7 +60,7 @@ test_that("execute_stac_request handles GET/POST logic", {
 
   # Should execute without error
   expect_no_error({
-    result <- vrtility:::execute_stac_request(search)
+    result <- execute_stac_request(search)
     expect_s3_class(result, "rstac_doc")
   })
 })
@@ -362,10 +362,10 @@ test_that("functions handle edge cases gracefully", {
 })
 
 test_that("date formatting handles various inputs", {
-  expect_no_error(vrtility:::format_stac_date("2023-01-01"))
-  expect_no_error(vrtility:::format_stac_date("2023-01-01T12:00:00"))
-  expect_no_error(vrtility:::format_stac_date("2023-01-01T12:00:00Z"))
+  expect_no_error(format_stac_date("2023-01-01"))
+  expect_no_error(format_stac_date("2023-01-01T12:00:00"))
+  expect_no_error(format_stac_date("2023-01-01T12:00:00Z"))
 
   # Test with lubridate-parseable formats
-  expect_no_error(vrtility:::format_stac_date("2023/01/01"))
+  expect_no_error(format_stac_date("2023/01/01"))
 })

@@ -48,35 +48,35 @@ test_that("assertions work", {
 
 test_that("v_assert_length_gt works", {
   expect_error(
-    vrtility:::v_assert_length_gt(character(0), "x", 0, nullok = FALSE),
+    v_assert_length_gt(character(0), "x", 0, nullok = FALSE),
     class = "vrtility_length_error"
   )
   expect_error(
-    vrtility:::v_assert_length_gt("a", "x", 1, nullok = FALSE),
+    v_assert_length_gt("a", "x", 1, nullok = FALSE),
     class = "vrtility_length_error"
   )
-  expect_null(vrtility:::v_assert_length_gt(c("a", "b"), "x", 1))
-  expect_null(vrtility:::v_assert_length_gt(NULL, "x", 1, nullok = TRUE))
+  expect_null(v_assert_length_gt(c("a", "b"), "x", 1))
+  expect_null(v_assert_length_gt(NULL, "x", 1, nullok = TRUE))
 })
 
 test_that("v_assert_is_named works", {
   expect_error(
-    vrtility:::v_assert_is_named(c(1, 2, 3), "x"),
+    v_assert_is_named(c(1, 2, 3), "x"),
     class = "vrtility_named_error"
   )
-  expect_invisible(vrtility:::v_assert_is_named(c(a = 1, b = 2), "x"))
+  expect_invisible(v_assert_is_named(c(a = 1, b = 2), "x"))
 })
 
 test_that("v_assert_hls_catalog works", {
   # Planetary Computer source
   expect_error(
-    vrtility:::v_assert_hls_catalog(
+    v_assert_hls_catalog(
       "https://planetarycomputer.microsoft.com/api/stac/v1/",
       "wrong"
     )
   )
   expect_silent(
-    vrtility:::v_assert_hls_catalog(
+    v_assert_hls_catalog(
       "https://planetarycomputer.microsoft.com/api/stac/v1/",
       "hls2-s30"
     )
@@ -84,13 +84,13 @@ test_that("v_assert_hls_catalog works", {
 
   # NASA EARTHDATA source
   expect_error(
-    vrtility:::v_assert_hls_catalog(
+    v_assert_hls_catalog(
       "https://cmr.earthdata.nasa.gov/stac/LPCLOUD",
       "wrong"
     )
   )
   expect_silent(
-    vrtility:::v_assert_hls_catalog(
+    v_assert_hls_catalog(
       "https://cmr.earthdata.nasa.gov/stac/LPCLOUD",
       "HLSS30_2.0"
     )
@@ -100,7 +100,7 @@ test_that("v_assert_hls_catalog works", {
 test_that("v_assert_create_mask_fun_attrs works", {
   bad_fn <- function(x) x
   expect_error(
-    vrtility:::v_assert_create_mask_fun_attrs(bad_fn, "maskfun"),
+    v_assert_create_mask_fun_attrs(bad_fn, "maskfun"),
     class = "vrtility_maskcreator_fun_error"
   )
 
@@ -109,7 +109,7 @@ test_that("v_assert_create_mask_fun_attrs works", {
   attr(good_fn, "required_bands") <- c("red", "nir")
   attr(good_fn, "mask_description") <- "a test mask"
   expect_invisible(
-    vrtility:::v_assert_create_mask_fun_attrs(good_fn, "maskfun")
+    v_assert_create_mask_fun_attrs(good_fn, "maskfun")
   )
 })
 
@@ -119,27 +119,27 @@ test_that("v_assert_mask_names_match works", {
   attr(maskfun, "required_bands") <- c("red", "nir")
 
   expect_error(
-    vrtility:::v_assert_mask_names_match(c(blue = 1, green = 2), maskfun),
+    v_assert_mask_names_match(c(blue = 1, green = 2), maskfun),
     class = "vrtility_maskfun_error"
   )
   expect_silent(
-    vrtility:::v_assert_mask_names_match(c(red = 1, nir = 2), maskfun)
+    v_assert_mask_names_match(c(red = 1, nir = 2), maskfun)
   )
 })
 
 test_that("v_assert_blosc works", {
   # blosc may or may not be available - just check it doesn't error unexpectedly
-  if (vrtility:::check_blosc()) {
-    expect_silent(vrtility:::v_assert_blosc("warn"))
+  if (check_blosc()) {
+    expect_silent(v_assert_blosc("warn"))
   } else {
-    expect_warning(vrtility:::v_assert_blosc("warn"))
-    expect_error(vrtility:::v_assert_blosc("abort"))
+    expect_warning(v_assert_blosc("warn"))
+    expect_error(v_assert_blosc("abort"))
   }
 })
 
 test_that("muparser_mask_warn produces correct warning", {
   expect_warning(
-    vrtility:::muparser_mask_warn("test_func"),
+    muparser_mask_warn("test_func"),
     class = "muparser_not_available_warning"
   )
 })

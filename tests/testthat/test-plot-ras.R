@@ -2,7 +2,7 @@ test_that(".validate_plot_params works correctly", {
   skip_on_os("windows")
 
   # Test valid inputs
-  result <- vrtility:::.validate_plot_params(
+  result <- .validate_plot_params(
     bands = 1,
     max_pixels = 1000,
     col = c("red", "blue")
@@ -14,7 +14,7 @@ test_that(".validate_plot_params works correctly", {
   expect_true(is.function(result$col_map_fn))
 
   # Test RGB bands
-  result_rgb <- vrtility:::.validate_plot_params(
+  result_rgb <- .validate_plot_params(
     bands = c(1, 2, 3),
     max_pixels = NULL,
     col = NULL
@@ -26,7 +26,7 @@ test_that(".validate_plot_params works correctly", {
 
   # Test NULL bands - should default to 1
   expect_message(
-    result_null <- vrtility:::.validate_plot_params(
+    result_null <- .validate_plot_params(
       bands = NULL,
       max_pixels = 1000,
       col = NULL
@@ -37,7 +37,7 @@ test_that(".validate_plot_params works correctly", {
 
   # Test invalid band lengths
   expect_error(
-    vrtility:::.validate_plot_params(
+    .validate_plot_params(
       bands = c(1, 2),
       max_pixels = 1000,
       col = NULL
@@ -47,7 +47,7 @@ test_that(".validate_plot_params works correctly", {
 
   # Test invalid color type
   expect_error(
-    vrtility:::.validate_plot_params(bands = 1, max_pixels = 1000, col = 123),
+    .validate_plot_params(bands = 1, max_pixels = 1000, col = 123),
     "must be a character vector"
   )
 })
@@ -61,18 +61,18 @@ test_that(".setup_plot_dimensions works correctly", {
   on.exit(ds$close())
 
   # Test default dimensions
-  result <- vrtility:::.setup_plot_dimensions(ds, NULL, NULL, 1e6)
+  result <- .setup_plot_dimensions(ds, NULL, NULL, 1e6)
   expect_true(all(c("dm", "xsize", "ysize") %in% names(result)))
   expect_equal(length(result$dm), 3) # GDALRaster$dim() returns c(xsize, ysize, bands)
 
   # Test specified dimensions
-  result_spec <- vrtility:::.setup_plot_dimensions(ds, 100, 200, 1e6)
+  result_spec <- .setup_plot_dimensions(ds, 100, 200, 1e6)
   expect_equal(result_spec$xsize, 100)
   expect_equal(result_spec$ysize, 200)
 
   # Test max_pixels constraint
   expect_warning(
-    result_warn <- vrtility:::.setup_plot_dimensions(ds, 1000, 1000, 100),
+    result_warn <- .setup_plot_dimensions(ds, 1000, 1000, 100),
     "exceeds.*max_pixels.*downsampling"
   )
   expect_true(result_warn$xsize * result_warn$ysize <= 100)
@@ -85,7 +85,7 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
   continuous_data <- runif(1000, 0, 100)
   col_fn <- scales::colour_ramp(c("blue", "red"))
 
-  result_cont <- vrtility:::.create_color_mapping(
+  result_cont <- .create_color_mapping(
     continuous_data,
     1,
     NULL,
@@ -98,7 +98,7 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
 
   # Test discrete data
   discrete_data <- sample.int(5, 100, replace = TRUE)
-  result_disc <- vrtility:::.create_color_mapping(
+  result_disc <- .create_color_mapping(
     discrete_data,
     1,
     NULL,
@@ -111,7 +111,7 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
 
   # Test with NoData values
   data_with_nodata <- c(discrete_data, rep(-9999, 10))
-  result_nodata <- vrtility:::.create_color_mapping(
+  result_nodata <- .create_color_mapping(
     data_with_nodata,
     1,
     NULL,
@@ -122,7 +122,7 @@ test_that(".create_color_mapping handles discrete vs continuous data", {
   expect_false(result_nodata$use_normalization)
 
   # Test RGB data (should return original function)
-  result_rgb <- vrtility:::.create_color_mapping(
+  result_rgb <- .create_color_mapping(
     continuous_data,
     3,
     NULL,

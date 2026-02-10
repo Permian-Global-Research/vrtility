@@ -1,12 +1,12 @@
 test_that("is_temp_dir detects tempdir correctly", {
-  expect_true(vrtility:::is_temp_dir(tempdir()))
-  expect_true(vrtility:::is_temp_dir(file.path(tempdir(), "subdir")))
-  expect_false(vrtility:::is_temp_dir("/some/other/path"))
+  expect_true(is_temp_dir(tempdir()))
+  expect_true(is_temp_dir(file.path(tempdir(), "subdir")))
+  expect_false(is_temp_dir("/some/other/path"))
 })
 
 test_that("cache_init_checks sets default option", {
   withr::with_options(list(vrt.cache = NULL), {
-    vrtility:::cache_init_checks()
+    cache_init_checks()
     expect_equal(getOption("vrt.cache"), tempdir())
   })
 })

@@ -157,7 +157,7 @@ test_that("build_vrt_plan creates correct structure", {
     list(B02 = list(uri = "test2.tif", dttm = "2023-01-02"))
   )
 
-  plan <- vrtility:::build_vrt_plan(
+  plan <- build_vrt_plan(
     sources = sources,
     assets = "B02",
     date_time = c("2023-01-01", "2023-01-02"),
@@ -196,7 +196,7 @@ test_that("sources_printer truncates long URLs", {
     list(B02 = list(uri = long_url, dttm = "2023-01-01"))
   )
 
-  output <- vrtility:::sources_printer(sources)
+  output <- sources_printer(sources)
 
   # Should be truncated with ...
   expect_true(grepl("\\.\\.\\.$", output))
@@ -209,7 +209,7 @@ test_that("sources_printer handles short URLs", {
     list(B02 = list(uri = short_url, dttm = "2023-01-01"))
   )
 
-  output <- vrtility:::sources_printer(sources)
+  output <- sources_printer(sources)
 
   # Should contain the full URL
   expect_true(grepl(short_url, output, fixed = TRUE))
