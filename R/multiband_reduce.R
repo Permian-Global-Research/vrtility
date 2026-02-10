@@ -56,7 +56,7 @@
 #' is sequential.
 #' @rdname multiband_reduce
 #' @examples
-#' # mirai::daemons(3) # recommended, expecially for larger datasets.
+#' # mirai::daemons(3) # recommended, especially for larger datasets.
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 #'
 #' ex_collect <- vrt_collect(s2files)
@@ -201,7 +201,7 @@ multiband_reduce.vrt_collection_warped <- function(
 
   if (length(x$date_time) > 1) {
     lubdttm <- lubridate::as_datetime(x$date_time)
-    x$date_time <- as.character(median(lubdttm, na.rm = TRUE))
+    x$date_time <- as.character(stats::median(lubdttm, na.rm = TRUE))
   }
 
   vrt_collect(

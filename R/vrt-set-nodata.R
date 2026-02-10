@@ -17,6 +17,7 @@
 #'   nodata = 0
 #' )
 #' print(ex_nodata[[1]][[1]], xml = TRUE)
+#' @return A modified object of the same class as `x` with the NoData value set.
 #' @export
 vrt_set_nodata <- function(x, nodatavalue, nodata, band_idx) {
   UseMethod("vrt_set_nodata")

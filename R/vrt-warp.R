@@ -193,8 +193,8 @@ vrt_warp.vrt_collection <- function(
   }))
 
   if (is.null(lazy)) {
-    # TODO: note this assumed all remote if any are - generally fine. but may
-    # unecessarily force materialization in some edge cases...
+    # Note: this assumed all remote if any are - generally fine. but may
+    # unnecessarily force materialization in some edge cases...
     lazy <- !any_remote
   }
 
@@ -557,7 +557,6 @@ src_df_warper <- function(warptab, w_cl_arg, config_options, quiet) {
         projwin,
         projwin_srs
       ) {
-        fs::path_ext(outtf)
         cclia <- c(
           w_cl_arg,
           "-b",

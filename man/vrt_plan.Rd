@@ -49,7 +49,7 @@ not available until warping occurs. Use \code{\link[=vrt_collect]{vrt_collect()}
 inspect or use the source spatial properties before warping.
 }
 \examples{
-\dontrun{
+\donttest{
 # Query STAC items
 items <- sentinel2_stac_query(
   bbox = c(-12.5, -37.5, -12.0, -37.0),

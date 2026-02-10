@@ -228,7 +228,7 @@ target point is a geometric median rather than band-by-band medians. When
 }
 }
 \examples{
-# mirai::daemons(3) # recommended, expecially for larger datasets.
+# mirai::daemons(3) # recommended, especially for larger datasets.
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
 ex_collect <- vrt_collect(s2files)

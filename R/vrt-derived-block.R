@@ -6,6 +6,8 @@
 #'
 #' @description
 #' Create new vrt blocks containing derived expression bands.
+#' @return A modified `vrt_block` or `vrt_collection` containing the new
+#' derived expression bands.
 #' @export
 #' @examplesIf check_muparser()
 #' s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))

@@ -15,6 +15,10 @@ in the mirai daemons.}
 
 \item{...}{Additional arguments passed to \code{\link{vrtility_py_require}}}
 }
+\value{
+For \code{n_daemons()}, an integer indicating the number of active
+mirai daemon connections. For \code{daemons_load_vrtility()}, \code{NULL} invisibly.
+}
 \description{
 Just some helpful functions for managing the mirai daemons and
 parallel processing.
@@ -23,4 +27,7 @@ Load vrtility python environment in mirai daemons
 }
 \details{
 \code{n_daemons()} returns the number of mirai daemons running.
+
+\code{daemons_load_vrtility()} loads the vrtility Python environment
+on all mirai daemons. Called for its side effect; returns \code{NULL} invisibly.
 }

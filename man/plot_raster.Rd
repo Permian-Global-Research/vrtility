@@ -144,6 +144,9 @@ before attempting to read the VRT.}
 
 \item{item}{The numeric index of the item, in the vrt_collection, to plot}
 }
+\value{
+\code{NULL} invisibly. Called for its side effect of creating a plot.
+}
 \description{
 A wrapper around \code{gdalraster::plot_raster} that simplifies the
 process of plotting a raster file.

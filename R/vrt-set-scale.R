@@ -23,6 +23,8 @@
 #'   scale_value = 1e-4
 #' )
 #' print(ex_sc1[[1]][[1]], xml = TRUE)
+#' @return A modified object of the same class as `x` with scale and offset
+#' values set.
 #' @export
 vrt_set_scale <- function(x, scale_value, offset_value, band_idx) {
   UseMethod("vrt_set_scale")

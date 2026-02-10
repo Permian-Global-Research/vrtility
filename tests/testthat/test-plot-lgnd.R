@@ -7,7 +7,7 @@ test_that("discrete legend detection works correctly", {
   discrete_data <- rep(c(1, 2, 3, 4, 5), each = 20)
   col_fn <- scales::colour_ramp(c("red", "blue", "green"))
 
-  result <- vrtility:::.create_color_mapping(
+  result <- .create_color_mapping(
     discrete_data,
     1,
     NULL,
@@ -32,7 +32,7 @@ test_that("continuous legend detection works correctly", {
   continuous_data <- runif(1000, 0, 100)
   col_fn <- scales::colour_ramp(c("red", "blue"))
 
-  result <- vrtility:::.create_color_mapping(
+  result <- .create_color_mapping(
     continuous_data,
     1,
     NULL,
@@ -53,7 +53,7 @@ test_that("NoData values are properly excluded from legend calculations", {
   data_with_nodata <- c(valid_data, rep(-9999, 10))
   col_fn <- scales::colour_ramp(c("red", "blue"))
 
-  result <- vrtility:::.create_color_mapping(
+  result <- .create_color_mapping(
     data_with_nodata,
     1,
     NULL,
@@ -69,7 +69,7 @@ test_that("NoData values are properly excluded from legend calculations", {
   mock_xlim <- c(0, 100)
   mock_ylim <- c(0, 100)
 
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     data_with_nodata,
     col_fn,
     NULL,
@@ -97,7 +97,7 @@ test_that("percentile cuts exclude NoData values", {
   mock_xlim <- c(0, 100)
   mock_ylim <- c(0, 100)
 
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     data_with_nodata,
     col_fn,
     NULL,
@@ -203,7 +203,7 @@ test_that("legend creation handles edge cases", {
 
   # Test with single unique value
   single_value_data <- rep(42, 100)
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     single_value_data,
     col_fn,
     NULL,
@@ -224,7 +224,7 @@ test_that("legend creation handles edge cases", {
 
   # Should not produce warnings about min/max on empty data
   expect_no_warning({
-    legend_data_na <- vrtility:::.create_legend(
+    legend_data_na <- .create_legend(
       all_na_data,
       col_fn,
       NULL,
@@ -245,7 +245,7 @@ test_that("legend creation handles edge cases", {
 
   # Test with exactly 12 unique values (boundary case)
   boundary_data <- rep(1:12, each = 10)
-  legend_data_boundary <- vrtility:::.create_legend(
+  legend_data_boundary <- .create_legend(
     boundary_data,
     col_fn,
     NULL,
@@ -278,7 +278,7 @@ test_that("all-NA data plotting with legend doesn't crash", {
   mock_ylim <- c(0, 100)
   col_fn <- scales::colour_ramp(c("red", "blue"))
 
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     all_na_data,
     col_fn,
     NULL,
@@ -302,35 +302,35 @@ test_that("auto_determine_digits works correctly for various data ranges", {
 
   # Test integer data - should return 0 digits
   integer_data <- c(1, 2, 3, 4, 5)
-  expect_equal(vrtility:::.auto_determine_digits(integer_data), 0)
+  expect_equal(.auto_determine_digits(integer_data), 0)
 
   # Test large magnitude data (>= 1000) - should return 0 digits
   large_magnitude <- c(1000, 2000, 3000, 4000)
-  expect_equal(vrtility:::.auto_determine_digits(large_magnitude), 0)
+  expect_equal(.auto_determine_digits(large_magnitude), 0)
 
   # Test hundreds magnitude (>= 100) - should return 0 digits due to magnitude
   hundreds_magnitude <- c(100, 150, 200, 250)
-  expect_equal(vrtility:::.auto_determine_digits(hundreds_magnitude), 0)
+  expect_equal(.auto_determine_digits(hundreds_magnitude), 0)
 
   # Test tens magnitude (>= 10) - should return 0 digits due to magnitude
   tens_magnitude <- c(10, 15, 20, 25)
-  expect_equal(vrtility:::.auto_determine_digits(tens_magnitude), 0)
+  expect_equal(.auto_determine_digits(tens_magnitude), 0)
 
   # Test units range with decimal values - should return 2 digits
   units_range <- c(1.1, 1.5, 2.0, 2.8)
-  expect_equal(vrtility:::.auto_determine_digits(units_range), 2)
+  expect_equal(.auto_determine_digits(units_range), 2)
 
   # Test tenths range (< 1 but >= 0.1) - should return 2 digits
   tenths_range <- c(0.1, 0.3, 0.5, 0.8)
-  expect_equal(vrtility:::.auto_determine_digits(tenths_range), 2)
+  expect_equal(.auto_determine_digits(tenths_range), 2)
 
   # Test hundredths range (< 0.1 but >= 0.01) - should return 3 digits
   hundredths_range <- c(0.01, 0.03, 0.05, 0.08)
-  expect_equal(vrtility:::.auto_determine_digits(hundredths_range), 3)
+  expect_equal(.auto_determine_digits(hundredths_range), 3)
 
   # Test very small values - should use difference-based logic
   tiny_values <- c(0.0001, 0.0002, 0.0003)
-  result <- vrtility:::.auto_determine_digits(tiny_values)
+  result <- .auto_determine_digits(tiny_values)
   expect_true(result >= 4) # Should need at least 4 digits
   expect_true(result <= 6) # Should be capped at 6 digits
 })
@@ -339,33 +339,33 @@ test_that("auto_determine_digits handles edge cases", {
   skip_on_os("windows")
 
   # Test empty vector
-  expect_equal(vrtility:::.auto_determine_digits(numeric(0)), 0)
+  expect_equal(.auto_determine_digits(numeric(0)), 0)
 
   # Test all NA values
-  expect_equal(vrtility:::.auto_determine_digits(c(NA, NA, NA)), 0)
+  expect_equal(.auto_determine_digits(c(NA, NA, NA)), 0)
 
   # Test infinite values
-  expect_equal(vrtility:::.auto_determine_digits(c(Inf, -Inf, 1, 2)), 0)
+  expect_equal(.auto_determine_digits(c(Inf, -Inf, 1, 2)), 0)
 
   # Test single value
-  expect_equal(vrtility:::.auto_determine_digits(c(42.5)), 1) # Default for single value
+  expect_equal(.auto_determine_digits(c(42.5)), 1) # Default for single value
 
   # Test identical values (no range)
-  expect_equal(vrtility:::.auto_determine_digits(c(5.5, 5.5, 5.5)), 4)
+  expect_equal(.auto_determine_digits(c(5.5, 5.5, 5.5)), 4)
 
   # Test mix of integers and decimals where range calculation matters
   mixed_data <- c(1.0, 2.0, 3.0) # All end in .0 but stored as numeric
-  expect_equal(vrtility:::.auto_determine_digits(mixed_data), 0) # Should detect as integers
+  expect_equal(.auto_determine_digits(mixed_data), 0) # Should detect as integers
 
   # Test precision boundary cases
   boundary_1000 <- c(999, 1001) # Max magnitude >= 1000
-  expect_equal(vrtility:::.auto_determine_digits(boundary_1000), 0)
+  expect_equal(.auto_determine_digits(boundary_1000), 0)
 
   boundary_100 <- c(99, 101) # Max magnitude >= 100
-  expect_equal(vrtility:::.auto_determine_digits(boundary_100), 1)
+  expect_equal(.auto_determine_digits(boundary_100), 1)
 
   boundary_10 <- c(9, 11) # Max magnitude >= 10
-  expect_equal(vrtility:::.auto_determine_digits(boundary_10), 1)
+  expect_equal(.auto_determine_digits(boundary_10), 1)
 })
 
 test_that("auto_determine_digits integrates correctly with legend drawing", {
@@ -376,7 +376,7 @@ test_that("auto_determine_digits integrates correctly with legend drawing", {
   col_fn <- scales::colour_ramp(c("red", "blue"))
 
   # Create a legend and check that auto-digits is applied
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     discrete_data,
     col_fn,
     NULL,
@@ -397,13 +397,13 @@ test_that("auto_determine_digits integrates correctly with legend drawing", {
     # Capture the plot to avoid display
     png(tempfile(fileext = ".png"))
     plot.new()
-    vrtility:::.draw_legend(legend_data, xlim, ylim, digits = NULL)
+    .draw_legend(legend_data, xlim, ylim, digits = NULL)
     dev.off()
   })
 
   # Test with continuous data
   continuous_data <- runif(1000, 10.123, 15.789)
-  legend_data_cont <- vrtility:::.create_legend(
+  legend_data_cont <- .create_legend(
     continuous_data,
     col_fn,
     NULL,
@@ -418,7 +418,7 @@ test_that("auto_determine_digits integrates correctly with legend drawing", {
   expect_no_error({
     png(tempfile(fileext = ".png"))
     plot.new()
-    vrtility:::.draw_legend(legend_data_cont, xlim, ylim, digits = NULL)
+    .draw_legend(legend_data_cont, xlim, ylim, digits = NULL)
     dev.off()
   })
 })
@@ -430,7 +430,7 @@ test_that("auto_determine_digits respects manual override", {
   test_data <- c(1.11111, 2.22222, 3.33333) # Would auto-determine to 2 digits
 
   col_fn <- scales::colour_ramp(c("red", "blue"))
-  legend_data <- vrtility:::.create_legend(
+  legend_data <- .create_legend(
     test_data,
     col_fn,
     NULL,
@@ -450,7 +450,7 @@ test_that("auto_determine_digits respects manual override", {
     png(tempfile(fileext = ".png"))
     plot.new()
     # Manually specify 4 digits - should override auto-determination
-    vrtility:::.draw_legend(legend_data, xlim, ylim, digits = 4)
+    .draw_legend(legend_data, xlim, ylim, digits = 4)
     dev.off()
   })
 
@@ -458,7 +458,7 @@ test_that("auto_determine_digits respects manual override", {
   expect_no_error({
     png(tempfile(fileext = ".png"))
     plot.new()
-    vrtility:::.draw_legend(legend_data, xlim, ylim, digits = 0)
+    .draw_legend(legend_data, xlim, ylim, digits = 0)
     dev.off()
   })
 })

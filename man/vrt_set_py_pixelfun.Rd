@@ -46,6 +46,9 @@ However, it requires the \code{fastnanquantile} library to be installed in the
 Python environment (This is handled automatically). Default is TRUE.}
 }
 \value{
+A modified object of the same class as \code{x} with the Python pixel
+function set.
+
 character of the python function
 
 character of the python function

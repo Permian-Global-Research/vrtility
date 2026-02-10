@@ -30,3 +30,6 @@
 ^doc$
 ^Meta$
 ^benchmarks$
+^\.Rmd\.orig$
+^vignettes/figure$
+^man/figures$

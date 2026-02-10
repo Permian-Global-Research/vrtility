@@ -217,7 +217,7 @@ vrt_set_maskfun.vrt_block <- function(
 
   if (drop_mask_band) {
     xml2::xml_remove(bands[[mask_idx]])
-    # this next bit is needed incase the mask is not the last band.
+    # this next bit is needed in case the mask is not the last band.
     regrab_bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
     purrr::walk(seq_along(regrab_bands), function(i) {
       xml2::xml_set_attr(regrab_bands[[i]], "band", i)

@@ -27,6 +27,7 @@
 #'   s2_imgs[3],
 #'   bands = c(3, 2, 1),
 #' )
+#' @return `NULL` invisibly. Called for its side effect of creating a plot.
 #' @export
 plot_raster_src <- function(
   x,
@@ -58,7 +59,7 @@ plot_raster_src <- function(
   ds <- methods::new(gdalraster::GDALRaster, x)
   on.exit(ds$close(), add = TRUE)
 
-  # TODO: is this actually doing anything now we call plot?
+  # Set GDAL resampling method to nearest neighbour for faster plotting
   rior_or <- gdalraster::get_config_option("GDAL_RASTERIO_RESAMPLING")
   gdalraster::set_config_option("GDAL_RASTERIO_RESAMPLING", "NEAREST")
   on.exit(

@@ -1,6 +1,8 @@
 ---
 title: "Creating NDVI Time Series from HLS Data"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Creating NDVI Time Series from HLS Data}
   %\VignetteEngine{knitr::rmarkdown}

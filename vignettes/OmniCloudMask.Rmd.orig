@@ -1,6 +1,8 @@
 ---
 title: "OmniCloudMask"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{OmniCloudMask}
   %\VignetteEngine{knitr::rmarkdown}

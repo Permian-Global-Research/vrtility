@@ -17,6 +17,9 @@ vrt_add_empty_band(x, after, description, scale_value)
 the scale of the first band in the VRT will be used. Be careful, Landsat for
 example has different scales for different bands.}
 }
+\value{
+A modified object of the same class as \code{x} with an empty band added.
+}
 \description{
 Add an empty band to a VRT_x object
 }

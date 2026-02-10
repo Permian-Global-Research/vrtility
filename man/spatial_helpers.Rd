@@ -59,7 +59,7 @@ A character string representing the SRS in WKT format.
 }
 \description{
 This function takes a lat/long bounding box and projects it to
-either a prescibed projected coordinate system or a generic projected
+either a prescribed projected coordinate system or a generic projected
 coordinate system suitable for the AOI.
 }
 \details{

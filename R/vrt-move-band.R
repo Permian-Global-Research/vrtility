@@ -1,9 +1,10 @@
-#' @title Add an empty band to a VRT_x object
+#' @title Move a band in a VRT_x object
 #' @param x A VRT_x object
 #' @param band_idx numeric indicating the band number of the band to move.
-#' @param after numeric indicating the band after which the new band should be
-#' places. Note this is based on the initial state of the band ordering. eg. do
+#' @param after numeric indicating the band after which the moved band should be
+#' placed. Note this is based on the initial state of the band ordering. eg. do
 #' not add 1 if you are moving the band forward.
+#' @return A modified object of the same class as `x` with the band reordered.
 #' @export
 vrt_move_band <- function(x, band_idx, after) {
   v_assert_type(after, "after", "numeric", nullok = FALSE)

@@ -3,6 +3,8 @@
 #' @param pixfun A function that returns the Python code for the pixel function
 #' @param band_idx The indices of the bands to set the pixel function for. If
 #' NULL, the pixel function is set for all bands.
+#' @return A modified object of the same class as `x` with the Python pixel
+#' function set.
 #' @export
 #' @rdname vrt_set_py_pixelfun
 #'

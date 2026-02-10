@@ -16,6 +16,8 @@
 #' Where a pixel function requires arguments, these can be passed as named
 #' arguments, in line with the specified naming in PixelFunctionArguments of
 #' the table at the above link.
+#' @return A modified object of the same class as `x` with the GDAL pixel
+#' function set.
 #' @export
 #' @rdname vrt_set_gdal_pixelfun
 #' @examples

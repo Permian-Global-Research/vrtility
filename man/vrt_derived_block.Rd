@@ -13,6 +13,10 @@ vrt_derived_block(x, ...)
 must the names of existing bands in the vrt_block object. the argument name
 is used to name the new (derived) band.}
 }
+\value{
+A modified \code{vrt_block} or \code{vrt_collection} containing the new
+derived expression bands.
+}
 \description{
 Create new vrt blocks containing derived expression bands.
 }

@@ -1,8 +1,7 @@
 #' @title Setup the vrtility Python environment
-#' @description A very thin wrapper around the `reticulate::py_install` function
-#' to set up the necessary python environment and then set some options required
+#' @description A very thin wrapper around the `reticulate::py_require` function
+#' to set up the necessary Python environment and then set some options required
 #' by the vrtility package.
-#' environment
 #' @inheritParams reticulate::py_require
 #' @return Invisible
 #' @export
@@ -31,24 +30,26 @@ vrtility_py_require <- function(
 }
 
 
-#' @title Set Python environment variables
-#' @description set_py_env_vals sets the environment variables required by the
+#' @title Set Python environment options
+#' @description `set_py_env_vals` sets the package options required by the
 #' vrtility package - typically not required.
 #' @export
 #' @rdname vrtility_python
 #' @details
-#' set_py_env_vals is only required if you are running reticulate::py_env in
-#' some non-standard way. In general it is a lot easier to  use #
-#' vrtility_py_require which will automatically set the necessary options.
+#' `set_py_env_vals` is only required if you are running reticulate in
+#' some non-standard way. In general it is easier to use
+#' `vrtility_py_require` which will automatically set the necessary options.
 set_py_env_vals <- function() {
   sys <- reticulate::import("sys")
-  Sys.setenv(VRTILITY_PY_EXECUTABLE = sys$executable)
-  Sys.setenv(VRTILITY_PY_VERSION_MAJOR = sys$version_info$major)
-  Sys.setenv(VRTILITY_PY_VERSION_MINOR = sys$version_info$minor)
+  options(
+    vrt.py_executable = sys$executable,
+    vrt.py_version_major = sys$version_info$major,
+    vrt.py_version_minor = sys$version_info$minor
+  )
   invisible(c(
-    VRTILITY_PY_EXECUTABLE = Sys.getenv("VRTILITY_PY_EXECUTABLE"),
-    VRTILITY_PY_VERSION_MAJOR = Sys.getenv("VRTILITY_PY_VERSION_MAJOR"),
-    VRTILITY_PY_VERSION_MINOR = Sys.getenv("VRTILITY_PY_VERSION_MINOR")
+    vrt.py_executable = getOption("vrt.py_executable"),
+    vrt.py_version_major = getOption("vrt.py_version_major"),
+    vrt.py_version_minor = getOption("vrt.py_version_minor")
   ))
 }
 
@@ -61,14 +62,19 @@ set_py_env_vals <- function() {
 #' \code{\link{gdal_config_options}}
 #' @export
 #' @rdname vrtility_python
-#' @examples
+#' @examplesIf reticulate::py_available()
 #' compute_with_py_env(print("Hello World"))
 compute_with_py_env <- function(
   code,
   config_options = NULL
 ) {
-  # First, ensure we have the correct paths
-  py_bin <- Sys.getenv("VRTILITY_PY_EXECUTABLE", unset = NA)
+
+  # Lazily initialize Python env info on first use
+  py_bin <- getOption("vrt.py_executable", default = NA)
+  if (is.na(py_bin)) {
+    set_py_env_vals()
+    py_bin <- getOption("vrt.py_executable", default = NA)
+  }
 
   if (is.na(py_bin)) {
     cli::cli_abort(c(

@@ -59,12 +59,11 @@ set in the environment before executing the code. eg. generated from
 Invisible
 }
 \description{
-A very thin wrapper around the \code{reticulate::py_install} function
-to set up the necessary python environment and then set some options required
+A very thin wrapper around the \code{reticulate::py_require} function
+to set up the necessary Python environment and then set some options required
 by the vrtility package.
-environment
 
-set_py_env_vals sets the environment variables required by the
+\code{set_py_env_vals} sets the package options required by the
 vrtility package - typically not required.
 }
 \details{
@@ -73,10 +72,12 @@ you wish to use a custom python pixel function which uses a python package
 not installed by default (currently only numpy), then you can use
 this function to install the package, making sure to set action as "add".
 
-set_py_env_vals is only required if you are running reticulate::py_env in
-some non-standard way. In general it is a lot easier to  use #
-vrtility_py_require which will automatically set the necessary options.
+\code{set_py_env_vals} is only required if you are running reticulate in
+some non-standard way. In general it is easier to use
+\code{vrtility_py_require} which will automatically set the necessary options.
 }
 \examples{
+\dontshow{if (reticulate::py_available()) withAutoprint(\{ # examplesIf}
 compute_with_py_env(print("Hello World"))
+\dontshow{\}) # examplesIf}
 }
