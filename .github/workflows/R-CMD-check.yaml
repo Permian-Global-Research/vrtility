@@ -54,12 +54,12 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Update Rtools45 libraries (Windows)
+      - name: Install latest Rtools45 (Windows)
         if: runner.os == 'Windows'
         run: |
-          c:\rtools45\usr\bin\bash.exe --login -c "pacman -Syuu --noconfirm"
-          c:\rtools45\usr\bin\bash.exe --login -c "pacman -Syuu --noconfirm"
-        shell: cmd
+          curl -Lo rtools45.exe https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-6768-6492.exe
+          Start-Process -FilePath .\rtools45.exe -ArgumentList "/VERYSILENT /CURRENTUSER" -Wait
+        shell: pwsh
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
