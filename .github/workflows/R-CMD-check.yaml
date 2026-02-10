@@ -54,12 +54,12 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install latest Rtools45 (Windows)
+      - name: Update Rtools45 toolchain libraries (Windows)
         if: runner.os == 'Windows'
         run: |
-          curl -Lo rtools45.exe https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-6768-6492.exe
-          Start-Process -FilePath .\rtools45.exe -ArgumentList "/VERYSILENT /CURRENTUSER" -Wait
-        shell: pwsh
+          curl -Lo rtools45-libs.tar.zst https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-toolchain-libs-base-6768.tar.zst
+          tar -xf rtools45-libs.tar.zst -C /c/rtools45
+        shell: bash
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
