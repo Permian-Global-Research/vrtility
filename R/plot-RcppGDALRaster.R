@@ -392,7 +392,7 @@
       # Continuous legend
       leg_data <- seq(mm[1], mm[2], length.out = 256)
       if (normalize) {
-        leg_data <- gdalraster:::.normalize(leg_data, mm)
+        leg_data <- .gr_normalize(leg_data, mm)
       }
       leg_data <- sort(leg_data, decreasing = TRUE)
       leg_data <- col_map_fn(leg_data)
@@ -401,7 +401,7 @@
   } else {
     leg_data <- sort(seq(mm[1], mm[2], by = 1), decreasing = TRUE)
     leg_data <- array(leg_data, dim = c(1, length(leg_data), 1))
-    leg_img <- gdalraster:::.as_raster(
+    leg_img <- .gr_as_raster(
       leg_data,
       col_tbl = col_tbl,
       maxColorValue = maxColorValue,
@@ -695,7 +695,7 @@ plot.Rcpp_GDALRaster <- function(
 
   # 7. Apply south-up transformation if needed
   if (south_up) {
-    data_in <- gdalraster:::.flip_vertical(
+    data_in <- .gr_flip_vertical(
       data_in,
       dimensions$xsize,
       dimensions$ysize,
@@ -724,7 +724,7 @@ plot.Rcpp_GDALRaster <- function(
 
   # 9. Create the main raster image
   a <- array(data_in, dim = c(dimensions$xsize, dimensions$ysize, nbands))
-  r <- gdalraster:::.as_raster(
+  r <- .gr_as_raster(
     a,
     col_tbl = col_tbl,
     maxColorValue = maxColorValue,
