@@ -244,12 +244,8 @@ build_bitmask_muparser <- function() {
 #' @param patch_overlap The overlap between patches (numeric default: 300).
 #' @param batch_size The batch size to use for prediction (numeric default: 1).
 #' @param inference_dtype The data type to use for inference. Options include
-#' "bfloat16" and "float32" (character, default: "bfloat16"). using "bfloat16"
+#' "bfloat16" and "float32" (character, default: "bfloat16"). Using "bfloat16"
 #' should be faster if supported by the hardware.
-#' @param inference_device The device to use for inference. If `NULL`, the
-#' function will automatically select the best available device (character,
-#' default: `NULL`). Options include "cpu", "cuda", "mps", etc. The order of
-#' selection is based on availability: "cuda" > "mps" > "cpu".
 #' @param nodata_value The nodata value to use in the output mask (numeric,
 #' default: 0).
 #' @param model_version The version of the OmniCloudMask model to use; options
@@ -267,17 +263,19 @@ create_omnicloudmask <- function(
   patch_overlap = 300,
   batch_size = 1,
   inference_dtype = c("bfloat16", "float32"),
-  inference_device = NULL,
   nodata_value = 0,
   model_version = NULL
 ) {
-  # assert omicloudmask is installed
+  # assert omnicloudmask is installed
   if (!reticulate::py_module_available("omnicloudmask")) {
     vrtility_py_require("omnicloudmask")
   }
 
-  if (!reticulate::py_module_available("fastai")) {
-    vrtility_py_require("fastai")
+  # fastai is only required for legacy model versions (1-3)
+  if (!is.null(model_version) && model_version %in% c("1.0", "2.0", "3.0")) {
+    if (!reticulate::py_module_available("fastai")) {
+      vrtility_py_require("fastai")
+    }
   }
 
   # assert args
@@ -300,43 +298,6 @@ create_omnicloudmask <- function(
     multiple = TRUE
   )
 
-  if (!is.null(inference_device)) {
-    inference_device <- rlang::arg_match(
-      inference_device,
-      c(
-        "cpu",
-        "cuda",
-        "ipu",
-        "xpu",
-        "mkldnn",
-        "opengl",
-        "opencl",
-        "ideep",
-        "hip",
-        "ve",
-        "fpga",
-        "maia",
-        "xla",
-        "lazy",
-        "vulkan",
-        "mps",
-        "meta",
-        "hpu",
-        "mtia",
-        "privateuseone"
-      )
-    )
-  } else {
-    torch <- reticulate::import("torch")
-    if (torch$cuda$is_available()) {
-      inference_device <- "cuda"
-    } else if (torch$backends$mps$is_available()) {
-      inference_device <- "mps"
-    } else {
-      inference_device <- "cpu"
-    }
-  }
-
   inference_dtype <- rlang::arg_match(inference_dtype)
 
   if (!is.null(model_version)) {
@@ -352,31 +313,22 @@ create_omnicloudmask <- function(
     "
 import numpy as np
 import omnicloudmask as omc
-import torch
 
 def create_mask(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,
                   raster_ysize, buf_radius, gt, **kwargs):
-    try:
-      np_rgn = np.stack([in_ar[0], in_ar[1], in_ar[2]], axis=0)
-      
-      pred_mask = omc.predict_from_array(
-        np_rgn,
-        patch_size = {patch_size},
-        patch_overlap = {patch_overlap},
-        batch_size = {batch_size},
-        inference_device = '{inference_device}',
-        inference_dtype = torch.{inference_dtype},
-        no_data_value = {nodata_value},
-        model_version = {model_version}
-      ) 
+    np_rgn = np.stack([in_ar[0], in_ar[1], in_ar[2]], axis=0)
 
-      out_ar[:] = pred_mask[0]
+    pred_mask = omc.predict_from_array(
+      np_rgn,
+      patch_size = {patch_size},
+      patch_overlap = {patch_overlap},
+      batch_size = {batch_size},
+      inference_dtype = '{inference_dtype}',
+      no_data_value = {nodata_value},
+      model_version = {model_version}
+    )
 
-    finally:
-      if '{inference_device}' == 'cuda':
-        torch.cuda.empty_cache()
-      elif '{inference_device}' == 'mps':
-        torch.backends.mps.empty_cache()
+    out_ar[:] = pred_mask[0]
 "
   )
 
