@@ -1,5 +1,5 @@
 test_that("py pixel functions work", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
   s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
   ex_collect <- vrt_collect(s2files)

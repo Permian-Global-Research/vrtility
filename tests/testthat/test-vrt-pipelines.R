@@ -130,7 +130,7 @@ pipeline_tests <- function(v) {
 
 
 test_that("full vrt pipeline works async", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
   if (!mirai::daemons_set()) {
     mirai::daemons(2)
   }
@@ -138,7 +138,7 @@ test_that("full vrt pipeline works async", {
 })
 
 test_that("full vrt pipeline works synchronously", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
   if (mirai::daemons_set()) {
     mirai::daemons(0)
   }

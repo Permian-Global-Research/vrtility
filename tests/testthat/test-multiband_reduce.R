@@ -132,7 +132,7 @@ multiband_tests <- function() {
 test_that("multiband_reduce works async", {
   # NOTE: we use expect_gt rather than matching exact values because windows
   # tests give different values - presumably some floadting point nonsence.
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
 
   if (!mirai::daemons_set()) {
     mirai::daemons(2)
@@ -142,7 +142,7 @@ test_that("multiband_reduce works async", {
 })
 
 test_that("multiband_reduce works synchronously", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
 
   if (mirai::daemons_set()) {
     mirai::daemons(0)
