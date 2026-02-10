@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -79,10 +80,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Using GDAL version 3.8.4</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> GDAL_CACHEMAX set to 1.562 GiB; to change this use</span></span>
-<span><span class="co">#&gt;   `vrtility::set_gdal_cache_max()`.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -95,7 +93,7 @@ is key to working effectively with the package’s VRT-based pipelines.
 Figure 1 provides a visual overview of these data structures and their
 relationships. which are discussed in detail below.</p>
 <div class="figure" style="text-align: center">
-<img src="figure/data-concepts.png" alt="Figure 1: Core data structures in vrtility: vrt_block, vrt_collection, and vrt_stack. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)." style="width: 100%;"><p class="caption">
+<img src="https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/data-concepts.png" alt="Figure 1: Core data structures in vrtility: vrt_block, vrt_collection, and vrt_stack. Red, green, and blue lines represent raster bands; black boxes represent VRT files; t* labels indicate discrete epochs (time steps)." style="width: 100%;"><p class="caption">
 Figure 1: Core data structures in vrtility: <code>vrt_block</code>,
 <code>vrt_collection</code>, and <code>vrt_stack</code>. Red, green, and
 blue lines represent raster bands; black boxes represent VRT files; t*
@@ -148,19 +146,17 @@ vrtility’s pipeline system.</p>
 <span></span>
 <span><span class="co"># Print the block to see its structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">single_block</span><span class="op">)</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Block&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">VRT XML: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, xml = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Block&gt;</span></span>
+<span><span class="co">#&gt; VRT XML: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 289813.58 88876.43 297031.04 95714.02</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9929669011164, 19.9929669011164</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08, SCL</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">No Data Value(s):</span> 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Date Time:</span> 2020-01-01 10:15:30 UTC</span></span></code></pre></div>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 289813.58 88876.43 297031.04 95714.02</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9929669011164, 19.9929669011164</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08, SCL</span></span>
+<span><span class="co">#&gt; No Data Value(s): 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; Date Time: 2020-01-01 10:15:30 UTC</span></span></code></pre></div>
 <p>A <code>vrt_block</code> contains:</p>
 <ul>
 <li><p><code>vrt</code>: The XML representation of the VRT</p></li>
@@ -203,22 +199,20 @@ operations</p></li>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Print collection summary</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">)</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Collection&gt;</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Collection&gt;</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span> <span style="color: #FF55FF; font-style: italic;">PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span> <span style="color: #FF55FF; font-style: italic;">PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> NA</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9923198138287, 19.9923198138287</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Start Date:</span> 2020-01-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">End Date:</span> 2020-05-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Number of Items:</span> 5</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08, SCL</span></span>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</span></span>
+<span><span class="co">#&gt; Bounding Box: NA</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9923198138287, 19.9923198138287</span></span>
+<span><span class="co">#&gt; Start Date: 2020-01-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; End Date: 2020-05-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; Number of Items: 5</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08, SCL</span></span>
 <span></span>
 <span><span class="co"># A collection is a list of blocks</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
@@ -226,33 +220,29 @@ operations</p></li>
 <span></span>
 <span><span class="co"># Access individual blocks</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="co"># First time step</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Block&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">VRT XML: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, xml = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Block&gt;</span></span>
+<span><span class="co">#&gt; VRT XML: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 289813.58 88876.43 297031.04 95714.02</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9929669011164, 19.9929669011164</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08, SCL</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">No Data Value(s):</span> 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Date Time:</span> 2020-01-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 289813.58 88876.43 297031.04 95714.02</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9929669011164, 19.9929669011164</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08, SCL</span></span>
+<span><span class="co">#&gt; No Data Value(s): 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; Date Time: 2020-01-01 10:15:30 UTC</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ex_collect</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="co"># Second time step</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Block&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">VRT XML: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, xml = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Block&gt;</span></span>
+<span><span class="co">#&gt; VRT XML: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 460436.9 5615438.2 467554.2 5622175.6</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9923198138287, 19.9923198138287</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08, SCL</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">No Data Value(s):</span> 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Date Time:</span> 2020-02-01 10:15:30 UTC</span></span></code></pre></div>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 460436.9 5615438.2 467554.2 5622175.6</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9923198138287, 19.9923198138287</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08, SCL</span></span>
+<span><span class="co">#&gt; No Data Value(s): 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; Date Time: 2020-02-01 10:15:30 UTC</span></span></code></pre></div>
 <p>A <code>vrt_collection</code> extends <code>vrt_block</code>
 with:</p>
 <ul>
@@ -284,20 +274,18 @@ collection has been warped to a common grid.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ex_warped</span><span class="op">)</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Collection&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Mask Function: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, maskfun = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Collection&gt;</span></span>
+<span><span class="co">#&gt; Mask Function: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 289813.58 88876.43 297031.04 95714.02</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9929669011164, 19.9929669011164</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Start Date:</span> 2020-01-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">End Date:</span> 2020-05-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Number of Items:</span> 5</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08</span></span>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 289813.58 88876.43 297031.04 95714.02</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9929669011164, 19.9929669011164</span></span>
+<span><span class="co">#&gt; Start Date: 2020-01-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; End Date: 2020-05-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; Number of Items: 5</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08</span></span>
 <span></span>
 <span><span class="co"># 4. Compute or stack for further processing</span></span></code></pre></div>
 <p>There are two functions which only support
@@ -335,21 +323,19 @@ in <code><a href="../reference/multiband_reduce.html">multiband_reduce()</a></co
 <span></span>
 <span><span class="co"># Print stack info</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ex_stack</span><span class="op">)</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">VRT STACK</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">VRT XML: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, xml = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Mask Function: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, maskfun = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → VRT STACK</span></span>
+<span><span class="co">#&gt; VRT XML: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
+<span><span class="co">#&gt; Mask Function: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 289813.58 88876.43 297031.04 95714.02</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Start Date:</span> 2020-01-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">End Date:</span> 2020-05-01 10:15:30 UTC</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Number of Items:</span> 5</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08</span></span>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 289813.58 88876.43 297031.04 95714.02</span></span>
+<span><span class="co">#&gt; Start Date: 2020-01-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; End Date: 2020-05-01 10:15:30 UTC</span></span>
+<span><span class="co">#&gt; Number of Items: 5</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08</span></span>
 <span></span>
 <span><span class="co"># A stack consolidates all time steps into bands</span></span>
 <span><span class="co"># If collection had 4 dates × 3 bands = 12 bands in stack</span></span></code></pre></div>
@@ -405,19 +391,17 @@ median function across the stacked bands, returning a new
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">median_composite</span><span class="op">)</span></span>
-<span><span class="co">#&gt; → <span style="color: #00BB00; font-weight: bold;">&lt;VRT Block&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">VRT XML: </span><span style="font-weight: bold;">[hidden]</span></span></span>
-<span><span class="co">#&gt;   <span style="font-style: italic;">run </span><span style="font-weight: bold; font-style: italic;">print</span><span style="color: #D7AF00; font-style: italic;">(</span><span style="font-style: italic;">x, xml = </span><span style="color: #D75FAF; font-style: italic;">TRUE</span><span style="color: #D7AF00; font-style: italic;">)</span><span style="font-style: italic;"> to view</span></span></span>
+<span><span class="co">#&gt; → &lt;VRT Block&gt;</span></span>
+<span><span class="co">#&gt; VRT XML: [hidden]</span></span>
+<span><span class="co">#&gt;   run </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt;  VRT SRS: </span></span></span>
-<span><span class="co"><span style="color: #BBBB00; font-weight: bold;">#&gt; </span><span style="color: #FF55FF; font-style: italic;">PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co"><span style="color: #FF55FF; font-style: italic;">#&gt; </span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Bounding Box:</span> 289798.06 88868.74 297035.51 95726.33</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Pixel res:</span> 19.9929669011164, 19.9929669011164</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Assets:</span> B02, B03, B04, B08</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">No Data Value(s):</span> 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">Date Time:</span> 2020-03-01 UTC</span></span></code></pre></div>
+<span><span class="co">#&gt;  VRT SRS: </span></span>
+<span><span class="co">#&gt; PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]</span></span>
+<span><span class="co">#&gt; Bounding Box: 289798.06 88868.74 297035.51 95726.33</span></span>
+<span><span class="co">#&gt; Pixel res: 19.9929669011164, 19.9929669011164</span></span>
+<span><span class="co">#&gt; Assets: B02, B03, B04, B08</span></span>
+<span><span class="co">#&gt; No Data Value(s): 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; Date Time: 2020-03-01 UTC</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

@@ -54,6 +54,9 @@ mean_db_numpy()
 
 ## Value
 
+A modified object of the same class as `x` with the Python pixel
+function set.
+
 character of the python function
 
 character of the python function

@@ -192,7 +192,7 @@ vrt_compute(
 
 - apply_scale:
 
-  A logical indicating whether to apply scale values existing the in
+  A logical indicating whether to apply scale values existing in the
   file metadata.
 
 - dst_nodata:
@@ -220,7 +220,7 @@ data has not yet been virtually aligned/resampled.
 
 The choice of `engine` will depend on the nature of the computation
 being carried out. In the majority of cases warping is preferred,
-especically when we are not processing the entirity of the input dataset
+especially when we are not processing the entirety of the input dataset
 (as is usually the case when working with online data sources).
 
 ## Examples

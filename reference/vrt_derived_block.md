@@ -20,6 +20,11 @@ vrt_derived_block(x, ...)
   the names of existing bands in the vrt_block object. the argument name
   is used to name the new (derived) band.
 
+## Value
+
+A modified `vrt_block` or `vrt_collection` containing the new derived
+expression bands.
+
 ## Examples
 
 ``` r

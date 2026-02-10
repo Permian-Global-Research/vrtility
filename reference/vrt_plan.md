@@ -94,7 +94,7 @@ for warping
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Query STAC items
 items <- sentinel2_stac_query(
   bbox = c(-12.5, -37.5, -12.0, -37.0),
@@ -114,5 +114,5 @@ warped <- vrt_warp(
   te = c(700000, 5850000, 710000, 5860000),
   tr = c(10, 10)
 )
-} # }
+# }
 ```

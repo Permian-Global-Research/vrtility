@@ -190,4 +190,4 @@ gif_file <- gifski::save_gif(
 )
 ```
 
-![](figure/ndvi_timeseries.gif)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/ndvi_timeseries.gif)

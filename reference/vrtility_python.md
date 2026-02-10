@@ -1,11 +1,11 @@
 # Setup the vrtility Python environment
 
 A very thin wrapper around the
-[`reticulate::py_install`](https://rstudio.github.io/reticulate/reference/py_install.html)
-function to set up the necessary python environment and then set some
-options required by the vrtility package. environment
+[`reticulate::py_require`](https://rstudio.github.io/reticulate/reference/py_require.html)
+function to set up the necessary Python environment and then set some
+options required by the vrtility package.
 
-set_py_env_vals sets the environment variables required by the vrtility
+`set_py_env_vals` sets the package options required by the vrtility
 package - typically not required.
 
 ## Usage
@@ -91,9 +91,9 @@ wish to use a custom python pixel function which uses a python package
 not installed by default (currently only numpy), then you can use this
 function to install the package, making sure to set action as "add".
 
-set_py_env_vals is only required if you are running reticulate::py_env
-in some non-standard way. In general it is a lot easier to use \#
-vrtility_py_require which will automatically set the necessary options.
+`set_py_env_vals` is only required if you are running reticulate in some
+non-standard way. In general it is easier to use `vrtility_py_require`
+which will automatically set the necessary options.
 
 ## Examples
 

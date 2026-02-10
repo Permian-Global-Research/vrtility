@@ -35,6 +35,10 @@ vrt_set_nodata(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
   numeric; the target band position(s) to set the NoData value for. If
   NULL, The nodatavalue will be set for all bands.
 
+## Value
+
+A modified object of the same class as `x` with the NoData value set.
+
 ## Examples
 
 ``` r

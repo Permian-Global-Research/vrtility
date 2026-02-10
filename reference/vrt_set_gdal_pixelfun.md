@@ -42,6 +42,11 @@ vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
   use this you will probably need to specify the '-srcnodata' option on
   compute.
 
+## Value
+
+A modified object of the same class as `x` with the GDAL pixel function
+set.
+
 ## Details
 
 The documentation for the GDAL pixel functions can be found at

@@ -48,6 +48,9 @@ requests to the CDSE API.
 
 ``` r
 library(vrtility)
+#> ✔ Using GDAL version 3.12.1
+#> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
+#>   `
 
 # only use 2 daemons!
 mirai::daemons(2)
@@ -155,11 +158,11 @@ Finally, let’s plot the NIR band on its own and then the RGB composite.
 plot_raster_src(s2_median, bands = 4)
 ```
 
-![](figure/s2-plots-1.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-1.png)
 
 ``` r
 
 plot_raster_src(s2_median, bands = c(3, 2, 1))
 ```
 
-![](figure/s2-plots-2.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-2.png)

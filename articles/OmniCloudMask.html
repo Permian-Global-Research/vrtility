@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -159,7 +160,12 @@ processing.</p>
 <span>  <span class="fu"><a href="../reference/vrt_create_mask.html">vrt_create_mask</a></span><span class="op">(</span></span>
 <span>    inbands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>red <span class="op">=</span> <span class="fl">3</span>, green <span class="op">=</span> <span class="fl">2</span>, nir <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    maskfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_create_mask.html">create_omnicloudmask</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `purrr::map()`:</span></span>
+<span><span class="co">#&gt; ℹ In index: 1.</span></span>
+<span><span class="co">#&gt; Caused by error in `py_module_import()`:</span></span>
+<span><span class="co">#&gt; ! ModuleNotFoundError: No module named 'torch'</span></span>
+<span><span class="co">#&gt; Run `reticulate::py_last_error()` for details.</span></span></code></pre></div>
 <p>Now, let’s take a look at the OmniCloudMask and the Sentinel-2 SCL
 bands, alongside the RGB image. We can clearly see that the
 OmniCloudMask is identifying a greater area of clouds and shadows.</p>
@@ -173,8 +179,11 @@ OmniCloudMask is identifying a greater area of clouds and shadows.</p>
 <span>    <span class="va">.x</span>,</span>
 <span>    main <span class="op">=</span> <span class="va">.y</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/plot-mask-1.png"><img src="figure/plot-mask-2.png"><img src="figure/plot-mask-3.png"></p>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `map2()`:</span></span>
+<span><span class="co">#&gt; ℹ In index: 1.</span></span>
+<span><span class="co">#&gt; Caused by error in `.f()`:</span></span>
+<span><span class="co">#&gt; ! object 'zurich_vrt_mask' not found</span></span></code></pre></div>
 <p>Let’s examine the impact of masking on the actual image areas. We’ll
 apply both masks and visually compare the results to assess the
 performance of OmniCloudMask versus the Sentinel-2 SCL band.</p>
@@ -195,12 +204,14 @@ the possible values are:</p>
 <span>    mask_band <span class="op">=</span> <span class="st">"SCL"</span>,</span>
 <span>    mask_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">8</span>, <span class="fl">9</span>, <span class="fl">10</span>, <span class="fl">11</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'zurich_vrt_mask' not found</span></span>
 <span></span>
 <span><span class="va">ocm_rgb</span> <span class="op">&lt;-</span> <span class="va">zurich_vrt_mask</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_maskfun.html">vrt_set_maskfun</a></span><span class="op">(</span></span>
 <span>    mask_band <span class="op">=</span> <span class="st">"omnicloudmask"</span>,</span>
 <span>    mask_values <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span></span>
 <span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'zurich_vrt_mask' not found</span></span>
 <span></span>
 <span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">scl_rgb</span>, <span class="va">ocm_rgb</span><span class="op">)</span>,</span>
@@ -212,8 +223,8 @@ the possible values are:</p>
 <span>    main <span class="op">=</span> <span class="va">.y</span>,</span>
 <span>    na_col <span class="op">=</span> <span class="st">"#eb4310"</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/apply-mask-1.png"><img src="figure/apply-mask-2.png"></p>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'scl_rgb' not found</span></span></code></pre></div>
 <p>The OmniCloudMask provides a more accurate and comprehensive
 identification of clouds and shadows compared to the Sentinel-2 SCL
 band. It also reduces false positives that are present in the SCL mask,
@@ -225,10 +236,12 @@ plot the results to visually compare their effectiveness.</p>
 <code class="sourceCode R"><span><span class="va">scl_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">scl_rgb</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">mean_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'scl_rgb' not found</span></span>
 <span></span>
 <span><span class="va">ocm_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vrt_stack.html">vrt_stack</a></span><span class="op">(</span><span class="va">ocm_rgb</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">vrt_set_py_pixelfun</a></span><span class="op">(</span>pixfun <span class="op">=</span> <span class="fu"><a href="../reference/vrt_set_py_pixelfun.html">mean_numpy</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/vrt_compute.html">vrt_compute</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'ocm_rgb' not found</span></span>
 <span></span>
 <span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">walk2</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">scl_median</span>, <span class="va">ocm_median</span><span class="op">)</span>,</span>
@@ -240,8 +253,8 @@ plot the results to visually compare their effectiveness.</p>
 <span>    rgb_trans <span class="op">=</span> <span class="st">"gamma"</span>,</span>
 <span>    axes <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/compute-median-1.png"><img src="figure/compute-median-2.png"></p>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error: object 'scl_median' not found</span></span></code></pre></div>
 <p>Comparing the two median images, the difference is striking. The
 OmniCloudMask-masked composite is much clearer, while the SCL-masked
 image appears “milky” due to residual cloud artefacts. Although the SCL

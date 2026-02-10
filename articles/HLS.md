@@ -156,8 +156,7 @@ print(hls_sl_col)
 #> Start Date: 2023-01-17 00:32:26 UTC
 #> End Date: 2023-12-03 00:32:19 UTC
 #> Number of Items: 6
-#> Assets: B01, B02, B03, B04, B05, B06, B07,
-#> B09, B10, B11, Fmask
+#> Assets: B01, B02, B03, B04, B05, B06, B07, B09, B10, B11, Fmask
 
 hls_ss_col <- vrt_collect(hlsss_stac)
 print(hls_ss_col)
@@ -172,8 +171,8 @@ print(hls_ss_col)
 #> Start Date: 2023-01-29 00:49:07 UTC
 #> End Date: 2023-12-30 00:49:10 UTC
 #> Number of Items: 8
-#> Assets: B01, B02, B03, B04, B05, B06, B07,
-#> B08, B8A, B09, B10, B11, B12, Fmask
+#> Assets: B01, B02, B03, B04, B05, B06, B07, B08, B8A, B09, B10,
+#> B11, B12, Fmask
 ```
 
 The print method for vrt_collection objects gives us a high level
@@ -263,8 +262,7 @@ print(hls_col_mask, maskfun = TRUE)
 #> Start Date: 2023-01-17 00:32:26 UTC
 #> End Date: 2023-12-30 00:49:10 UTC
 #> Number of Items: 14
-#> Assets: A, B, G, R, RE1, RE2, RE3, N, N2, WV,
-#> C, S1, S2, T1, T2
+#> Assets: A, B, G, R, RE1, RE2, RE3, N, N2, WV, C, S1, S2, T1, T2
 ```
 
 Now we want to “reduce” the imagery collection to a single composite
@@ -364,7 +362,7 @@ withr::with_par(list(mar = c(0, 0, 0, 0)), {
 })
 ```
 
-![](figure/hls-plot-1.png)![](figure/hls-plot-2.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/hls-plot-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/hls-plot-2.png)
 
 And all the other bands too:
 
@@ -383,4 +381,4 @@ withr::with_par(
 )
 ```
 
-![](figure/hls-plot-bands-1.png)
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/hls-plot-bands-1.png)

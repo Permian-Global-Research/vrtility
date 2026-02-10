@@ -207,6 +207,10 @@ plot(x, item, ..., config_options = gdal_config_options())
 
   The numeric index of the item, in the vrt_collection, to plot
 
+## Value
+
+`NULL` invisibly. Called for its side effect of creating a plot.
+
 ## Details
 
 When plotting 3 bands, the `rgb_trans` parameter controls the type of

@@ -19,7 +19,8 @@ gdal_config_options(
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-  GDAL_HTTP_COOKIEFILE = "~/.cookies.txt",
+  GDAL_HTTP_COOKIEFILE = fs::path(tools::R_user_dir("vrtility", which = "cache"),
+    "gdal_cookies.txt"),
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
@@ -188,14 +189,14 @@ check_muparser(gdal_version = "3.11.4")
 
   Number of threads to use for warping equivalent to -wo NUM_THREADS on
   the CLI. "ALL_CPUS" (the default) will use all available CPUs,
-  alternartively an integer can be supplied - or NULL to use a single
+  alternatively an integer can be supplied - or NULL to use a single
   threaded process.
 
 - unified_src_nodata:
 
   Unified source nodata option equivalent to -wo UNIFIED_SRC_NODATA on
   the CLI. Can be "NO", "YES" or "PARTIAL". Default is "NO" (as was the
-  deafault for earlier versions of GDAL).
+  default for earlier versions of GDAL).
 
 - x:
 
@@ -241,7 +242,7 @@ used. These arguments are currently included as NULL because they could
 in theory improve performance but, from our limited testing they either
 have no or a negative impact on performance.
 
-output_format, equaivalent to `-of` from the gdaltranslate or gdalwarp
+output_format, equivalent to `-of` from the gdaltranslate or gdalwarp
 CLIs. If NULL, then the output format will be inferred from the file
 extension.
 
@@ -272,20 +273,34 @@ Drivers](https://gdal.org/en/stable/drivers/raster/index.html#raster-drivers)
 
 ``` r
 gdal_config_options(GDAL_HTTP_USERPWD = "user:password")
-#>                          VSI_CACHE                     VSI_CACHE_SIZE 
-#>                             "TRUE"                        "268435456" 
-#>                   GDAL_NUM_THREADS       GDAL_DISABLE_READDIR_ON_OPEN 
-#>                                "1"                        "EMPTY_DIR" 
-#>           CPL_VSIL_CURL_CACHE_SIZE                GDAL_HTTP_MAX_RETRY 
-#>                       "1342177280"                               "10" 
-#>              GDAL_HTTP_RETRY_DELAY                GDAL_HTTP_MULTIPLEX 
-#>                              "0.5"                              "YES" 
-#>                  GDAL_HTTP_VERSION GDAL_HTTP_MERGE_CONSECUTIVE_RANGES 
-#>                                "2"                              "YES" 
-#>               GDAL_HTTP_COOKIEFILE                GDAL_HTTP_COOKIEJAR 
-#>                   "~/.cookies.txt"                   "~/.cookies.txt" 
-#>             CPL_VSIL_CURL_USE_HEAD                  GDAL_HTTP_USERPWD 
-#>                              "YES"                    "user:password" 
+#>                                         VSI_CACHE 
+#>                                            "TRUE" 
+#>                                    VSI_CACHE_SIZE 
+#>                                       "268435456" 
+#>                                  GDAL_NUM_THREADS 
+#>                                               "1" 
+#>                      GDAL_DISABLE_READDIR_ON_OPEN 
+#>                                       "EMPTY_DIR" 
+#>                          CPL_VSIL_CURL_CACHE_SIZE 
+#>                                      "1342177280" 
+#>                               GDAL_HTTP_MAX_RETRY 
+#>                                              "10" 
+#>                             GDAL_HTTP_RETRY_DELAY 
+#>                                             "0.5" 
+#>                               GDAL_HTTP_MULTIPLEX 
+#>                                             "YES" 
+#>                                 GDAL_HTTP_VERSION 
+#>                                               "2" 
+#>                GDAL_HTTP_MERGE_CONSECUTIVE_RANGES 
+#>                                             "YES" 
+#>                              GDAL_HTTP_COOKIEFILE 
+#> "/home/runner/.cache/R/vrtility/gdal_cookies.txt" 
+#>                               GDAL_HTTP_COOKIEJAR 
+#> "/home/runner/.cache/R/vrtility/gdal_cookies.txt" 
+#>                            CPL_VSIL_CURL_USE_HEAD 
+#>                                             "YES" 
+#>                                 GDAL_HTTP_USERPWD 
+#>                                   "user:password" 
 gdal_creation_options(COMPRESS = "JPEG", JPEG_QUALITY = "90")
 #> [1] "COMPRESS=JPEG"          "PREDICTOR=2"            "NUM_THREADS=ALL_CPUS"  
 #> [4] "BIGTIFF=IF_NEEDED"      "TILED=YES"              "COPY_SRC_OVERVIEWS=YES"
@@ -296,8 +311,8 @@ gdalwarp_options(multi = TRUE, warp_memory = "50%", num_threads = 4)
 #> [7] "UNIFIED_SRC_NODATA=NO"
 set_gdal_config(gdal_config_options())
 gcm <- set_gdal_cache_max(0.05)
-#> ℹ GDAL_CACHEMAX set to 799.538 MiB; to change this use
+#> ℹ GDAL_CACHEMAX set to 799.745 MiB; to change this use
 #>   `vrtility::set_gdal_cache_max()`.
 print(gcm)
-#> 799.538 MiB
+#> 799.745 MiB
 ```

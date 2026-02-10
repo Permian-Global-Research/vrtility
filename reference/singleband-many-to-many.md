@@ -5,7 +5,7 @@ collection. This function processes each band independently, applying a
 user-defined function across the temporal dimension (e.g., filtering
 outliers, smoothing, gap-filling).
 
-`hampel_filter` is used tocreate a function to filter band-level
+`hampel_filter` is used to create a function to filter band-level
 outliers in time-series using the Hampel filter. to be provided to
 `singleband_m2m()`.
 

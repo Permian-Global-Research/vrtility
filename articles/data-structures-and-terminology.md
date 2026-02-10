@@ -2,9 +2,6 @@
 
 ``` r
 library(vrtility)
-#> ✔ Using GDAL version 3.8.4
-#> ℹ GDAL_CACHEMAX set to 1.562 GiB; to change this use
-#>   `vrtility::set_gdal_cache_max()`.
 ```
 
 ## Overview
@@ -20,7 +17,7 @@ detail below.
 ![Figure 1: Core data structures in vrtility: vrt_block, vrt_collection,
 and vrt_stack. Red, green, and blue lines represent raster bands; black
 boxes represent VRT files; t\* labels indicate discrete epochs (time
-steps).](figure/data-concepts.png)
+steps).](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/data-concepts.png)
 
 Figure 1: Core data structures in vrtility: `vrt_block`,
 `vrt_collection`, and `vrt_stack`. Red, green, and blue lines represent
@@ -79,12 +76,10 @@ single_block <- ex_collect[[1]][[1]]
 print(single_block)
 #> → <VRT Block>
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#> 
 #> Bounding Box: 289813.58 88876.43 297031.04 95714.02
 #> Pixel res: 19.9929669011164, 19.9929669011164
 #> Assets: B02, B03, B04, B08, SCL
@@ -150,8 +145,6 @@ print(ex_collect)
 #>  PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
 #> 
 #>  PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",50.72],PARAMETER["longitude_of_center",-3.51],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
-#> 
-#> 
 #> Bounding Box: NA
 #> Pixel res: 19.9923198138287, 19.9923198138287
 #> Start Date: 2020-01-01 10:15:30 UTC
@@ -167,12 +160,10 @@ length(ex_collect[[1]])
 print(ex_collect[[1]][[1]]) # First time step
 #> → <VRT Block>
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#> 
 #> Bounding Box: 289813.58 88876.43 297031.04 95714.02
 #> Pixel res: 19.9929669011164, 19.9929669011164
 #> Assets: B02, B03, B04, B08, SCL
@@ -181,12 +172,10 @@ print(ex_collect[[1]][[1]]) # First time step
 print(ex_collect[[1]][[2]]) # Second time step
 #> → <VRT Block>
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["WGS 84 / UTM zone 30N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-3],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","32630"]]
-#> 
-#> 
 #> Bounding Box: 460436.9 5615438.2 467554.2 5622175.6
 #> Pixel res: 19.9923198138287, 19.9923198138287
 #> Assets: B02, B03, B04, B08, SCL
@@ -228,12 +217,10 @@ ex_warped <- vrt_warp(
 print(ex_warped)
 #> → <VRT Collection>
 #> Mask Function: [hidden]
-#>   run print(x, maskfun = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#> 
 #> Bounding Box: 289813.58 88876.43 297031.04 95714.02
 #> Pixel res: 19.9929669011164, 19.9929669011164
 #> Start Date: 2020-01-01 10:15:30 UTC
@@ -282,14 +269,12 @@ ex_stack <- vrt_stack(ex_warped)
 print(ex_stack)
 #> → VRT STACK
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> Mask Function: [hidden]
-#>   run print(x, maskfun = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#> 
 #> Bounding Box: 289813.58 88876.43 297031.04 95714.02
 #> Start Date: 2020-01-01 10:15:30 UTC
 #> End Date: 2020-05-01 10:15:30 UTC
@@ -328,12 +313,10 @@ median_composite <- ex_stack |>
 print(median_composite)
 #> → <VRT Block>
 #> VRT XML: [hidden]
-#>   run print(x, xml = TRUE) to view
+#>   run 
 #> 
 #>  VRT SRS: 
 #> PROJCS["OSGB36 / British National Grid",GEOGCS["OSGB36",DATUM["Ordnance_Survey_of_Great_Britain_1936",SPHEROID["Airy 1830",6377563.396,299.3249646,AUTHORITY["EPSG","7001"]],AUTHORITY["EPSG","6277"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4277"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",49],PARAMETER["central_meridian",-2],PARAMETER["scale_factor",0.9996012717],PARAMETER["false_easting",400000],PARAMETER["false_northing",-100000],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","27700"]]
-#> 
-#> 
 #> Bounding Box: 289798.06 88868.74 297035.51 95726.33
 #> Pixel res: 19.9929669011164, 19.9929669011164
 #> Assets: B02, B03, B04, B08

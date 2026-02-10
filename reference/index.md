@@ -60,7 +60,7 @@ Helper functions for VRT objects
 - [`vrt_add_empty_band()`](https://permian-global-research.github.io/vrtility/reference/vrt_add_empty_band.md)
   : Add an empty band to a VRT_x object
 - [`vrt_move_band()`](https://permian-global-research.github.io/vrtility/reference/vrt_move_band.md)
-  : Add an empty band to a VRT_x object
+  : Move a band in a VRT_x object
 - [`vrt_set_scale()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_scale.md)
   : set the scale values for a VRT_x object
 - [`vrt_set_nodata()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_nodata.md)

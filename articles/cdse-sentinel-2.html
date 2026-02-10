@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="../articles/OmniCloudMask.html">OmniCloudMask</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -117,6 +118,9 @@ You must not set more than 2 daemons, as this is the limit for
 concurrent requests to the CDSE API.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://permian-global-research.github.io/vrtility/">vrtility</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; ✔ Using GDAL version 3.12.1</span></span>
+<span><span class="co">#&gt; ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use</span></span>
+<span><span class="co">#&gt;   `</span></span>
 <span></span>
 <span><span class="co"># only use 2 daemons!</span></span>
 <span><span class="fu">mirai</span><span class="fu">::</span><span class="fu"><a href="https://mirai.r-lib.org/reference/daemons.html" class="external-link">daemons</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
@@ -216,11 +220,11 @@ across bands and image tiles.</p>
 composite.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">s2_median</span>, bands <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/s2-plots-1.png"></p>
+<p><img src="https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-1.png"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/plot_raster.html">plot_raster_src</a></span><span class="op">(</span><span class="va">s2_median</span>, bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figure/s2-plots-2.png"></p>
+<p><img src="https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-2.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

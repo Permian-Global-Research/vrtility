@@ -1,7 +1,7 @@
 # Project a lat/long bounding box to a generic projected coordinate system
 
 This function takes a lat/long bounding box and projects it to either a
-prescibed projected coordinate system or a generic projected coordinate
+prescribed projected coordinate system or a generic projected coordinate
 system suitable for the AOI.
 
 ## Usage

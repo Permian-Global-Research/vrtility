@@ -30,6 +30,11 @@ vrt_set_scale(x, scale_value, offset_value, band_idx)
   numeric; the target band position(s) to set the scale value for. If
   NULL, The scale_value will be set for all bands.
 
+## Value
+
+A modified object of the same class as `x` with scale and offset values
+set.
+
 ## Details
 
 This sets the Scale and Offset XML tags for the VRT_x object. This is

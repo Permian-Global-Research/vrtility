@@ -27,3 +27,7 @@ vrt_add_empty_band(x, after, description, scale_value)
   A numeric value to set the scale of the new band. If NULL, the scale
   of the first band in the VRT will be used. Be careful, Landsat for
   example has different scales for different bands.
+
+## Value
+
+A modified object of the same class as `x` with an empty band added.
