@@ -87,7 +87,7 @@ sbm2m_tests <- function() {
 
 
 test_that("singleband_m2m works async", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
 
   if (!mirai::daemons_set()) {
     mirai::daemons(2)
@@ -97,7 +97,7 @@ test_that("singleband_m2m works async", {
 })
 
 test_that("singleband_m2m works synchronously", {
-  skip_if_not(reticulate::py_available(), "Python not available")
+  skip_if_not(reticulate::py_available(initialize = TRUE), "Python not available")
 
   if (mirai::daemons_set()) {
     mirai::daemons(0)
