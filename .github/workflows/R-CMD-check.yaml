@@ -53,6 +53,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          update-rtools: true
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
@@ -64,6 +65,9 @@ jobs:
             any::rcmdcheck
             gdalraster=?source
           needs: check
+
+      - name: Print GDAL version
+        run: Rscript -e "cat('GDAL version:', gdalraster::gdal_version(), '\n')"
 
       - uses: r-lib/actions/check-r-package@v2
         with:
