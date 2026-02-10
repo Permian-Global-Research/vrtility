@@ -96,11 +96,6 @@ zurich_vrt_mask <- zurich_vrt |>
     inbands = c(red = 3, green = 2, nir = 4),
     maskfun = create_omnicloudmask()
   )
-#> Error in `purrr::map()`:
-#> ℹ In index: 1.
-#> Caused by error in `py_module_import()`:
-#> ! ModuleNotFoundError: No module named 'torch'
-#> Run `reticulate::py_last_error()` for details.
 ```
 
 Now, let’s take a look at the OmniCloudMask and the Sentinel-2 SCL
@@ -118,11 +113,9 @@ purrr::walk2(
     main = .y
   )
 )
-#> Error in `map2()`:
-#> ℹ In index: 1.
-#> Caused by error in `.f()`:
-#> ! object 'zurich_vrt_mask' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/plot-mask-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/plot-mask-2.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/plot-mask-3.png)
 
 Let’s examine the impact of masking on the actual image areas. We’ll
 apply both masks and visually compare the results to assess the
@@ -149,14 +142,12 @@ scl_rgb <- zurich_vrt_mask |>
     mask_band = "SCL",
     mask_values = c(0, 1, 2, 3, 8, 9, 10, 11)
   )
-#> Error: object 'zurich_vrt_mask' not found
 
 ocm_rgb <- zurich_vrt_mask |>
   vrt_set_maskfun(
     mask_band = "omnicloudmask",
     mask_values = 1:3
   )
-#> Error: object 'zurich_vrt_mask' not found
 
 purrr::walk2(
   list(scl_rgb, ocm_rgb),
@@ -169,8 +160,9 @@ purrr::walk2(
     na_col = "#eb4310"
   )
 )
-#> Error: object 'scl_rgb' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/apply-mask-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/apply-mask-2.png)
 
 The OmniCloudMask provides a more accurate and comprehensive
 identification of clouds and shadows compared to the Sentinel-2 SCL
@@ -185,12 +177,10 @@ results to visually compare their effectiveness.
 scl_median <- vrt_stack(scl_rgb) |>
   vrt_set_py_pixelfun(pixfun = mean_numpy()) |>
   vrt_compute()
-#> Error: object 'scl_rgb' not found
 
 ocm_median <- vrt_stack(ocm_rgb) |>
   vrt_set_py_pixelfun(pixfun = mean_numpy()) |>
   vrt_compute()
-#> Error: object 'ocm_rgb' not found
 
 purrr::walk2(
   list(scl_median, ocm_median),
@@ -203,8 +193,9 @@ purrr::walk2(
     axes = FALSE
   )
 )
-#> Error: object 'scl_median' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/compute-median-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/compute-median-2.png)
 
 Comparing the two median images, the difference is striking. The
 OmniCloudMask-masked composite is much clearer, while the SCL-masked

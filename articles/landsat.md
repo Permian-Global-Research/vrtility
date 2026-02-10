@@ -160,18 +160,14 @@ landsat_mask <- landsat_chgn |>
     mask_values = 1:3
   ) |>        
     vrt_set_scale(scale_value = 0.0000275, offset_value = -0.2) 
-#> Error in `purrr::map()`:
-#> ℹ In index: 1.
-#> Caused by error in `py_module_import()`:
-#> ! ModuleNotFoundError: No module named 'torch'
-#> Run `reticulate::py_last_error()` for details.
 
 purrr::walk(
   seq_len(landsat_mask$n_items),
   ~ plot(landsat_mask, item = .x, c(3, 2, 1), na_col = "#ffa928")
 )
-#> Error: object 'landsat_mask' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-2.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-3.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-4.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-5.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/cloud-masking-6.png)
 
 ## Geometric median composite
 
@@ -198,15 +194,15 @@ with(mirai::daemons(10), {
     recollect = TRUE
   )  
 })
-#> Error: object 'landsat_mask' not found
 
 plot(
   landsat_median,
   c(3, 2, 1),
   na_col = "#ffa928"
 )
-#> Error: object 'landsat_median' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/geomedian-1.png)
 
 ## Derived bands
 
@@ -235,16 +231,30 @@ exptest <- vrt_derived_block(
   evi2 ~ 2.5 * (nir08 - red) / (nir08 + 2.4 * red + 1),
   vgnirbi ~ (green - nir08) / (green + nir08)
 )
-#> Error: object 'landsat_median' not found
 
 print(exptest, pixfun = TRUE)
-#> Error: object 'exptest' not found
+#> → <VRT Block>
+#> VRT XML: [hidden]
+#>   run 
+#> Pixel Function:
+#> ndvi ~ ((nir08 * 0.0000275 + -0.2) - (red * 0.0000275 + -0.2))/((nir08 * 0.0000275 + -0.2) + (red * 0.0000275 + -0.2))                
+#> ndti ~ ((red * 0.0000275 + -0.2) - (green * 0.0000275 + -0.2))/((red * 0.0000275 + -0.2) + (green * 0.0000275 + -0.2))                
+#> evi2 ~ 2.5 * ((nir08 * 0.0000275 + -0.2) - (red * 0.0000275 + -0.2))/((nir08 * 0.0000275 + -0.2) + 2.4 * (red * 0.0000275 + -0.2) + 1)
+#> vgnirbi ~ ((green * 0.0000275 + -0.2) - (nir08 * 0.0000275 + -0.2))/((green * 0.0000275 + -0.2) + (nir08 * 0.0000275 + -0.2))
+#> 
+#> 
+#>  VRT SRS: 
+#> PROJCS["unknown",GEOGCS["unknown",DATUM["Unknown based on WGS 84 ellipsoid",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",55.67],PARAMETER["longitude_of_center",12.56],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+#> Bounding Box: -18973.07 -22271.98 18976.93 22308.02
+#> Pixel res: 30, 30
+#> Assets: ndvi, ndti, evi2, vgnirbi
+#> No Data Value(s): NaN, NaN, NaN, NaN
+#> Date Time: 2025-06-06 10:13:37 UTC
 
 x <- vrt_compute(
   exptest,
   outfile = fs::file_temp(ext = ".tif")
 )
-#> Error: object 'exptest' not found
 
 
 purrr::walk(
@@ -256,8 +266,6 @@ purrr::walk(
     col = grDevices::hcl.colors(10, "Inferno")
   )
 )
-#> Error in `map()`:
-#> ℹ In index: 1.
-#> Caused by error in `.f()`:
-#> ! object 'x' not found
 ```
+
+![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/derived-bands-1.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/derived-bands-2.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/derived-bands-3.png)![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/derived-bands-4.png)

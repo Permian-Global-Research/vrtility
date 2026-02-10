@@ -15,7 +15,6 @@ create_omnicloudmask(
   patch_overlap = 300,
   batch_size = 1,
   inference_dtype = c("bfloat16", "float32"),
-  inference_device = NULL,
   nodata_value = 0,
   model_version = NULL
 )
@@ -58,15 +57,8 @@ create_omnicloudmask(
 - inference_dtype:
 
   The data type to use for inference. Options include "bfloat16" and
-  "float32" (character, default: "bfloat16"). using "bfloat16" should be
+  "float32" (character, default: "bfloat16"). Using "bfloat16" should be
   faster if supported by the hardware.
-
-- inference_device:
-
-  The device to use for inference. If `NULL`, the function will
-  automatically select the best available device (character, default:
-  `NULL`). Options include "cpu", "cuda", "mps", etc. The order of
-  selection is based on availability: "cuda" \> "mps" \> "cpu".
 
 - model_version:
 
