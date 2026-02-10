@@ -15,6 +15,7 @@
 #' exist. Default is TRUE.
 #' @return A vrt_collection object.
 #' @rdname vrt_collect
+#' @importFrom carrier crate
 #' @export
 #' @details The main way to create a vrt_collection object, which forms
 #' the basis of the vrt-based pipelines in vrtility is using a doc_items
