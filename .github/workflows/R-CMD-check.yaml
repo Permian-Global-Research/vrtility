@@ -53,7 +53,13 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          update-rtools: true
+
+      - name: Update Rtools45 libraries (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          c:\rtools45\usr\bin\bash.exe --login -c "pacman -Syuu --noconfirm"
+          c:\rtools45\usr\bin\bash.exe --login -c "pacman -Syuu --noconfirm"
+        shell: cmd
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
