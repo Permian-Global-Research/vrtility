@@ -42,8 +42,8 @@ filtering.
 ## Features
 
 - **Modular design**: Creates remote sensing pipelines using 
-  nested VRTs, allowing easy addition of new pixel and
-  masking functions. Can be adapted for deriving spectral indices
+  nested VRTs, allowing the addition of new pixel and
+  masking functions. Can be used for deriving spectral indices
   or calculating complex time series functions. All powered by 
   [{gdalraster}](https://firelab.github.io/gdalraster/).
 
