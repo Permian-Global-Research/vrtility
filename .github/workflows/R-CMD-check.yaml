@@ -63,7 +63,7 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
-            gdalraster=?source
+            gdalraster?source
           needs: check
 
       - name: Print GDAL version
