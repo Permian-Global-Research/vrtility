@@ -66,6 +66,11 @@ jobs:
             gdalraster?source
           needs: check
 
+      - name: Rebuild gdalraster from source (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Rscript -e "install.packages('gdalraster', type = 'source', repos = 'https://cloud.r-project.org')"
+
       - name: Print GDAL version
         run: Rscript -e "cat('GDAL version:', gdalraster::gdal_version(), '\n')"
 
