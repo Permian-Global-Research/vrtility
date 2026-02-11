@@ -53,17 +53,16 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          rtools-version: 'none'
 
-      - name: Install Rtools45 6768 (Windows)
+      - name: Update Rtools45 toolchain libs to 6768 (Windows)
         if: runner.os == 'Windows'
         run: |
-          $url = "https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-6768-6492.exe"
-          curl.exe -Lo rtools45.exe $url
-          Start-Process -FilePath .\rtools45.exe -ArgumentList "/VERYSILENT /DIR=C:\rtools45" -Wait -NoNewWindow
-          echo "C:\rtools45\usr\bin" | Out-File -Append $env:GITHUB_PATH
-          echo "C:\rtools45\x86_64-w64-mingw32.static.posix\bin" | Out-File -Append $env:GITHUB_PATH
-        shell: pwsh
+          cd /
+          wget -q https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-toolchain-libs-base-6768.tar.zst
+          rm -rf /x86_64-w64-mingw32.static.posix
+          tar xf rtools45-toolchain-libs-base-6768.tar.zst
+          rm rtools45-toolchain-libs-base-6768.tar.zst
+        shell: c:\rtools45\usr\bin\bash.exe --login {0}
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
