@@ -57,12 +57,11 @@ jobs:
       - name: Update Rtools45 toolchain to 6768 (Windows)
         if: runner.os == 'Windows'
         run: |
-          $url = "https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-toolchain-libs-base-6768.tar.zst"
-          curl.exe -sLo libs.tar.zst $url
-          Remove-Item -Recurse -Force "C:\rtools45\x86_64-w64-mingw32.static.posix" -ErrorAction SilentlyContinue
-          & "C:\rtools45\usr\bin\tar.exe" xf libs.tar.zst -C "C:\rtools45"
-          Remove-Item libs.tar.zst
-        shell: pwsh
+          curl.exe -sLo libs.tar.zst https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-toolchain-libs-base-6768.tar.zst
+          rm -rf /c/rtools45/x86_64-w64-mingw32.static.posix
+          /c/rtools45/usr/bin/tar.exe xf libs.tar.zst -C /c/rtools45
+          rm libs.tar.zst
+        shell: bash
 
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
