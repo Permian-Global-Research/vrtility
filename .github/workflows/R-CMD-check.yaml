@@ -54,6 +54,18 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      - name: Update Rtools45 toolchain to latest (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          LIBS_URL=$(curl -sL https://cran.r-project.org/bin/windows/Rtools/rtools45/files/ \
+            | grep -oP 'rtools45-toolchain-libs-full-\d+\.tar\.zst' | sort -V | tail -1)
+          echo "Downloading $LIBS_URL"
+          curl.exe -sLo libs.tar.zst "https://cran.r-project.org/bin/windows/Rtools/rtools45/files/$LIBS_URL"
+          rm -rf /c/rtools45/x86_64-w64-mingw32.static.posix
+          /c/rtools45/usr/bin/tar.exe xf libs.tar.zst -C /c/rtools45
+          rm libs.tar.zst
+        shell: bash
+
       - name: Configure GDAL for macOS
         if: runner.os == 'macOS'
         run: echo "GTIFF_SRS_SOURCE=EPSG" >> $GITHUB_ENV
@@ -62,8 +74,16 @@ jobs:
         with:
           extra-packages: |
             any::rcmdcheck
-            gdalraster=?source
+            gdalraster?source
           needs: check
+
+      - name: Rebuild gdalraster from source (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Rscript -e "install.packages('gdalraster', type = 'source', repos = 'https://cloud.r-project.org')"
+
+      - name: Print GDAL version
+        run: Rscript -e "cat('GDAL version:', gdalraster::gdal_version(), '\n')"
 
       - uses: r-lib/actions/check-r-package@v2
         with:
