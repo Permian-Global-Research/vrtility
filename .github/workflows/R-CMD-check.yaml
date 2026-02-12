@@ -54,10 +54,13 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Update Rtools45 toolchain to 6768 (Windows)
+      - name: Update Rtools45 toolchain to latest (Windows)
         if: runner.os == 'Windows'
         run: |
-          curl.exe -sLo libs.tar.zst https://cran.r-project.org/bin/windows/Rtools/rtools45/files/rtools45-toolchain-libs-full-6768.tar.zst
+          LIBS_URL=$(curl -sL https://cran.r-project.org/bin/windows/Rtools/rtools45/files/ \
+            | grep -oP 'rtools45-toolchain-libs-full-\d+\.tar\.zst' | sort -V | tail -1)
+          echo "Downloading $LIBS_URL"
+          curl.exe -sLo libs.tar.zst "https://cran.r-project.org/bin/windows/Rtools/rtools45/files/$LIBS_URL"
           rm -rf /c/rtools45/x86_64-w64-mingw32.static.posix
           /c/rtools45/usr/bin/tar.exe xf libs.tar.zst -C /c/rtools45
           rm libs.tar.zst
