@@ -9,7 +9,7 @@ articles:
   landsat: landsat.html
   ndvi-timeseries: ndvi-timeseries.html
   OmniCloudMask: OmniCloudMask.html
-last_built: 2026-02-12T10:34Z
+last_built: 2026-02-16T14:49Z
 urls:
   reference: https://permian-global-research.github.io/vrtility/reference
   article: https://permian-global-research.github.io/vrtility/articles
