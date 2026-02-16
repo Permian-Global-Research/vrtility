@@ -18,31 +18,27 @@ mirai_async_result_handler <- function(
 ) {
   dots <- rlang::list2(...)
   rlang::env_bind(rlang::current_env(), !!!dots)
-  resolved <- logical(length(jobs))
-  unresolved_idx <- seq_along(jobs)
-  # Continue polling for results until all jobs are resolved
-  while (!all(resolved)) {
-    # Iterate over unresolved jobs
-    for (i in unresolved_idx) {
-      if (mirai::unresolved(jobs[[i]])) {
-        Sys.sleep(0.001) # Sleep briefly to avoid busy-waiting
-        next
-      }
 
-      j <- mirai::collect_mirai(jobs[[i]])
+  jobs <- unclass(jobs)
+  original_idx <- seq_along(jobs)
 
-      if (inherits(j, "miraiError")) {
-        cli::cli_abort(
-          "{msg}:  {j}",
-          class = "mirai_async_error"
-        )
-      }
+  while (length(jobs) > 0) {
+    pos <- mirai::race_mirai(jobs)
+    i <- original_idx[pos]
 
-      rlang::eval_bare(expr)
-      # If the job is resolved, mark it as such
-      resolved[[i]] <- TRUE
-      unresolved_idx <- which(!resolved)
+    j <- jobs[[pos]]$data
+
+    if (inherits(j, "miraiError")) {
+      cli::cli_abort(
+        "{msg}:  {j}",
+        class = "mirai_async_error"
+      )
     }
+
+    rlang::eval_bare(expr)
+
+    jobs <- jobs[-pos]
+    original_idx <- original_idx[-pos]
   }
   return(invisible())
 }
