@@ -30,7 +30,7 @@ Imports:
     lubridate,
     memuse,
     methods,
-    mirai (>= 2.4.0),
+    mirai (>= 2.6.0),
     purrr (>= 1.2.0),
     Rcpp,
     reticulate (>= 1.43.0),
