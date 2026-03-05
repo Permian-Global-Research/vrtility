@@ -677,6 +677,7 @@ read_token <- function(
 #' Check for duplicate items in a STAC item collection
 #' @param x A \pkg{rstac} doc_items object
 #' @return An integer vector of the indices of unique items
+#' @importFrom rlang %||%
 #' @noRd
 #' @keywords internal
 check_for_dups <- function(x) {
