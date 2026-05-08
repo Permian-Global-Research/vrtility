@@ -1,5 +1,14 @@
 # vrtility 0.4.0
 
+## New features
+
+* `vrt_save()` gained `bundle = TRUE` to write a saved VRT alongside copies
+  of every intermediate VRT it depends on, with paths rewritten relative to
+  the output directory. The result survives wiping the VRT cache. Adding
+  `include_rasters = TRUE` also copies local raster leaves into the bundle
+  for full portability; remote sources (URLs, `/vsicurl/`, ...) are detected
+  and reported in a single warning (#110).
+
 # vrtility 0.3.3
 
 ## Improvements
