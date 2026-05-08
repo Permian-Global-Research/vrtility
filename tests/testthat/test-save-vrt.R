@@ -52,6 +52,13 @@ test_that("save_vrt works", {
 })
 
 
+read_vrt_values <- function(path) {
+  ds <- methods::new(gdalraster::GDALRaster, path)
+  on.exit(if (ds$isOpen()) ds$close())
+  gdalraster::read_ds(ds)
+}
+
+
 test_that("vrt_save bundle mode produces a self-contained directory", {
   s2files <- fs::dir_ls(
     system.file("s2-data", package = "vrtility"),
@@ -63,7 +70,7 @@ test_that("vrt_save bundle mode produces a self-contained directory", {
     vrt_stack()
 
   ref_file <- vrt_save(ex_vrt)
-  ref_vals <- terra::values(terra::rast(ref_file))
+  ref_vals <- read_vrt_values(ref_file)
 
   bundle_root <- fs::path(withr::local_tempdir(), "diff.vrt")
   saved <- vrt_save(ex_vrt, bundle_root, bundle = TRUE)
@@ -99,7 +106,7 @@ test_that("vrt_save bundle mode produces a self-contained directory", {
   })
 
   # bundle output must produce identical pixel values
-  expect_equal(terra::values(terra::rast(saved)), ref_vals)
+  expect_equal(read_vrt_values(saved), ref_vals)
 })
 
 
@@ -113,7 +120,7 @@ test_that("vrt_save include_rasters bundles local sources and is portable", {
     vrt_collect() |>
     vrt_stack()
 
-  ref_vals <- terra::values(terra::rast(vrt_save(ex_vrt)))
+  ref_vals <- read_vrt_values(vrt_save(ex_vrt))
 
   bundle_dir <- withr::local_tempdir()
   bundle_root <- fs::path(bundle_dir, "diff.vrt")
@@ -133,7 +140,7 @@ test_that("vrt_save include_rasters bundles local sources and is portable", {
   # portability: wipe the cache, the bundle should still resolve
   cache_vrts <- fs::dir_ls(getOption("vrt.cache"), glob = "*.vrt")
   fs::file_delete(cache_vrts)
-  expect_equal(terra::values(terra::rast(saved)), ref_vals)
+  expect_equal(read_vrt_values(saved), ref_vals)
 })
 
 
