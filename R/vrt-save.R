@@ -1,8 +1,17 @@
 #' Save a vrt_block object to disk
 #' @param x A `vrt_stack` of `vrt_block` object.
 #' @param outfile A character string of the output file
+#' @param bundle Logical. If `TRUE`, copy every intermediate VRT in the
+#'   dependency tree into the directory containing `outfile` and rewrite all
+#'   `<SourceFilename>` paths relative to that directory. The result is a
+#'   self-contained bundle that survives wiping the VRT cache. Remote sources
+#'   (URLs, `/vsicurl/`, ...) cannot be bundled and are left untouched.
+#' @param include_rasters Logical. Only meaningful when `bundle = TRUE`. If
+#'   `TRUE`, copy local raster leaves (e.g. GeoTIFFs) into the bundle as well,
+#'   producing a fully portable directory. Remote raster sources are skipped
+#'   and surfaced as a single warning.
 #' @export
-vrt_save <- function(x, outfile) {
+vrt_save <- function(x, outfile, bundle = FALSE, include_rasters = FALSE) {
   UseMethod("vrt_save")
 }
 
@@ -19,13 +28,32 @@ vrt_save.default <- function(x, ...) {
 #' @export
 vrt_save.vrt_block <- function(
   x,
-  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
+  bundle = FALSE,
+  include_rasters = FALSE
 ) {
   if (fs::path_ext(outfile) != "vrt") {
     cli::cli_abort("The `outfile` extension must be'.vrt'.")
   }
+  if (include_rasters && !bundle) {
+    cli::cli_abort(
+      c(
+        "!" = "{.arg include_rasters} requires {.code bundle = TRUE}.",
+        "i" = "Set {.code bundle = TRUE} to copy raster sources into a self-contained directory."
+      )
+    )
+  }
 
   vrt_xml <- xml2::read_xml(x$vrt)
+
+  if (bundle) {
+    return(invisible(write_vrt_bundle(
+      vrt_xml,
+      outfile,
+      cache_dir = getOption("vrt.cache"),
+      include_rasters = include_rasters
+    )))
+  }
 
   if (fs::path_has_parent(outfile, getOption("vrt.cache"))) {
     xml2::write_xml(vrt_xml, outfile)

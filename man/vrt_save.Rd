@@ -4,12 +4,23 @@
 \alias{vrt_save}
 \title{Save a vrt_block object to disk}
 \usage{
-vrt_save(x, outfile)
+vrt_save(x, outfile, bundle = FALSE, include_rasters = FALSE)
 }
 \arguments{
 \item{x}{A \code{vrt_stack} of \code{vrt_block} object.}
 
 \item{outfile}{A character string of the output file}
+
+\item{bundle}{Logical. If \code{TRUE}, copy every intermediate VRT in the
+dependency tree into the directory containing \code{outfile} and rewrite all
+\verb{<SourceFilename>} paths relative to that directory. The result is a
+self-contained bundle that survives wiping the VRT cache. Remote sources
+(URLs, \verb{/vsicurl/}, ...) cannot be bundled and are left untouched.}
+
+\item{include_rasters}{Logical. Only meaningful when \code{bundle = TRUE}. If
+\code{TRUE}, copy local raster leaves (e.g. GeoTIFFs) into the bundle as well,
+producing a fully portable directory. Remote raster sources are skipped
+and surfaced as a single warning.}
 }
 \description{
 Save a vrt_block object to disk
