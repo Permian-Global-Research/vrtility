@@ -1,4 +1,4 @@
-# vrtility (development version)
+# vrtility 0.4.0
 
 # vrtility 0.3.3
 
