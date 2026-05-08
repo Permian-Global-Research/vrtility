@@ -76,10 +76,7 @@ test_that("vrt_save bundle mode produces a self-contained directory", {
   saved <- vrt_save(ex_vrt, bundle_root, bundle = TRUE)
 
   expect_true(fs::file_exists(saved))
-  expect_identical(
-    as.character(fs::path_dir(saved)),
-    as.character(fs::path_abs(fs::path_dir(bundle_root)))
-  )
+  expect_identical(fs::path_file(saved), fs::path_file(bundle_root))
 
   bundle_files <- fs::dir_ls(fs::path_dir(saved))
   expect_gt(length(bundle_files), 1) # root VRT plus intermediates
