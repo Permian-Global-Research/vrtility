@@ -44,6 +44,7 @@ the area of interest. The default SRS is an equal area projection
 centered around the centroid of the bounding box.
 
 ``` r
+
 library(vrtility)
 
 mirai::daemons(gdalraster::get_num_cpus())
@@ -66,6 +67,7 @@ collection. Here we set a maximum cloud cover of 35% and a date range of
 6 had less than 35% cloud cover.
 
 ``` r
+
 hlssl_stac <- hls_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -96,6 +98,7 @@ parameters. Again we can see that \< 10% of images have less than 35%
 cloud cover.
 
 ``` r
+
 hlsss_stac <- hls_stac_query(
   bbox = bbox,
   start_date = "2023-01-01",
@@ -128,6 +131,7 @@ package. But, because we are using asynchronous mirai daemons, we need
 to set the credentials for all daemons.
 
 ``` r
+
 mirai::everywhere(
   earthdatalogin::edl_netrc(
     username = Sys.getenv("EARTHDATA_USER"),
@@ -143,6 +147,7 @@ however, GDAL caching makes re-accessing these remote files faster, for
 the subsequent parts of the workflow.
 
 ``` r
+
 hls_sl_col <- vrt_collect(hlssl_stac)
 print(hls_sl_col)
 #> → <VRT Collection>
@@ -194,6 +199,7 @@ is ignored. Automating this is tricky but if you miss an appropriate
 scale, you will see warnings when you then use `vrt_stack`.
 
 ``` r
+
 hls_ls_align <- vrt_set_band_names(
   hls_sl_col,
   c("A", "B", "G", "R", "N2", "S1", "S2", "C", "T1", "T2", "Fmask")
@@ -219,6 +225,7 @@ Now we can combine the two collections into a single collection using
 the `c` method. This is a simple concatenation of the two collections.
 
 ``` r
+
 hls_merge_coll <- c(
   hls_ls_align,
   hls_ss_align
@@ -231,6 +238,7 @@ Therefore we must use the `build_bitmask` function to set the mask and
 can specify the bits that we wish to set as no-data across all bands.
 
 ``` r
+
 hls_col_mask <- vrt_set_maskfun(
   hls_merge_coll,
   mask_band = "Fmask",
@@ -274,6 +282,7 @@ using `vrt_set_py_pixelfun` before computing the final composite using
 `vrt_compute`.
 
 ``` r
+
 # not run
 band_level_median <- vrt_warp(
   hls_col_mask,
@@ -304,6 +313,7 @@ properties of the data.
 In theory we can also just run:
 
 ``` r
+
 # not run
 hls_composite <- vrt_warp(
   hls_col_mask,
@@ -329,6 +339,7 @@ case because of the multiple SRS values in the collection. note that
 returned instead.
 
 ``` r
+
 hls_composite <- hls_col_mask |>
   vrt_compute(
     fs::file_temp(ext = ".tif"),
@@ -346,6 +357,7 @@ Now let’s take a look at the composite - first RGB and then a false
 colour composite.
 
 ``` r
+
 withr::with_par(list(mar = c(0, 0, 0, 0)), {
   plot_raster_src(
     hls_composite,
@@ -367,6 +379,7 @@ withr::with_par(list(mar = c(0, 0, 0, 0)), {
 And all the other bands too:
 
 ``` r
+
 withr::with_par(
   list(mfrow = c(5, 3), mar = c(0, 0, 1, 0)),
   purrr::walk(1:15, function(i) {

@@ -26,6 +26,7 @@ mirai daemons you want to use (R processes that will download the data
 in parallel).
 
 ``` r
+
 library(vrtility)
 
 mirai::daemons(5)
@@ -41,6 +42,7 @@ certain amount in the x and y directions. This location is in North of
 Madagascar.
 
 ``` r
+
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (46.33 -15.9)",
   extend_x = 0.22,
@@ -58,6 +60,7 @@ VRT objects. This can be optionally filtered, as shown below, if you
 don’t need all of the assets (bands).
 
 ``` r
+
 l8l9_query <- stac_query(
   bbox = bbox,
   stac_source = "https://explorer.digitalearth.africa/stac/",
@@ -91,6 +94,7 @@ important environment variables in `vrt_collect` that will allow you to
 access the Digital Earth Africa data from the S3 bucket.
 
 ``` r
+
 l8l9_vrt <- vrt_collect(
   l8l9_query,
   gdal_config_options(
@@ -133,6 +137,7 @@ l8l9file <- vrt_warp(
 Let’s have a look at the data in both true colour and false colour.
 
 ``` r
+
   plot(
     l8l9file,
     bands = c(3, 2, 1)

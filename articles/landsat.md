@@ -49,6 +49,7 @@ to ensure we only retrieve images with adequate coverage of our area of
 interest.
 
 ``` r
+
 library(vrtility)
 
 bbox <- gdalraster::bbox_from_wkt(
@@ -107,6 +108,7 @@ imagery. On occasion the ordering of bands in the STAC assets may not
 align with typical expectations.
 
 ``` r
+
 with(mirai::daemons(10), {
   landsat_chgn <- vrt_plan(
     landsat_filter
@@ -150,6 +152,7 @@ reflectance - see the [USGS
 docs](https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products)
 
 ``` r
+
 landsat_mask <- landsat_chgn |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
@@ -186,6 +189,7 @@ parallelize the computation across multiple cores, significantly
 improving processing speed for this computationally intensive operation.
 
 ``` r
+
 with(mirai::daemons(10), {
   landsat_median <- multiband_reduce(
     landsat_mask,
@@ -224,6 +228,7 @@ In this example, we’ll calculate several useful indices and visualize
 the results:
 
 ``` r
+
 exptest <- vrt_derived_block(
   landsat_median,
   ndvi ~ (nir08 - red) / (nir08 + red),

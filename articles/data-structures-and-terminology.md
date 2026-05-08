@@ -1,6 +1,7 @@
 # Data Structures and Terminology
 
 ``` r
+
 library(vrtility)
 ```
 
@@ -59,6 +60,7 @@ more bands. It is the fundamental unit in vrtility’s pipeline system.
 - Stores optional mask and pixel functions
 
 ``` r
+
 # Load example Sentinel-2 data
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))
 
@@ -135,6 +137,7 @@ area.
 - Inherits from `vrt_block`, so supports the same operations
 
 ``` r
+
 # Print collection summary
 print(ex_collect)
 #> → <VRT Collection>
@@ -198,6 +201,7 @@ collections bounding box is returned rather than NA, indicating that the
 collection has been warped to a common grid.
 
 ``` r
+
 # 2. Apply transformations (masking, scaling)
 ex_masked <- ex_collect |>
   vrt_set_maskfun(
@@ -262,6 +266,7 @@ being the long format.
 - Single VRT file representing the entire time series
 
 ``` r
+
 # Stack a warped collection
 ex_stack <- vrt_stack(ex_warped)
 
@@ -299,6 +304,7 @@ function across the stacked bands, returning a new `vrt_block` with
 median values for each original band.
 
 ``` r
+
 # Apply temporal median
 tblock <- ex_collect[[1]][[1]]
 median_composite <- ex_stack |>

@@ -24,6 +24,7 @@ the OmniCloudMask and the standard Sentinel-2 scene classsification
 (SCL) band by including imagery with up to 80% cloud cover.
 
 ``` r
+
 library(vrtility)
 mirai::daemons(6)
 
@@ -54,6 +55,7 @@ lazy=FALSE to write files to disk. The returned object in this case is a
 warped `vrt_collection`.
 
 ``` r
+
 zurich_vrt <- vrt_collect(s2_stac) |>
   vrt_warp(
     t_srs = trs,
@@ -91,6 +93,7 @@ Note that we use `recollect = TRUE` to return a new `vrt_collection`
 object because we plan to do some further processing.
 
 ``` r
+
 zurich_vrt_mask <- zurich_vrt |>
   vrt_create_mask(
     inbands = c(red = 3, green = 2, nir = 4),
@@ -103,6 +106,7 @@ bands, alongside the RGB image. We can clearly see that the
 OmniCloudMask is identifying a greater area of clouds and shadows.
 
 ``` r
+
 purrr::walk2(
   .x = list(c(3, 2, 1), 5, 6),
   .y = c("RGB", "SCL", "OmniCloudMask"),
@@ -137,6 +141,7 @@ For the OmniCloudMask band, the possible values are:
 In this example, we mask all non-clear classes (values 1, 2, and 3).
 
 ``` r
+
 scl_rgb <- zurich_vrt_mask |>
   vrt_set_maskfun(
     mask_band = "SCL",
@@ -174,6 +179,7 @@ for both the SCL-masked and OmniCloudMask-masked images, and plot the
 results to visually compare their effectiveness.
 
 ``` r
+
 scl_median <- vrt_stack(scl_rgb) |>
   vrt_set_py_pixelfun(pixfun = mean_numpy()) |>
   vrt_compute()

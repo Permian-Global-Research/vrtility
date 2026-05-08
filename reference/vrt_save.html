@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_save</span><span class="op">(</span><span class="va">x</span>, <span class="va">outfile</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vrt_save</span><span class="op">(</span><span class="va">x</span>, <span class="va">outfile</span>, bundle <span class="op">=</span> <span class="cn">FALSE</span>, include_rasters <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,6 +68,21 @@
 
 <dt id="arg-outfile">outfile<a class="anchor" aria-label="anchor" href="#arg-outfile"></a></dt>
 <dd><p>A character string of the output file</p></dd>
+
+
+<dt id="arg-bundle">bundle<a class="anchor" aria-label="anchor" href="#arg-bundle"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, copy every intermediate VRT in the
+dependency tree into the directory containing <code>outfile</code> and rewrite all
+<code>&lt;SourceFilename&gt;</code> paths relative to that directory. The result is a
+self-contained bundle that survives wiping the VRT cache. Remote sources
+(URLs, <code>/vsicurl/</code>, ...) cannot be bundled and are left untouched.</p></dd>
+
+
+<dt id="arg-include-rasters">include_rasters<a class="anchor" aria-label="anchor" href="#arg-include-rasters"></a></dt>
+<dd><p>Logical. Only meaningful when <code>bundle = TRUE</code>. If
+<code>TRUE</code>, copy local raster leaves (e.g. GeoTIFFs) into the bundle as well,
+producing a fully portable directory. Remote raster sources are skipped
+and surfaced as a single warning.</p></dd>
 
 </dl></div>
 

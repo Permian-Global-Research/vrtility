@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">vrtility</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,14 @@
       <small>Source: <a href="https://github.com/Permian-Global-Research/vrtility/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="vrtility-040">vrtility 0.4.0<a class="anchor" aria-label="anchor" href="#vrtility-040"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-4-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
+<ul><li>
+<code><a href="../reference/vrt_save.html">vrt_save()</a></code> gained <code>bundle = TRUE</code> to write a saved VRT alongside copies of every intermediate VRT it depends on, with paths rewritten relative to the output directory. The result survives wiping the VRT cache. Adding <code>include_rasters = TRUE</code> also copies local raster leaves into the bundle for full portability; remote sources (URLs, <code>/vsicurl/</code>, …) are detected and reported in a single warning (<a href="https://github.com/Permian-Global-Research/vrtility/issues/110" class="external-link">#110</a>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.3" id="vrtility-033">vrtility 0.3.3<a class="anchor" aria-label="anchor" href="#vrtility-033"></a></h2>
 <div class="section level3">

@@ -72,14 +72,13 @@ v2m <- r_to_MEM(
 )
 
 v2m
-#> failed to get projection ref
-#> C++ object of class GDALRaster
-#>  Driver : In Memory Raster (MEM)
-#>  DSN    : 
-#>  Dim    : 120, 110, 1
-#>  CRS    : 
-#>  Res    : 1.000000, 1.000000
-#>  Bbox   : 0.000000, 0.000000, 120.000000, 110.000000
+#> C++ object of class <GDALRaster>
+#> • Driver: In Memory Raster (MEM)
+#> • DSN: ""
+#> • Dimensions: 120, 110, 1
+#> • CRS: not set
+#> • Pixel resolution: 1.000000, 1.000000
+#> • Bbox: 0.000000, 0.000000, 120.000000, 110.000000
 plot(v2m)
-#> failed to get projection ref
+#> ✖ failed to get projection ref
 ```

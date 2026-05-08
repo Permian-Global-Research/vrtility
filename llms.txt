@@ -48,6 +48,7 @@ filtering.
 You can install vrtility from GitHub with:
 
 ``` r
+
 # install.packages("pak")
 pak::pkg_install("Permian-Global-Research/vrtility")
 ```
@@ -81,6 +82,7 @@ composite from Sentinel-2 data:
     bands and image blocks using mirai daemons.
 
 ``` r
+
 library(vrtility)
 #> ✔ Using GDAL version 3.12.1
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
@@ -158,6 +160,7 @@ consistency but require more computation than band-wise functions (using
 mirai daemons here is recommended).
 
 ``` r
+
 s2files <- fs::dir_ls(system.file("s2-data", package = "vrtility"))[1:4]
 
 ex_collect <- vrt_collect(s2files)
@@ -180,6 +183,7 @@ purrr::walk(
 
 ``` r
 
+
 purrr::walk(
   seq_len(ex_collect_mask$n_items),
   ~ plot(ex_collect_mask, item = .x, bands = c(3, 2, 1))
@@ -189,6 +193,7 @@ purrr::walk(
 ![](reference/figures/README-example2-2.png)
 
 ``` r
+
 
 # extract a block to use as a template for warping
 t_block <- ex_collect$vrt[[1]]

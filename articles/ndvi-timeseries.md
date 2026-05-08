@@ -21,6 +21,7 @@ First, load the package and set up parallel processing. We’ll use 6
 workers to speed up data processing:
 
 ``` r
+
 library(vrtility)
 
 # Initialize parallel processing with 6 workers
@@ -34,6 +35,7 @@ We’ll create a bounding box around a point in West Texas, extending it
 to cover a reasonable study area:
 
 ``` r
+
 # Create a bounding box around a point in West Texas
 # The point is at -102.2°W, 33.1°N
 # extend_x and extend_y control the size of the area (in degrees)
@@ -60,6 +62,7 @@ time period and request only the bands we need for NDVI calculation
 (B04;Red and B08; Broad Near Infrared) and cloud masking (Fmask):
 
 ``` r
+
 # Query HLS Sentinel-2 data for 2021
 tex_s2 <- hls_stac_query(
   bbox,
@@ -82,6 +85,7 @@ Build a virtual raster collection from the STAC results, applying cloud
 masking and warping to your target projection/resolution:
 
 ``` r
+
 tex_s2_collect <- vrt_collect(tex_s2) |>
   # Apply cloud/shadow/water mask using Fmask band
   # Values 0-3 represent clear conditions
@@ -119,6 +123,7 @@ temporally filtered using a Hampel filter to reduce noise from residual
 clouds and sensor artifacts:
 
 ``` r
+
 tex_ndvi <- tex_s2_collect |>
   # Calculate NDVI: (NIR - Red) / (NIR + Red)
   vrt_derived_block(
@@ -164,6 +169,7 @@ Create a function to plot each NDVI image, then render as an animated
 GIF:
 
 ``` r
+
 # Create plotting function
 ndvi_plot <- function() {
   # Start from image 10 stabilise median filter effect

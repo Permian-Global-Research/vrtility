@@ -47,6 +47,7 @@ must not set more than 2 daemons, as this is the limit for concurrent
 requests to the CDSE API.
 
 ``` r
+
 library(vrtility)
 #> ✔ Using GDAL version 3.12.1
 #> ℹ GDAL_CACHEMAX set to 6.247 GiB; to change this use
@@ -73,6 +74,7 @@ and the scene classification layer), and finally filter the results to
 only include images with a maximum cloud cover of 30%.
 
 ``` r
+
 bbox <- gdalraster::bbox_from_wkt(
   wkt = "POINT (95.415 27.78)",
   extend_x = 0.3,
@@ -120,6 +122,7 @@ function, which writes the output to a file. We use the `gdalraster`
 engine to process the data in parallel across bands and image tiles.
 
 ``` r
+
 # Download the data and process
 s2_median <- vrt_collect(s2copdse,
   gdal_config_options(
@@ -155,12 +158,14 @@ s2_median <- vrt_collect(s2copdse,
 Finally, let’s plot the NIR band on its own and then the RGB composite.
 
 ``` r
+
 plot_raster_src(s2_median, bands = 4)
 ```
 
 ![](https://raw.githubusercontent.com/Permian-Global-Research/vrtility/main/vignettes/figure/s2-plots-1.png)
 
 ``` r
+
 
 plot_raster_src(s2_median, bands = c(3, 2, 1))
 ```
