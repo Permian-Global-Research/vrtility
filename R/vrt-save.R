@@ -1,6 +1,8 @@
 #' Save a vrt_block object to disk
-#' @param x A `vrt_stack` of `vrt_block` object.
-#' @param outfile A character string of the output file
+#' @param x A `vrt_stack` or `vrt_block` object.
+#' @param outfile A character string of the output file path. Must have a
+#'   `.vrt` extension. Defaults to a temporary file inside
+#'   `getOption("vrt.cache")`.
 #' @param bundle Logical. If `TRUE`, copy every intermediate VRT in the
 #'   dependency tree into the directory containing `outfile` and rewrite all
 #'   `<SourceFilename>` paths relative to that directory. The result is a
@@ -10,8 +12,14 @@
 #'   `TRUE`, copy local raster leaves (e.g. GeoTIFFs) into the bundle as well,
 #'   producing a fully portable directory. Remote raster sources are skipped
 #'   and surfaced as a single warning.
+#' @return Invisibly, the normalised absolute path to the saved `.vrt` file.
 #' @export
-vrt_save <- function(x, outfile, bundle = FALSE, include_rasters = FALSE) {
+vrt_save <- function(
+  x,
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
+  bundle = FALSE,
+  include_rasters = FALSE
+) {
   UseMethod("vrt_save")
 }
 
@@ -21,6 +29,20 @@ vrt_save <- function(x, outfile, bundle = FALSE, include_rasters = FALSE) {
 vrt_save.default <- function(x, ...) {
   cli::cli_abort(
     "The vrt_save method is not implemented for class {class(x)}",
+    class = "vrtility_type_error"
+  )
+}
+
+#' @keywords internal
+#' @noRd
+#' @export
+vrt_save.vrt_collection <- function(x, ...) {
+  cli::cli_abort(
+    c(
+      "!" = "{.fn vrt_save} is not supported for {.cls vrt_collection} objects.",
+      "i" = "A vrt_collection holds many per-item VRTs and is an intermediate state, not a saveable end product.",
+      ">" = "Call {.fn vrt_stack} to combine the items into a single VRT, then {.fn vrt_save}, or {.fn vrt_compute} to materialise to disk."
+    ),
     class = "vrtility_type_error"
   )
 }

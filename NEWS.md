@@ -1,3 +1,32 @@
+# vrtility 0.4.0.9000
+
+## New features
+
+* `vrt_set_gdal_pixelfun()`, `vrt_set_py_pixelfun()`, `vrt_set_scale()`,
+  `vrt_set_nodata()` and `vrt_move_band()` now have `vrt_stack` methods, so
+  these operations can be applied after stacking, not only on blocks and
+  collections.
+* `gdal_config_options()` gained network-robustness controls:
+  `GDAL_HTTP_TIMEOUT`, `GDAL_HTTP_CONNECTTIMEOUT`, `GDAL_HTTP_LOW_SPEED_TIME`,
+  `GDAL_HTTP_LOW_SPEED_LIMIT`, `GDAL_GEOREF_SOURCES` and `GDAL_PAM_ENABLED`,
+  with defaults that stop a stalled `/vsicurl` request from hanging a pipeline.
+* `vrt_save()` now defaults `outfile` to a temporary `.vrt` in the VRT cache
+  and returns the saved path invisibly.
+
+## Breaking changes
+
+* `vrt_compute()` no longer accepts `apply_scale`; scaling is controlled via
+  `vrt_set_scale()` on the input instead.
+
+## Improvements
+
+* `vrt_collect()` opens each source once when building per-item VRTs, removing
+  a redundant re-open to read the block size.
+* Operations that cannot apply to an already-stacked VRT (`vrt_set_maskfun()`,
+  `vrt_create_mask()`, `vrt_add_empty_band()`, and `vrt_save()` on a
+  collection) now fail with a clear, actionable error rather than dispatching
+  to `default`.
+
 # vrtility 0.4.0
 
 ## New features

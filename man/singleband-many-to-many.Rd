@@ -101,7 +101,7 @@ all time steps
 \subsection{Performance Considerations}{
 \itemize{
 \item Processing is parallelized if \code{mirai} daemons are active (see
-\code{daemons}\link[mirai:mirai]{mirai::mirai}).
+\code{daemons}\link[mirai:mirai]{mirai}).
 \item Automatic tiling balances memory usage against I/O overhead
 \item Each output image retains original metadata (timestamps, band descriptions)
 \item Use \code{recollect = TRUE} to chain with additional VRT operations

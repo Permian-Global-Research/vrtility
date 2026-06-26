@@ -161,6 +161,7 @@ build_intmask_muparser <- function() {
 #' used where bitwise operations are required. e.g. for HLS data, the "Fmask"
 #' band requires bitwise operations to extract the mask values.
 #' @param use_muparser Logical. If `TRUE` and GDAL >= 3.12, uses muparser
+#' expression instead of Python. Default is to auto-detect based on GDAL version.
 #' @export
 #' @rdname vrt_set_maskfun
 build_bitmask <- function(
@@ -240,7 +241,7 @@ build_bitmask_muparser <- function() {
 #' python library. It is designed to be used with the `vrt_set_maskfun()`
 #' function.
 #' @param patch_size The size/dimension of the patches to use for prediction
-#' (numeric default: 600).
+#' (numeric default: 1000).
 #' @param patch_overlap The overlap between patches (numeric default: 300).
 #' @param batch_size The batch size to use for prediction (numeric default: 1).
 #' @param inference_dtype The data type to use for inference. Options include

@@ -1,5 +1,5 @@
-#' Set the pixel function of a VRT stack object
-#' @param x A vrt_stack object
+#' Set the Python pixel function of a VRT object
+#' @param x A vrt_block, vrt_stack, or vrt_collection object.
 #' @param pixfun A function that returns the Python code for the pixel function
 #' @param band_idx The indices of the bands to set the pixel function for. If
 #' NULL, the pixel function is set for all bands.
@@ -18,18 +18,12 @@ vrt_set_py_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
       "!" = "{.fn vrt_set_py_pixelfun} is not implemented for class {.cls {class(x)[1]}}.",
-      "i" = "{.arg x} must be a {.cls vrt_stack} object."
+      "i" = "{.arg x} must be a {.cls vrt_block}, {.cls vrt_stack}, or {.cls vrt_collection} object."
     )
   )
 }
 
-#' @export
-#' @rdname vrt_set_py_pixelfun
-vrt_set_py_pixelfun.vrt_block <- function(
-  x,
-  pixfun = vrtility::median_numpy(),
-  band_idx = NULL
-) {
+apply_set_py_pixfun_xml <- function(x, pixfun, band_idx) {
   v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
   v_assert_type(
     band_idx,
@@ -70,32 +64,43 @@ vrt_set_py_pixelfun.vrt_block <- function(
     xml2::xml_add_child(pixel_func_code, cdata_node)
   })
 
-  # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
+  tf
+}
 
-  if (inherits(x, "vrt_stack_warped")) {
-    warped <- TRUE
-  } else {
-    warped <- FALSE
-  }
-  if (inherits(x, "vrt_stack")) {
-    build_vrt_stack(
-      vrt_to_vrt(tf),
-      n_items = x$n_items,
-      maskfun = x$maskfun,
-      pixfun = pixfun,
-      warped = warped
-    )
-  } else {
-    build_vrt_block(
-      vrt_to_vrt(tf),
-      maskfun = x$maskfun,
-      pixfun = pixfun,
-      warped = warped,
-      is_remote = x$is_remote
-    )
-  }
+#' @export
+#' @rdname vrt_set_py_pixelfun
+vrt_set_py_pixelfun.vrt_block <- function(
+  x,
+  pixfun = vrtility::median_numpy(),
+  band_idx = NULL
+) {
+  tf <- apply_set_py_pixfun_xml(x, pixfun, band_idx)
+  build_vrt_block(
+    vrt_to_vrt(tf),
+    maskfun = x$maskfun,
+    pixfun = pixfun,
+    warped = x$warped,
+    is_remote = x$is_remote
+  )
+}
+
+#' @export
+#' @rdname vrt_set_py_pixelfun
+vrt_set_py_pixelfun.vrt_stack <- function(
+  x,
+  pixfun = vrtility::median_numpy(),
+  band_idx = NULL
+) {
+  tf <- apply_set_py_pixfun_xml(x, pixfun, band_idx)
+  build_vrt_stack(
+    vrt_to_vrt(tf),
+    n_items = x$n_items,
+    maskfun = x$maskfun,
+    pixfun = pixfun,
+    warped = inherits(x, "vrt_stack_warped")
+  )
 }
 
 #' @export

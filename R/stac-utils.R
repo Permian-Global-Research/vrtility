@@ -531,7 +531,7 @@ stac_coverage_filter <- function(items, bbox, min_coverage = 0.5) {
 #' many items from the same collection. Memory cache provides faster access
 #' for same-session requests.
 #'
-#' @returns A STACItemCollection object with signed assets url.
+#' @return A STACItemCollection object with signed assets url.
 #'
 #' @export
 #' @rdname stac_utilities

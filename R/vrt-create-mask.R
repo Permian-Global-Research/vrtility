@@ -112,7 +112,7 @@ vrt_create_mask.vrt_block <- function(
   cdata_node <- xml2::xml_cdata(maskfun)
   pixel_func_code <- xml2::xml_add_child(msk_band, "PixelFunctionCode")
   xml2::xml_add_child(pixel_func_code, cdata_node)
-  xml2::xml_add_child(
+  reset_element(
     msk_band,
     "Description",
     attributes(maskfun)$mask_description
@@ -170,6 +170,20 @@ vrt_create_mask.vrt_block <- function(
     pixfun = x$pixfun,
     warped = x$warped,
     is_remote = x$is_remote
+  )
+}
+
+#' @noRd
+#' @keywords internal
+#' @export
+vrt_create_mask.vrt_stack <- function(x, ...) {
+  cli::cli_abort(
+    c(
+      "!" = "{.fn vrt_create_mask} is not supported for {.cls vrt_stack} objects.",
+      "i" = "Mask creation needs the per-item structure of a {.cls vrt_collection}; a stack has already combined items into a single VRT.",
+      ">" = "Call {.fn vrt_create_mask} on the {.cls vrt_collection} before {.fn vrt_stack}."
+    ),
+    class = "vrtility_type_error"
   )
 }
 

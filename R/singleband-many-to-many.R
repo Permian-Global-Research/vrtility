@@ -262,9 +262,8 @@ singleband_m2m.vrt_collection_warped <- function(
 #' @param x A matrix.
 #' @return A list of vectors, where each vector represents a row of the
 #' matrix.
-#' @export
 #' @keywords internal
-#' @rdname vrtility_internal
+#' @noRd
 matrix_to_rowlist <- function(x) {
   matrix_to_rowlist_cpp(x)
 }

@@ -281,10 +281,10 @@ vrt_warp.vrt_plan <- function(
   v_assert_length(tr, "tr", 2)
   resampling <- rlang::arg_match(resampling)
 
-  daemon_setup(gdal_config = x$config_options)
+  daemon_setup(gdal_config = config_options)
 
   # Set GDAL config options
-  orig_config <- set_gdal_config(x$config_options)
+  orig_config <- set_gdal_config(config_options)
   on.exit(set_gdal_config(orig_config), add = TRUE)
 
   # Prepare warp options
@@ -381,7 +381,7 @@ vrt_warp.vrt_plan <- function(
       te = te,
       lazy = lazy,
       w_cl_arg = w_cl_arg,
-      config_options = x$config_options,
+      config_options = config_options,
       quiet = quiet,
       src_df_warper = src_df_warper
     )
@@ -448,7 +448,7 @@ warp_setup <- function(
 
   # Force nearest neighbor resampling for byte bands (e.g., masks, classification)
   if (is.null(byte_band_idx)) {
-    byte_band_idx <- detect_byte_bands(x$vrt_src)
+    byte_band_idx <- x$byte_band_idx %||% detect_byte_bands(x$vrt_src)
   }
 
   resamp_methods <- rep(resampling, length(assets))

@@ -24,12 +24,7 @@ vrt_move_band.default <- function(x, ...) {
   )
 }
 
-#' @export
-vrt_move_band.vrt_block <- function(
-  x,
-  band_idx,
-  after
-) {
+apply_move_band_xml <- function(x, band_idx, after) {
   if (after < 0 || after > length(x$assets) + 1) {
     cli::cli_abort(
       c(
@@ -48,12 +43,8 @@ vrt_move_band.vrt_block <- function(
     )
   }
 
-  # Get the VRT XML
   vrt_xml <- xml2::read_xml(x$vrt)
-
-  # Insert the new band after the specified position
   bands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
-
   mv_band <- bands[[band_idx]]
 
   if (after == 0) {
@@ -63,29 +54,49 @@ vrt_move_band.vrt_block <- function(
   }
 
   upbands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
-
   old_position <- ifelse(band_idx < after, band_idx, band_idx + 1)
-
   xml2::xml_remove(upbands[[old_position]])
 
   newbands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
-
   purrr::iwalk(
     newbands,
     ~ xml2::xml_set_attr(.x, "band", as.character(.y))
   )
 
   out_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
-
-  # Save the modified VRT XML back to the file
   xml2::write_xml(vrt_xml, out_vrt)
+  out_vrt
+}
 
+#' @export
+vrt_move_band.vrt_block <- function(
+  x,
+  band_idx,
+  after
+) {
+  out_vrt <- apply_move_band_xml(x, band_idx, after)
   build_vrt_block(
     out_vrt,
     pixfun = x$pixfun,
     maskfun = x$maskfun,
     warped = x$warped,
     is_remote = x$is_remote
+  )
+}
+
+#' @export
+vrt_move_band.vrt_stack <- function(
+  x,
+  band_idx,
+  after
+) {
+  out_vrt <- apply_move_band_xml(x, band_idx, after)
+  build_vrt_stack(
+    out_vrt,
+    n_items = x$n_items,
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    warped = inherits(x, "vrt_stack_warped")
   )
 }
 

@@ -4,12 +4,19 @@
 \alias{vrt_save}
 \title{Save a vrt_block object to disk}
 \usage{
-vrt_save(x, outfile, bundle = FALSE, include_rasters = FALSE)
+vrt_save(
+  x,
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
+  bundle = FALSE,
+  include_rasters = FALSE
+)
 }
 \arguments{
-\item{x}{A \code{vrt_stack} of \code{vrt_block} object.}
+\item{x}{A \code{vrt_stack} or \code{vrt_block} object.}
 
-\item{outfile}{A character string of the output file}
+\item{outfile}{A character string of the output file path. Must have a
+\code{.vrt} extension. Defaults to a temporary file inside
+\code{getOption("vrt.cache")}.}
 
 \item{bundle}{Logical. If \code{TRUE}, copy every intermediate VRT in the
 dependency tree into the directory containing \code{outfile} and rewrite all
@@ -21,6 +28,9 @@ self-contained bundle that survives wiping the VRT cache. Remote sources
 \code{TRUE}, copy local raster leaves (e.g. GeoTIFFs) into the bundle as well,
 producing a fully portable directory. Remote raster sources are skipped
 and surfaced as a single warning.}
+}
+\value{
+Invisibly, the normalised absolute path to the saved \code{.vrt} file.
 }
 \description{
 Save a vrt_block object to disk

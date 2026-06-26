@@ -1,6 +1,6 @@
 #' @title Add an empty band to a VRT_x object
-#' @param after numeric indicating the band number to add the empty band after
 #' @param x A VRT_x object
+#' @param after numeric indicating the band number to add the empty band after
 #' @param description A character string describing the empty band
 #' @param scale_value A numeric value to set the scale of the new band. If NULL,
 #' the scale of the first band in the VRT will be used. Be careful, Landsat for
@@ -82,7 +82,7 @@ vrt_add_empty_band.vrt_block <- function(
 
   ebxml <- xml2::read_xml(eb_vrt)
   ebband <- xml2::xml_find_first(ebxml, ".//VRTRasterBand")
-  xml2::xml_add_child(ebband, "Description", description)
+  reset_element(ebband, "Description", description)
 
   # Get the VRT XML
   vrt_xml <- xml2::read_xml(x$vrt)
@@ -102,11 +102,7 @@ vrt_add_empty_band.vrt_block <- function(
 
   if (!is.null(scale_value)) {
     # apply scale to new band (enables combining with other scaled collections)
-    xml2::xml_add_child(
-      ebband,
-      "Scale",
-      format(scale_value, scientific = FALSE)
-    )
+    reset_element(ebband, "Scale", scale_value)
   }
 
   if (after == 0) {
@@ -136,6 +132,20 @@ vrt_add_empty_band.vrt_block <- function(
   )
 }
 
+
+#' @noRd
+#' @keywords internal
+#' @export
+vrt_add_empty_band.vrt_stack <- function(x, ...) {
+  cli::cli_abort(
+    c(
+      "!" = "{.fn vrt_add_empty_band} is not supported for {.cls vrt_stack} objects.",
+      "i" = "Adding bands needs the per-item structure of a {.cls vrt_block} or {.cls vrt_collection}; a stack has already combined items into a single VRT with one source per band per item.",
+      ">" = "Call {.fn vrt_add_empty_band} before {.fn vrt_stack}."
+    ),
+    class = "vrtility_type_error"
+  )
+}
 
 #' @export
 vrt_add_empty_band.vrt_collection <- function(

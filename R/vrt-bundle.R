@@ -3,8 +3,8 @@
 #' Walks the VRT dependency tree, copies every intermediate VRT (and optionally
 #' the underlying local rasters) into the directory containing `outfile`, and
 #' rewrites all `<SourceFilename>` paths to be relative to that directory.
-#' Remote sources (URLs, /vsicurl/, /vsis3/, ...) are detected via
-#' [assert_is_url()] and left in place: they cannot be bundled.
+#' Remote sources (URLs, /vsicurl/, /vsis3/, ...) are detected and left in
+#' place: they cannot be bundled.
 #'
 #' @param vrt_xml An `xml_document` of the root VRT (already in memory).
 #' @param outfile The destination path for the root VRT. Its parent directory
@@ -47,8 +47,7 @@ write_vrt_bundle <- function(
     used <- purrr::map_chr(ls(registry), ~ get(.x, envir = registry))
     i <- 1L
     while (
-      candidate %in% used ||
-        fs::file_exists(fs::path(bundle_dir, candidate))
+      candidate %in% used || fs::file_exists(fs::path(bundle_dir, candidate))
     ) {
       candidate <- paste0(
         fs::path_ext_remove(base),

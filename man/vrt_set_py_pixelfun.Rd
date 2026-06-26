@@ -4,17 +4,20 @@
 \name{vrt_set_py_pixelfun}
 \alias{vrt_set_py_pixelfun}
 \alias{vrt_set_py_pixelfun.vrt_block}
+\alias{vrt_set_py_pixelfun.vrt_stack}
 \alias{vrt_set_py_pixelfun.vrt_collection}
 \alias{median_numpy}
 \alias{mean_numpy}
 \alias{geomean_numpy}
 \alias{quantile_numpy}
 \alias{mean_db_numpy}
-\title{Set the pixel function of a VRT stack object}
+\title{Set the Python pixel function of a VRT object}
 \usage{
 vrt_set_py_pixelfun(x, pixfun, band_idx)
 
 \method{vrt_set_py_pixelfun}{vrt_block}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
+
+\method{vrt_set_py_pixelfun}{vrt_stack}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
 
 \method{vrt_set_py_pixelfun}{vrt_collection}(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
 
@@ -29,7 +32,7 @@ quantile_numpy(q, use_fastnanquantile = TRUE)
 mean_db_numpy()
 }
 \arguments{
-\item{x}{A vrt_stack object}
+\item{x}{A vrt_block, vrt_stack, or vrt_collection object.}
 
 \item{pixfun}{A function that returns the Python code for the pixel function}
 
@@ -54,7 +57,7 @@ character of the python function
 character of the python function
 }
 \description{
-Set the pixel function of a VRT stack object
+Set the Python pixel function of a VRT object
 }
 \details{
 \code{median_numpy} is a pixel function that calculates the median of

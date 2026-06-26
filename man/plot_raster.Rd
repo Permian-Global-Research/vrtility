@@ -99,7 +99,8 @@ For RGB plots, should be length 6: c(min_r, min_g, min_b, max_r, max_g, max_b).}
 \item{minmax_pct_cut}{Numeric vector of length 2. Percentile cutoff values
 for color scaling (e.g., c(2, 98) for 2nd and 98th percentiles).}
 
-\item{col}{a character vector of colors to use when plotting a single band.}
+\item{col}{Colors to interpolate; must be a valid argument to
+\code{\link[grDevices]{col2rgb}}. Ignored if \code{col_tbl} is provided.}
 
 \item{pixel_fn}{Function to apply to pixel values before plotting.}
 

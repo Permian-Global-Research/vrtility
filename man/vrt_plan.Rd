@@ -30,7 +30,6 @@ A \code{vrt_plan} object containing:
 \item{n_items}{Number of items in the plan}
 \item{vsi_prefix}{VSI prefix used}
 \item{driver}{Driver prefix used}
-\item{config_options}{GDAL configuration options}
 }
 }
 \description{
@@ -49,7 +48,7 @@ not available until warping occurs. Use \code{\link[=vrt_collect]{vrt_collect()}
 inspect or use the source spatial properties before warping.
 }
 \examples{
-\donttest{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # Query STAC items
 items <- sentinel2_stac_query(
   bbox = c(-12.5, -37.5, -12.0, -37.0),
@@ -69,8 +68,7 @@ warped <- vrt_warp(
   te = c(700000, 5850000, 710000, 5860000),
   tr = c(10, 10)
 )
-}
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=vrt_collect]{vrt_collect()}} for full VRT creation, \code{\link[=vrt_warp]{vrt_warp()}} for warping

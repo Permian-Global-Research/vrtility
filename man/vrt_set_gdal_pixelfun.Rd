@@ -3,17 +3,20 @@
 \name{vrt_set_gdal_pixelfun}
 \alias{vrt_set_gdal_pixelfun}
 \alias{vrt_set_gdal_pixelfun.vrt_block}
+\alias{vrt_set_gdal_pixelfun.vrt_stack}
 \alias{vrt_set_gdal_pixelfun.vrt_collection}
-\title{Set built-in GDAL pixel functions of a VRT stack object}
+\title{Set built-in GDAL pixel functions of a VRT object}
 \usage{
 vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx, nodata_as_nan)
 
 \method{vrt_set_gdal_pixelfun}{vrt_block}(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 
+\method{vrt_set_gdal_pixelfun}{vrt_stack}(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
+
 \method{vrt_set_gdal_pixelfun}{vrt_collection}(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 }
 \arguments{
-\item{x}{A vrt_stack object}
+\item{x}{A vrt_block, vrt_stack, or vrt_collection object.}
 
 \item{pixfun}{A built-in GDAL pixel function. See details for a list of
 available functions.}
@@ -33,7 +36,7 @@ A modified object of the same class as \code{x} with the GDAL pixel
 function set.
 }
 \description{
-Set built-in GDAL pixel functions of a VRT stack object
+Set built-in GDAL pixel functions of a VRT object
 }
 \details{
 The documentation for the GDAL pixel functions can be found at

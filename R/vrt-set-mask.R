@@ -246,6 +246,20 @@ vrt_set_maskfun.vrt_block <- function(
   )
 }
 
+#' @noRd
+#' @keywords internal
+#' @export
+vrt_set_maskfun.vrt_stack <- function(x, ...) {
+  cli::cli_abort(
+    c(
+      "!" = "{.fn vrt_set_maskfun} is not supported for {.cls vrt_stack} objects.",
+      "i" = "Masking operates on a collection's per-item bands; a stack has already combined items into a single VRT.",
+      ">" = "Call {.fn vrt_set_maskfun} on the {.cls vrt_collection} before {.fn vrt_stack}."
+    ),
+    class = "vrtility_type_error"
+  )
+}
+
 #' @param x A VRT collection
 #' @rdname vrt_set_maskfun
 #' @export
