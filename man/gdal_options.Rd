@@ -17,7 +17,7 @@ gdal_config_options(
   GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
   GDAL_GEOREF_SOURCES = NULL,
   GDAL_PAM_ENABLED = NULL,
-  CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
+  CPL_VSIL_CURL_CACHE_SIZE = "268435456",
   GDAL_HTTP_MAX_RETRY = "10",
   GDAL_HTTP_RETRY_DELAY = "0.5",
   GDAL_HTTP_TIMEOUT = "60",
@@ -27,8 +27,7 @@ gdal_config_options(
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-  GDAL_HTTP_COOKIEFILE = fs::path(tools::R_user_dir("vrtility", which = "cache"),
-    "gdal_cookies.txt"),
+  GDAL_HTTP_COOKIEFILE = NULL,
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
@@ -90,7 +89,10 @@ mechanism. Defaults to NULL (GDAL's default, PAM enabled). Setting "NO"
 disables PAM wholesale and can eliminate residual probe requests for
 .aux.xml sidecars.}
 
-\item{CPL_VSIL_CURL_CACHE_SIZE}{Cache size for HTTP requests.}
+\item{CPL_VSIL_CURL_CACHE_SIZE}{Global /vsicurl chunk cache size in bytes,
+applied per process. Defaults to 256 MiB. vrtility parallelises across mirai
+daemons, so the effective total is this value times the number of daemons;
+keep it modest rather than large to avoid memory pressure across daemons.}
 
 \item{GDAL_HTTP_MAX_RETRY}{Maximum number of retries for HTTP requests.}
 
@@ -121,9 +123,14 @@ for plaintext HTTP/2 (h2c) and breaks HTTPS endpoints.}
 \item{GDAL_HTTP_MERGE_CONSECUTIVE_RANGES}{Merge consecutive ranges in HTTP
 requests?}
 
-\item{GDAL_HTTP_COOKIEFILE}{Path to the cookie file for HTTP requests.}
+\item{GDAL_HTTP_COOKIEFILE}{Path to the cookie file for HTTP requests.
+Defaults to NULL (no cookie file). Most sources (e.g. Planetary Computer,
+public buckets) need no cookies. Set a path when accessing a source that
+authenticates via HTTP cookies, such as NASA Earthdata / URS. Under daemon
+parallelism prefer a per-daemon path to avoid concurrent writes to one file.}
 
-\item{GDAL_HTTP_COOKIEJAR}{Path to the cookie jar for HTTP requests.}
+\item{GDAL_HTTP_COOKIEJAR}{Path to the cookie jar for HTTP requests. Defaults
+to \code{GDAL_HTTP_COOKIEFILE} (so NULL unless a cookie file is set).}
 
 \item{GDAL_MAX_DATASET_POOL_SIZE}{Maximum size of the dataset pool.}
 

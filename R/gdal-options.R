@@ -29,9 +29,17 @@
 #' in bytes. Defaults to NULL so GDAL's underlying default of 16 KiB applies.
 #' Larger values inflate every cold metadata read by the chunk size and can hurt
 #' COG-open latency.
-#' @param CPL_VSIL_CURL_CACHE_SIZE Cache size for HTTP requests.
+#' @param CPL_VSIL_CURL_CACHE_SIZE Global /vsicurl chunk cache size in bytes,
+#' applied per process. Defaults to 256 MiB. vrtility parallelises across mirai
+#' daemons, so the effective total is this value times the number of daemons;
+#' keep it modest rather than large to avoid memory pressure across daemons.
 #' @param GDAL_HTTP_COOKIEFILE Path to the cookie file for HTTP requests.
-#' @param GDAL_HTTP_COOKIEJAR  Path to the cookie jar for HTTP requests.
+#' Defaults to NULL (no cookie file). Most sources (e.g. Planetary Computer,
+#' public buckets) need no cookies. Set a path when accessing a source that
+#' authenticates via HTTP cookies, such as NASA Earthdata / URS. Under daemon
+#' parallelism prefer a per-daemon path to avoid concurrent writes to one file.
+#' @param GDAL_HTTP_COOKIEJAR Path to the cookie jar for HTTP requests. Defaults
+#' to `GDAL_HTTP_COOKIEFILE` (so NULL unless a cookie file is set).
 #' @param GDAL_DISABLE_READDIR_ON_OPEN Disable directory listing on open?
 #' @param GDAL_GEOREF_SOURCES Comma-separated list of georeferencing sources
 #' GDAL is allowed to consult on open. Defaults to NULL, leaving GDAL's
@@ -74,7 +82,7 @@ gdal_config_options <- function(
   GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
   GDAL_GEOREF_SOURCES = NULL,
   GDAL_PAM_ENABLED = NULL,
-  CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
+  CPL_VSIL_CURL_CACHE_SIZE = "268435456",
   GDAL_HTTP_MAX_RETRY = "10",
   GDAL_HTTP_RETRY_DELAY = "0.5",
   GDAL_HTTP_TIMEOUT = "60",
@@ -84,10 +92,7 @@ gdal_config_options <- function(
   GDAL_HTTP_MULTIPLEX = "YES",
   GDAL_HTTP_VERSION = "2",
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-  GDAL_HTTP_COOKIEFILE = fs::path(
-    tools::R_user_dir("vrtility", which = "cache"),
-    "gdal_cookies.txt"
-  ),
+  GDAL_HTTP_COOKIEFILE = NULL,
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
@@ -96,7 +101,9 @@ gdal_config_options <- function(
   CPL_VSIL_CURL_CHUNK_SIZE = NULL,
   ...
 ) {
-  fs::dir_create(fs::path_dir(GDAL_HTTP_COOKIEFILE))
+  if (!is.null(GDAL_HTTP_COOKIEFILE)) {
+    fs::dir_create(fs::path_dir(GDAL_HTTP_COOKIEFILE))
+  }
   unlist(c(as.list(rlang::current_env()), rlang::dots_list(...)))
 }
 
