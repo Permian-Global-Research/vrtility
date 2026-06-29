@@ -132,8 +132,10 @@
 
 .onLoad <- function(libname, pkgname) {
   # Declare Python dependency (does NOT trigger Python initialization).
-  # numba now supports numpy 2.4.0: https://github.com/numba/numba/issues/10263#issuecomment-3946988146
-  reticulate::py_require("numpy>=2.4.0")
+  # Cap below 2.5: fastnanquantile pulls in numba, which supports numpy 2.4 but
+  # not yet 2.5. An unbounded `numpy>=2.4.0` lets uv select numpy 2.5, then
+  # backtrack to an ancient, unbuildable numba (0.53.1). See numba#10263.
+  reticulate::py_require("numpy>=2.4.0,<2.5")
   cache_init_checks()
   vrt_opts_set()
 
