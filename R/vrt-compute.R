@@ -20,8 +20,6 @@
 #' that are not captured in `gdalwarp_options()` - these are not checked for
 #' validity.
 #' @param quiet A logical indicating whether to suppress output
-#' @param apply_scale A logical indicating whether to apply scale values
-#' existing in the file metadata.
 #' @param dst_nodata A numeric value of the nodata value to use for the
 #' output raster. If NULL, gdal will decide. This is usually only required if
 #' you are retaining a band which contains a different nodata value to others.
@@ -112,7 +110,6 @@ vrt_compute <- function(
   nsplits,
   add_cl_arg,
   quiet,
-  apply_scale,
   dst_nodata,
   recollect
 ) {
@@ -162,7 +159,6 @@ vrt_compute.vrt_block <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -280,7 +276,6 @@ vrt_compute.vrt_stack_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -299,7 +294,6 @@ vrt_compute.vrt_stack_warped <- function(
     nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet,
-    apply_scale = apply_scale,
     dst_nodata = dst_nodata,
     recollect = recollect
   )
@@ -336,7 +330,6 @@ vrt_compute.vrt_stack <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -378,7 +371,6 @@ vrt_compute.vrt_collection_warped <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -397,7 +389,6 @@ vrt_compute.vrt_collection_warped <- function(
     nsplits = nsplits,
     add_cl_arg = add_cl_arg,
     quiet = quiet,
-    apply_scale = apply_scale,
     dst_nodata = dst_nodata,
     recollect = recollect
   )
@@ -435,7 +426,6 @@ vrt_compute.vrt_collection <- function(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 ) {
@@ -482,7 +472,6 @@ vrt_compute.vrt_collection <- function(
           nsplits = nsplits,
           add_cl_arg = add_cl_arg,
           quiet = TRUE,
-          apply_scale = apply_scale,
           dst_nodata = dst_nodata,
           recollect = FALSE
         )
@@ -498,7 +487,6 @@ vrt_compute.vrt_collection <- function(
       config_options = config_options,
       nsplits = nsplits,
       add_cl_arg = add_cl_arg,
-      apply_scale = apply_scale,
       dst_nodata = dst_nodata
     ),
     .progress = !quiet

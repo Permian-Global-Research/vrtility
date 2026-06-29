@@ -177,6 +177,7 @@ async_gdalreader_multiband_reduce_read_write <- function(
     read_block_arrays = read_block_arrays,
     reduce_fun = reduce_fun,
     mdim_reduction_apply = mdim_reduction_apply,
+    extract_band_matrices = extract_band_matrices,
     restructure_cells = restructure_cells,
     config_options = config_options
   )

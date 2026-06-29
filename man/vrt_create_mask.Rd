@@ -32,7 +32,7 @@ attributes: \code{mask_name}, \code{mask_description}, and \code{required_bands}
 default: 0).}
 
 \item{patch_size}{The size/dimension of the patches to use for prediction
-(numeric default: 600).}
+(numeric default: 1000).}
 
 \item{patch_overlap}{The overlap between patches (numeric default: 300).}
 

@@ -15,14 +15,19 @@ gdal_config_options(
   VSI_CACHE_SIZE = "268435456",
   GDAL_NUM_THREADS = 1,
   GDAL_DISABLE_READDIR_ON_OPEN = "EMPTY_DIR",
-  CPL_VSIL_CURL_CACHE_SIZE = "1342177280",
+  GDAL_GEOREF_SOURCES = NULL,
+  GDAL_PAM_ENABLED = NULL,
+  CPL_VSIL_CURL_CACHE_SIZE = "268435456",
   GDAL_HTTP_MAX_RETRY = "10",
   GDAL_HTTP_RETRY_DELAY = "0.5",
-  GDAL_HTTP_MULTIPLEX = "YES",
-  GDAL_HTTP_VERSION = "2",
+  GDAL_HTTP_TIMEOUT = "60",
+  GDAL_HTTP_CONNECTTIMEOUT = "10",
+  GDAL_HTTP_LOW_SPEED_TIME = "30",
+  GDAL_HTTP_LOW_SPEED_LIMIT = "1000",
+  GDAL_HTTP_MULTIPLEX = NULL,
+  GDAL_HTTP_VERSION = NULL,
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
-  GDAL_HTTP_COOKIEFILE = fs::path(tools::R_user_dir("vrtility", which = "cache"),
-    "gdal_cookies.txt"),
+  GDAL_HTTP_COOKIEFILE = NULL,
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
   GDAL_MAX_DATASET_POOL_SIZE = NULL,
   GDAL_INGESTED_BYTES_AT_OPEN = NULL,
@@ -66,27 +71,71 @@ check_muparser(gdal_version = "3.11.4")
 
 \item{VSI_CACHE_SIZE}{Size of the VSI cache in bytes.}
 
-\item{GDAL_NUM_THREADS}{Number of threads to use for processing.
-Default is the number of available cores divided by the number of daemons.}
+\item{GDAL_NUM_THREADS}{Number of threads GDAL is permitted to use for
+processing. Defaults to 1 because vrtility parallelises across mirai
+daemons and additional GDAL-internal threads contend for CPU rather
+than helping.}
 
 \item{GDAL_DISABLE_READDIR_ON_OPEN}{Disable directory listing on open?}
 
-\item{CPL_VSIL_CURL_CACHE_SIZE}{Cache size for HTTP requests.}
+\item{GDAL_GEOREF_SOURCES}{Comma-separated list of georeferencing sources
+GDAL is allowed to consult on open. Defaults to NULL, leaving GDAL's
+full search list "PAM,INTERNAL,TABFILE,WORLDFILE,XML" in effect. Setting
+"INTERNAL" restricts GDAL to the source raster's own georeferencing and
+can suppress sidecar / aux probes.}
+
+\item{GDAL_PAM_ENABLED}{Controls the Persistent Auxiliary Metadata (PAM)
+mechanism. Defaults to NULL (GDAL's default, PAM enabled). Setting "NO"
+disables PAM wholesale and can eliminate residual probe requests for
+.aux.xml sidecars.}
+
+\item{CPL_VSIL_CURL_CACHE_SIZE}{Global /vsicurl chunk cache size in bytes,
+applied per process. Defaults to 256 MiB. vrtility parallelises across mirai
+daemons, so the effective total is this value times the number of daemons;
+keep it modest rather than large to avoid memory pressure across daemons.}
 
 \item{GDAL_HTTP_MAX_RETRY}{Maximum number of retries for HTTP requests.}
 
 \item{GDAL_HTTP_RETRY_DELAY}{Delay between retries in seconds.}
 
-\item{GDAL_HTTP_MULTIPLEX}{Use HTTP multiplexing?}
+\item{GDAL_HTTP_TIMEOUT}{Total per-request timeout in seconds. Defaults to
+60. Setting this prevents a single stalled /vsicurl request from hanging
+the pipeline indefinitely; GDAL's underlying default is 0 (no timeout).}
 
-\item{GDAL_HTTP_VERSION}{HTTP version to use.}
+\item{GDAL_HTTP_CONNECTTIMEOUT}{TCP connection establishment timeout in
+seconds. Defaults to 10.}
+
+\item{GDAL_HTTP_LOW_SPEED_TIME}{Abort an in-flight request if the transfer
+rate stays below \code{GDAL_HTTP_LOW_SPEED_LIMIT} for this many seconds.
+Defaults to 30.}
+
+\item{GDAL_HTTP_LOW_SPEED_LIMIT}{Transfer rate floor in bytes/sec used by
+\code{GDAL_HTTP_LOW_SPEED_TIME}. Defaults to 1000 (1 KB/s).}
+
+\item{GDAL_HTTP_MULTIPLEX}{Use HTTP/2 multiplexing? Defaults to NULL (GDAL's
+default, off). Multiplexing funnels many range reads over a single HTTP/2
+connection; under vrtility's per-daemon model that single connection becomes
+a per-process bottleneck, so plain HTTP/1.1 with multiple parallel
+connections (the default) saturates at least as well and is more resilient.}
+
+\item{GDAL_HTTP_VERSION}{HTTP version to negotiate. Defaults to NULL, leaving
+GDAL's default (HTTP/1.1), which opens multiple parallel connections per
+process. This matches the configuration used by fast cloud readers such as
+odc-stac and, in vrtility's many-daemon model, saturates the network at
+least as well as forcing HTTP/2 while being more resilient to throttling.
+Set "2" to negotiate HTTP/2 via TLS-ALPN, or "1.1" to force HTTP/1.1.}
 
 \item{GDAL_HTTP_MERGE_CONSECUTIVE_RANGES}{Merge consecutive ranges in HTTP
 requests?}
 
-\item{GDAL_HTTP_COOKIEFILE}{Path to the cookie file for HTTP requests.}
+\item{GDAL_HTTP_COOKIEFILE}{Path to the cookie file for HTTP requests.
+Defaults to NULL (no cookie file). Most sources (e.g. Planetary Computer,
+public buckets) need no cookies. Set a path when accessing a source that
+authenticates via HTTP cookies, such as NASA Earthdata / URS. Under daemon
+parallelism prefer a per-daemon path to avoid concurrent writes to one file.}
 
-\item{GDAL_HTTP_COOKIEJAR}{Path to the cookie jar for HTTP requests.}
+\item{GDAL_HTTP_COOKIEJAR}{Path to the cookie jar for HTTP requests. Defaults
+to \code{GDAL_HTTP_COOKIEFILE} (so NULL unless a cookie file is set).}
 
 \item{GDAL_MAX_DATASET_POOL_SIZE}{Maximum size of the dataset pool.}
 
@@ -95,9 +144,17 @@ requests?}
 \item{CPL_VSIL_CURL_ALLOWED_EXTENSIONS}{Allowed file extensions for HTTP
 requests.}
 
-\item{CPL_VSIL_CURL_USE_HEAD}{Use HTTP HEAD requests?}
+\item{CPL_VSIL_CURL_USE_HEAD}{When "YES", GDAL issues an HTTP HEAD before
+the first GET on each cold /vsicurl open to retrieve content length.
+Defaults to "YES". Setting "NO" theoretically saves one round trip per
+cold open but in practice the HEAD warms the connection (DNS, TLS,
+redirect resolution) so skipping it produced no measurable gain in our
+testing.}
 
-\item{CPL_VSIL_CURL_CHUNK_SIZE}{Chunk size for HTTP requests.}
+\item{CPL_VSIL_CURL_CHUNK_SIZE}{Chunk size for /vsicurl HTTP range reads,
+in bytes. Defaults to NULL so GDAL's underlying default of 16 KiB applies.
+Larger values inflate every cold metadata read by the chunk size and can hurt
+COG-open latency.}
 
 \item{...}{Additional -co options to set}
 

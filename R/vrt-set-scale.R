@@ -43,13 +43,7 @@ vrt_set_scale.default <- function(x, ...) {
   )
 }
 
-#' @export
-vrt_set_scale.vrt_block <- function(
-  x,
-  scale_value,
-  offset_value = 0.0,
-  band_idx = NULL
-) {
+apply_set_scale_xml <- function(x, scale_value, offset_value, band_idx) {
   purrr::pwalk(
     list(
       v = list(scale_value, offset_value),
@@ -57,19 +51,12 @@ vrt_set_scale.vrt_block <- function(
     ),
     function(v, n) {
       if (length(v) > 1) {
-        v_assert_length(
-          v,
-          n,
-          length(x$assets),
-          nullok = FALSE
-        )
+        v_assert_length(v, n, length(x$assets), nullok = FALSE)
       }
     }
   )
 
-  # Get the VRT XML
   vrt_xml <- xml2::read_xml(x$vrt)
-
   bands <- xml2::xml_find_all(vrt_xml, ".//VRTRasterBand")
 
   if (is.null(band_idx)) {
@@ -79,26 +66,47 @@ vrt_set_scale.vrt_block <- function(
   purrr::pwalk(
     list(band = bands[band_idx], scale = scale_value, offset = offset_value),
     function(band, scale, offset) {
-      # Remove existing Scale elements
       reset_element(band, "Scale", scale)
-
-      # Remove existing Offset elements
       reset_element(band, "Offset", offset)
     }
   )
-  out_vrt <- fs::file_temp(
-    tmp_dir = getOption("vrt.cache"),
-    ext = "vrt"
-  )
-  # Save the modified VRT XML back to the file
-  xml2::write_xml(vrt_xml, out_vrt)
 
+  out_vrt <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
+  xml2::write_xml(vrt_xml, out_vrt)
+  out_vrt
+}
+
+#' @export
+vrt_set_scale.vrt_block <- function(
+  x,
+  scale_value,
+  offset_value = 0.0,
+  band_idx = NULL
+) {
+  out_vrt <- apply_set_scale_xml(x, scale_value, offset_value, band_idx)
   build_vrt_block(
     out_vrt,
     pixfun = x$pixfun,
     maskfun = x$maskfun,
     warped = x$warped,
     is_remote = x$is_remote
+  )
+}
+
+#' @export
+vrt_set_scale.vrt_stack <- function(
+  x,
+  scale_value,
+  offset_value = 0.0,
+  band_idx = NULL
+) {
+  out_vrt <- apply_set_scale_xml(x, scale_value, offset_value, band_idx)
+  build_vrt_stack(
+    out_vrt,
+    n_items = x$n_items,
+    maskfun = x$maskfun,
+    pixfun = x$pixfun,
+    warped = inherits(x, "vrt_stack_warped")
   )
 }
 

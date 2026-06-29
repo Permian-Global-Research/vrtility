@@ -3,12 +3,15 @@
 \name{vrt_set_nodata}
 \alias{vrt_set_nodata}
 \alias{vrt_set_nodata.vrt_block}
+\alias{vrt_set_nodata.vrt_stack}
 \alias{vrt_set_nodata.vrt_collection}
 \title{Set NoData Value for VRT}
 \usage{
 vrt_set_nodata(x, nodatavalue, nodata, band_idx)
 
 \method{vrt_set_nodata}{vrt_block}(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
+
+\method{vrt_set_nodata}{vrt_stack}(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
 
 \method{vrt_set_nodata}{vrt_collection}(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
 }

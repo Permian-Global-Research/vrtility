@@ -32,6 +32,7 @@ build_vrt_block <- function(
     assets = bt$assets,
     no_data_val = bt$no_data_val,
     mask_band_name = bt$mask_band_name,
+    byte_band_idx = bt$byte_band_idx,
     pixfun = pixfun,
     maskfun = maskfun,
     warped = warped,
@@ -54,6 +55,10 @@ block_template <- function(ds) {
     seq_len(ras_count),
     function(.x) ds$getNoDataValue(.x)
   )
+  byte_band_idx <- which(purrr::map_lgl(
+    seq_len(ras_count),
+    function(.x) ds$getDataTypeName(.x) == "Byte"
+  ))
   # for stacks there will be multiple datetime_{n} keys
   metadata_items <- ds$getMetadata(0, "")
   datetime_keys <- metadata_items[grepl("^datetime_\\d+", metadata_items)]
@@ -68,6 +73,7 @@ block_template <- function(ds) {
   list(
     assets = assets,
     no_data_val = no_data_val,
+    byte_band_idx = byte_band_idx,
     dttm = dttm,
     mask_band_name = mask_band_name,
     dttm_keys = datetime_keys

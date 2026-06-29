@@ -59,8 +59,7 @@ test_that("vrt_set_gdal_pixelfun works", {
       t_srs = t_block$srs,
       te = t_block$bbox,
       tr = t_block$res,
-      engine = "warp",
-      apply_scale = TRUE
+      engine = "warp"
     )
 
   freader <- function(x) {

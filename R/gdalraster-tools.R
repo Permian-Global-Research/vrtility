@@ -167,6 +167,38 @@ src_block_size <- function(
   return(blksize)
 }
 
+#' get source block size from an already-open GDALRaster
+#' @param ds an open GDALRaster
+#' @param band numeric band number
+#' @return numeric vector of block size c(xsize, ysize) or -co arg vector.
+#' Kept self-contained from src_block_size so it can be called in main-process
+#' contexts without entangling daemon-shipped closures.
+#' @keywords internal
+#' @noRd
+src_block_size_from_ds <- function(
+  ds,
+  band = 1,
+  co_format = TRUE,
+  mingdal = gdalraster::gdal_compute_version(3, 10, 0)
+) {
+  blksize <- ds$getBlockSize(band)
+
+  if (co_format) {
+    if (mingdal <= gdalraster::gdal_version_num()) {
+      blksize <- c(
+        "-co",
+        glue::glue("BLOCKXSIZE={blksize[1]}"),
+        "-co",
+        glue::glue("BLOCKYSIZE={blksize[2]}")
+      )
+    } else {
+      blksize <- NULL
+    }
+  }
+
+  return(blksize)
+}
+
 #' get source metadata from raster file
 #' @param src character path to raster file
 #' @return named character vector of metadata items

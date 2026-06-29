@@ -23,7 +23,6 @@ vrt_compute(
   nsplits,
   add_cl_arg,
   quiet,
-  apply_scale,
   dst_nodata,
   recollect
 )
@@ -43,7 +42,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -63,7 +61,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -83,7 +80,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -103,7 +99,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -123,7 +118,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -162,9 +156,6 @@ that are not captured in \code{gdalwarp_options()} - these are not checked for
 validity.}
 
 \item{quiet}{A logical indicating whether to suppress output}
-
-\item{apply_scale}{A logical indicating whether to apply scale values
-existing in the file metadata.}
 
 \item{dst_nodata}{A numeric value of the nodata value to use for the
 output raster. If NULL, gdal will decide. This is usually only required if

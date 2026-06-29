@@ -24,7 +24,8 @@ vrt_stack(x)
 \item{...}{Additional arguments not used}
 }
 \value{
-A vrt_stack object
+A vrt_stack object, or a vrt_stack_warped object if the input
+collection was warped (a vrt_collection_warped).
 }
 \description{
 Stack VRT files from a vrt_collection object

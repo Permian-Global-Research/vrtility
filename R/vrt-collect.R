@@ -118,18 +118,19 @@ vrt_collect.character <- function(
   vrt_items <- purrr::map2(unname(x), datetimes, function(.x, .y) {
     tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
 
+    ds <- methods::new(gdalraster::GDALRaster, .x)
+    on.exit(ds$close(), add = TRUE)
+
     gdalraster::buildVRT(
       tf,
       .x,
       quiet = TRUE,
       cl_arg = c(
         band_args,
-        src_block_size(.x)
+        src_block_size_from_ds(ds)
       )
     )
 
-    ds <- methods::new(gdalraster::GDALRaster, .x)
-    on.exit(ds$close(), add = TRUE)
     dst <- methods::new(gdalraster::GDALRaster, tf, readonly = FALSE)
     on.exit(dst$close(), add = TRUE)
 

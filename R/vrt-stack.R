@@ -5,7 +5,8 @@
 #' files are stacked in the order they are provided in the vrt_collection
 #' object. If this is derived from a rstac object, the order should be ordered
 #' by date.
-#' @return A vrt_stack object
+#' @return A vrt_stack object, or a vrt_stack_warped object if the input
+#' collection was warped (a vrt_collection_warped).
 #' @export
 #' @rdname vrt_stack
 vrt_stack <- function(x) {
@@ -82,7 +83,8 @@ vrt_stack.vrt_collection <- function(
 #' @param pixfun The code of the pixel function
 #' @param warped Logical. Is this a warped VRT?
 #' @param n_items Number of items in the collection
-#' @return A vrt_stack object
+#' @return A vrt_stack object, or a vrt_stack_warped object when
+#' `warped = TRUE`.
 #' @keywords internal
 #' @noRd
 build_vrt_stack <- function(

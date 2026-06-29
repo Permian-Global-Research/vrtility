@@ -52,6 +52,13 @@ test_that("vrt_derived_block works", {
   expect_identical(dszt$getNoDataValue(1), NaN)
 
   skip_on_os("windows")
+  # vdiffr SVG output is coupled to the svglite/systemfonts toolchain, which is
+  # newer on R-devel and renders byte-different SVG; skip there to avoid
+  # spurious snapshot failures. The visual check still runs on release CI.
+  testthat::skip_if(
+    grepl("devel", R.version$status, ignore.case = TRUE),
+    "vdiffr snapshot unstable on the R-devel rendering toolchain"
+  )
   vdiffr::expect_doppelganger(
     "derived ndvi plot",
     plot(ex_ndvi, item = 3)

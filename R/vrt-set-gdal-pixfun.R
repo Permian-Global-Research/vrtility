@@ -1,5 +1,5 @@
-#' Set built-in GDAL pixel functions of a VRT stack object
-#' @param x A vrt_stack object
+#' Set built-in GDAL pixel functions of a VRT object
+#' @param x A vrt_block, vrt_stack, or vrt_collection object.
 #' @param pixfun A built-in GDAL pixel function. See details for a list of
 #' available functions.
 #' @param ... named arguments used within the pixel function see details.
@@ -71,20 +71,12 @@ vrt_set_gdal_pixelfun.default <- function(x, ...) {
   cli::cli_abort(
     c(
       "!" = "{.fn vrt_set_gdal_pixelfun} is not implemented for class {.cls {class(x)[1]}}.",
-      "i" = "{.arg x} must be a {.cls vrt_stack} object."
+      "i" = "{.arg x} must be a {.cls vrt_block}, {.cls vrt_stack}, or {.cls vrt_collection} object."
     )
   )
 }
 
-#' @export
-#' @rdname vrt_set_gdal_pixelfun
-vrt_set_gdal_pixelfun.vrt_block <- function(
-  x,
-  pixfun,
-  ...,
-  band_idx = NULL,
-  nodata_as_nan = FALSE
-) {
+apply_set_gdal_pixfun_xml <- function(x, pixfun, pf_arg_vals, band_idx, nodata_as_nan) {
   v_assert_type(pixfun, "pixfun", "character", nullok = FALSE)
   v_assert_type(
     band_idx,
@@ -93,10 +85,8 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
     nullok = TRUE,
     multiple = TRUE
   )
-  pf_arg_vals <- rlang::dots_list(...)
 
   if (length(pf_arg_vals) > 0) {
-    # change TRUE to "true" and FALSE to "false"
     pf_arg_vals <- purrr::map(pf_arg_vals, function(.x) {
       if (inherits(.x, "logical")) {
         return(tolower(.x))
@@ -107,7 +97,6 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
   }
 
   vx <- xml2::read_xml(x$vrt)
-
   bands <- xml2::xml_find_all(vx, ".//VRTRasterBand")
 
   if (is.null(band_idx)) {
@@ -128,32 +117,59 @@ vrt_set_gdal_pixelfun.vrt_block <- function(
     set_nodatavalue(vx, "NaN", nodata_targets = ".//NoDataValue")
   }
 
-  # Write back to block
   tf <- fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt")
   xml2::write_xml(vx, tf)
+  tf
+}
 
-  if (inherits(x, "vrt_stack_warped")) {
-    warped <- TRUE
-  } else {
-    warped <- FALSE
-  }
-  if (inherits(x, "vrt_stack")) {
-    build_vrt_stack(
-      vrt_to_vrt(tf),
-      n_items = x$n_items,
-      maskfun = x$maskfun,
-      pixfun = pixfun,
-      warped = warped
-    )
-  } else {
-    build_vrt_block(
-      vrt_to_vrt(tf),
-      maskfun = x$maskfun,
-      pixfun = pixfun,
-      warped = warped,
-      is_remote = x$is_remote
-    )
-  }
+#' @export
+#' @rdname vrt_set_gdal_pixelfun
+vrt_set_gdal_pixelfun.vrt_block <- function(
+  x,
+  pixfun,
+  ...,
+  band_idx = NULL,
+  nodata_as_nan = FALSE
+) {
+  tf <- apply_set_gdal_pixfun_xml(
+    x,
+    pixfun,
+    rlang::dots_list(...),
+    band_idx,
+    nodata_as_nan
+  )
+  build_vrt_block(
+    vrt_to_vrt(tf),
+    maskfun = x$maskfun,
+    pixfun = pixfun,
+    warped = x$warped,
+    is_remote = x$is_remote
+  )
+}
+
+#' @export
+#' @rdname vrt_set_gdal_pixelfun
+vrt_set_gdal_pixelfun.vrt_stack <- function(
+  x,
+  pixfun,
+  ...,
+  band_idx = NULL,
+  nodata_as_nan = FALSE
+) {
+  tf <- apply_set_gdal_pixfun_xml(
+    x,
+    pixfun,
+    rlang::dots_list(...),
+    band_idx,
+    nodata_as_nan
+  )
+  build_vrt_stack(
+    vrt_to_vrt(tf),
+    n_items = x$n_items,
+    maskfun = x$maskfun,
+    pixfun = pixfun,
+    warped = inherits(x, "vrt_stack_warped")
+  )
 }
 
 #' @export

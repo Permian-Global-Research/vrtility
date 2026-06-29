@@ -336,8 +336,7 @@ read_block_arrays <- function(
 #' @param n_bands The number of bands.
 #' @return A list of matrices, where each matrix corresponds to a band.
 #' @keywords internal
-#' @rdname vrtility_internal
-#' @export
+#' @noRd
 extract_band_matrices <- function(
   x,
   row_indices,

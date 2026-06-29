@@ -22,7 +22,6 @@
 #'   \item{n_items}{Number of items in the plan}
 #'   \item{vsi_prefix}{VSI prefix used}
 #'   \item{driver}{Driver prefix used}
-#'   \item{config_options}{GDAL configuration options}
 #' }
 #'
 #' @details
@@ -35,8 +34,7 @@
 #' not available until warping occurs. Use [vrt_collect()] if you need to
 #' inspect or use the source spatial properties before warping.
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' # Query STAC items
 #' items <- sentinel2_stac_query(
 #'   bbox = c(-12.5, -37.5, -12.0, -37.0),
@@ -56,7 +54,6 @@
 #'   te = c(700000, 5850000, 710000, 5860000),
 #'   tr = c(10, 10)
 #' )
-#' }
 #'
 #' @seealso [vrt_collect()] for full VRT creation, [vrt_warp()] for warping
 #' @rdname vrt_plan

@@ -4,7 +4,6 @@
 #' @param x A path to a raster file
 #' @param bands a numeric vector of band numbers to plot must be of length
 #' 1 or 3.
-#' @param col a character vector of colors to use when plotting a single band.
 #' @param title a character string indicating what to use as the title of the
 #' plot. One of "description", "dttm", or "none". If "description" the band
 #' description (name) is used, if "dttm" the datetime of the block is used, if
