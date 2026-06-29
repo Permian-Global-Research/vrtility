@@ -11,13 +11,13 @@ Source:
 [`DESCRIPTION`](https://github.com/Permian-Global-Research/vrtility/blob/main/DESCRIPTION)
 
 Graham H (2026). *vrtility: Efficient Raster Processing Pipelines Using
-GDAL Virtual Rasters*. R package version 0.4.0,
+GDAL Virtual Rasters*. R package version 0.4.0.9000,
 <https://permian-global-research.github.io/vrtility/>.
 
     @Manual{,
       title = {vrtility: Efficient Raster Processing Pipelines Using GDAL Virtual Rasters},
       author = {Hugh Graham},
       year = {2026},
-      note = {R package version 0.4.0},
+      note = {R package version 0.4.0.9000},
       url = {https://permian-global-research.github.io/vrtility/},
     }

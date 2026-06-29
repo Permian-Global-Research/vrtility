@@ -40,7 +40,8 @@ print(x, xml = FALSE, pixfun = FALSE, maskfun = FALSE, ...)
 
 ## Value
 
-A vrt_stack object
+A vrt_stack object, or a vrt_stack_warped object if the input collection
+was warped (a vrt_collection_warped).
 
 ## Details
 

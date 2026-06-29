@@ -19,7 +19,6 @@ vrt_compute(
   nsplits,
   add_cl_arg,
   quiet,
-  apply_scale,
   dst_nodata,
   recollect
 )
@@ -40,7 +39,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -61,7 +59,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -82,7 +79,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -103,7 +99,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -124,7 +119,6 @@ vrt_compute(
   nsplits = NULL,
   add_cl_arg = NULL,
   quiet = TRUE,
-  apply_scale = TRUE,
   dst_nodata = NULL,
   recollect = FALSE
 )
@@ -189,11 +183,6 @@ vrt_compute(
 - quiet:
 
   A logical indicating whether to suppress output
-
-- apply_scale:
-
-  A logical indicating whether to apply scale values existing in the
-  file metadata.
 
 - dst_nodata:
 

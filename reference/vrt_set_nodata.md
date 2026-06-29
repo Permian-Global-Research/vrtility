@@ -11,6 +11,9 @@ vrt_set_nodata(x, nodatavalue, nodata, band_idx)
 # S3 method for class 'vrt_block'
 vrt_set_nodata(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
 
+# S3 method for class 'vrt_stack'
+vrt_set_nodata(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
+
 # S3 method for class 'vrt_collection'
 vrt_set_nodata(x, nodatavalue, nodata = nodatavalue, band_idx = NULL)
 ```

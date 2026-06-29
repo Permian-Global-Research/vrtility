@@ -241,14 +241,14 @@ Core functions for Virtual Raster management
 Functions for pixel-wise operations on VRT rasters
 
 - [`vrt_set_gdal_pixelfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_gdal_pixelfun.md)
-  : Set built-in GDAL pixel functions of a VRT stack object
+  : Set built-in GDAL pixel functions of a VRT object
 - [`vrt_set_py_pixelfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
   [`median_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
   [`mean_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
   [`geomean_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
   [`quantile_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
   [`mean_db_numpy()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md)
-  : Set the pixel function of a VRT stack object
+  : Set the Python pixel function of a VRT object
 - [`vrt_derived_block()`](https://permian-global-research.github.io/vrtility/reference/vrt_derived_block.md)
   : Create vrt blocks with derived bands.
 

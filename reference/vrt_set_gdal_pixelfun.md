@@ -1,6 +1,6 @@
-# Set built-in GDAL pixel functions of a VRT stack object
+# Set built-in GDAL pixel functions of a VRT object
 
-Set built-in GDAL pixel functions of a VRT stack object
+Set built-in GDAL pixel functions of a VRT object
 
 ## Usage
 
@@ -8,6 +8,9 @@ Set built-in GDAL pixel functions of a VRT stack object
 vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx, nodata_as_nan)
 
 # S3 method for class 'vrt_block'
+vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
+
+# S3 method for class 'vrt_stack'
 vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 
 # S3 method for class 'vrt_collection'
@@ -18,7 +21,7 @@ vrt_set_gdal_pixelfun(x, pixfun, ..., band_idx = NULL, nodata_as_nan = FALSE)
 
 - x:
 
-  A vrt_stack object
+  A vrt_block, vrt_stack, or vrt_collection object.
 
 - pixfun:
 

@@ -126,7 +126,9 @@ plot(x, item, ..., config_options = gdal_config_options())
 
 - col:
 
-  a character vector of colors to use when plotting a single band.
+  Colors to interpolate; must be a valid argument to
+  [`col2rgb`](https://rdrr.io/r/grDevices/col2rgb.html). Ignored if
+  `col_tbl` is provided.
 
 - pixel_fn:
 

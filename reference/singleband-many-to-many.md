@@ -130,7 +130,7 @@ raster time series.
 ### Performance Considerations
 
 - Processing is parallelized if `mirai` daemons are active (see
-  `daemons`[mirai::mirai](https://mirai.r-lib.org/reference/mirai.html)).
+  `daemons`[mirai](https://mirai.r-lib.org/reference/mirai.html)).
 
 - Automatic tiling balances memory usage against I/O overhead
 

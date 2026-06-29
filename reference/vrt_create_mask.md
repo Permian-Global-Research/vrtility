@@ -44,7 +44,7 @@ create_omnicloudmask(
 - patch_size:
 
   The size/dimension of the patches to use for prediction (numeric
-  default: 600).
+  default: 1000).
 
 - patch_overlap:
 

@@ -66,10 +66,6 @@ A `vrt_plan` object containing:
 
   Driver prefix used
 
-- config_options:
-
-  GDAL configuration options
-
 ## Details
 
 Unlike
@@ -94,7 +90,7 @@ for warping
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 # Query STAC items
 items <- sentinel2_stac_query(
   bbox = c(-12.5, -37.5, -12.0, -37.0),
@@ -114,5 +110,5 @@ warped <- vrt_warp(
   te = c(700000, 5850000, 710000, 5860000),
   tr = c(10, 10)
 )
-# }
+}
 ```

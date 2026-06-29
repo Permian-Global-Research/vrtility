@@ -1,6 +1,6 @@
-# Set the pixel function of a VRT stack object
+# Set the Python pixel function of a VRT object
 
-Set the pixel function of a VRT stack object
+Set the Python pixel function of a VRT object
 
 ## Usage
 
@@ -8,6 +8,9 @@ Set the pixel function of a VRT stack object
 vrt_set_py_pixelfun(x, pixfun, band_idx)
 
 # S3 method for class 'vrt_block'
+vrt_set_py_pixelfun(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
+
+# S3 method for class 'vrt_stack'
 vrt_set_py_pixelfun(x, pixfun = vrtility::median_numpy(), band_idx = NULL)
 
 # S3 method for class 'vrt_collection'
@@ -28,7 +31,7 @@ mean_db_numpy()
 
 - x:
 
-  A vrt_stack object
+  A vrt_block, vrt_stack, or vrt_collection object.
 
 - pixfun:
 

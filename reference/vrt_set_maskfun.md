@@ -76,7 +76,8 @@ build_bitmask(use_muparser = getOption("vrtility.use_muparser", FALSE))
 
 - use_muparser:
 
-  Logical. If `TRUE` and GDAL \>= 3.12, uses muparser
+  Logical. If `TRUE` and GDAL \>= 3.12, uses muparser expression instead
+  of Python. Default is to auto-detect based on GDAL version.
 
 ## Value
 

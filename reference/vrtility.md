@@ -285,3 +285,8 @@ Browser](https://radiantearth.github.io/stac-browser/#/external/cmr.earthdata.na
 
 **Maintainer**: Hugh Graham <hugh.graham@permianglobal.com>
 ([ORCID](https://orcid.org/0000-0001-9451-5010))
+
+Authors:
+
+- Hugh Graham <hugh.graham@permianglobal.com>
+  ([ORCID](https://orcid.org/0000-0001-9451-5010))

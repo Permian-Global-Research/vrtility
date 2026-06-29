@@ -1,5 +1,48 @@
 # Changelog
 
+## vrtility 0.4.0.9000
+
+### New features
+
+- [`vrt_set_gdal_pixelfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_gdal_pixelfun.md),
+  [`vrt_set_py_pixelfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_py_pixelfun.md),
+  [`vrt_set_scale()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_scale.md),
+  [`vrt_set_nodata()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_nodata.md)
+  and
+  [`vrt_move_band()`](https://permian-global-research.github.io/vrtility/reference/vrt_move_band.md)
+  now have `vrt_stack` methods, so these operations can be applied after
+  stacking, not only on blocks and collections.
+- [`gdal_config_options()`](https://permian-global-research.github.io/vrtility/reference/gdal_options.md)
+  gained network-robustness controls: `GDAL_HTTP_TIMEOUT`,
+  `GDAL_HTTP_CONNECTTIMEOUT`, `GDAL_HTTP_LOW_SPEED_TIME`,
+  `GDAL_HTTP_LOW_SPEED_LIMIT`, `GDAL_GEOREF_SOURCES` and
+  `GDAL_PAM_ENABLED`, with defaults that stop a stalled `/vsicurl`
+  request from hanging a pipeline.
+- [`vrt_save()`](https://permian-global-research.github.io/vrtility/reference/vrt_save.md)
+  now defaults `outfile` to a temporary `.vrt` in the VRT cache and
+  returns the saved path invisibly.
+
+### Breaking changes
+
+- [`vrt_compute()`](https://permian-global-research.github.io/vrtility/reference/vrt_compute.md)
+  no longer accepts `apply_scale`; scaling is controlled via
+  [`vrt_set_scale()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_scale.md)
+  on the input instead.
+
+### Improvements
+
+- [`vrt_collect()`](https://permian-global-research.github.io/vrtility/reference/vrt_collect.md)
+  opens each source once when building per-item VRTs, removing a
+  redundant re-open to read the block size.
+- Operations that cannot apply to an already-stacked VRT
+  ([`vrt_set_maskfun()`](https://permian-global-research.github.io/vrtility/reference/vrt_set_maskfun.md),
+  [`vrt_create_mask()`](https://permian-global-research.github.io/vrtility/reference/vrt_create_mask.md),
+  [`vrt_add_empty_band()`](https://permian-global-research.github.io/vrtility/reference/vrt_add_empty_band.md),
+  and
+  [`vrt_save()`](https://permian-global-research.github.io/vrtility/reference/vrt_save.md)
+  on a collection) now fail with a clear, actionable error rather than
+  dispatching to `default`.
+
 ## vrtility 0.4.0
 
 ### New features

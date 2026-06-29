@@ -5,18 +5,25 @@ Save a vrt_block object to disk
 ## Usage
 
 ``` r
-vrt_save(x, outfile, bundle = FALSE, include_rasters = FALSE)
+vrt_save(
+  x,
+  outfile = fs::file_temp(tmp_dir = getOption("vrt.cache"), ext = "vrt"),
+  bundle = FALSE,
+  include_rasters = FALSE
+)
 ```
 
 ## Arguments
 
 - x:
 
-  A `vrt_stack` of `vrt_block` object.
+  A `vrt_stack` or `vrt_block` object.
 
 - outfile:
 
-  A character string of the output file
+  A character string of the output file path. Must have a `.vrt`
+  extension. Defaults to a temporary file inside
+  `getOption("vrt.cache")`.
 
 - bundle:
 
@@ -33,3 +40,7 @@ vrt_save(x, outfile, bundle = FALSE, include_rasters = FALSE)
   raster leaves (e.g. GeoTIFFs) into the bundle as well, producing a
   fully portable directory. Remote raster sources are skipped and
   surfaced as a single warning.
+
+## Value
+
+Invisibly, the normalised absolute path to the saved `.vrt` file.
