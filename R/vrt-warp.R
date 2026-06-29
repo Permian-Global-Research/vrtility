@@ -114,7 +114,7 @@ vrt_warp.vrt_block <- function(
   tr <- v_assert_res(tr)
   resampling <- rlang::arg_match(resampling)
 
-  daemon_setup()
+  daemon_setup(gdal_config = config_options)
 
   if (is.null(lazy)) {
     lazy <- !x$is_remote
@@ -186,7 +186,7 @@ vrt_warp.vrt_collection <- function(
   v_assert_length(tr, "tr", 2)
   resampling <- rlang::arg_match(resampling)
 
-  daemon_setup()
+  daemon_setup(gdal_config = config_options)
 
   any_remote <- any(purrr::map_lgl(x$vrt, function(vrt) {
     vrt$is_remote

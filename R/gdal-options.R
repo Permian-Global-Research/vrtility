@@ -16,7 +16,11 @@
 #' Defaults to 30.
 #' @param GDAL_HTTP_LOW_SPEED_LIMIT Transfer rate floor in bytes/sec used by
 #' `GDAL_HTTP_LOW_SPEED_TIME`. Defaults to 1000 (1 KB/s).
-#' @param GDAL_HTTP_MULTIPLEX Use HTTP multiplexing?
+#' @param GDAL_HTTP_MULTIPLEX Use HTTP/2 multiplexing? Defaults to NULL (GDAL's
+#' default, off). Multiplexing funnels many range reads over a single HTTP/2
+#' connection; under vrtility's per-daemon model that single connection becomes
+#' a per-process bottleneck, so plain HTTP/1.1 with multiple parallel
+#' connections (the default) saturates at least as well and is more resilient.
 #' @param CPL_VSIL_CURL_ALLOWED_EXTENSIONS Allowed file extensions for HTTP
 #' requests.
 #' @param CPL_VSIL_CURL_USE_HEAD When "YES", GDAL issues an HTTP HEAD before
@@ -52,11 +56,12 @@
 #' .aux.xml sidecars.
 #' @param GDAL_MAX_DATASET_POOL_SIZE Maximum size of the dataset pool.
 #' @param GDAL_INGESTED_BYTES_AT_OPEN Number of bytes to read at open.
-#' @param GDAL_HTTP_VERSION HTTP version to negotiate. Defaults to "2",
-#' which negotiates HTTP/2 via TLS-ALPN for HTTPS endpoints and falls back
-#' to HTTP/1.1 otherwise. Use "2TLS" to restrict HTTP/2 to TLS connections
-#' only, or "1.1" to force HTTP/1.1. Do not use "2PRIOR_KNOWLEDGE": it is
-#' for plaintext HTTP/2 (h2c) and breaks HTTPS endpoints.
+#' @param GDAL_HTTP_VERSION HTTP version to negotiate. Defaults to NULL, leaving
+#' GDAL's default (HTTP/1.1), which opens multiple parallel connections per
+#' process. This matches the configuration used by fast cloud readers such as
+#' odc-stac and, in vrtility's many-daemon model, saturates the network at
+#' least as well as forcing HTTP/2 while being more resilient to throttling.
+#' Set "2" to negotiate HTTP/2 via TLS-ALPN, or "1.1" to force HTTP/1.1.
 #' @param GDAL_HTTP_MERGE_CONSECUTIVE_RANGES Merge consecutive ranges in HTTP
 #' requests?
 #' @param GDAL_NUM_THREADS Number of threads GDAL is permitted to use for
@@ -89,8 +94,8 @@ gdal_config_options <- function(
   GDAL_HTTP_CONNECTTIMEOUT = "10",
   GDAL_HTTP_LOW_SPEED_TIME = "30",
   GDAL_HTTP_LOW_SPEED_LIMIT = "1000",
-  GDAL_HTTP_MULTIPLEX = "YES",
-  GDAL_HTTP_VERSION = "2",
+  GDAL_HTTP_MULTIPLEX = NULL,
+  GDAL_HTTP_VERSION = NULL,
   GDAL_HTTP_MERGE_CONSECUTIVE_RANGES = "YES",
   GDAL_HTTP_COOKIEFILE = NULL,
   GDAL_HTTP_COOKIEJAR = GDAL_HTTP_COOKIEFILE,
